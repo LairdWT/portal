@@ -12,6 +12,7 @@ import type { Axis2D } from '../../input';
 import { EInputInteraction } from '../../input';
 import { type EmitBinding, useEmitBinding } from '../../react/hooks/useEmitBinding';
 import { usePointerControl } from '../../react/hooks/usePointerControl';
+import { useResolvedEnabled } from '../../react/hooks/useResolvedEnabled';
 import { EEnabledState } from '../../state/state';
 import styles from './DPad.module.css';
 import { type DPadProps, EDpadDirection, EDpadMode } from './DPad.types';
@@ -153,7 +154,7 @@ function isActivationKey(key: string): boolean {
 export function DPad({
     label,
     mode = EDpadMode.EightWay,
-    enabled = EEnabledState.Enabled,
+    enabled,
     onDirectionChange,
     onSignal,
     descriptor,
@@ -165,7 +166,8 @@ export function DPad({
     const directionRef: RefObject<EDpadDirection> = useRef<EDpadDirection>(
         EDpadDirection.None,
     );
-    const isDisabled: boolean = enabled === EEnabledState.Disabled;
+    const resolvedEnabled: EEnabledState = useResolvedEnabled(enabled);
+    const isDisabled: boolean = resolvedEnabled === EEnabledState.Disabled;
 
     const { emitDigital }: EmitBinding = useEmitBinding(descriptor, onSignal);
 
@@ -279,7 +281,7 @@ export function DPad({
             role="group"
             className={styles.base}
             aria-label={label}
-            data-enabled={enabled}
+            data-enabled={resolvedEnabled}
             data-mode={mode}
             data-direction={direction}
             onBlur={handleGroupBlur}

@@ -7,6 +7,7 @@ import {
     EAxis2DSource,
     useAxis2DControl,
 } from '../../react/hooks/useAxis2DControl';
+import { useResolvedEnabled } from '../../react/hooks/useResolvedEnabled';
 import { EEnabledState } from '../../state/state';
 import styles from './Thumbpad.module.css';
 import { type ThumbpadProps } from './Thumbpad.types';
@@ -16,11 +17,12 @@ const PAD_Y_PROPERTY: string = '--portal-pad-y';
 
 export function Thumbpad({
     label,
-    enabled = EEnabledState.Enabled,
+    enabled,
     onDelta,
     onSignal,
     descriptor,
 }: ThumbpadProps): ReactElement {
+    const resolvedEnabled: EEnabledState = useResolvedEnabled(enabled);
     const hostRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(
         null,
     );
@@ -31,7 +33,7 @@ export function Thumbpad({
     // Accumulated, unit-circle-clamped look offset. Shared by the pointer path,
     // the keyboard sliders, and the parallax layers so all three stay in sync.
     const offsetRef: RefObject<Axis2D> = useRef<Axis2D>({ x: 0, y: 0 });
-    const isDisabled: boolean = enabled === EEnabledState.Disabled;
+    const isDisabled: boolean = resolvedEnabled === EEnabledState.Disabled;
 
     // Write the offset onto the HOST element so both stacked parallax layers
     // inherit --portal-pad-x / --portal-pad-y and translate at their own depth.
@@ -52,10 +54,21 @@ export function Thumbpad({
             const axisXInput: HTMLInputElement | null = axisXInputRef.current;
             if (axisXInput !== null) {
                 axisXInput.value = String(offset.x);
+                // Announce the current horizontal offset to assistive tech
+                // imperatively, in the same ref-sync path, so no per-sample
+                // React state or re-render is introduced.
+                axisXInput.setAttribute(
+                    'aria-valuetext',
+                    `horizontal ${offset.x.toFixed(2)}`,
+                );
             }
             const axisYInput: HTMLInputElement | null = axisYInputRef.current;
             if (axisYInput !== null) {
                 axisYInput.value = String(offset.y);
+                axisYInput.setAttribute(
+                    'aria-valuetext',
+                    `vertical ${offset.y.toFixed(2)}`,
+                );
             }
         },
         [],
@@ -157,7 +170,7 @@ export function Thumbpad({
             role="group"
             aria-label={label}
             aria-disabled={isDisabled}
-            data-enabled={enabled}
+            data-enabled={resolvedEnabled}
         >
             <div
                 ref={boundRef}

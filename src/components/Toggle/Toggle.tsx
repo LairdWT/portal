@@ -7,6 +7,7 @@ import {
 
 import { EInputInteraction } from '../../input';
 import { type EmitBinding, useEmitBinding } from '../../react/hooks/useEmitBinding';
+import { useResolvedEnabled } from '../../react/hooks/useResolvedEnabled';
 import { EEnabledState } from '../../state/state';
 import styles from './Toggle.module.css';
 import { ECheckedState, type ToggleProps } from './Toggle.types';
@@ -24,7 +25,7 @@ export function Toggle({
     label,
     checked,
     defaultChecked = ECheckedState.Unchecked,
-    enabled = EEnabledState.Enabled,
+    enabled,
     onChange,
     onSignal,
     descriptor,
@@ -40,12 +41,13 @@ export function Toggle({
     ] = useState<ECheckedState>(defaultChecked);
     const currentChecked: ECheckedState = checked ?? internalChecked;
 
+    const resolvedEnabled: EEnabledState = useResolvedEnabled(enabled);
     const isChecked: boolean = currentChecked === ECheckedState.Checked;
-    const isDisabled: boolean = enabled === EEnabledState.Disabled;
+    const isDisabled: boolean = resolvedEnabled === EEnabledState.Disabled;
     const { emitDigital }: EmitBinding = useEmitBinding(descriptor, onSignal);
 
     function handleClick(): void {
-        switch (enabled) {
+        switch (resolvedEnabled) {
             case EEnabledState.Disabled:
                 return;
             case EEnabledState.Enabled: {

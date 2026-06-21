@@ -71,9 +71,10 @@
 
 .label {
     display: inline-block;
+    font-family: var(--portal-font-sans);
     font-size: var(--portal-size-text-md);
+    font-weight: 700;
     line-height: var(--portal-line-height-tight);
     letter-spacing: var(--portal-letter-spacing-wide);
     text-align: center;
-    text-transform: uppercase;
 }

@@ -22,9 +22,9 @@ export type EBevelCorners = (typeof EBevelCorners)[keyof typeof EBevelCorners];
 // buttons interlocks. When both `onSignal` and `descriptor` are supplied a typed
 // Digital InputSignal is emitted on press and release alongside the raw
 // `onPress` and `onRelease` callbacks. `enabled` is an enum; the DOM disabled
-// state is derived from it.
+// state is derived from it. `label` defaults to 'A' when omitted.
 export type ActionButtonProps = Readonly<{
-    label: string;
+    label?: string;
     bevelCorners?: EBevelCorners;
     enabled?: EEnabledState;
     onPress?: () => void;

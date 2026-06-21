@@ -1,6 +1,7 @@
 import type { ChangeEvent, CSSProperties, ReactElement, RefObject } from 'react';
 import { useRef } from 'react';
 
+import { useResolvedEnabled } from '../../react/hooks/useResolvedEnabled';
 import {
     type ScalarControlBinding,
     useScalarControl,
@@ -29,15 +30,17 @@ export function Slider({
     min = 0,
     max = 100,
     step = 1,
-    enabled = EEnabledState.Enabled,
+    enabled,
     onChange,
     onSignal,
     descriptor,
+    formatValueText,
 }: SliderProps): ReactElement {
     const rootRef: RefObject<HTMLLabelElement | null> =
         useRef<HTMLLabelElement | null>(null);
+    const resolvedEnabled: EEnabledState = useResolvedEnabled(enabled);
 
-    const isDisabled: boolean = enabled === EEnabledState.Disabled;
+    const isDisabled: boolean = resolvedEnabled === EEnabledState.Disabled;
     const fillRatio: number = computeFillRatio(value, min, max);
     const rootStyle: CSSProperties = {
         [FILL_PROPERTY]: String(fillRatio),
@@ -46,6 +49,7 @@ export function Slider({
         descriptor,
         onSignal,
     );
+    const valueText: string | undefined = formatValueText?.(value);
 
     function pushFill(ratio: number): void {
         const root: HTMLLabelElement | null = rootRef.current;
@@ -75,7 +79,8 @@ export function Slider({
                     value={value}
                     disabled={isDisabled}
                     aria-label={label}
-                    data-enabled={enabled}
+                    aria-valuetext={valueText}
+                    data-enabled={resolvedEnabled}
                     onChange={handleChange}
                 />
             </span>

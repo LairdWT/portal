@@ -18,6 +18,8 @@
 import type { PointerEvent as ReactPointerEvent, RefObject } from 'react';
 import { useCallback, useRef } from 'react';
 
+import type { TimeProvider } from '../../input';
+import { useTimeProvider } from '../TimeProviderContext';
 import type { EGesture, GestureBinding, GestureOptions } from './useGesture.types';
 import { EGesture as EGestureValue } from './useGesture.types';
 
@@ -80,6 +82,8 @@ export function useGesture<ElementType extends HTMLElement>({
     );
     const lastTapTimeMsRef: RefObject<number | null> = useRef<number | null>(null);
 
+    const timeProvider: TimeProvider = useTimeProvider();
+
     const onPointerDown: (event: ReactPointerEvent<ElementType>) => void =
         useCallback((event: ReactPointerEvent<ElementType>): void => {
             if (startRef.current !== null) {
@@ -118,7 +122,7 @@ export function useGesture<ElementType extends HTMLElement>({
                     return;
                 }
 
-                const nowMs: number = performance.now();
+                const nowMs: number = timeProvider();
                 const lastTapTimeMs: number | null = lastTapTimeMsRef.current;
                 const isDoubleTap: boolean =
                     lastTapTimeMs !== null &&
@@ -132,7 +136,7 @@ export function useGesture<ElementType extends HTMLElement>({
 
                 lastTapTimeMsRef.current = nowMs;
             },
-            [onGesture, swipeThresholdPx, doubleTapWindowMs],
+            [onGesture, swipeThresholdPx, doubleTapWindowMs, timeProvider],
         );
 
     // A cancelled gesture (browser took over, palm rejection, lost capture)

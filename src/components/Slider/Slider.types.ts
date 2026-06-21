@@ -16,4 +16,5 @@ export type SliderProps = Readonly<{
     onChange?: (value: number) => void;
     onSignal?: (signal: InputSignal) => void;
     descriptor?: InputDescriptor;
+    formatValueText?: ((value: number) => string) | undefined;
 }>;
