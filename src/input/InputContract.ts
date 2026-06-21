@@ -25,11 +25,17 @@ export const EInputInteraction: {
     readonly Release: 'release';
     readonly Move: 'move';
     readonly Cancel: 'cancel';
+    readonly Held: 'held';
+    readonly DoubleTap: 'double-tap';
+    readonly Hover: 'hover';
 } = {
     Press: 'press',
     Release: 'release',
     Move: 'move',
     Cancel: 'cancel',
+    Held: 'held',
+    DoubleTap: 'double-tap',
+    Hover: 'hover',
 };
 export type EInputInteraction =
     (typeof EInputInteraction)[keyof typeof EInputInteraction];
@@ -60,11 +66,15 @@ export type InputValue =
       };
 
 // Static description of an input surface. `id` is an opaque identifier the
-// consumer defines; the contract never enumerates concrete game actions.
+// consumer defines; the contract never enumerates concrete game actions. The
+// optional `interactions` allow-list names which interactions this input may
+// fire (mirrors the armada descriptors); omit it to leave the input
+// unconstrained.
 export type InputDescriptor = Readonly<{
     id: string;
     kind: EInputValueType;
     label: string;
+    interactions?: readonly EInputInteraction[];
 }>;
 
 // Runtime event emitted when an input changes. Carries the descriptor, the
