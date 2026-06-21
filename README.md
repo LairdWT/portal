@@ -7,6 +7,8 @@ Fiber presentation surface.
 
 ## Demo
 
+![Portal mobile controller: HUD readouts, an analog joystick, and action buttons](https://raw.githubusercontent.com/LairdWT/portal/main/docs/portal-controller.png)
+
 Live, interactive Storybook (every control plus the Unity-binding example):
 https://lairdwt.github.io/portal/
 
