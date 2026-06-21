@@ -80,6 +80,53 @@ pixels or viewport-stretch units. Layout is safe-area aware through the
 `env(safe-area-inset-*)` values, touch targets meet the 3rem minimum, and
 motion respects the user `prefers-reduced-motion` setting.
 
+## Input and Unity binding
+
+Portal's input core is decoupled from React and from any game. A control
+describes itself with an `InputDescriptor` (an opaque id, a value kind, and a
+label) and emits an `InputSignal` carrying the value, the interaction, and a
+timestamp. Controls share emit hooks so the wiring is uniform:
+
+- `useDigitalPress` and `useEmitBinding` for button-like inputs.
+- `useAxis2DControl` for absolute (joystick) and relative (thumbpad) pads.
+- `useScalarControl` for sliders.
+
+Timestamps come from an injectable `TimeProvider` (default `performance.now`).
+Override it through `TimeProviderContext` to make emission deterministic in
+tests or to align the clock with a host application:
+
+```tsx
+import { TimeProviderContext } from 'portal';
+
+<TimeProviderContext.Provider value={() => engineClock.nowMs()}>
+    <Controller />
+</TimeProviderContext.Provider>;
+```
+
+Inputs are mapped to actions by a data-driven registry rather than hard-coded
+in the controls. The registry is immutable; each mutator returns a new
+registry, and a binding can be scoped to a named context (a profile such as
+`menu` or `gameplay`) with a global fallback:
+
+```ts
+import { createRegistry } from 'portal';
+
+const registry = createRegistry([
+    { inputId: 'fire', actionId: 'weapon.primary' },
+    { inputId: 'fire', actionId: 'ui.confirm', context: 'menu' },
+]);
+
+registry.resolve('fire').actionId; // 'weapon.primary'
+registry.resolve('fire', 'menu').actionId; // 'ui.confirm'
+const rebound = registry.rebind('fire', 'weapon.special');
+```
+
+At the Unity boundary, `toWireInput` narrows a signal to a serializable
+`FInputWirePayload` (the descriptor collapsed to its id, plus the interaction,
+value, and timestamp) and throws if a value does not match the descriptor's
+declared kind. The `Patterns/Unity Binding` Storybook story wires a binding
+profile, a custom `TimeProvider`, and the wire codec together.
+
 ## Scripts
 
 - `pnpm verify` runs typecheck, lint, CSS lint, format check, tests, and
