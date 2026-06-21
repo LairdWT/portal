@@ -60,14 +60,18 @@ afterEach((): void => {
 });
 
 describe('Thumbpad', () => {
-    it('reports incremental deltas between pointer samples and does not reset on up', () => {
+    it('reports incremental pointer deltas and emits nothing on gesture end', () => {
         const onDelta: Mock<(delta: Axis2D) => void> =
             vi.fn<(delta: Axis2D) => void>();
         render(<Thumbpad label={PAD_LABEL} onDelta={onDelta} />);
 
-        const surface: HTMLElement = screen.getByRole('application', {
+        const group: HTMLElement = screen.getByRole('group', {
             name: PAD_LABEL,
         });
+        const surface: Element | null = group.firstElementChild;
+        if (surface === null) {
+            throw new Error('Expected a pointer surface element.');
+        }
 
         fireEvent.pointerDown(surface, {
             pointerId: ACTIVE_POINTER_ID,
@@ -82,8 +86,6 @@ describe('Thumbpad', () => {
             clientX: 150,
             clientY: 100,
         });
-
-        expect(onDelta).toHaveBeenCalledTimes(1);
         const firstDelta: Axis2D | undefined = onDelta.mock.lastCall?.[0];
         // Rect is 200 wide, half-width 100; a 50px move yields delta x = 0.5.
         expect(firstDelta?.x).toBeCloseTo(0.5);
@@ -104,41 +106,41 @@ describe('Thumbpad', () => {
         expect(onDelta.mock.calls.length).toBe(callsBeforeUp);
     });
 
-    it('emits a fixed relative delta step on each arrow keydown', () => {
+    it('emits a relative delta when an axis slider value changes', () => {
         const onDelta: Mock<(delta: Axis2D) => void> =
             vi.fn<(delta: Axis2D) => void>();
         render(<Thumbpad label={PAD_LABEL} onDelta={onDelta} />);
 
-        const surface: HTMLElement = screen.getByRole('application', {
-            name: PAD_LABEL,
-        });
+        const horizontal: HTMLInputElement = screen.getByLabelText(
+            `${PAD_LABEL} horizontal look`,
+        );
+        const vertical: HTMLInputElement = screen.getByLabelText(
+            `${PAD_LABEL} vertical look`,
+        );
 
-        fireEvent.keyDown(surface, { key: 'ArrowRight' });
-        const rightDelta: Axis2D | undefined = onDelta.mock.lastCall?.[0];
-        expect(rightDelta?.x).toBeCloseTo(0.1);
-        expect(rightDelta?.y).toBeCloseTo(0);
+        fireEvent.change(horizontal, { target: { value: '0.1' } });
+        const firstDelta: Axis2D | undefined = onDelta.mock.lastCall?.[0];
+        expect(firstDelta?.x).toBeCloseTo(0.1);
+        expect(firstDelta?.y).toBeCloseTo(0);
 
-        fireEvent.keyDown(surface, { key: 'ArrowUp' });
-        const upDelta: Axis2D | undefined = onDelta.mock.lastCall?.[0];
-        expect(upDelta?.y).toBeCloseTo(-0.1);
-        expect(upDelta?.x).toBeCloseTo(0);
-
-        expect(onDelta).toHaveBeenCalledTimes(2);
+        // Moving the other slider reports the delta from the previous offset.
+        fireEvent.change(vertical, { target: { value: '-0.1' } });
+        const secondDelta: Axis2D | undefined = onDelta.mock.lastCall?.[0];
+        expect(secondDelta?.x).toBeCloseTo(0);
+        expect(secondDelta?.y).toBeCloseTo(-0.1);
     });
 
-    it('is a focusable application surface when enabled and not focusable when disabled', () => {
-        const { rerender }: ReturnType<typeof render> = render(
-            <Thumbpad label={PAD_LABEL} />,
-        );
-        const enabledSurface: HTMLElement = screen.getByRole('application', {
-            name: PAD_LABEL,
-        });
-        expect(enabledSurface).toHaveAttribute('tabindex', '0');
+    it('disables both axis sliders when disabled', () => {
+        render(<Thumbpad label={PAD_LABEL} enabled={EEnabledState.Disabled} />);
 
-        rerender(<Thumbpad label={PAD_LABEL} enabled={EEnabledState.Disabled} />);
-        const disabledSurface: HTMLElement = screen.getByRole('application', {
-            name: PAD_LABEL,
-        });
-        expect(disabledSurface).toHaveAttribute('tabindex', '-1');
+        const horizontal: HTMLInputElement = screen.getByLabelText(
+            `${PAD_LABEL} horizontal look`,
+        );
+        const vertical: HTMLInputElement = screen.getByLabelText(
+            `${PAD_LABEL} vertical look`,
+        );
+
+        expect(horizontal).toBeDisabled();
+        expect(vertical).toBeDisabled();
     });
 });

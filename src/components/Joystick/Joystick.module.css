@@ -47,6 +47,17 @@
     border: 0;
 }
 
+/* Transparent pointer-capture layer. Presentational (role="presentation") so the
+ * pointer interaction, redundant with the keyboard sliders, carries no semantics.
+ * The visual layers above set pointer-events:none, so taps fall through to this
+ * surface, which the pointer hook measures. */
+.surface {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    touch-action: none;
+}
+
 .thumb {
     --joystick-travel: 41%;
 

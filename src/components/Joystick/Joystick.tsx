@@ -1,10 +1,12 @@
 import type { Dispatch, ReactElement, RefObject, SetStateAction } from 'react';
 import { useCallback, useRef, useState } from 'react';
 
-import type { Axis2D, InputSource } from '../../input';
-import { clampToUnitCircle, EInputInteraction } from '../../input';
-import { useInputSource } from '../../react/hooks/useInputSource';
-import { usePointerControl } from '../../react/hooks/usePointerControl';
+import { type Axis2D, clampToUnitCircle } from '../../input';
+import {
+    type Axis2DControlBinding,
+    EAxis2DSource,
+    useAxis2DControl,
+} from '../../react/hooks/useAxis2DControl';
 import { EEnabledState } from '../../state/state';
 import styles from './Joystick.module.css';
 import { type JoystickProps } from './Joystick.types';
@@ -33,11 +35,10 @@ export function Joystick({
     const [isActive, setIsActive]: [boolean, Dispatch<SetStateAction<boolean>>] =
         useState<boolean>(false);
 
-    const inputSource: InputSource | null = useInputSource(descriptor, onSignal);
-
     // Write the axis to both parallax layers (each applies its own travel
-    // multiplier in CSS) and the magnitude ring, then emit.
-    const handleValue: (axis: Axis2D) => void = useCallback(
+    // multiplier in CSS) and the magnitude ring. Emission is owned by the axis
+    // control seam, which calls this visual write and then emits the same vector.
+    const applyAxis: (axis: Axis2D) => void = useCallback(
         (axis: Axis2D): void => {
             const magnitude: number = Math.hypot(axis.x, axis.y);
             const thumb: HTMLDivElement | null = thumbRef.current;
@@ -56,15 +57,8 @@ export function Joystick({
                 );
             }
             onAxisChange?.(axis);
-            if (inputSource !== null) {
-                inputSource.emitAxis2D(
-                    axis,
-                    EInputInteraction.Move,
-                    performance.now(),
-                );
-            }
         },
-        [onAxisChange, inputSource],
+        [onAxisChange],
     );
 
     const {
@@ -73,13 +67,16 @@ export function Joystick({
         onPointerMove,
         onPointerUp,
         onPointerCancel,
-    }: ReturnType<typeof usePointerControl<HTMLDivElement>> =
-        usePointerControl<HTMLDivElement>({
-            onValue: handleValue,
-            deadZone,
-            disabled: isDisabled,
-            onActiveChange: setIsActive,
-        });
+        emitAxis2D,
+    }: Axis2DControlBinding<HTMLDivElement> = useAxis2DControl<HTMLDivElement>({
+        mode: EAxis2DSource.Absolute,
+        onVector: applyAxis,
+        descriptor,
+        onSignal,
+        deadZone,
+        disabled: isDisabled,
+        onActiveChange: setIsActive,
+    });
 
     // Read both uncontrolled sliders and rebuild the axis, clamped to the unit
     // circle so the keyboard path cannot exceed the pointer path's magnitude.
@@ -95,23 +92,28 @@ export function Joystick({
             x: axisXInput.valueAsNumber,
             y: axisYInput.valueAsNumber,
         });
-        handleValue(axis);
-    }, [handleValue]);
+        applyAxis(axis);
+        emitAxis2D(axis);
+    }, [applyAxis, emitAxis2D]);
 
     return (
         <div
-            ref={ref}
             className={styles.base}
             role="group"
             aria-label={label}
             aria-disabled={isDisabled}
             data-enabled={enabled}
             data-active={isActive ? 'true' : 'false'}
-            onPointerDown={onPointerDown}
-            onPointerMove={onPointerMove}
-            onPointerUp={onPointerUp}
-            onPointerCancel={onPointerCancel}
         >
+            <div
+                ref={ref}
+                className={styles.surface}
+                role="presentation"
+                onPointerDown={onPointerDown}
+                onPointerMove={onPointerMove}
+                onPointerUp={onPointerUp}
+                onPointerCancel={onPointerCancel}
+            />
             <div
                 ref={thumbShadowRef}
                 className={styles.thumbShadow}

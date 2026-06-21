@@ -1,41 +1,18 @@
-import type {
-    KeyboardEvent as ReactKeyboardEvent,
-    ReactElement,
-    RefObject,
-} from 'react';
+import type { ReactElement, RefObject } from 'react';
 import { useCallback, useRef } from 'react';
 
-import type { Axis2D, InputSource } from '../../input';
-import { clampToUnitCircle, EInputInteraction } from '../../input';
-import { useInputSource } from '../../react/hooks/useInputSource';
-import { useRelativePointerControl } from '../../react/hooks/useRelativePointerControl';
+import { type Axis2D, clampToUnitCircle } from '../../input';
+import {
+    type Axis2DControlBinding,
+    EAxis2DSource,
+    useAxis2DControl,
+} from '../../react/hooks/useAxis2DControl';
 import { EEnabledState } from '../../state/state';
 import styles from './Thumbpad.module.css';
 import { type ThumbpadProps } from './Thumbpad.types';
 
 const PAD_X_PROPERTY: string = '--portal-pad-x';
 const PAD_Y_PROPERTY: string = '--portal-pad-y';
-
-// Fixed delta magnitude applied per keyboard arrow nudge.
-const KEYBOARD_STEP: number = 0.1;
-
-// Resolve an arrow key to a single relative delta step. Non-arrow keys yield
-// null so the caller ignores them. Local to this component: the Thumbpad keyboard
-// surface owns its own mapping and exposes no shared enum (no barrel coupling).
-function arrowKeyToDelta(key: string): Axis2D | null {
-    switch (key) {
-        case 'ArrowUp':
-            return { x: 0, y: -KEYBOARD_STEP };
-        case 'ArrowDown':
-            return { x: 0, y: KEYBOARD_STEP };
-        case 'ArrowLeft':
-            return { x: -KEYBOARD_STEP, y: 0 };
-        case 'ArrowRight':
-            return { x: KEYBOARD_STEP, y: 0 };
-        default:
-            return null;
-    }
-}
 
 export function Thumbpad({
     label,
@@ -47,17 +24,18 @@ export function Thumbpad({
     const hostRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(
         null,
     );
-    // Accumulated, unit-circle-clamped visual offset. The control reports raw
-    // relative deltas, but the parallax layers travel under the finger like an
-    // absolute pad, so the visual integrates the deltas and eases home on release.
-    const visualOffsetRef: RefObject<Axis2D> = useRef<Axis2D>({ x: 0, y: 0 });
+    const axisXInputRef: RefObject<HTMLInputElement | null> =
+        useRef<HTMLInputElement | null>(null);
+    const axisYInputRef: RefObject<HTMLInputElement | null> =
+        useRef<HTMLInputElement | null>(null);
+    // Accumulated, unit-circle-clamped look offset. Shared by the pointer path,
+    // the keyboard sliders, and the parallax layers so all three stay in sync.
+    const offsetRef: RefObject<Axis2D> = useRef<Axis2D>({ x: 0, y: 0 });
     const isDisabled: boolean = enabled === EEnabledState.Disabled;
 
-    const inputSource: InputSource | null = useInputSource(descriptor, onSignal);
-
-    // Write the transient parallax offset onto the HOST element so both stacked
-    // layers inherit --portal-pad-x / --portal-pad-y.
-    const showHostOffset: (offset: Axis2D) => void = useCallback(
+    // Write the offset onto the HOST element so both stacked parallax layers
+    // inherit --portal-pad-x / --portal-pad-y and translate at their own depth.
+    const writeHostOffset: (offset: Axis2D) => void = useCallback(
         (offset: Axis2D): void => {
             const host: HTMLDivElement | null = hostRef.current;
             if (host === null) {
@@ -69,46 +47,62 @@ export function Thumbpad({
         [],
     );
 
-    const restHostOffset: () => void = useCallback((): void => {
-        visualOffsetRef.current = { x: 0, y: 0 };
-        const host: HTMLDivElement | null = hostRef.current;
-        if (host === null) {
-            return;
-        }
-        host.style.setProperty(PAD_X_PROPERTY, '0');
-        host.style.setProperty(PAD_Y_PROPERTY, '0');
-    }, []);
-
-    const handleDelta: (delta: Axis2D) => void = useCallback(
-        (delta: Axis2D): void => {
-            // Integrate the incremental delta into the clamped visual offset so
-            // the parallax layers travel under the finger; the emitted signal
-            // stays a raw relative delta.
-            const accumulated: Axis2D = clampToUnitCircle({
-                x: visualOffsetRef.current.x + delta.x,
-                y: visualOffsetRef.current.y + delta.y,
-            });
-            visualOffsetRef.current = accumulated;
-            showHostOffset(accumulated);
-            onDelta?.(delta);
-            if (inputSource !== null) {
-                inputSource.emitAxis2D(
-                    delta,
-                    EInputInteraction.Move,
-                    performance.now(),
-                );
+    const syncSliders: (offset: Axis2D) => void = useCallback(
+        (offset: Axis2D): void => {
+            const axisXInput: HTMLInputElement | null = axisXInputRef.current;
+            if (axisXInput !== null) {
+                axisXInput.value = String(offset.x);
+            }
+            const axisYInput: HTMLInputElement | null = axisYInputRef.current;
+            if (axisYInput !== null) {
+                axisYInput.value = String(offset.y);
             }
         },
-        [showHostOffset, onDelta, inputSource],
+        [],
     );
+
+    // Move the shared offset (parallax + sliders) to a new clamped position and
+    // emit the relative delta that produced it.
+    // Commit the visual offset and the public onDelta callback. Emission is
+    // owned by the axis control seam: the pointer path emits via the hook after
+    // onVector, and the keyboard path emits explicitly below.
+    const commitOffset: (offset: Axis2D, delta: Axis2D) => void = useCallback(
+        (offset: Axis2D, delta: Axis2D): void => {
+            offsetRef.current = offset;
+            writeHostOffset(offset);
+            onDelta?.(delta);
+        },
+        [writeHostOffset, onDelta],
+    );
+
+    // Pointer path: the hook reports a raw per-sample delta. Integrate it into the
+    // clamped offset, keep the sliders in sync for assistive tech, and emit the
+    // raw delta.
+    const handlePointerDelta: (delta: Axis2D) => void = useCallback(
+        (delta: Axis2D): void => {
+            const offset: Axis2D = clampToUnitCircle({
+                x: offsetRef.current.x + delta.x,
+                y: offsetRef.current.y + delta.y,
+            });
+            syncSliders(offset);
+            commitOffset(offset, delta);
+        },
+        [syncSliders, commitOffset],
+    );
+
+    const resetOffset: () => void = useCallback((): void => {
+        offsetRef.current = { x: 0, y: 0 };
+        writeHostOffset({ x: 0, y: 0 });
+        syncSliders({ x: 0, y: 0 });
+    }, [writeHostOffset, syncSliders]);
 
     const handleActiveChange: (active: boolean) => void = useCallback(
         (active: boolean): void => {
             if (!active) {
-                restHostOffset();
+                resetOffset();
             }
         },
-        [restHostOffset],
+        [resetOffset],
     );
 
     const {
@@ -117,71 +111,93 @@ export function Thumbpad({
         onPointerMove,
         onPointerUp,
         onPointerCancel,
-    }: ReturnType<
-        typeof useRelativePointerControl<HTMLDivElement>
-    > = useRelativePointerControl<HTMLDivElement>({
-        onDelta: handleDelta,
+        emitAxis2D,
+    }: Axis2DControlBinding<HTMLDivElement> = useAxis2DControl<HTMLDivElement>({
+        mode: EAxis2DSource.Relative,
+        onVector: handlePointerDelta,
+        descriptor,
+        onSignal,
         disabled: isDisabled,
         onActiveChange: handleActiveChange,
     });
 
-    // Sync the hook's ref and the component's hostRef to the same node so the
-    // parallax custom properties are written on the element the hook measures.
-    const setHostNode: (node: HTMLDivElement | null) => void = useCallback(
-        (node: HTMLDivElement | null): void => {
-            boundRef.current = node;
-            hostRef.current = node;
-        },
-        [boundRef],
-    );
-
-    function handleKeyDown(event: ReactKeyboardEvent<HTMLDivElement>): void {
-        if (isDisabled) {
+    // Keyboard / assistive-tech path: a slider arrow change sets a new absolute
+    // offset; emit the relative delta from the previous offset. Reading the slider
+    // values keeps this off React state.
+    const handleSliderInput: () => void = useCallback((): void => {
+        const axisXInput: HTMLInputElement | null = axisXInputRef.current;
+        const axisYInput: HTMLInputElement | null = axisYInputRef.current;
+        if (axisXInput === null || axisYInput === null) {
             return;
         }
-        const delta: Axis2D | null = arrowKeyToDelta(event.key);
-        if (delta === null) {
-            return;
+        const offset: Axis2D = clampToUnitCircle({
+            x: axisXInput.valueAsNumber,
+            y: axisYInput.valueAsNumber,
+        });
+        const delta: Axis2D = {
+            x: offset.x - offsetRef.current.x,
+            y: offset.y - offsetRef.current.y,
+        };
+        // If the clamp pulled a corner back to the unit circle, re-sync the
+        // sliders so their announced value matches the actual offset.
+        if (
+            offset.x !== axisXInput.valueAsNumber ||
+            offset.y !== axisYInput.valueAsNumber
+        ) {
+            syncSliders(offset);
         }
-        event.preventDefault();
-        handleDelta(delta);
-    }
-
-    function handleKeyUp(event: ReactKeyboardEvent<HTMLDivElement>): void {
-        if (isDisabled) {
-            return;
-        }
-        const delta: Axis2D | null = arrowKeyToDelta(event.key);
-        if (delta === null) {
-            return;
-        }
-        event.preventDefault();
-        restHostOffset();
-    }
-
-    function handleBlur(): void {
-        restHostOffset();
-    }
+        commitOffset(offset, delta);
+        emitAxis2D(delta);
+    }, [syncSliders, commitOffset, emitAxis2D]);
 
     return (
         <div
-            ref={setHostNode}
+            ref={hostRef}
             className={styles.base}
-            role="application"
+            role="group"
             aria-label={label}
             aria-disabled={isDisabled}
-            tabIndex={isDisabled ? -1 : 0}
             data-enabled={enabled}
-            onPointerDown={onPointerDown}
-            onPointerMove={onPointerMove}
-            onPointerUp={onPointerUp}
-            onPointerCancel={onPointerCancel}
-            onKeyDown={handleKeyDown}
-            onKeyUp={handleKeyUp}
-            onBlur={handleBlur}
         >
+            <div
+                ref={boundRef}
+                className={styles.surface}
+                role="presentation"
+                onPointerDown={onPointerDown}
+                onPointerMove={onPointerMove}
+                onPointerUp={onPointerUp}
+                onPointerCancel={onPointerCancel}
+            />
             <div className={styles.thumbShadow} aria-hidden="true" />
             <div className={styles.thumb} aria-hidden="true" />
+            <input
+                ref={axisXInputRef}
+                className={styles.axisInput}
+                type="range"
+                min={-1}
+                max={1}
+                step={0.1}
+                defaultValue={0}
+                disabled={isDisabled}
+                aria-label={`${label} horizontal look`}
+                onChange={(): void => {
+                    handleSliderInput();
+                }}
+            />
+            <input
+                ref={axisYInputRef}
+                className={styles.axisInput}
+                type="range"
+                min={-1}
+                max={1}
+                step={0.1}
+                defaultValue={0}
+                disabled={isDisabled}
+                aria-label={`${label} vertical look`}
+                onChange={(): void => {
+                    handleSliderInput();
+                }}
+            />
         </div>
     );
 }

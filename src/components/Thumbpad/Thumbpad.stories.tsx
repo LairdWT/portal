@@ -29,8 +29,8 @@ export const RelativeDelta: Story = {
     },
 };
 
-// Keyboard: focus the pad (role=application, tabbable) and press the arrow keys
-// to emit fixed relative delta steps.
+// Keyboard / assistive tech: Tab to one of the hidden per-axis sliders and arrow
+// it; each change emits a relative delta step and moves the parallax offset.
 export const Keyboard: Story = {
     args: {
         label: 'Look thumbpad (keyboard)',

@@ -139,7 +139,7 @@ describe('DPad', () => {
         expect(onDirectionChange).toHaveBeenLastCalledWith(EDpadDirection.None);
     });
 
-    it('still resolves a direction from a pointer gesture on the group', () => {
+    it('still resolves a direction from a pointer gesture on the pad surface', () => {
         const onDirectionChange: Mock<(direction: EDpadDirection) => void> =
             vi.fn<(direction: EDpadDirection) => void>();
         render(
@@ -153,9 +153,13 @@ describe('DPad', () => {
         const group: HTMLElement = screen.getByRole('group', {
             name: PAD_LABEL,
         });
+        const surface: Element | null = group.firstElementChild;
+        if (surface === null) {
+            throw new Error('Expected a pointer surface element.');
+        }
 
         // Pointer to the right edge centre resolves to Right via the octant math.
-        fireEvent.pointerDown(group, {
+        fireEvent.pointerDown(surface, {
             pointerId: ACTIVE_POINTER_ID,
             clientX: 200,
             clientY: 100,
@@ -163,7 +167,7 @@ describe('DPad', () => {
 
         expect(onDirectionChange).toHaveBeenLastCalledWith(EDpadDirection.Right);
 
-        fireEvent.pointerUp(group, { pointerId: ACTIVE_POINTER_ID });
+        fireEvent.pointerUp(surface, { pointerId: ACTIVE_POINTER_ID });
         expect(onDirectionChange).toHaveBeenLastCalledWith(EDpadDirection.None);
     });
 
@@ -182,8 +186,12 @@ describe('DPad', () => {
         const group: HTMLElement = screen.getByRole('group', {
             name: PAD_LABEL,
         });
+        const surface: Element | null = group.firstElementChild;
+        if (surface === null) {
+            throw new Error('Expected a pointer surface element.');
+        }
 
-        fireEvent.pointerDown(group, {
+        fireEvent.pointerDown(surface, {
             pointerId: ACTIVE_POINTER_ID,
             clientX: 200,
             clientY: 100,

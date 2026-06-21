@@ -8,9 +8,9 @@ import type {
 } from 'react';
 import { useCallback, useRef, useState } from 'react';
 
-import type { Axis2D, InputSource } from '../../input';
+import type { Axis2D } from '../../input';
 import { EInputInteraction } from '../../input';
-import { useInputSource } from '../../react/hooks/useInputSource';
+import { type EmitBinding, useEmitBinding } from '../../react/hooks/useEmitBinding';
 import { usePointerControl } from '../../react/hooks/usePointerControl';
 import { EEnabledState } from '../../state/state';
 import styles from './DPad.module.css';
@@ -167,7 +167,7 @@ export function DPad({
     );
     const isDisabled: boolean = enabled === EEnabledState.Disabled;
 
-    const inputSource: InputSource | null = useInputSource(descriptor, onSignal);
+    const { emitDigital }: EmitBinding = useEmitBinding(descriptor, onSignal);
 
     const commitDirection: (next: EDpadDirection) => void = useCallback(
         (next: EDpadDirection): void => {
@@ -177,15 +177,13 @@ export function DPad({
             directionRef.current = next;
             setDirection(next);
             onDirectionChange?.(next);
-            if (inputSource !== null) {
-                const pressed: boolean = next !== EDpadDirection.None;
-                const interaction: EInputInteraction = pressed
-                    ? EInputInteraction.Press
-                    : EInputInteraction.Release;
-                inputSource.emitDigital(pressed, interaction, performance.now());
-            }
+            const pressed: boolean = next !== EDpadDirection.None;
+            const interaction: EInputInteraction = pressed
+                ? EInputInteraction.Press
+                : EInputInteraction.Release;
+            emitDigital(pressed, interaction);
         },
-        [onDirectionChange, inputSource],
+        [onDirectionChange, emitDigital],
     );
 
     const handleValue: (axis: Axis2D) => void = useCallback(
@@ -278,19 +276,23 @@ export function DPad({
 
     return (
         <div
-            ref={ref}
             role="group"
             className={styles.base}
             aria-label={label}
             data-enabled={enabled}
             data-mode={mode}
             data-direction={direction}
-            onPointerDown={onPointerDown}
-            onPointerMove={onPointerMove}
-            onPointerUp={onPointerUp}
-            onPointerCancel={onPointerCancel}
             onBlur={handleGroupBlur}
         >
+            <div
+                ref={ref}
+                className={styles.surface}
+                role="presentation"
+                onPointerDown={onPointerDown}
+                onPointerMove={onPointerMove}
+                onPointerUp={onPointerUp}
+                onPointerCancel={onPointerCancel}
+            />
             {children.map(
                 (childDirection: EDpadDirection): ReactElement => (
                     <button

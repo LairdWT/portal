@@ -47,7 +47,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
     .track {
-        transition: background-color var(--portal-duration-base)
+        transition: background-color var(--portal-duration-ms128)
             var(--portal-easing-standard);
     }
 }
@@ -79,14 +79,14 @@
 
 @media (prefers-reduced-motion: no-preference) {
     .knob {
-        transition: inset-inline-start var(--portal-duration-base)
+        transition: inset-inline-start var(--portal-duration-ms128)
             var(--portal-easing-emphasized);
     }
 }
 
 .toggle[data-checked='checked'] .knob {
     inset-inline-start: calc(
-        var(--toggle-track-inline-size) - 50% - var(--toggle-knob-inset) -
+        var(--toggle-track-inline-size) - 55% - var(--toggle-knob-inset) -
             var(--portal-border-thickness-thin)
     );
     background-color: var(--portal-color-bg-0);

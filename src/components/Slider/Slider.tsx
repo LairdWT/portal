@@ -1,9 +1,10 @@
 import type { ChangeEvent, CSSProperties, ReactElement, RefObject } from 'react';
 import { useRef } from 'react';
 
-import type { InputSource } from '../../input';
-import { EInputInteraction } from '../../input/InputContract';
-import { useInputSource } from '../../react/hooks/useInputSource';
+import {
+    type ScalarControlBinding,
+    useScalarControl,
+} from '../../react/hooks/useScalarControl';
 import { EEnabledState } from '../../state/state';
 import styles from './Slider.module.css';
 import { type SliderProps } from './Slider.types';
@@ -41,7 +42,10 @@ export function Slider({
     const rootStyle: CSSProperties = {
         [FILL_PROPERTY]: String(fillRatio),
     };
-    const inputSource: InputSource | null = useInputSource(descriptor, onSignal);
+    const { emitScalar }: ScalarControlBinding = useScalarControl(
+        descriptor,
+        onSignal,
+    );
 
     function pushFill(ratio: number): void {
         const root: HTMLLabelElement | null = rootRef.current;
@@ -51,18 +55,11 @@ export function Slider({
         root.style.setProperty(FILL_PROPERTY, String(ratio));
     }
 
-    function emitSignal(scalar: number): void {
-        if (inputSource === null) {
-            return;
-        }
-        inputSource.emitScalar(scalar, EInputInteraction.Move, performance.now());
-    }
-
     function handleChange(event: ChangeEvent<HTMLInputElement>): void {
         const nextValue: number = event.currentTarget.valueAsNumber;
         pushFill(computeFillRatio(nextValue, min, max));
         onChange?.(nextValue);
-        emitSignal(nextValue);
+        emitScalar(nextValue);
     }
 
     return (

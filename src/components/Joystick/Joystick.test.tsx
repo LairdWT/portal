@@ -61,9 +61,13 @@ describe('Joystick', () => {
             <Joystick label={PAD_LABEL} deadZone={0} onAxisChange={onAxisChange} />,
         );
 
-        const surface: HTMLElement = screen.getByRole('group', {
+        const group: HTMLElement = screen.getByRole('group', {
             name: PAD_LABEL,
         });
+        const surface: Element | null = group.firstElementChild;
+        if (surface === null) {
+            throw new Error('Expected a pointer surface element.');
+        }
 
         fireEvent.pointerDown(surface, {
             pointerId: ACTIVE_POINTER_ID,
@@ -85,7 +89,7 @@ describe('Joystick', () => {
 
         const horizontal: HTMLInputElement = screen.getByLabelText(
             `${PAD_LABEL} horizontal axis`,
-        ) as HTMLInputElement;
+        );
 
         fireEvent.change(horizontal, { target: { value: '0.5' } });
 
@@ -99,10 +103,10 @@ describe('Joystick', () => {
 
         const horizontal: HTMLInputElement = screen.getByLabelText(
             `${PAD_LABEL} horizontal axis`,
-        ) as HTMLInputElement;
+        );
         const vertical: HTMLInputElement = screen.getByLabelText(
             `${PAD_LABEL} vertical axis`,
-        ) as HTMLInputElement;
+        );
 
         expect(horizontal).toBeDisabled();
         expect(vertical).toBeDisabled();
@@ -114,7 +118,7 @@ describe('Joystick', () => {
         const group: HTMLElement = screen.getByRole('group', { name: PAD_LABEL });
         const horizontal: HTMLInputElement = screen.getByLabelText(
             `${PAD_LABEL} horizontal axis`,
-        ) as HTMLInputElement;
+        );
 
         horizontal.focus();
         expect(group).toContainElement(horizontal);

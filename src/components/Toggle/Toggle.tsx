@@ -5,8 +5,8 @@ import {
     useState,
 } from 'react';
 
-import { EInputInteraction, type InputSource } from '../../input';
-import { useInputSource } from '../../react/hooks/useInputSource';
+import { EInputInteraction } from '../../input';
+import { type EmitBinding, useEmitBinding } from '../../react/hooks/useEmitBinding';
 import { EEnabledState } from '../../state/state';
 import styles from './Toggle.module.css';
 import { ECheckedState, type ToggleProps } from './Toggle.types';
@@ -42,17 +42,7 @@ export function Toggle({
 
     const isChecked: boolean = currentChecked === ECheckedState.Checked;
     const isDisabled: boolean = enabled === EEnabledState.Disabled;
-    const inputSource: InputSource | null = useInputSource(descriptor, onSignal);
-
-    function emitDigital(pressed: boolean): void {
-        if (inputSource === null) {
-            return;
-        }
-        const interaction: EInputInteraction = pressed
-            ? EInputInteraction.Press
-            : EInputInteraction.Release;
-        inputSource.emitDigital(pressed, interaction, performance.now());
-    }
+    const { emitDigital }: EmitBinding = useEmitBinding(descriptor, onSignal);
 
     function handleClick(): void {
         switch (enabled) {
@@ -64,7 +54,11 @@ export function Toggle({
                     setInternalChecked(next);
                 }
                 onChange?.(next);
-                emitDigital(next === ECheckedState.Checked);
+                const pressed: boolean = next === ECheckedState.Checked;
+                const interaction: EInputInteraction = pressed
+                    ? EInputInteraction.Press
+                    : EInputInteraction.Release;
+                emitDigital(pressed, interaction);
             }
         }
     }
