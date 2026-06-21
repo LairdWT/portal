@@ -11,16 +11,7 @@ import { useReducedMotion } from '../react/hooks/useReducedMotion';
 import type { ShaderDescriptor, ShaderUniforms } from '../shaders/shaderContract';
 import styles from './ShaderSurface.module.css';
 import type { ShaderSurfaceProps } from './ShaderSurface.types';
-
-function isWebGlAvailable(): boolean {
-    if (typeof document === 'undefined') {
-        return false;
-    }
-    const canvas: HTMLCanvasElement = document.createElement('canvas');
-    const context: RenderingContext | null =
-        canvas.getContext('webgl2') ?? canvas.getContext('webgl');
-    return context !== null;
-}
+import { isWebGlAvailable } from './webglSupport';
 
 function composeClassName(base: string, extra?: string): string {
     return extra === undefined ? base : `${base} ${extra}`;
