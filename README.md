@@ -48,10 +48,10 @@ application entry point:
 ```tsx
 import 'portal/styles.css';
 
-import { Button } from 'portal';
+import { CTA } from 'portal';
 
 export function Example(): JSX.Element {
-    return <Button onPress={() => undefined}>Press</Button>;
+    return <CTA onClick={() => undefined}>Press</CTA>;
 }
 ```
 
@@ -133,6 +133,31 @@ At the Unity boundary, `toWireInput` narrows a signal to a serializable
 value, and timestamp) and throws if a value does not match the descriptor's
 declared kind. The `Patterns/Unity Binding` Storybook story wires a binding
 profile, a custom `TimeProvider`, and the wire codec together.
+
+## Generic UI components
+
+A domain-agnostic UI layer for click and selection surfaces, separate from the
+game-input controllers above: `CTA` (click button), `Panel`, `SelectableTile`,
+`StatPill`, `Tabs`, `StepTrack`, `ReadoutPanel`, and `TextField`. These emit
+plain callbacks (`onClick`, `onSelect`, `onChange`) and never the input-signal
+contract, so they suit any React UI, not only game input.
+
+Colour comes from one opaque `tone` prop rather than a fixed palette. A
+component sets `--portal-tone` from it and derives its accent, border, glow, and
+fill, so a consumer maps any domain palette without per-component CSS:
+
+```tsx
+import { SelectableTile, StatPill } from 'portal';
+
+<SelectableTile id="ship-1" tone="var(--faction-crimson)" onSelect={select}>
+    Frigate
+</SelectableTile>;
+<StatPill label="Energy" value={7} tone="oklch(0.7 0.16 150)" />;
+```
+
+With no `tone`, components use the neutral portal accent. An optional
+`SelectionProvider` supplies an ambient selection sink so tiles are wired once
+rather than per control.
 
 ## Scripts
 
