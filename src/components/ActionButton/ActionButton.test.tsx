@@ -6,7 +6,7 @@ import { EEnabledState } from '../../state/state';
 import { ActionButton } from './ActionButton';
 import { EBevelCorners } from './ActionButton.types';
 
-const BUTTON_LABEL: string = 'Fire';
+const BUTTON_LABEL: string = 'A';
 
 // jsdom does not define the pointer-capture methods; the press hook calls
 // setPointerCapture inside its pointerdown handler. Define no-op stubs as

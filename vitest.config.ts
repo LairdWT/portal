@@ -1,4 +1,3 @@
-/// <reference types="vitest/config" />
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -60,6 +59,15 @@ export default defineConfig({
                 },
             },
         ],
+        onConsoleLog: (log: string): boolean | undefined => {
+            // three r183 deprecated THREE.Clock; the warning originates inside
+            // @react-three/fiber when a Canvas mounts, not in Portal source.
+            // Suppress only that one line so test stderr stays signal.
+            if (log.includes('THREE.Clock: This module has been deprecated')) {
+                return false;
+            }
+            return undefined;
+        },
         coverage: {
             provider: 'v8',
             reportsDirectory: './coverage',

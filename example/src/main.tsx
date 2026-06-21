@@ -1,7 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
-import 'portal/styles.css';
+import '@laird-wt/portal/styles.css';
 
 import { App } from './App';
 

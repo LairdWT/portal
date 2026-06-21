@@ -18,6 +18,8 @@
     border: var(--portal-border-thickness-thin) solid var(--portal-tone-border);
     border-radius: var(--portal-radius-md);
     background-color: var(--portal-color-surface-0);
+    box-shadow: 0 var(--portal-space-2) var(--portal-space-6)
+        color-mix(in oklab, var(--portal-color-bg-0) 55%, transparent);
     color: var(--portal-color-text-0);
     font-family: var(--portal-font-sans);
     inline-size: 100%;
@@ -25,6 +27,10 @@
 
 .panel[data-elevation='raised'] {
     background-color: var(--portal-color-surface-1);
+    box-shadow:
+        0 0 var(--portal-space-4) var(--portal-tone-glow),
+        0 var(--portal-space-2) var(--portal-space-6)
+            color-mix(in oklab, var(--portal-color-bg-0) 55%, transparent);
 }
 
 .title {

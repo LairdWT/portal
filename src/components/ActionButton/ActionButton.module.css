@@ -11,19 +11,20 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    aspect-ratio: 1;
     min-inline-size: max(var(--portal-touch-target-min), 2.6em);
     min-block-size: max(var(--portal-touch-target-min), 2.6em);
     padding-inline: var(--portal-space-3);
-    border: var(--portal-border-thickness-normal) solid var(--portal-color-border);
+    border: var(--portal-border-thickness-thin) solid transparent;
     border-radius: var(--portal-radius-lg);
     corner-shape: squircle;
-    background: radial-gradient(
-        circle at 50%,
-        var(--portal-color-accent-highlight) 1%,
-        var(--portal-color-accent-shadow) 55%,
-        var(--portal-color-accent) 90%,
-        var(--portal-color-accent) 100%
-    );
+
+    /* Two background layers: the accent fill clipped to the padding box (the
+     * button face) and the animated metal gradient clipped to the border box, so
+     * the transparent border reads as a brushed-metal trim. */
+    background:
+        var(--portal-gradient-button-face) padding-box,
+        var(--portal-gradient-metal-ring) border-box;
     color: var(--portal-color-bg-0);
     cursor: pointer;
     touch-action: none;
@@ -32,15 +33,22 @@
 
 @media (prefers-reduced-motion: no-preference) {
     .action {
-        transition:
-            transform var(--portal-duration-fast) var(--portal-easing-standard),
-            background var(--portal-duration-fast) var(--portal-easing-standard);
+        transition: transform var(--portal-duration-fast)
+            var(--portal-easing-standard);
+        animation: portal-action-sheen var(--portal-duration-metal-sheen) linear
+            infinite;
+    }
+}
+
+@keyframes portal-action-sheen {
+    to {
+        --portal-metal-angle: 360deg;
     }
 }
 
 .action:focus-visible {
-    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
-    outline-offset: calc(-1 * var(--portal-border-thickness-bold));
+    outline: var(--portal-border-thickness-thin) solid var(--portal-color-focus);
+    outline-offset: calc(-1 * var(--portal-border-thickness-normal));
 }
 
 /* corner-shape order: top-left, top-right, bottom-right, bottom-left. */
@@ -53,14 +61,13 @@
 }
 
 .action[data-pressed='pressed'] {
-    transform: scale(0.95);
-    background: radial-gradient(
-        circle at 50%,
-        var(--portal-color-accent-highlight) 1%,
-        var(--portal-color-accent-shadow) 55%,
-        var(--portal-color-accent) 70%,
-        var(--portal-color-accent) 100%
-    );
+    transform: scale(0.97);
+
+    /* Only the fill image changes on press; the metal border layer and the
+     * background clip, size, and position carry over so the sheen continues. */
+    background-image:
+        var(--portal-gradient-button-face-pressed),
+        var(--portal-gradient-metal-ring);
     color: var(--portal-color-text-0);
 }
 
@@ -71,8 +78,18 @@
 
 .label {
     display: inline-block;
+
+    /* letter-spacing adds a trailing gap after the last glyph; without this the
+     * inline box the flex parent centres is glyph + trailing gap wide, leaving a
+     * single centred letter shifted left by half the letter-spacing. Trimming an
+     * equal end margin re-centres the glyph itself. */
+    margin-inline-end: calc(-1 * var(--portal-letter-spacing-wide));
     font-family: var(--portal-font-sans);
-    font-size: var(--portal-size-text-md);
+
+    /* A container (for example ControlSurface) may scale the glyph with the
+     * button by setting --portal-action-label-size; otherwise the static text
+     * token applies. */
+    font-size: var(--portal-action-label-size, var(--portal-size-text-md));
     font-weight: 700;
     line-height: var(--portal-line-height-tight);
     letter-spacing: var(--portal-letter-spacing-wide);

@@ -60,6 +60,8 @@ export type PortalTokens = {
         readonly fast: string;
         readonly base: string;
         readonly slow: string;
+        readonly ms64: string;
+        readonly ms128: string;
     };
     readonly easing: {
         readonly standard: string;
@@ -129,6 +131,8 @@ export const PORTAL_TOKENS: PortalTokens = {
         fast: 'var(--portal-duration-fast)',
         base: 'var(--portal-duration-base)',
         slow: 'var(--portal-duration-slow)',
+        ms64: 'var(--portal-duration-ms64)',
+        ms128: 'var(--portal-duration-ms128)',
     },
     easing: {
         standard: 'var(--portal-easing-standard)',

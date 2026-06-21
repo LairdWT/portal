@@ -1,36 +1,32 @@
-.bevel {
-    --portal-bevel-size: 0.75rem;
+/*
+ * BevelButton. A worded action key in the control family. It keeps the shared
+ * animated metal-ring trim, press scale, and standardized label typography, but
+ * fills its face with the brushed-metal ramp instead of ActionButton's accent
+ * face, so the two controls read as distinct - a machined metal key versus an
+ * accent button. It sizes to its content instead of locking to a square, so a
+ * worded action reads naturally wider than tall. Corners are beveled
+ * (corner-shape: bevel) as the control's identity. Tokens drive every value.
+ */
 
+.bevel {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     min-inline-size: var(--portal-touch-target-min);
     min-block-size: var(--portal-touch-target-min);
     padding-block: var(--portal-space-2);
-    padding-inline: var(--portal-space-4);
-    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
-    background: linear-gradient(
-        160deg,
-        var(--portal-color-accent-highlight) 0%,
-        var(--portal-color-accent) 60%,
-        var(--portal-color-bg-1) 100%
-    );
-    color: var(--portal-color-text-0);
-    font-family: var(--portal-font-sans);
-    font-size: var(--portal-size-text-md);
-    font-weight: 700;
-    line-height: var(--portal-line-height-tight);
-    letter-spacing: var(--portal-letter-spacing-wide);
-    clip-path: polygon(
-        var(--portal-bevel-size) 0%,
-        calc(100% - var(--portal-bevel-size)) 0%,
-        100% var(--portal-bevel-size),
-        100% calc(100% - var(--portal-bevel-size)),
-        calc(100% - var(--portal-bevel-size)) 100%,
-        var(--portal-bevel-size) 100%,
-        0% calc(100% - var(--portal-bevel-size)),
-        0% var(--portal-bevel-size)
-    );
+    padding-inline: var(--portal-space-5);
+    border: var(--portal-border-thickness-thin) solid transparent;
+    border-radius: var(--portal-radius-md);
+    corner-shape: bevel;
+
+    /* A brushed-metal face (padding box) inside the same animated metal ring
+     * (border box). The metal face is what sets BevelButton apart from
+     * ActionButton's accent face; the shared ring keeps them one family. */
+    background:
+        var(--portal-gradient-metal) padding-box,
+        var(--portal-gradient-metal-ring) border-box;
+    color: var(--portal-color-bg-0);
     cursor: pointer;
     touch-action: none;
     user-select: none;
@@ -38,25 +34,38 @@
 
 @media (prefers-reduced-motion: no-preference) {
     .bevel {
-        transition:
-            transform var(--portal-duration-fast) var(--portal-easing-standard),
-            background var(--portal-duration-fast) var(--portal-easing-standard);
+        transition: transform var(--portal-duration-fast)
+            var(--portal-easing-standard);
+        animation: portal-bevel-sheen var(--portal-duration-metal-sheen) linear
+            infinite;
+    }
+}
+
+@keyframes portal-bevel-sheen {
+    to {
+        --portal-metal-angle: 360deg;
     }
 }
 
 .bevel:focus-visible {
-    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
-    outline-offset: calc(-1 * var(--portal-border-thickness-bold));
+    outline: var(--portal-border-thickness-thin) solid var(--portal-color-focus);
+    outline-offset: calc(-1 * var(--portal-border-thickness-normal));
 }
 
 .bevel[data-pressed='pressed'] {
-    background: linear-gradient(
-        160deg,
-        var(--portal-color-accent) 0%,
-        var(--portal-color-accent-highlight) 60%,
-        var(--portal-color-bg-1) 100%
-    );
-    transform: scale(0.95);
+    transform: scale(0.97);
+
+    /* Pressed reads as recessed metal: the face darkens to the steel end of the
+     * ramp while the animated ring carries over (the background clip persists). */
+    background-image:
+        linear-gradient(
+            160deg,
+            var(--portal-color-metal-0) 0%,
+            var(--portal-color-metal-1) 55%,
+            var(--portal-color-metal-0) 100%
+        ),
+        var(--portal-gradient-metal-ring);
+    color: var(--portal-color-text-0);
 }
 
 .bevel:disabled {
@@ -67,10 +76,13 @@
 .label {
     display: inline-block;
 
-    /* letter-spacing (inherited from .bevel) adds a trailing gap after the last
-     * glyph; without this the inline box the flex parent centres is text +
-     * trailing gap wide, leaving centred text shifted left by half the
-     * letter-spacing. Trimming an equal end margin recentres it. Mirrors the
-     * ActionButton label fix. */
+    /* letter-spacing adds a trailing gap after the last glyph; trimming an equal
+     * end margin re-centres the text. Matches the ActionButton label. */
     margin-inline-end: calc(-1 * var(--portal-letter-spacing-wide));
+    font-family: var(--portal-font-sans);
+    font-size: var(--portal-action-label-size, var(--portal-size-text-lg));
+    font-weight: 900;
+    line-height: var(--portal-line-height-tight);
+    letter-spacing: var(--portal-letter-spacing-wide);
+    text-align: center;
 }

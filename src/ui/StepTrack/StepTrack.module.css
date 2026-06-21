@@ -55,8 +55,9 @@
 @media (prefers-reduced-motion: no-preference) {
     .marker {
         transition:
-            border-color var(--portal-duration-128) var(--portal-easing-standard),
-            box-shadow var(--portal-duration-128) var(--portal-easing-standard);
+            border-color var(--portal-duration-ms128) var(--portal-easing-standard),
+            background var(--portal-duration-ms128) var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ms128) var(--portal-easing-standard);
     }
 }
 
@@ -74,7 +75,12 @@
 
 .step[data-state='current'] .marker {
     border-color: var(--portal-tone-accent);
-    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow);
+    background: radial-gradient(
+        circle at 50% 35%,
+        var(--portal-tone-edge) 0%,
+        var(--portal-color-surface-0) 100%
+    );
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow-strong);
 }
 
 .step[data-state='current'] .dot {

@@ -3,6 +3,14 @@
  * Consumers may override any token at a higher cascade layer.
  */
 
+/* Registered so the metal trim's sweep angle animates as a real angle, letting
+ * the conic ring rotate seamlessly (0deg and 360deg are identical, so no seam). */
+@property --portal-metal-angle {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+}
+
 :root {
     color-scheme: dark;
 
@@ -29,6 +37,52 @@
     --portal-color-danger: #a0444d;
     --portal-color-success: #5ce0a0;
     --portal-color-grid-cell: #2a2f45;
+
+    /* Metallic trim. A brushed-silver ramp plus a composed gradient and sheen
+     * timing for animated control-frame trim. */
+    --portal-color-metal-0: #5b6472;
+    --portal-color-metal-1: #707a8a;
+    --portal-color-metal-2: #aab4c6;
+    --portal-color-metal-3: #cdd6e4;
+    --portal-color-metal-4: #e8eef7;
+    --portal-gradient-metal: linear-gradient(
+        120deg,
+        var(--portal-color-metal-0) 0%,
+        var(--portal-color-metal-3) 18%,
+        var(--portal-color-metal-1) 38%,
+        var(--portal-color-metal-2) 58%,
+        var(--portal-color-metal-4) 78%,
+        var(--portal-color-metal-0) 100%
+    );
+    --portal-gradient-metal-ring: conic-gradient(
+        from var(--portal-metal-angle, 0deg),
+        var(--portal-color-metal-0) 0deg,
+        var(--portal-color-metal-3) 60deg,
+        var(--portal-color-metal-1) 120deg,
+        var(--portal-color-metal-4) 180deg,
+        var(--portal-color-metal-2) 240deg,
+        var(--portal-color-metal-3) 300deg,
+        var(--portal-color-metal-0) 360deg
+    );
+    --portal-duration-metal-sheen: 7s;
+
+    /* Shared tactile-button face. The closest-side circle inscribes within the
+     * shorter dimension, so the same fill suits a square ActionButton and a wide
+     * BevelButton. Standardizing it keeps the two controls visually matched. */
+    --portal-gradient-button-face: radial-gradient(
+        circle closest-side at 50%,
+        var(--portal-color-accent-highlight) 5%,
+        var(--portal-color-accent-shadow) 75%,
+        var(--portal-color-accent) 97%,
+        var(--portal-color-accent) 100%
+    );
+    --portal-gradient-button-face-pressed: radial-gradient(
+        circle closest-side at 50%,
+        var(--portal-color-accent-highlight) 1%,
+        var(--portal-color-accent-shadow) 70%,
+        var(--portal-color-accent) 97%,
+        var(--portal-color-accent) 100%
+    );
 
     /* Spacing scale */
     --portal-space-1: 0.25rem;
@@ -82,6 +136,8 @@
     --portal-duration-fast: 8ms;
     --portal-duration-base: 16ms;
     --portal-duration-slow: 32ms;
+    --portal-duration-ms64: 64ms;
+    --portal-duration-ms128: 128ms;
 
     /* Motion easing */
     --portal-easing-standard: cubic-bezier(0.2, 0, 0, 1);

@@ -31,7 +31,7 @@ export const RIPPLE_GRID_FRAGMENT_SHADER: string = /* glsl */ `
 
     // Tunables. Each controls one feel of the surface; adjust freely.
     const float GRID_CELLS = 12.0;       // grid divisions across the panel
-    const float GRID_THICKNESS = 0.04;   // line half-width, in cell fraction
+    const float GRID_THICKNESS = 0.06;   // line half-width, in cell fraction
     const float FLOAT_SPEED = 0.15;      // drift rate of the whole grid
     const float FLOAT_AMOUNT = 0.012;    // drift distance, in UV units
     const float WAVE_FREQUENCY = 26.0;   // ripple ring spacing
@@ -39,12 +39,14 @@ export const RIPPLE_GRID_FRAGMENT_SHADER: string = /* glsl */ `
     const float TIME_DECAY = 1.6;        // ripple fade over time
     const float DISTANCE_DECAY = 2.2;    // ripple fade over distance
     const float RIPPLE_LIFETIME = 4.0;   // seconds before a ripple is ignored
-    const float DISPLACE_SCALE = 0.06;   // how far ripples bend the grid
-    const float RIPPLE_GLOW = 0.9;       // accent brightness added by ripples
+    const float DISPLACE_SCALE = 0.025;  // how far ripples bend the grid
+    const float RIPPLE_GLOW = 0.8;       // accent brightness added by ripples
 
-    // Returns ~1 on a grid line and ~0 in a cell interior.
+    // Returns ~1 on a grid line and ~0 in a cell interior. The x coordinate is
+    // aspect-corrected so cells stay square at any viewport ratio instead of
+    // stretching on narrow phones or wide desktops.
     float gridIntensity(vec2 uv) {
-        vec2 scaled = uv * GRID_CELLS;
+        vec2 scaled = vec2(uv.x * uAspect, uv.y) * GRID_CELLS;
         vec2 toBoundary = 0.5 - abs(fract(scaled) - 0.5);
         float nearest = min(toBoundary.x, toBoundary.y);
         return 1.0 - smoothstep(0.0, GRID_THICKNESS, nearest);
@@ -79,9 +81,13 @@ export const RIPPLE_GRID_FRAGMENT_SHADER: string = /* glsl */ `
         float line = gridIntensity(gridUv);
 
         vec3 color = mix(uColorBackground, uColorGrid, line);
+
+        // A warm resting shimmer on the lines (the +0.5 bias keeps the grid
+        // faintly lit at rest) that brightens as a ripple's wavefront passes,
+        // plus a soft ambient accent fill, so the surface reads warm and premium.
         float glow = clamp(wave * 0.5 + 0.5, 0.0, 1.0) * RIPPLE_GLOW;
         color += uColorAccent * glow * line;
-        color += uColorAccent * abs(wave) * 0.06;
+        color += uColorAccent * abs(wave) * 0.03;
 
         gl_FragColor = vec4(color, 1.0);
     }

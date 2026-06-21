@@ -2,7 +2,8 @@
 // signal, an injected TimeProvider stamps it, the wire codec narrows it to the
 // payload Unity receives, and a data-driven registry resolves the input id to an
 // action. Nothing here names a real game action; the binding profile is data the
-// consumer supplies.
+// consumer supplies. A BevelButton and an A/B/X/Y ActionButton grid all route
+// through the same signal sink, so any press updates the wire-payload readout.
 
 import {
     type Dispatch,
@@ -15,6 +16,8 @@ import {
     useState,
 } from 'react';
 
+import { ActionButton } from '../components/ActionButton/ActionButton';
+import { EBevelCorners } from '../components/ActionButton/ActionButton.types';
 import { BevelButton } from '../components/BevelButton/BevelButton';
 import {
     type BindingResolution,
@@ -36,19 +39,68 @@ const fireDescriptor: InputDescriptor = {
     label: 'Fire',
 };
 
+// One face button: its visible label, the descriptor it emits, and the bevel
+// diagonal so the four buttons interlock in the grid.
+type FaceButton = Readonly<{
+    label: string;
+    descriptor: InputDescriptor;
+    bevelCorners: EBevelCorners;
+}>;
+
+const FACE_BUTTONS: readonly FaceButton[] = [
+    {
+        label: 'A',
+        descriptor: { id: 'face.a', kind: EInputValueType.Digital, label: 'A' },
+        bevelCorners: EBevelCorners.TopLeftBottomRight,
+    },
+    {
+        label: 'B',
+        descriptor: { id: 'face.b', kind: EInputValueType.Digital, label: 'B' },
+        bevelCorners: EBevelCorners.TopRightBottomLeft,
+    },
+    {
+        label: 'X',
+        descriptor: { id: 'face.x', kind: EInputValueType.Digital, label: 'X' },
+        bevelCorners: EBevelCorners.TopRightBottomLeft,
+    },
+    {
+        label: 'Y',
+        descriptor: { id: 'face.y', kind: EInputValueType.Digital, label: 'Y' },
+        bevelCorners: EBevelCorners.TopLeftBottomRight,
+    },
+];
+
 const layoutStyle: { display: 'grid'; gap: string; maxInlineSize: string } = {
     display: 'grid',
     gap: '0.75rem',
     maxInlineSize: '32rem',
 };
 
+const buttonGridStyle: {
+    display: 'grid';
+    gridTemplateColumns: string;
+    gap: string;
+    maxInlineSize: string;
+} = {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, minmax(3rem, 1fr))',
+    gap: '0.5rem',
+    maxInlineSize: '16rem',
+};
+
 export function UnityBindingExample(): ReactElement {
-    // The binding profile: pure data mapping an opaque input id to an action id.
-    // A consumer would load this per player or per context and could rebind it
-    // at runtime through the registry's immutable mutators.
+    // The binding profile: pure data mapping opaque input ids to action ids. A
+    // consumer would load this per player or per context and could rebind it at
+    // runtime through the registry's immutable mutators.
     const registry: IInputBindingRegistry = useMemo<IInputBindingRegistry>(
         (): IInputBindingRegistry =>
-            createRegistry([{ inputId: 'fire', actionId: 'weapon.primary' }]),
+            createRegistry([
+                { inputId: 'fire', actionId: 'weapon.primary' },
+                { inputId: 'face.a', actionId: 'ui.confirm' },
+                { inputId: 'face.b', actionId: 'ui.cancel' },
+                { inputId: 'face.x', actionId: 'ui.menu' },
+                { inputId: 'face.y', actionId: 'ui.special' },
+            ]),
         [],
     );
 
@@ -85,10 +137,23 @@ export function UnityBindingExample(): ReactElement {
                 <BevelButton descriptor={fireDescriptor} onSignal={handleSignal}>
                     Fire
                 </BevelButton>
+                <div style={buttonGridStyle}>
+                    {FACE_BUTTONS.map(
+                        (face: FaceButton): ReactElement => (
+                            <ActionButton
+                                key={face.descriptor.id}
+                                label={face.label}
+                                bevelCorners={face.bevelCorners}
+                                descriptor={face.descriptor}
+                                onSignal={handleSignal}
+                            />
+                        ),
+                    )}
+                </div>
             </TimeProviderContext.Provider>
             <pre>
                 {lastPayload === null
-                    ? 'Press the control to emit a wire payload.'
+                    ? 'Press a control to emit a wire payload.'
                     : JSON.stringify(lastPayload, null, 2)}
             </pre>
         </div>

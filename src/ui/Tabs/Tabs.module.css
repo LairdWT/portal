@@ -30,6 +30,7 @@
     padding-inline: var(--portal-space-4);
     border: var(--portal-border-thickness-thin) solid transparent;
     border-radius: var(--portal-radius-md);
+    corner-shape: squircle;
     background-color: transparent;
     color: var(--portal-color-text-1);
     font-family: var(--portal-font-sans);
@@ -43,15 +44,17 @@
 @media (prefers-reduced-motion: no-preference) {
     .tab {
         transition:
-            border-color var(--portal-duration-128) var(--portal-easing-standard),
-            background-color var(--portal-duration-128)
+            transform var(--portal-duration-ms128) var(--portal-easing-standard),
+            border-color var(--portal-duration-ms128) var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ms128) var(--portal-easing-standard),
+            background-color var(--portal-duration-ms128)
                 var(--portal-easing-standard),
-            color var(--portal-duration-128) var(--portal-easing-standard);
+            color var(--portal-duration-ms128) var(--portal-easing-standard);
     }
 }
 
 .tab:focus-visible {
-    outline: var(--portal-border-thickness-thin) solid var(--portal-color-focus);
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
     outline-offset: var(--portal-space-1);
 }
 
@@ -60,9 +63,18 @@
     cursor: not-allowed;
 }
 
+.tab:active:not(:disabled) {
+    transform: scale(0.95);
+}
+
 .tab[data-state='selected'] {
     border-color: var(--portal-tone-accent);
-    background-color: var(--portal-tone-fill);
+    background: linear-gradient(
+        160deg,
+        var(--portal-tone-fill) 0%,
+        var(--portal-color-surface-0) 100%
+    );
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow-strong);
     color: var(--portal-color-text-0);
 }
 

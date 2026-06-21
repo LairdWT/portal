@@ -46,14 +46,18 @@ export function toneProperties(tone?: string): CSSProperties {
 // keep React and Unity palettes in sync.
 export const PORTAL_TONE: {
     readonly accent: 'var(--portal-tone-accent)';
+    readonly edge: 'var(--portal-tone-edge)';
     readonly border: 'var(--portal-tone-border)';
     readonly glow: 'var(--portal-tone-glow)';
+    readonly glowStrong: 'var(--portal-tone-glow-strong)';
     readonly fill: 'var(--portal-tone-fill)';
     readonly on: 'var(--portal-tone-on)';
 } = {
     accent: 'var(--portal-tone-accent)',
+    edge: 'var(--portal-tone-edge)',
     border: 'var(--portal-tone-border)',
     glow: 'var(--portal-tone-glow)',
+    glowStrong: 'var(--portal-tone-glow-strong)',
     fill: 'var(--portal-tone-fill)',
     on: 'var(--portal-tone-on)',
 };

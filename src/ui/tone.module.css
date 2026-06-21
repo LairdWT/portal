@@ -15,7 +15,17 @@
         var(--portal-tone) 55%,
         var(--portal-color-border)
     );
+    --portal-tone-edge: color-mix(
+        in oklab,
+        var(--portal-tone) 45%,
+        var(--portal-color-accent-highlight)
+    );
     --portal-tone-glow: color-mix(in oklab, var(--portal-tone) 40%, transparent);
+    --portal-tone-glow-strong: color-mix(
+        in oklab,
+        var(--portal-tone) 60%,
+        transparent
+    );
     --portal-tone-fill: color-mix(
         in oklab,
         var(--portal-tone) 18%,

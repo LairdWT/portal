@@ -3,7 +3,7 @@
 // uniform arrays each frame with no per-frame allocation. When the buffer is
 // full the oldest slot is reused.
 
-export const MAX_RIPPLES: number = 8;
+export const MAX_RIPPLES: number = 16;
 
 // A single ripple source in surface UV space. timeSeconds shares the clock used
 // for the shader time uniform so the shader can derive each ripple's age.

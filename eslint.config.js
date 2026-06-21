@@ -13,6 +13,24 @@ import tseslint from 'typescript-eslint';
 
 const configDirectory = path.dirname(fileURLToPath(import.meta.url));
 
+// jsx-a11y's interaction rules default to mouse/keyboard handlers only. Portal's
+// controls drive interaction with Pointer Events, so extend the handler set to
+// include them; otherwise role="group" + onPointerDown slips past the a11y rules.
+const interactionHandlers = [
+    'onClick',
+    'onError',
+    'onLoad',
+    'onMouseDown',
+    'onMouseUp',
+    'onKeyPress',
+    'onKeyDown',
+    'onKeyUp',
+    'onPointerDown',
+    'onPointerMove',
+    'onPointerUp',
+    'onPointerCancel',
+];
+
 export default tseslint.config(
     {
         ignores: [
@@ -44,6 +62,14 @@ export default tseslint.config(
         plugins: { 'react-hooks': reactHooks },
         rules: {
             ...reactHooks.configs.recommended.rules,
+            'jsx-a11y/no-noninteractive-element-interactions': [
+                'error',
+                { handlers: interactionHandlers },
+            ],
+            'jsx-a11y/no-static-element-interactions': [
+                'error',
+                { handlers: interactionHandlers },
+            ],
             '@typescript-eslint/consistent-type-definitions': ['error', 'type'],
             '@typescript-eslint/consistent-type-imports': [
                 'error',
@@ -93,6 +119,22 @@ export default tseslint.config(
     {
         files: ['**/*.{js,cjs,mjs}'],
         extends: [tseslint.configs.disableTypeChecked],
+    },
+    // e2e specs compile under Playwright's own runner, not the library tsconfig;
+    // lint them without type-aware rules so they need not join a tsconfig project.
+    {
+        files: ['e2e/**/*.ts'],
+        extends: [tseslint.configs.disableTypeChecked],
+        languageOptions: { parserOptions: { projectService: false } },
+    },
+    // Playwright's config pulls in DOM-dependent option types the node tsconfig
+    // (no DOM lib) cannot fully resolve, and Playwright runs it with its own
+    // runner. Lint it without type-aware rules and outside the type project, the
+    // same way the e2e specs are handled.
+    {
+        files: ['playwright.config.ts'],
+        extends: [tseslint.configs.disableTypeChecked],
+        languageOptions: { parserOptions: { projectService: false } },
     },
     {
         plugins: { 'simple-import-sort': simpleImportSort },

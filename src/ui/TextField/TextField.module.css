@@ -29,7 +29,7 @@
     padding-inline: var(--portal-space-3);
     padding-block: var(--portal-space-2);
     border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
-    border-radius: var(--portal-radius-md);
+    border-radius: var(--portal-radius-lg);
     background-color: var(--portal-color-surface-0);
     color: var(--portal-color-text-0);
     font-family: inherit;
@@ -40,8 +40,8 @@
 @media (prefers-reduced-motion: no-preference) {
     .input {
         transition:
-            border-color var(--portal-duration-128) var(--portal-easing-standard),
-            box-shadow var(--portal-duration-128) var(--portal-easing-standard);
+            border-color var(--portal-duration-ms128) var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ms128) var(--portal-easing-standard);
     }
 }
 
@@ -53,7 +53,7 @@
     border-color: var(--portal-tone-accent);
     outline: var(--portal-border-thickness-thin) solid var(--portal-color-focus);
     outline-offset: var(--portal-border-thickness-thin);
-    box-shadow: 0 0 0 var(--portal-border-thickness-thin) var(--portal-tone-glow);
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow-strong);
 }
 
 .input:disabled {

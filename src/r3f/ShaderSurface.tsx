@@ -6,6 +6,7 @@ import {
     useMemo,
     useRef,
 } from 'react';
+import type { ShaderMaterial } from 'three';
 
 import { useReducedMotion } from '../react/hooks/useReducedMotion';
 import type { ShaderDescriptor, ShaderUniforms } from '../shaders/shaderContract';
@@ -24,21 +25,46 @@ type ShaderFieldProps<TState> = Readonly<{
     timeRef: RefObject<number>;
 }>;
 
-// Lives inside the Canvas so useFrame can drive the shader's uniforms. Mutating
-// the shared uniforms object is the supported three pattern: values upload on
-// the next render.
+// Lives inside the Canvas so useFrame can drive the shader's uniforms.
 function ShaderField<TState>({
     shader,
     state,
     uniforms,
     timeRef,
 }: ShaderFieldProps<TState>): ReactElement {
+    const materialRef: RefObject<ShaderMaterial | null> =
+        useRef<ShaderMaterial | null>(null);
+
     useFrame((rootState: RootState): void => {
         const elapsedSeconds: number = rootState.clock.elapsedTime;
         timeRef.current = elapsedSeconds;
+        // Aspect from the live host size (not R3F's measured size, which lags in
+        // nested absolute containers), forcing the buffer to match so grid cells
+        // stay square instead of stretching with the canvas.
+        const canvasElement: HTMLCanvasElement = rootState.gl.domElement;
+        const host: HTMLElement | null = canvasElement.parentElement;
+        const displayWidth: number = host?.clientWidth ?? rootState.size.width;
+        const displayHeight: number = host?.clientHeight ?? rootState.size.height;
+        if (displayWidth === 0 || displayHeight === 0) {
+            return;
+        }
+        if (
+            Math.round(rootState.size.width) !== displayWidth ||
+            Math.round(rootState.size.height) !== displayHeight
+        ) {
+            rootState.setSize(displayWidth, displayHeight);
+        }
+        // R3F copies the uniforms prop into fresh wrappers, so the material's
+        // uniforms is a different object than ours; mutating ours would never
+        // reach the GPU. Point the material at our object once so shader.update
+        // and the shared ripple arrays drive the real material uniforms.
+        const material: ShaderMaterial | null = materialRef.current;
+        if (material !== null && material.uniforms !== uniforms) {
+            material.uniforms = uniforms;
+        }
         shader.update(uniforms, state, {
             elapsedSeconds,
-            aspectRatio: rootState.size.width / rootState.size.height,
+            aspectRatio: displayWidth / displayHeight,
         });
     });
 
@@ -46,6 +72,7 @@ function ShaderField<TState>({
         <mesh frustumCulled={false}>
             <planeGeometry args={[2, 2]} />
             <shaderMaterial
+                ref={materialRef}
                 vertexShader={shader.vertexShader}
                 fragmentShader={shader.fragmentShader}
                 uniforms={uniforms}
@@ -112,7 +139,12 @@ export function ShaderSurface<TState>({
                       }
             }
         >
-            <Canvas className={styles.canvas} dpr={[1, 1.5]}>
+            <Canvas
+                className={styles.canvas}
+                dpr={[1, 2]}
+                camera={{ position: [0, 0, 6], fov: 45 }}
+                gl={{ antialias: true, powerPreference: 'high-performance' }}
+            >
                 <ShaderField
                     shader={shader}
                     state={state}

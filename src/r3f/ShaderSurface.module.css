@@ -1,14 +1,18 @@
 /*
- * ShaderSurface layout. The surface fills its container and clips the canvas to
- * a rounded panel. It is decorative (aria-hidden) but pointer-interactive, so it
- * disables native touch gestures to keep ripple drags from scrolling the page.
- * No fixed-pixel sizing: the consumer sizes the surface; the canvas fills it.
+ * ShaderSurface layout. The surface absolutely fills its nearest positioned
+ * ancestor and clips the canvas to a rounded panel. Filling by inset rather than
+ * a percentage block-size chain gives R3F a definite, correctly-measured box, so
+ * the drawing buffer matches the displayed aspect and the shader never stretches
+ * (a percentage height that fails to resolve leaves R3F measuring a wrong-aspect
+ * box, which stretches the grid and turns ripples into ovals). It is decorative
+ * (aria-hidden) but pointer-interactive, so it disables native touch gestures to
+ * keep ripple drags from scrolling the page. No fixed-pixel sizing: the consumer
+ * provides a positioned, sized container; the surface fills it.
  */
 
 .surface {
-    position: relative;
-    inline-size: 100%;
-    block-size: 100%;
+    position: absolute;
+    inset: 0;
     overflow: hidden;
     border-radius: var(--portal-radius-lg);
     background-color: var(--portal-color-bg-0);
@@ -16,9 +20,9 @@
 }
 
 .canvas {
+    position: absolute;
+    inset: 0;
     display: block;
-    inline-size: 100%;
-    block-size: 100%;
 }
 
 .fallback {

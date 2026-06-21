@@ -10,16 +10,7 @@ import { type EmitBinding, useEmitBinding } from '../../react/hooks/useEmitBindi
 import { useResolvedEnabled } from '../../react/hooks/useResolvedEnabled';
 import { EEnabledState } from '../../state/state';
 import styles from './Toggle.module.css';
-import { ECheckedState, type ToggleProps } from './Toggle.types';
-
-function nextCheckedState(current: ECheckedState): ECheckedState {
-    switch (current) {
-        case ECheckedState.Checked:
-            return ECheckedState.Unchecked;
-        case ECheckedState.Unchecked:
-            return ECheckedState.Checked;
-    }
-}
+import { ECheckedState, nextCheckedState, type ToggleProps } from './Toggle.types';
 
 export function Toggle({
     label,

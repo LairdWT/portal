@@ -8,7 +8,9 @@ import type { ReactElement } from 'react';
 // evaluate components in their intended theme context, not against Storybook's
 // default white canvas. Token references carry literal fallbacks so the decorator
 // is robust even if a token is renamed.
-const withPortalSurface: Decorator = (Story): ReactElement => (
+const withPortalSurface: Decorator = (
+    Story: Parameters<Decorator>[0],
+): ReactElement => (
     <div
         style={{
             background: 'var(--portal-color-bg-0, #07080d)',

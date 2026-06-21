@@ -151,6 +151,33 @@ function isActivationKey(key: string): boolean {
     }
 }
 
+// Validate a child button's data-segment attribute back to a directional member,
+// so a single delegated key handler can read the direction from the event target
+// rather than allocating a per-button closure. Returns null for any value that
+// is not an operable direction.
+function parseDpadDirection(value: string | undefined): EDpadDirection | null {
+    switch (value) {
+        case EDpadDirection.Up:
+            return EDpadDirection.Up;
+        case EDpadDirection.Down:
+            return EDpadDirection.Down;
+        case EDpadDirection.Left:
+            return EDpadDirection.Left;
+        case EDpadDirection.Right:
+            return EDpadDirection.Right;
+        case EDpadDirection.UpLeft:
+            return EDpadDirection.UpLeft;
+        case EDpadDirection.UpRight:
+            return EDpadDirection.UpRight;
+        case EDpadDirection.DownLeft:
+            return EDpadDirection.DownLeft;
+        case EDpadDirection.DownRight:
+            return EDpadDirection.DownRight;
+        default:
+            return null;
+    }
+}
+
 export function DPad({
     label,
     mode = EDpadMode.EightWay,
@@ -210,12 +237,8 @@ export function DPad({
 
     const handleChildKeyDown: (
         event: ReactKeyboardEvent<HTMLButtonElement>,
-        childDirection: EDpadDirection,
     ) => void = useCallback(
-        (
-            event: ReactKeyboardEvent<HTMLButtonElement>,
-            childDirection: EDpadDirection,
-        ): void => {
+        (event: ReactKeyboardEvent<HTMLButtonElement>): void => {
             if (isDisabled) {
                 return;
             }
@@ -228,33 +251,40 @@ export function DPad({
             if (event.repeat) {
                 return;
             }
+            const childDirection: EDpadDirection | null = parseDpadDirection(
+                event.currentTarget.dataset.segment,
+            );
+            if (childDirection === null) {
+                return;
+            }
             commitDirection(childDirection);
         },
         [isDisabled, commitDirection],
     );
 
-    const handleChildKeyUp: (
-        event: ReactKeyboardEvent<HTMLButtonElement>,
-        childDirection: EDpadDirection,
-    ) => void = useCallback(
-        (
-            event: ReactKeyboardEvent<HTMLButtonElement>,
-            childDirection: EDpadDirection,
-        ): void => {
-            if (isDisabled) {
-                return;
-            }
-            if (!isActivationKey(event.key)) {
-                return;
-            }
-            event.preventDefault();
-            if (directionRef.current !== childDirection) {
-                return;
-            }
-            commitDirection(EDpadDirection.None);
-        },
-        [isDisabled, commitDirection],
-    );
+    const handleChildKeyUp: (event: ReactKeyboardEvent<HTMLButtonElement>) => void =
+        useCallback(
+            (event: ReactKeyboardEvent<HTMLButtonElement>): void => {
+                if (isDisabled) {
+                    return;
+                }
+                if (!isActivationKey(event.key)) {
+                    return;
+                }
+                event.preventDefault();
+                const childDirection: EDpadDirection | null = parseDpadDirection(
+                    event.currentTarget.dataset.segment,
+                );
+                if (childDirection === null) {
+                    return;
+                }
+                if (directionRef.current !== childDirection) {
+                    return;
+                }
+                commitDirection(EDpadDirection.None);
+            },
+            [isDisabled, commitDirection],
+        );
 
     // Returning to None when focus leaves the whole group releases a held
     // direction. relatedTarget inside the group means focus only moved between
@@ -306,16 +336,8 @@ export function DPad({
                         disabled={isDisabled}
                         data-segment={childDirection}
                         data-active={direction === childDirection}
-                        onKeyDown={(
-                            event: ReactKeyboardEvent<HTMLButtonElement>,
-                        ): void => {
-                            handleChildKeyDown(event, childDirection);
-                        }}
-                        onKeyUp={(
-                            event: ReactKeyboardEvent<HTMLButtonElement>,
-                        ): void => {
-                            handleChildKeyUp(event, childDirection);
-                        }}
+                        onKeyDown={handleChildKeyDown}
+                        onKeyUp={handleChildKeyUp}
                     />
                 ),
             )}

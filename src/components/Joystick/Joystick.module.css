@@ -18,7 +18,25 @@
     min-inline-size: var(--portal-touch-target-min);
     min-block-size: var(--portal-touch-target-min);
     border: var(--portal-border-thickness-normal) solid var(--portal-color-border);
-    border-radius: 50%;
+    border-radius: calc(min(var(--portal-size-pad), var(--portal-size-pad)) * 0.16);
+    corner-shape: bevel;
+    background-color: var(--portal-color-surface-0);
+    touch-action: none;
+    user-select: none;
+}
+
+.pad {
+    --pad-inline-size: var(--portal-size-pad);
+    --pad-block-size: var(--portal-size-pad);
+
+    position: relative;
+    inline-size: var(--pad-inline-size);
+    block-size: var(--pad-block-size);
+    border-style: solid;
+    border-color: var(--portal-color-border);
+    border-width: var(--portal-border-thickness-normal);
+    border-radius: calc(min(var(--pad-inline-size), var(--pad-block-size)) * 0.16);
+    corner-shape: bevel;
     background-color: var(--portal-color-surface-0);
     touch-action: none;
     user-select: none;

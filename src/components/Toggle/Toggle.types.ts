@@ -30,3 +30,12 @@ export type ToggleProps = Readonly<{
     onSignal?: (signal: InputSignal) => void;
     descriptor?: InputDescriptor;
 }>;
+
+export function nextCheckedState(current: ECheckedState): ECheckedState {
+    switch (current) {
+        case ECheckedState.Checked:
+            return ECheckedState.Unchecked;
+        case ECheckedState.Unchecked:
+            return ECheckedState.Checked;
+    }
+}

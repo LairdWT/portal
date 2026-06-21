@@ -16,7 +16,8 @@
     min-block-size: var(--portal-touch-target-min);
     padding: var(--portal-space-3) var(--portal-space-4);
     border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
-    border-radius: var(--portal-radius-md);
+    border-radius: var(--portal-radius-lg);
+    corner-shape: squircle;
     background-color: var(--portal-color-surface-0);
     color: var(--portal-color-text-0);
     font-family: var(--portal-font-sans);
@@ -30,15 +31,16 @@
 @media (prefers-reduced-motion: no-preference) {
     .tile {
         transition:
-            border-color var(--portal-duration-128) var(--portal-easing-standard),
-            box-shadow var(--portal-duration-128) var(--portal-easing-standard),
-            background-color var(--portal-duration-128)
+            transform var(--portal-duration-ms128) var(--portal-easing-standard),
+            border-color var(--portal-duration-ms128) var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ms128) var(--portal-easing-standard),
+            background-color var(--portal-duration-ms128)
                 var(--portal-easing-standard);
     }
 }
 
 .tile:focus-visible {
-    outline: var(--portal-border-thickness-thin) solid var(--portal-color-focus);
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
     outline-offset: var(--portal-space-1);
 }
 
@@ -47,10 +49,18 @@
     cursor: not-allowed;
 }
 
+.tile:active:not(:disabled) {
+    transform: scale(0.95);
+}
+
 .tile[data-state='selected'] {
-    border-color: var(--portal-tone-border);
-    background-color: var(--portal-tone-fill);
-    box-shadow: 0 0 0 var(--portal-border-thickness-thin) var(--portal-tone-glow);
+    border-color: var(--portal-tone-accent);
+    background: linear-gradient(
+        160deg,
+        var(--portal-tone-fill) 0%,
+        var(--portal-color-surface-0) 100%
+    );
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow-strong);
     color: var(--portal-tone-on);
 }
 

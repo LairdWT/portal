@@ -1,0 +1,34 @@
+/*
+ * OrbBackdrop layout. Absolutely fills its nearest positioned ancestor and clips
+ * the canvas. Filling by inset rather than a percentage block-size chain gives
+ * R3F a definite, correctly-measured box, so the camera aspect and the shader's
+ * uAspect match the displayed box - otherwise the orb renders as an ellipse and
+ * the grid as rectangles. It is decorative (aria-hidden) but pointer-interactive
+ * for shader ripples, so it disables native touch gestures. No fixed-pixel
+ * sizing: the consumer provides a positioned, sized container; the backdrop fills
+ * it.
+ */
+
+.backdrop {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background-color: var(--portal-color-bg-0);
+    touch-action: none;
+}
+
+.canvas {
+    position: absolute;
+    inset: 0;
+    display: block;
+}
+
+.fallback {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(
+        circle at 50% 35%,
+        var(--portal-color-bg-1),
+        var(--portal-color-bg-0)
+    );
+}

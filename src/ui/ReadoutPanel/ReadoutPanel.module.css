@@ -20,6 +20,10 @@
     border: var(--portal-border-thickness-thin) solid var(--portal-tone-border);
     border-radius: var(--portal-radius-lg);
     background-color: var(--portal-tone-fill);
+    box-shadow:
+        0 0 var(--portal-space-4) var(--portal-tone-glow),
+        0 var(--portal-space-2) var(--portal-space-6)
+            color-mix(in oklab, var(--portal-color-bg-0) 55%, transparent);
     color: var(--portal-color-text-0);
     font-family: var(--portal-font-sans);
     line-height: var(--portal-line-height-tight);
@@ -53,7 +57,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
     .readout {
-        transition: border-color var(--portal-duration-128)
+        transition: border-color var(--portal-duration-ms128)
             var(--portal-easing-standard);
     }
 }

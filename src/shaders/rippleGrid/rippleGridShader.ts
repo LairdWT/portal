@@ -13,10 +13,10 @@ import {
 } from './rippleGridSource';
 
 // Raw hex mirrors of the Portal CSS tokens. three materials need a concrete
-// color, not a CSS var() reference, matching SceneBackdrop's approach.
-const COLOR_BACKGROUND: string = '#07080d'; // --portal-color-bg-0
-const COLOR_GRID: string = '#2a2f45'; // --portal-color-grid-cell
-const COLOR_ACCENT: string = '#5f6dac'; // --portal-color-accent
+// color, not a CSS var() reference.
+const COLOR_BACKGROUND: string = '#07080d';
+const COLOR_GRID: string = '#5f6dac';
+const COLOR_ACCENT: string = '#92a1e4';
 
 function createRippleGridUniforms(state: RippleField): ShaderUniforms {
     return {

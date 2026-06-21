@@ -1,10 +1,15 @@
 /*
- * ControlSurface. Safe-area-aware, full-height controller shell. A HudPanel
- * spans the top; the Joystick anchors the bottom-inline-start corner and the
- * ActionButton cluster the bottom-inline-end corner. Layout is intrinsic and
- * adapts through grid and clamp; no fixed pixel sizing. Progressive full height
- * uses legacy 100vh first, then 100svh where small-viewport units exist, so a
- * mobile URL bar does not clip the controls.
+ * ControlSurface. Safe-area-aware, full-height controller shell. An optional
+ * full-bleed backgroundSlot (for example a ShaderSurface) sits behind the
+ * controls; a HudPanel spans the top; an optional extras strip sits below it;
+ * and a metal-trimmed deck is pinned to the bottom, holding the Joystick at the
+ * inline-start and a two-by-two ActionButton grid at the inline-end. The deck is
+ * an opaque panel framed by an animated silver gradient, so the shader shows
+ * above it while the controls sit on a solid surface. Layout is intrinsic and
+ * adapts through clamp; no fixed pixel sizing. Progressive full height uses
+ * legacy 100vh first, then 100svh. The hud and extras pass pointer events
+ * through their empty space so an interactive backdrop reacts where no control
+ * sits on top.
  */
 
 .surface {
@@ -15,18 +20,22 @@
     );
 
     container-type: inline-size;
-    display: grid;
-    grid-template:
-        'hud hud' auto
-        'movement actions' 1fr
-        / 1fr 1fr;
+    position: relative;
+    display: flex;
+    flex-direction: column;
     gap: var(--control-surface-gap);
     min-block-size: 100vh;
     padding: max(var(--portal-space-4), env(safe-area-inset-top))
         max(var(--portal-space-4), env(safe-area-inset-right))
         max(var(--portal-space-4), env(safe-area-inset-bottom))
         max(var(--portal-space-4), env(safe-area-inset-left));
-    background-color: var(--portal-color-bg-0);
+    background:
+        radial-gradient(
+            120% 180% at 50% 160%,
+            var(--portal-color-accent) 10%,
+            var(--portal-color-bg-0) 70%
+        ),
+        var(--portal-color-bg-0);
     color: var(--portal-color-text-0);
     font-family: var(--portal-font-sans);
 }
@@ -37,53 +46,149 @@
     }
 }
 
+/*
+ * Full-bleed background layer, taken out of flow so it spans the whole surface
+ * behind every region. It keeps pointer events so an interactive backdrop reacts
+ * where no control sits on top.
+ */
+.backdrop {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+}
+
+/* The hud and extras float over the shader; their empty space stays transparent
+ * to pointer input so taps fall through to the backdrop, while the controls
+ * inside capture their own input. */
+.hud,
+.extras {
+    position: relative;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.hud > *,
+.extras > * {
+    pointer-events: auto;
+}
+
 .hud {
-    grid-area: hud;
     display: flex;
     justify-content: center;
     inline-size: 100%;
 }
 
+.extras {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--portal-space-4);
+    align-items: start;
+    justify-content: center;
+}
+
+/*
+ * The control deck, pinned to the bottom. The outer element is the animated
+ * metal trim (a silver gradient wider than the box, scrolled by the sheen
+ * animation); its padding is the trim width. The inner element is the opaque
+ * control surface.
+ */
+.deck {
+    position: relative;
+    z-index: 1;
+    margin-block-start: auto;
+    padding: var(--portal-border-thickness-thin);
+    border-radius: var(--portal-radius-lg);
+    background: var(--portal-gradient-metal-ring);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .deck {
+        animation: portal-deck-sheen var(--portal-duration-metal-sheen) linear
+            infinite;
+    }
+}
+
+@keyframes portal-deck-sheen {
+    to {
+        --portal-metal-angle: 360deg;
+    }
+}
+
+.deckInner {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas: 'movement center actions';
+    align-items: end;
+    gap: clamp(var(--portal-space-2), 2vmin, var(--portal-space-4));
+    padding: var(--portal-space-4);
+    border-radius: calc(
+        var(--portal-radius-lg) - var(--portal-border-thickness-thin)
+    );
+    background-color: var(--portal-color-surface-0);
+}
+
 .movement {
     grid-area: movement;
+    justify-self: start;
     display: flex;
     align-items: end;
     justify-content: start;
 }
 
+.deckCenter {
+    grid-area: center;
+    place-self: center center;
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-2);
+    align-items: center;
+}
+
 .actions {
+    /* Intrinsic, viewport-scaled square like the Joystick (clamped to the touch
+     * minimum), so the cluster sizes to the deck corner rather than stretching. */
+    --control-action-size: clamp(
+        var(--portal-touch-target-min),
+        14vmin,
+        calc(var(--portal-touch-target-max) * 1.5)
+    );
+
+    /* Scale the action-button glyph with the button so the label tracks the
+     * dynamic button size. ActionButton reads this inherited property and falls
+     * back to the static text token when no container drives it. */
+    --portal-action-label-size: clamp(
+        var(--portal-size-text-md),
+        calc(var(--control-action-size) * 0.42),
+        2rem
+    );
+
     grid-area: actions;
+    justify-self: end;
     display: grid;
-    grid-template-columns: repeat(2, minmax(var(--portal-touch-target-min), 1fr));
-    gap: clamp(var(--portal-space-3), 3vmin, var(--portal-space-5));
-    place-items: end stretch;
-    justify-content: end;
+    grid-template-columns: repeat(2, var(--control-action-size));
+    grid-auto-rows: var(--control-action-size);
+    gap: clamp(var(--portal-space-1), 1.5vmin, var(--portal-space-3));
+}
+
+.actionCell {
+    display: grid;
 }
 
 /*
- * One grid cell per action slot. A consumer slot that is a multi-child fragment
- * is contained as stacked rows inside its single cell rather than spilling into
- * the actions track and shifting the sibling action.
+ * Narrow decks (phone portrait) cannot fit the joystick, centre keys, and action
+ * grid in one row, so restack: the centre keys span a top row with the joystick
+ * and action grid beneath.
  */
-.actionCell {
-    display: grid;
-    align-content: end;
-}
-
-@container (width < 30rem) {
-    .surface {
-        grid-template:
-            'hud' auto
-            'movement' auto
-            'actions' auto
-            / 1fr;
+@container (width < 34rem) {
+    .deckInner {
+        grid-template-columns: 1fr 1fr;
+        grid-template-areas:
+            'center center'
+            'movement actions';
     }
 
-    .movement {
-        justify-content: center;
-    }
-
-    .actions {
-        justify-content: center;
+    .deckCenter {
+        flex-direction: row;
     }
 }

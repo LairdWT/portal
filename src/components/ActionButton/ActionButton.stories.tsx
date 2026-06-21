@@ -9,7 +9,7 @@ const meta: Meta<typeof ActionButton> = {
     title: 'Controls/ActionButton',
     component: ActionButton,
     args: {
-        label: 'Fire',
+        label: 'A',
         enabled: EEnabledState.Enabled,
     },
 };
@@ -47,19 +47,19 @@ export const Grid: Story = {
             }}
         >
             <ActionButton
-                label="A"
+                label="X"
                 bevelCorners={EBevelCorners.TopLeftBottomRight}
             />
             <ActionButton
-                label="B"
-                bevelCorners={EBevelCorners.TopRightBottomLeft}
-            />
-            <ActionButton
-                label="X"
-                bevelCorners={EBevelCorners.TopRightBottomLeft}
-            />
-            <ActionButton
                 label="Y"
+                bevelCorners={EBevelCorners.TopRightBottomLeft}
+            />
+            <ActionButton
+                label="A"
+                bevelCorners={EBevelCorners.TopRightBottomLeft}
+            />
+            <ActionButton
+                label="B"
                 bevelCorners={EBevelCorners.TopLeftBottomRight}
             />
         </div>

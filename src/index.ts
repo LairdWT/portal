@@ -1,66 +1,199 @@
-export * from './components/ActionButton/ActionButton';
-export * from './components/ActionButton/ActionButton.types';
-export * from './components/BevelButton/BevelButton';
-export * from './components/BevelButton/BevelButton.types';
-export * from './components/ControlSurface/ControlSurface';
-export * from './components/ControlSurface/ControlSurface.types';
-export * from './components/DPad/DPad';
-export * from './components/DPad/DPad.types';
-export * from './components/HudPanel/HudPanel';
-export * from './components/HudPanel/HudPanel.types';
-export * from './components/Joystick/Joystick';
-export * from './components/Joystick/Joystick.types';
-export * from './components/Slider/Slider';
-export * from './components/Slider/Slider.types';
-export * from './components/Thumbpad/Thumbpad';
-export * from './components/Thumbpad/Thumbpad.types';
-export * from './components/Toggle/Toggle';
-export * from './components/Toggle/Toggle.types';
-export * from './input/createInputSource';
-export * from './input/InputBinding';
-export * from './input/InputContract';
-export * from './input/InputWireCodec';
-export * from './input/PointerSpine';
-export * from './input/TimeProvider';
-export * from './input/transport/InputTransport';
-export * from './react/ControllerContext';
-export * from './react/ControllerProvider';
+export { ActionButton } from './components/ActionButton/ActionButton';
+export {
+    type ActionButtonProps,
+    EBevelCorners,
+} from './components/ActionButton/ActionButton.types';
+export { BevelButton } from './components/BevelButton/BevelButton';
+export { type BevelButtonProps } from './components/BevelButton/BevelButton.types';
+export { ControlSurface } from './components/ControlSurface/ControlSurface';
+export {
+    type ControlSurfaceProps,
+    type ControlSurfaceReadout,
+    type DefaultPresetDescriptors,
+    type SignalForwardProps,
+} from './components/ControlSurface/ControlSurface.types';
+export { DPad } from './components/DPad/DPad';
+export {
+    type DPadProps,
+    EDpadDirection,
+    EDpadMode,
+} from './components/DPad/DPad.types';
+export { HudPanel } from './components/HudPanel/HudPanel';
+export {
+    type HudPanelProps,
+    type HudReadout,
+} from './components/HudPanel/HudPanel.types';
+export { Joystick } from './components/Joystick/Joystick';
+export { type JoystickProps } from './components/Joystick/Joystick.types';
+export { Slider } from './components/Slider/Slider';
+export { type SliderProps } from './components/Slider/Slider.types';
+export { Thumbpad } from './components/Thumbpad/Thumbpad';
+export { type ThumbpadProps } from './components/Thumbpad/Thumbpad.types';
+export { Toggle } from './components/Toggle/Toggle';
+export {
+    ECheckedState,
+    nextCheckedState,
+    type ToggleProps,
+} from './components/Toggle/Toggle.types';
+export {
+    createInputSource,
+    type CreateInputSourceOptions,
+    type EmitInputSignal,
+    type InputSource,
+} from './input/createInputSource';
+export {
+    type ActionId,
+    type BindingResolution,
+    bindingsForAction,
+    createRegistry,
+    detectConflicts,
+    EBindingConflictKind,
+    type FBindingConflict,
+    type FInputBinding,
+    type IInputBindingRegistry,
+    InputBindingRegistry,
+    resolveBinding,
+    serializeBindings,
+} from './input/InputBinding';
+export {
+    type Axis2D,
+    EInputInteraction,
+    EInputValueType,
+    type InputDescriptor,
+    type InputSignal,
+    type InputValue,
+} from './input/InputContract';
+export {
+    type FInputWirePayload,
+    isValueForType,
+    toWireInput,
+} from './input/InputWireCodec';
+export {
+    applyDeadZone,
+    claimPointer,
+    clampToUnitCircle,
+    createPointerTracker,
+    isActivePointer,
+    type PointerTracker,
+    type RectLike,
+    releasePointer,
+    resolveAxis2D,
+    resolveDelta,
+} from './input/PointerSpine';
+export {
+    performanceNowTimeProvider,
+    type TimeProvider,
+} from './input/TimeProvider';
+export {
+    type InputSignalListener,
+    type InputTransport,
+    LocalInputTransport,
+    type Unsubscribe,
+} from './input/transport/InputTransport';
+export {
+    ControllerContext,
+    type ControllerContextValue,
+    useControllerContext,
+} from './react/ControllerContext';
+export {
+    ControllerProvider,
+    type ControllerProviderProps,
+} from './react/ControllerProvider';
 export { useAnime } from './react/hooks/useAnime';
-export * from './react/hooks/useAxis2DControl';
-export * from './react/hooks/useDigitalPress';
-export * from './react/hooks/useEmitBinding';
-export * from './react/hooks/useGesture';
-export * from './react/hooks/useGesture.types';
-export * from './react/hooks/useInputBinding';
+export {
+    type Axis2DControlBinding,
+    type Axis2DControlOptions,
+    EAxis2DSource,
+    useAxis2DControl,
+} from './react/hooks/useAxis2DControl';
+export {
+    type DigitalPressBinding,
+    type DigitalPressOptions,
+    useDigitalPress,
+} from './react/hooks/useDigitalPress';
+export { type EmitBinding, useEmitBinding } from './react/hooks/useEmitBinding';
+export { useGesture } from './react/hooks/useGesture';
+export {
+    EGesture,
+    type GestureBinding,
+    type GestureListener,
+    type GestureOptions,
+} from './react/hooks/useGesture.types';
+export { useInputBinding } from './react/hooks/useInputBinding';
 export { useInputSource } from './react/hooks/useInputSource';
 export { usePointerControl } from './react/hooks/usePointerControl';
 export { useReducedMotion } from './react/hooks/useReducedMotion';
 export { useRelativePointerControl } from './react/hooks/useRelativePointerControl';
-export * from './react/hooks/useResolvedEnabled';
-export * from './react/hooks/useScalarControl';
-export * from './react/motion/motionPresets';
-export * from './react/motion/useChangeMotion';
-export * from './react/motion/useEntranceMotion';
-export * from './react/motion/useEntranceOnReady';
-export * from './react/SelectionContext';
-export * from './react/SelectionProvider';
+export { useResolvedEnabled } from './react/hooks/useResolvedEnabled';
+export {
+    type ScalarControlBinding,
+    useScalarControl,
+} from './react/hooks/useScalarControl';
+export {
+    type EntrancePreset,
+    MOTION_DURATION,
+    type MotionPreset,
+    pulse,
+    riseIn,
+    type StaggerPreset,
+} from './react/motion/motionPresets';
+export { useChangeMotion } from './react/motion/useChangeMotion';
+export { useEntranceMotion } from './react/motion/useEntranceMotion';
+export { useEntranceOnReady } from './react/motion/useEntranceOnReady';
+export {
+    SelectionContext,
+    type SelectionContextValue,
+    useSelectionContext,
+} from './react/SelectionContext';
+export {
+    SelectionProvider,
+    type SelectionProviderProps,
+} from './react/SelectionProvider';
 export { TimeProviderContext, useTimeProvider } from './react/TimeProviderContext';
-export * from './state/state';
-export * from './theme/tokens';
-export * from './ui/CTA/CTA';
-export * from './ui/CTA/CTA.types';
-export * from './ui/Panel/Panel';
-export * from './ui/Panel/Panel.types';
-export * from './ui/ReadoutPanel/ReadoutPanel';
-export * from './ui/ReadoutPanel/ReadoutPanel.types';
-export * from './ui/SelectableTile/SelectableTile';
-export * from './ui/SelectableTile/SelectableTile.types';
-export * from './ui/StatPill/StatPill';
-export * from './ui/StatPill/StatPill.types';
-export * from './ui/StepTrack/StepTrack';
-export * from './ui/StepTrack/StepTrack.types';
-export * from './ui/Tabs/Tabs';
-export * from './ui/Tabs/Tabs.types';
-export * from './ui/TextField/TextField';
-export * from './ui/TextField/TextField.types';
-export * from './ui/tone';
+export {
+    EConnectionState,
+    EEnabledState,
+    ELoadStatus,
+    EPressState,
+    EVisibility,
+} from './state/state';
+export { PORTAL_TOKENS, type PortalTokens } from './theme/tokens';
+export { CTA } from './ui/CTA/CTA';
+export {
+    type CTAProps,
+    type ECtaButtonType,
+    ECtaSize,
+    ECtaVariant,
+} from './ui/CTA/CTA.types';
+export { Panel } from './ui/Panel/Panel';
+export {
+    EPanelElevation,
+    type PanelHeadingLevel,
+    type PanelProps,
+} from './ui/Panel/Panel.types';
+export { ReadoutPanel } from './ui/ReadoutPanel/ReadoutPanel';
+export {
+    type ReadoutPanelProps,
+    type UiReadout,
+} from './ui/ReadoutPanel/ReadoutPanel.types';
+export { SelectableTile } from './ui/SelectableTile/SelectableTile';
+export {
+    ESelectionState,
+    type SelectableTileProps,
+} from './ui/SelectableTile/SelectableTile.types';
+export { StatPill } from './ui/StatPill/StatPill';
+export { type StatPillProps } from './ui/StatPill/StatPill.types';
+export { StepTrack } from './ui/StepTrack/StepTrack';
+export {
+    EStepState,
+    type StepTrackProps,
+    type UiStep,
+} from './ui/StepTrack/StepTrack.types';
+export { Tabs } from './ui/Tabs/Tabs';
+export { ETabState, type TabsProps, type UiTabItem } from './ui/Tabs/Tabs.types';
+export { TextField } from './ui/TextField/TextField';
+export {
+    ETextFieldType,
+    type TextFieldProps,
+} from './ui/TextField/TextField.types';
+export { EUiStatus, PORTAL_TONE, type Toned, toneProperties } from './ui/tone';
