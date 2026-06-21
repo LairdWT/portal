@@ -36,6 +36,10 @@
             "types": "./dist/r3f.d.ts",
             "import": "./dist/r3f.js"
         },
+        "./shaders": {
+            "types": "./dist/shaders.d.ts",
+            "import": "./dist/shaders.js"
+        },
         "./package.json": "./package.json"
     },
     "scripts": {

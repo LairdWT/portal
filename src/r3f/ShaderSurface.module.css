@@ -1,0 +1,32 @@
+/*
+ * ShaderSurface layout. The surface fills its container and clips the canvas to
+ * a rounded panel. It is decorative (aria-hidden) but pointer-interactive, so it
+ * disables native touch gestures to keep ripple drags from scrolling the page.
+ * No fixed-pixel sizing: the consumer sizes the surface; the canvas fills it.
+ */
+
+.surface {
+    position: relative;
+    inline-size: 100%;
+    block-size: 100%;
+    overflow: hidden;
+    border-radius: var(--portal-radius-lg);
+    background-color: var(--portal-color-bg-0);
+    touch-action: none;
+}
+
+.canvas {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+}
+
+.fallback {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(
+        circle at 50% 30%,
+        var(--portal-color-bg-1),
+        var(--portal-color-bg-0)
+    );
+}

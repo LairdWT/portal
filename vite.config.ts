@@ -51,6 +51,7 @@ export default defineConfig({
                 index: path.resolve(dirname, 'src/index.ts'),
                 theme: path.resolve(dirname, 'src/theme/index.ts'),
                 r3f: path.resolve(dirname, 'src/r3f/index.ts'),
+                shaders: path.resolve(dirname, 'src/shaders/index.ts'),
             },
             formats: ['es'],
             fileName: (_format: string, entryName: string): string =>
