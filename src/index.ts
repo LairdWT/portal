@@ -21,6 +21,7 @@ export * from './input/InputContract';
 export * from './input/PointerSpine';
 export * from './input/transport/InputTransport';
 export { useAnime } from './react/hooks/useAnime';
+export * from './react/hooks/useDigitalPress';
 export * from './react/hooks/useGesture';
 export * from './react/hooks/useGesture.types';
 export { useInputSource } from './react/hooks/useInputSource';

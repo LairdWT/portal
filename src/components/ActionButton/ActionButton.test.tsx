@@ -4,10 +4,11 @@ import { afterEach, beforeEach, describe, expect, it, type Mock, vi } from 'vite
 
 import { EEnabledState } from '../../state/state';
 import { ActionButton } from './ActionButton';
+import { EBevelCorners } from './ActionButton.types';
 
 const BUTTON_LABEL: string = 'Fire';
 
-// jsdom does not define the pointer-capture methods; the press primitive calls
+// jsdom does not define the pointer-capture methods; the press hook calls
 // setPointerCapture inside its pointerdown handler. Define no-op stubs as
 // configurable own properties so they can be removed after the suite.
 function definePointerCaptureStubs(): void {
@@ -34,18 +35,16 @@ afterEach((): void => {
     removePointerCaptureStubs();
 });
 
-describe('ActionButton', () => {
-    it('exposes an accessible button carrying the label', () => {
+describe('ActionButton', (): void => {
+    it('exposes an accessible button carrying the label', (): void => {
         render(<ActionButton label={BUTTON_LABEL} />);
 
-        const button: HTMLElement = screen.getByRole('button', {
-            name: BUTTON_LABEL,
-        });
-
-        expect(button).toBeInTheDocument();
+        expect(
+            screen.getByRole('button', { name: BUTTON_LABEL }),
+        ).toBeInTheDocument();
     });
 
-    it('fires onPress when enabled and pressed', async () => {
+    it('fires onPress when enabled and pressed', async (): Promise<void> => {
         const onPress: Mock<() => void> = vi.fn<() => void>();
         const user: UserEvent = userEvent.setup();
         render(
@@ -56,15 +55,12 @@ describe('ActionButton', () => {
             />,
         );
 
-        const button: HTMLElement = screen.getByRole('button', {
-            name: BUTTON_LABEL,
-        });
-        await user.click(button);
+        await user.click(screen.getByRole('button', { name: BUTTON_LABEL }));
 
         expect(onPress).toHaveBeenCalledTimes(1);
     });
 
-    it('disables the button and suppresses onPress when disabled', async () => {
+    it('disables the button and suppresses onPress when disabled', async (): Promise<void> => {
         const onPress: Mock<() => void> = vi.fn<() => void>();
         const user: UserEvent = userEvent.setup();
         render(
@@ -78,11 +74,32 @@ describe('ActionButton', () => {
         const button: HTMLElement = screen.getByRole('button', {
             name: BUTTON_LABEL,
         });
-
         expect(button).toBeDisabled();
 
         await user.click(button);
-
         expect(onPress).not.toHaveBeenCalled();
+    });
+
+    it('reflects the requested bevel corners as a data attribute', (): void => {
+        render(
+            <ActionButton
+                label={BUTTON_LABEL}
+                bevelCorners={EBevelCorners.TopRightBottomLeft}
+            />,
+        );
+
+        expect(screen.getByRole('button', { name: BUTTON_LABEL })).toHaveAttribute(
+            'data-bevel-corners',
+            'top-right-bottom-left',
+        );
+    });
+
+    it('defaults to all-squircle corners', (): void => {
+        render(<ActionButton label={BUTTON_LABEL} />);
+
+        expect(screen.getByRole('button', { name: BUTTON_LABEL })).toHaveAttribute(
+            'data-bevel-corners',
+            'none',
+        );
     });
 });

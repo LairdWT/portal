@@ -1,26 +1,42 @@
 import { type ReactElement } from 'react';
 
-import { BevelButton } from '../BevelButton/BevelButton';
+import {
+    type DigitalPressBinding,
+    useDigitalPress,
+} from '../../react/hooks/useDigitalPress';
+import { EEnabledState } from '../../state/state';
 import styles from './ActionButton.module.css';
-import { type ActionButtonProps } from './ActionButton.types';
+import { type ActionButtonProps, EBevelCorners } from './ActionButton.types';
 
 export function ActionButton({
     label,
-    enabled,
+    bevelCorners = EBevelCorners.None,
+    enabled = EEnabledState.Enabled,
     onPress,
     onRelease,
     onSignal,
     descriptor,
 }: ActionButtonProps): ReactElement {
+    const press: DigitalPressBinding = useDigitalPress({
+        enabled,
+        onPress,
+        onRelease,
+        onSignal,
+        descriptor,
+    });
+
     return (
-        <BevelButton
-            enabled={enabled}
-            onPress={onPress}
-            onRelease={onRelease}
-            onSignal={onSignal}
-            descriptor={descriptor}
+        <button
+            type="button"
+            className={styles.action}
+            data-pressed={press.pressState}
+            data-bevel-corners={bevelCorners}
+            disabled={enabled === EEnabledState.Disabled}
+            onPointerDown={press.onPointerDown}
+            onPointerUp={press.onPointerUp}
+            onPointerCancel={press.onPointerCancel}
         >
             <span className={styles.label}>{label}</span>
-        </BevelButton>
+        </button>
     );
 }
