@@ -1,0 +1,42 @@
+{
+    "compilerOptions": {
+        "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.tsbuildinfo",
+        "composite": true,
+        "target": "ESNext",
+        "lib": ["ESNext", "DOM", "DOM.Iterable"],
+        "module": "ESNext",
+        "types": ["vite/client"],
+        "skipLibCheck": true,
+
+        /* Bundler mode */
+        "moduleResolution": "bundler",
+        "allowImportingTsExtensions": false,
+        "verbatimModuleSyntax": true,
+        "moduleDetection": "force",
+        "isolatedModules": true,
+        "jsx": "react-jsx",
+
+        /* Emit: vite-plugin-dts produces the declarations; tsc -b stays type-only */
+        "declaration": true,
+        "declarationMap": false,
+        "emitDeclarationOnly": true,
+        "outDir": "./dist/types",
+
+        /* Linting and strictness */
+        "strict": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "erasableSyntaxOnly": true,
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitAny": true,
+        "noImplicitReturns": true,
+        "noUncheckedIndexedAccess": true,
+        "noUncheckedSideEffectImports": true,
+        "exactOptionalPropertyTypes": true,
+        "strictFunctionTypes": true,
+        "strictNullChecks": true
+    },
+    "include": ["src", "global.d.ts"],
+    "exclude": [],
+    "references": [{ "path": "./tsconfig.node.json" }]
+}

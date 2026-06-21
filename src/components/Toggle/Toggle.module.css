@@ -1,0 +1,91 @@
+/*
+ * Toggle. A role="switch" button with a token-driven track and a sliding knob.
+ * The on/off state is expressed through the data-checked attribute the component
+ * sets; the knob position and track color derive from it. Layout is intrinsic
+ * and sized from the touch-target tokens, with no fixed pixel sizing.
+ */
+
+.toggle {
+    --toggle-track-inline-size: calc(var(--portal-touch-target-min) * 1.5);
+    --toggle-knob-inset: var(--portal-space-1);
+
+    display: inline-flex;
+    align-items: center;
+    gap: var(--portal-space-3);
+    min-block-size: var(--portal-touch-target-min);
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+    font-size: var(--portal-size-text-md);
+    line-height: var(--portal-line-height-normal);
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+}
+
+.toggle:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: var(--portal-space-1);
+}
+
+.toggle:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.track {
+    position: relative;
+    flex: none;
+    inline-size: var(--toggle-track-inline-size);
+    block-size: var(--portal-touch-target-min);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-radius-pill);
+    background-color: var(--portal-color-surface-0);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .track {
+        transition: background-color var(--portal-duration-base)
+            var(--portal-easing-standard);
+    }
+}
+
+.toggle[data-checked='checked'] .track {
+    border-color: var(--portal-color-border-accent);
+    background-color: var(--portal-color-accent);
+}
+
+.knob {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: var(--toggle-knob-inset);
+    inline-size: calc(
+        var(--portal-touch-target-min) - var(--toggle-knob-inset) * 2 -
+            var(--portal-border-thickness-thin) * 2
+    );
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background-color: var(--portal-color-text-0);
+    transform: translateY(-50%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .knob {
+        transition: inset-inline-start var(--portal-duration-base)
+            var(--portal-easing-emphasized);
+    }
+}
+
+.toggle[data-checked='checked'] .knob {
+    inset-inline-start: calc(
+        var(--toggle-track-inline-size) - 100% - var(--toggle-knob-inset) -
+            var(--portal-border-thickness-thin) * 2
+    );
+    background-color: var(--portal-color-bg-0);
+}
+
+.label {
+    color: inherit;
+}

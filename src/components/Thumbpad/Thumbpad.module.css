@@ -1,0 +1,95 @@
+/*
+ * Thumbpad. Relative (camera-look / trackpad) surface. The host element carries
+ * the transient --portal-pad-x / --portal-pad-y custom properties (written by the
+ * component) so the two stacked parallax layers below it inherit and translate
+ * from the same offset at different depth multipliers. The offset eases back to
+ * centre when the gesture ends. The control reports incremental deltas, not an
+ * absolute axis. Layout is intrinsic; no fixed pixel sizing.
+ *
+ * Reduced motion: the only animation is the layers' transform transition, which
+ * the @media (prefers-reduced-motion: reduce) block fully disables. There is no
+ * JS-driven animation, so the component adds no useReducedMotion call.
+ */
+
+.base {
+    --thumbpad-size: clamp(
+        var(--portal-touch-target-min),
+        40vmin,
+        calc(var(--portal-touch-target-max) * 4)
+    );
+
+    position: relative;
+    inline-size: var(--thumbpad-size);
+    block-size: var(--thumbpad-size);
+    min-inline-size: var(--portal-touch-target-min);
+    min-block-size: var(--portal-touch-target-min);
+    border: var(--portal-border-thickness-normal) solid var(--portal-color-border);
+    border-radius: 50%;
+    background-color: var(--portal-color-surface-0);
+    touch-action: none;
+    user-select: none;
+}
+
+.base[data-enabled='disabled'] {
+    opacity: 0.5;
+}
+
+.base:focus-visible {
+    outline: var(--portal-border-thickness-thin) solid var(--portal-color-focus);
+    outline-offset: var(--portal-space-1);
+}
+
+/* FRONT parallax layer. Translates from the host-inherited offset at the larger
+ * multiplier so it leads the BACK layer for depth, mirroring ControllerPad. */
+.thumb {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    inline-size: 60%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(
+        circle at 50%,
+        var(--portal-color-accent) 25%,
+        var(--portal-color-accent-highlight) 55%,
+        var(--portal-color-accent) 70%,
+        var(--portal-color-accent-shadow) 100%
+    );
+    transform: translate(
+        calc(-50% + var(--portal-pad-x, 0) * 40%),
+        calc(-50% + var(--portal-pad-y, 0) * 40%)
+    );
+    transition: transform var(--portal-duration-base) var(--portal-easing-standard);
+    pointer-events: none;
+}
+
+/* BACK parallax layer. Larger and translated at the smaller multiplier so it
+ * trails the FRONT layer. */
+.thumbShadow {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    inline-size: 70%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(
+        circle at 50%,
+        var(--portal-color-accent-shadow),
+        var(--portal-color-accent-shadow) 60%,
+        var(--portal-color-accent-shadow-edge) 98%,
+        var(--portal-color-accent) 100%
+    );
+    transform: translate(
+        calc(-50% + var(--portal-pad-x, 0) * 20%),
+        calc(-50% + var(--portal-pad-y, 0) * 20%)
+    );
+    transition: transform var(--portal-duration-base) var(--portal-easing-standard);
+    pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .thumb,
+    .thumbShadow {
+        transition: none;
+    }
+}

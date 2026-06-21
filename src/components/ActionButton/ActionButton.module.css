@@ -1,0 +1,14 @@
+/*
+ * ActionButton. Typographic label layer rendered inside the BevelButton press
+ * primitive. The button surface, bevel, press feedback, and disabled handling
+ * all live in BevelButton; this module only styles the label text.
+ */
+
+.label {
+    display: inline-block;
+    font-size: var(--portal-size-text-md);
+    line-height: var(--portal-line-height-tight);
+    letter-spacing: var(--portal-letter-spacing-wide);
+    text-align: center;
+    text-transform: uppercase;
+}

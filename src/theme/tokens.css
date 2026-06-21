@@ -1,0 +1,101 @@
+/*
+ * Portal design tokens. All tokens namespaced --portal-*.
+ * Consumers may override any token at a higher cascade layer.
+ */
+
+:root {
+    color-scheme: dark;
+
+    /* Background and surface */
+    --portal-color-bg-0: #07080d;
+    --portal-color-bg-1: #111323;
+    --portal-color-surface-0: #121523;
+    --portal-color-surface-1: rgb(255 255 255 / 7%);
+
+    /* Border */
+    --portal-color-border: rgb(255 255 255 / 14%);
+    --portal-color-border-accent: rgb(255 255 255 / 39%);
+
+    /* Text */
+    --portal-color-text-0: #dadde9;
+    --portal-color-text-1: #b9bed6;
+
+    /* Accent and status */
+    --portal-color-accent: #5f6dac;
+    --portal-color-accent-highlight: #92a1e4;
+    --portal-color-accent-shadow: #191e38;
+    --portal-color-accent-shadow-edge: #192042;
+    --portal-color-focus: #8992bb;
+    --portal-color-danger: #a0444d;
+    --portal-color-success: #5ce0a0;
+    --portal-color-grid-cell: #2a2f45;
+
+    /* Spacing scale */
+    --portal-space-1: 0.25rem;
+    --portal-space-2: 0.5rem;
+    --portal-space-3: 0.75rem;
+    --portal-space-4: 1rem;
+    --portal-space-5: 1.5rem;
+    --portal-space-6: 2rem;
+    --portal-space-7: 3rem;
+    --portal-space-8: 4rem;
+
+    /* Radius scale */
+    --portal-radius-sm: 0.5rem;
+    --portal-radius-md: 0.75rem;
+    --portal-radius-lg: 1rem;
+    --portal-radius-xl: 1.5rem;
+    --portal-radius-pill: 999px;
+
+    /* Text sizes, fluid where available */
+    --portal-size-text-sm: clamp(0.8125rem, 0.78rem + 0.15vw, 0.875rem);
+    --portal-size-text-md: clamp(0.9375rem, 0.9rem + 0.2vw, 1rem);
+    --portal-size-text-lg: clamp(1.0625rem, 1rem + 0.3vw, 1.125rem);
+
+    /* Touch target */
+    --portal-touch-target-min: 3rem;
+    --portal-touch-target-max: 4rem;
+
+    /* Control sizing */
+    --portal-size-pad: clamp(6rem, 24vw, 12rem);
+
+    /* Auxiliary font sizes */
+    --portal-size-font-tiny: 0.5rem;
+    --portal-size-font-small: 1rem;
+    --portal-size-font-medium: 2rem;
+    --portal-size-font-large: 3rem;
+    --portal-size-font-huge: 5rem;
+
+    /* Display font width scale (fluid headline ramps) */
+    --portal-size-font-width-tiny: 2rem;
+    --portal-size-font-width-small: 4rem;
+    --portal-size-font-width-medium: 8rem;
+    --portal-size-font-width-large: 16rem;
+    --portal-size-font-width-huge: 32rem;
+
+    /* Border thickness */
+    --portal-border-thickness-thin: 2px;
+    --portal-border-thickness-normal: 4px;
+    --portal-border-thickness-bold: 6px;
+
+    /* Motion durations */
+    --portal-duration-fast: 8ms;
+    --portal-duration-base: 16ms;
+    --portal-duration-slow: 32ms;
+
+    /* Motion easing */
+    --portal-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+    --portal-easing-emphasized: cubic-bezier(0.3, 0, 0, 1.1);
+
+    /* Typography */
+    --portal-font-sans: system-ui, 'Open Sans', sans-serif;
+    --portal-font-mono: ui-monospace, monospace;
+    --portal-line-height-tight: 1.15;
+    --portal-line-height-normal: 1.5;
+    --portal-letter-spacing-wide: 0.04em;
+
+    /* Surface preview sizing (R3F technical surface) */
+    --portal-size-surface-preview-min: 25dvw;
+    --portal-size-surface-preview-fluid: 25dvw;
+    --portal-size-surface-preview-max: 50dvw;
+}

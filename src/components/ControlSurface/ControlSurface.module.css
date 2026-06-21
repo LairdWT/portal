@@ -1,0 +1,89 @@
+/*
+ * ControlSurface. Safe-area-aware, full-height controller shell. A HudPanel
+ * spans the top; the Joystick anchors the bottom-inline-start corner and the
+ * ActionButton cluster the bottom-inline-end corner. Layout is intrinsic and
+ * adapts through grid and clamp; no fixed pixel sizing. Progressive full height
+ * uses legacy 100vh first, then 100svh where small-viewport units exist, so a
+ * mobile URL bar does not clip the controls.
+ */
+
+.surface {
+    --control-surface-gap: clamp(
+        var(--portal-space-4),
+        4vmin,
+        var(--portal-space-7)
+    );
+
+    container-type: inline-size;
+    display: grid;
+    grid-template:
+        'hud hud' auto
+        'movement actions' 1fr
+        / 1fr 1fr;
+    gap: var(--control-surface-gap);
+    min-block-size: 100vh;
+    padding: max(var(--portal-space-4), env(safe-area-inset-top))
+        max(var(--portal-space-4), env(safe-area-inset-right))
+        max(var(--portal-space-4), env(safe-area-inset-bottom))
+        max(var(--portal-space-4), env(safe-area-inset-left));
+    background-color: var(--portal-color-bg-0);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+}
+
+@supports (min-block-size: 100svh) {
+    .surface {
+        min-block-size: 100svh;
+    }
+}
+
+.hud {
+    grid-area: hud;
+    display: flex;
+    justify-content: center;
+    inline-size: 100%;
+}
+
+.movement {
+    grid-area: movement;
+    display: flex;
+    align-items: end;
+    justify-content: start;
+}
+
+.actions {
+    grid-area: actions;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(var(--portal-touch-target-min), 1fr));
+    gap: clamp(var(--portal-space-3), 3vmin, var(--portal-space-5));
+    place-items: end stretch;
+    justify-content: end;
+}
+
+/*
+ * One grid cell per action slot. A consumer slot that is a multi-child fragment
+ * is contained as stacked rows inside its single cell rather than spilling into
+ * the actions track and shifting the sibling action.
+ */
+.actionCell {
+    display: grid;
+    align-content: end;
+}
+
+@container (width < 30rem) {
+    .surface {
+        grid-template:
+            'hud' auto
+            'movement' auto
+            'actions' auto
+            / 1fr;
+    }
+
+    .movement {
+        justify-content: center;
+    }
+
+    .actions {
+        justify-content: center;
+    }
+}

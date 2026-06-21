@@ -1,0 +1,25 @@
+/*
+ * SceneBackdrop layout. The backdrop fills its positioned ancestor and sits
+ * behind sibling content. It is decorative and never interactive, so it
+ * ignores pointer input. No fixed-pixel sizing: the surface derives size from
+ * its container via intrinsic logical inset and sizing properties.
+ */
+
+.backdrop {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+    background-image: radial-gradient(
+        circle at 50% 30%,
+        var(--portal-color-bg-1),
+        var(--portal-color-bg-0)
+    );
+}
+
+.canvas {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+}

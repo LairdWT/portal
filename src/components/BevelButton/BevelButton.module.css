@@ -1,0 +1,65 @@
+.bevel {
+    --portal-bevel-size: 0.75rem;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: var(--portal-touch-target-min);
+    min-block-size: var(--portal-touch-target-min);
+    padding-block: var(--portal-space-2);
+    padding-inline: var(--portal-space-4);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    background: linear-gradient(
+        160deg,
+        var(--portal-color-accent-highlight) 0%,
+        var(--portal-color-accent) 60%,
+        var(--portal-color-bg-1) 100%
+    );
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+    font-size: var(--portal-size-text-md);
+    font-weight: 700;
+    line-height: var(--portal-line-height-tight);
+    letter-spacing: var(--portal-letter-spacing-wide);
+    clip-path: polygon(
+        var(--portal-bevel-size) 0%,
+        calc(100% - var(--portal-bevel-size)) 0%,
+        100% var(--portal-bevel-size),
+        100% calc(100% - var(--portal-bevel-size)),
+        calc(100% - var(--portal-bevel-size)) 100%,
+        var(--portal-bevel-size) 100%,
+        0% calc(100% - var(--portal-bevel-size)),
+        0% var(--portal-bevel-size)
+    );
+    cursor: pointer;
+    touch-action: none;
+    user-select: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .bevel {
+        transition:
+            transform var(--portal-duration-fast) var(--portal-easing-standard),
+            background var(--portal-duration-fast) var(--portal-easing-standard);
+    }
+}
+
+.bevel:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: calc(-1 * var(--portal-border-thickness-bold));
+}
+
+.bevel[data-pressed='pressed'] {
+    background: linear-gradient(
+        160deg,
+        var(--portal-color-accent) 0%,
+        var(--portal-color-accent-highlight) 60%,
+        var(--portal-color-bg-1) 100%
+    );
+    transform: scale(0.95);
+}
+
+.bevel:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

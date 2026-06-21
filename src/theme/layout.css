@@ -1,0 +1,70 @@
+/*
+ * Portal layout helpers. Safe-area-aware padding and full-height screens.
+ * References only --portal-* tokens.
+ */
+
+/*
+ * Safe-area padding. Each side grows to at least the chosen spacing token,
+ * expanding only when the device inset is larger (notches, home bars).
+ */
+.portalSafeArea {
+    padding: max(var(--portal-space-3), env(safe-area-inset-top))
+        max(var(--portal-space-3), env(safe-area-inset-right))
+        max(var(--portal-space-3), env(safe-area-inset-bottom))
+        max(var(--portal-space-3), env(safe-area-inset-left));
+}
+
+/* Roomier safe-area variant for primary screen gutters. */
+.portalSafeAreaLoose {
+    padding: max(var(--portal-space-4), env(safe-area-inset-top))
+        max(var(--portal-space-4), env(safe-area-inset-right))
+        max(var(--portal-space-4), env(safe-area-inset-bottom))
+        max(var(--portal-space-4), env(safe-area-inset-left));
+}
+
+/* Per-edge helpers for composing custom safe-area layouts. */
+.portalSafeAreaTop {
+    padding-top: max(var(--portal-space-3), env(safe-area-inset-top));
+}
+
+.portalSafeAreaRight {
+    padding-right: max(var(--portal-space-3), env(safe-area-inset-right));
+}
+
+.portalSafeAreaBottom {
+    padding-bottom: max(var(--portal-space-3), env(safe-area-inset-bottom));
+}
+
+.portalSafeAreaLeft {
+    padding-left: max(var(--portal-space-3), env(safe-area-inset-left));
+}
+
+/*
+ * Full-height screen helper. Progressive enhancement: legacy 100vh first,
+ * then 100svh for browsers that support small-viewport units, so mobile
+ * URL bars do not clip content. The @supports query avoids a duplicate
+ * property declaration while preserving the legacy fallback.
+ */
+.portalScreen {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Full-height screen with safe-area gutters applied. */
+.portalScreenSafe {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    padding: max(var(--portal-space-4), env(safe-area-inset-top))
+        max(var(--portal-space-4), env(safe-area-inset-right))
+        max(var(--portal-space-4), env(safe-area-inset-bottom))
+        max(var(--portal-space-4), env(safe-area-inset-left));
+}
+
+@supports (min-height: 100svh) {
+    .portalScreen,
+    .portalScreenSafe {
+        min-height: 100svh;
+    }
+}
