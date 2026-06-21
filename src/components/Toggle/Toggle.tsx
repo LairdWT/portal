@@ -1,4 +1,9 @@
-import { type ReactElement } from 'react';
+import {
+    type Dispatch,
+    type ReactElement,
+    type SetStateAction,
+    useState,
+} from 'react';
 
 import { EInputInteraction, type InputSource } from '../../input';
 import { useInputSource } from '../../react/hooks/useInputSource';
@@ -17,13 +22,25 @@ function nextCheckedState(current: ECheckedState): ECheckedState {
 
 export function Toggle({
     label,
-    checked = ECheckedState.Unchecked,
+    checked,
+    defaultChecked = ECheckedState.Unchecked,
     enabled = EEnabledState.Enabled,
     onChange,
     onSignal,
     descriptor,
 }: ToggleProps): ReactElement {
-    const isChecked: boolean = checked === ECheckedState.Checked;
+    // Controlled when the consumer supplies `checked`; otherwise the component
+    // owns its state, seeded once from `defaultChecked`. currentChecked drives
+    // the ARIA and data-attribute the CSS reads, so the knob now moves on click
+    // in both modes.
+    const isControlled: boolean = checked !== undefined;
+    const [internalChecked, setInternalChecked]: [
+        ECheckedState,
+        Dispatch<SetStateAction<ECheckedState>>,
+    ] = useState<ECheckedState>(defaultChecked);
+    const currentChecked: ECheckedState = checked ?? internalChecked;
+
+    const isChecked: boolean = currentChecked === ECheckedState.Checked;
     const isDisabled: boolean = enabled === EEnabledState.Disabled;
     const inputSource: InputSource | null = useInputSource(descriptor, onSignal);
 
@@ -42,7 +59,10 @@ export function Toggle({
             case EEnabledState.Disabled:
                 return;
             case EEnabledState.Enabled: {
-                const next: ECheckedState = nextCheckedState(checked);
+                const next: ECheckedState = nextCheckedState(currentChecked);
+                if (!isControlled) {
+                    setInternalChecked(next);
+                }
                 onChange?.(next);
                 emitDigital(next === ECheckedState.Checked);
             }
@@ -57,7 +77,7 @@ export function Toggle({
             disabled={isDisabled}
             aria-checked={isChecked}
             aria-label={label}
-            data-checked={checked}
+            data-checked={currentChecked}
             onClick={handleClick}
         >
             <span className={styles.track} aria-hidden="true">

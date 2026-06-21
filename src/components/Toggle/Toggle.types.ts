@@ -16,12 +16,15 @@ export type ECheckedState = (typeof ECheckedState)[keyof typeof ECheckedState];
 // Props for the Toggle boolean-switch primitive.
 //
 // `checked` and `enabled` are enums, not booleans, so the ARIA and disabled DOM
-// states are derived rather than stored. When both `onSignal` and `descriptor`
-// are provided the component emits a typed Digital InputSignal on each toggle in
-// addition to the raw `onChange` callback.
+// states are derived rather than stored. When `checked` is provided the Toggle
+// is controlled and the consumer owns the state; otherwise it is uncontrolled
+// and manages its own state, seeded once from `defaultChecked`. When both
+// `onSignal` and `descriptor` are provided the component also emits a typed
+// Digital InputSignal on each toggle alongside the raw `onChange` callback.
 export type ToggleProps = Readonly<{
     label: string;
     checked?: ECheckedState;
+    defaultChecked?: ECheckedState;
     enabled?: EEnabledState;
     onChange?: (checked: ECheckedState) => void;
     onSignal?: (signal: InputSignal) => void;

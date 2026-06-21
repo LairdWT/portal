@@ -67,7 +67,13 @@
     );
     aspect-ratio: 1;
     border-radius: 50%;
-    background-color: var(--portal-color-text-0);
+    background: radial-gradient(
+        circle at 50%,
+        var(--portal-color-accent) 25%,
+        var(--portal-color-accent-highlight) 55%,
+        var(--portal-color-accent) 70%,
+        var(--portal-color-accent-shadow) 100%
+    );
     transform: translateY(-50%);
 }
 
@@ -80,8 +86,8 @@
 
 .toggle[data-checked='checked'] .knob {
     inset-inline-start: calc(
-        var(--toggle-track-inline-size) - 100% - var(--toggle-knob-inset) -
-            var(--portal-border-thickness-thin) * 2
+        var(--toggle-track-inline-size) - 50% - var(--toggle-knob-inset) -
+            var(--portal-border-thickness-thin)
     );
     background-color: var(--portal-color-bg-0);
 }
