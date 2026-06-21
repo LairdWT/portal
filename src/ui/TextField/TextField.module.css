@@ -1,0 +1,83 @@
+/*
+ * TextField. The generic, domain-agnostic single-line input of the UI layer. The
+ * root carries the shared .toneScope, so the derived --portal-tone-* vars resolve
+ * from an optional inline --portal-tone. The field surface is the dark tone scrim
+ * (--portal-color-surface-0); a mid-tone solid accent fill cannot meet AA for an
+ * arbitrary tone, so the accent reads only as the focus border and ring while the
+ * text stays on the dark surface. No literal colors or pixels; tokens and the
+ * derived tone vars drive every value. Logical properties throughout. Motion is
+ * gated behind prefers-reduced-motion. The error message uses the danger token.
+ */
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-1);
+    font-family: var(--portal-font-sans);
+}
+
+.label {
+    font-size: var(--portal-size-text-sm);
+    letter-spacing: var(--portal-letter-spacing-wide);
+    line-height: var(--portal-line-height-tight);
+    color: var(--portal-color-text-1);
+}
+
+.input {
+    box-sizing: border-box;
+    min-block-size: var(--portal-touch-target-min);
+    padding-inline: var(--portal-space-3);
+    padding-block: var(--portal-space-2);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-radius-md);
+    background-color: var(--portal-color-surface-0);
+    color: var(--portal-color-text-0);
+    font-family: inherit;
+    font-size: var(--portal-size-text-md);
+    line-height: var(--portal-line-height-normal);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .input {
+        transition:
+            border-color var(--portal-duration-128) var(--portal-easing-standard),
+            box-shadow var(--portal-duration-128) var(--portal-easing-standard);
+    }
+}
+
+.input::placeholder {
+    color: var(--portal-color-text-1);
+}
+
+.input:focus-visible {
+    border-color: var(--portal-tone-accent);
+    outline: var(--portal-border-thickness-thin) solid var(--portal-color-focus);
+    outline-offset: var(--portal-border-thickness-thin);
+    box-shadow: 0 0 0 var(--portal-border-thickness-thin) var(--portal-tone-glow);
+}
+
+.input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.input:hover:not(:disabled) {
+    border-color: var(--portal-tone-border);
+}
+
+/* The error message forces the seed to the danger token so the accent and the
+ * text resolve to danger regardless of any passed tone. */
+.input[aria-invalid='true'] {
+    --portal-tone: var(--portal-color-danger);
+
+    border-color: var(--portal-tone-accent);
+}
+
+/* The message text uses the high-contrast foreground (not the danger accent,
+ * which is too dark to meet AA over the scrim). The danger signal is carried by
+ * aria-invalid and the toned border, never by message color alone. */
+.error {
+    font-size: var(--portal-size-text-sm);
+    line-height: var(--portal-line-height-tight);
+    color: var(--portal-color-text-0);
+}

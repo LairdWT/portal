@@ -1,0 +1,74 @@
+/*
+ * ReadoutPanel. A discrete-value stat panel for the generic UI layer, distinct
+ * from HudPanel (which renders 0..1 bars). Values are presented as real text,
+ * never as a bar or a progressbar. The panel root carries the shared .toneScope
+ * for the panel-level tone, and each readout row carries its own .toneScope so a
+ * row can be toned independently. Only --portal-* tokens and the derived
+ * --portal-tone-* vars are referenced - no literal colors or pixels. The panel
+ * fills with the dark tone scrim so text keeps contrast over an arbitrary
+ * backdrop; the accent reads as a border indicator only. Edge-anchored padding
+ * respects the device safe area. Motion is gated behind prefers-reduced-motion.
+ */
+
+.panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-3);
+    padding-block: var(--portal-space-4);
+    padding-inline: max(var(--portal-space-4), env(safe-area-inset-left))
+        max(var(--portal-space-4), env(safe-area-inset-right));
+    border: var(--portal-border-thickness-thin) solid var(--portal-tone-border);
+    border-radius: var(--portal-radius-lg);
+    background-color: var(--portal-tone-fill);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+    line-height: var(--portal-line-height-tight);
+}
+
+.accent {
+    block-size: var(--portal-space-1);
+    inline-size: var(--portal-space-6);
+    border-radius: var(--portal-radius-pill);
+    background-color: var(--portal-tone-accent);
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-2);
+    margin: 0;
+}
+
+.readout {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--portal-space-3);
+    padding-block: var(--portal-space-1);
+    padding-inline: var(--portal-space-2);
+    border-inline-start: var(--portal-border-thickness-thin) solid
+        var(--portal-tone-accent);
+    border-radius: var(--portal-radius-sm);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .readout {
+        transition: border-color var(--portal-duration-128)
+            var(--portal-easing-standard);
+    }
+}
+
+.label {
+    margin: 0;
+    font-size: var(--portal-size-text-sm);
+    letter-spacing: var(--portal-letter-spacing-wide);
+    color: var(--portal-color-text-1);
+}
+
+.value {
+    margin: 0;
+    font-size: var(--portal-size-text-md);
+    font-weight: 700;
+    color: var(--portal-color-text-0);
+    font-variant-numeric: tabular-nums;
+}

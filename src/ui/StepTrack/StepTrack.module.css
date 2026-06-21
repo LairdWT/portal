@@ -1,0 +1,90 @@
+/*
+ * StepTrack. A read-only ordered phase indicator for the generic UI layer. The
+ * root <ol> carries the tone scope and consumes only the derived
+ * --portal-tone-* vars plus --portal-* tokens - no literal colors or pixels. The
+ * track is non-interactive: no buttons, no focus targets, no motion beyond a
+ * reduced-motion-gated transition on the current marker. Step order and position
+ * are carried by list semantics, data-state, and visible text; the tone ramp
+ * accents only the current step's border, dot, and connector so progress is
+ * never conveyed by color alone. Text stays on the neutral text tokens for
+ * contrast over an arbitrary backdrop.
+ */
+
+.track {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--portal-space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--portal-font-sans);
+}
+
+.step {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--portal-space-2);
+    color: var(--portal-color-text-1);
+}
+
+.marker {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: var(--portal-space-5);
+    block-size: var(--portal-space-5);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-radius-pill);
+    background-color: var(--portal-color-surface-0);
+}
+
+.dot {
+    inline-size: var(--portal-space-2);
+    block-size: var(--portal-space-2);
+    border-radius: var(--portal-radius-pill);
+    background-color: var(--portal-color-border);
+}
+
+.label {
+    font-size: var(--portal-size-text-sm);
+    letter-spacing: var(--portal-letter-spacing-wide);
+    line-height: var(--portal-line-height-tight);
+    color: var(--portal-color-text-1);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .marker {
+        transition:
+            border-color var(--portal-duration-128) var(--portal-easing-standard),
+            box-shadow var(--portal-duration-128) var(--portal-easing-standard);
+    }
+}
+
+.step[data-state='past'] .marker {
+    border-color: var(--portal-tone-border);
+}
+
+.step[data-state='past'] .dot {
+    background-color: var(--portal-tone-accent);
+}
+
+.step[data-state='current'] {
+    color: var(--portal-color-text-0);
+}
+
+.step[data-state='current'] .marker {
+    border-color: var(--portal-tone-accent);
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow);
+}
+
+.step[data-state='current'] .dot {
+    background-color: var(--portal-tone-accent);
+}
+
+.step[data-state='current'] .label {
+    color: var(--portal-color-text-0);
+}
+
+.step[data-state='future'] .marker {
+    border-color: var(--portal-color-border);
+}
