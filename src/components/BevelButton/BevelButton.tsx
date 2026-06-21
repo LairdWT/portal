@@ -41,7 +41,7 @@ export function BevelButton({
             onPointerUp={onPointerUp}
             onPointerCancel={onPointerCancel}
         >
-            {children}
+            <span className={styles.label}>{children}</span>
         </button>
     );
 }

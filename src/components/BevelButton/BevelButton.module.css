@@ -63,3 +63,14 @@
     opacity: 0.5;
     cursor: not-allowed;
 }
+
+.label {
+    display: inline-block;
+
+    /* letter-spacing (inherited from .bevel) adds a trailing gap after the last
+     * glyph; without this the inline box the flex parent centres is text +
+     * trailing gap wide, leaving centred text shifted left by half the
+     * letter-spacing. Trimming an equal end margin recentres it. Mirrors the
+     * ActionButton label fix. */
+    margin-inline-end: calc(-1 * var(--portal-letter-spacing-wide));
+}
