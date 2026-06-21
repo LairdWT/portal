@@ -5,7 +5,9 @@ import { animate, type JSAnimation, type Timeline } from 'animejs';
 // returns its JSAnimation or Timeline so the caller can revert it on unmount.
 // v4 API: the `ease` property (not v3 `easing`) and v4 ease names (`outExpo`).
 
-// Layout-agnostic motion durations in milliseconds.
+// Layout-agnostic motion durations in milliseconds. A plain numeric scale map,
+// deliberately not an E-prefixed enum: the members are distinct duration values,
+// not a named string union.
 const MOTION_DURATION: {
     readonly fast: 140;
     readonly base: 240;

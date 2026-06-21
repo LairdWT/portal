@@ -1,5 +1,5 @@
 import { type InputDescriptor, type InputSignal } from '../../input';
-import { EEnabledState } from '../../state/state';
+import { type EEnabledState } from '../../state/state';
 
 // Checked state for the Toggle switch. Modeled as an E-prefixed const-object
 // enum rather than a boolean so the on/off state is a named member set and the
@@ -30,5 +30,3 @@ export type ToggleProps = Readonly<{
     onSignal?: (signal: InputSignal) => void;
     descriptor?: InputDescriptor;
 }>;
-
-export { EEnabledState };

@@ -49,6 +49,9 @@ export function useAnime({ root, setup, deps = [] }: UseAnimeOptions): void {
         return (): void => {
             scope.revert();
         };
+        // The dep array spreads the caller-owned `deps`; `setup` and `deps` are
+        // part of the hook contract (the caller keeps them stable). exhaustive-deps
+        // cannot statically verify a spread, so it is disabled for this line only.
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [prefersReducedMotion, root, setup, ...deps]);
 }

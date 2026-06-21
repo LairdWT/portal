@@ -104,7 +104,7 @@ function BackdropScene({
 // is statically false, so this ternary folds to the null component and the dynamic
 // import is eliminated - r3f-perf never enters dist. In Storybook and dev it
 // lazy-loads inside the Canvas.
-const CanvasDevtools: ComponentType = import.meta.env.DEV
+const DevtoolsOverlay: ComponentType = import.meta.env.DEV
     ? lazy(
           async (): Promise<{ default: ComponentType }> => ({
               default: (await import('./CanvasDevtools')).CanvasDevtools,
@@ -144,7 +144,7 @@ export function SceneBackdrop({ className }: SceneBackdropProps): ReactElement {
                     camera={{ position: [0, 0, 6], fov: 50 }}
                 >
                     <Suspense fallback={null}>
-                        <CanvasDevtools />
+                        <DevtoolsOverlay />
                     </Suspense>
                     {sceneContent}
                 </Canvas>
