@@ -25,6 +25,10 @@ global preference where they conflict.
     export type EEnabledState = (typeof EEnabledState)[keyof typeof EEnabledState];
     ```
 
+    The type annotation on the const object is required: `@typescript-eslint/typedef`
+    runs with `variableDeclaration` enabled, so a bare `as const` object (which
+    carries no annotation) is rejected.
+
 - Reserve an `F` prefix for wire-payload structs only.
 
 ## Naming
@@ -59,6 +63,10 @@ global preference where they conflict.
 - `src/react` binds the input spine to React via hooks.
 - Components emit raw callbacks for simple consumers and an optional
   `onSignal(InputSignal)` for consumers wiring to game logic.
+- In-library stories and examples import from specific module paths, never the
+  package root barrel. Pulling the root barrel into the Storybook addon-vitest
+  browser project churns Vite's dependency optimizer and fails the story's
+  dynamic import.
 
 ## Discipline
 
