@@ -1,0 +1,33 @@
+/*
+ * Domain-agnostic tone scope for the generic UI layer. A component root carries
+ * .toneScope and may set --portal-tone (an opaque CSS color) inline; the derived
+ * accent/border/glow/fill/foreground vars below are what components consume -
+ * they never read raw colors. With no tone set the seed falls back to the portal
+ * accent, so untoned UI matches the base theme. A data-status attribute swaps the
+ * seed for the universal danger/success tokens. Fill mixes heavily toward the
+ * dark surface so foreground text keeps contrast over an arbitrary backdrop.
+ */
+.toneScope {
+    --portal-tone: var(--portal-color-accent);
+    --portal-tone-accent: var(--portal-tone);
+    --portal-tone-border: color-mix(
+        in oklab,
+        var(--portal-tone) 55%,
+        var(--portal-color-border)
+    );
+    --portal-tone-glow: color-mix(in oklab, var(--portal-tone) 40%, transparent);
+    --portal-tone-fill: color-mix(
+        in oklab,
+        var(--portal-tone) 18%,
+        var(--portal-color-surface-0)
+    );
+    --portal-tone-on: var(--portal-color-text-0);
+}
+
+.toneScope[data-status='danger'] {
+    --portal-tone: var(--portal-color-danger);
+}
+
+.toneScope[data-status='success'] {
+    --portal-tone: var(--portal-color-success);
+}

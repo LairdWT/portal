@@ -1,0 +1,120 @@
+/*
+ * CTA. The generic, domain-agnostic click button of the UI layer, separate from
+ * the input-emitting ActionButton/BevelButton controls. The root carries the
+ * shared .toneScope, so the derived --portal-tone-* vars resolve from an
+ * optional inline --portal-tone. data-variant selects the fill treatment,
+ * data-size scales padding and text while keeping the 48px touch minimum, and
+ * data-status routes the danger seed through the tone scope. No literal colors
+ * or pixels; tokens and the derived tone vars drive every value. Motion is gated
+ * behind prefers-reduced-motion.
+ */
+
+.cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--portal-space-2);
+    min-inline-size: var(--portal-touch-target-min);
+    min-block-size: var(--portal-touch-target-min);
+    padding-inline: var(--portal-space-4);
+    padding-block: var(--portal-space-2);
+    border: var(--portal-border-thickness-normal) solid transparent;
+    border-radius: var(--portal-radius-md);
+    background: transparent;
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+    font-size: var(--portal-size-text-md);
+    font-weight: 700;
+    line-height: var(--portal-line-height-tight);
+    letter-spacing: var(--portal-letter-spacing-wide);
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .cta {
+        transition:
+            background var(--portal-duration-fast) var(--portal-easing-standard),
+            border-color var(--portal-duration-fast) var(--portal-easing-standard),
+            color var(--portal-duration-fast) var(--portal-easing-standard),
+            box-shadow var(--portal-duration-fast) var(--portal-easing-standard);
+    }
+}
+
+.cta:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: var(--portal-border-thickness-normal);
+}
+
+/* Size scales padding and text; the touch minimum is preserved by the root. */
+.cta[data-size='sm'] {
+    padding-inline: var(--portal-space-3);
+    font-size: var(--portal-size-text-sm);
+}
+
+.cta[data-size='lg'] {
+    padding-inline: var(--portal-space-5);
+    padding-block: var(--portal-space-3);
+    font-size: var(--portal-size-text-lg);
+}
+
+/* Primary: emphasized. A solid mid-tone fill cannot meet AA contrast for an
+ * arbitrary tone, so the fill is the dark tone scrim (always high-contrast with
+ * the foreground) and the accent reads as a bold border plus a hover glow. */
+.cta[data-variant='primary'] {
+    border-color: var(--portal-tone-accent);
+    background: var(--portal-tone-fill);
+    color: var(--portal-color-text-0);
+}
+
+.cta[data-variant='primary']:hover:not(:disabled),
+.cta[data-variant='primary']:active:not(:disabled) {
+    box-shadow: 0 0 0 var(--portal-border-thickness-bold) var(--portal-tone-glow);
+}
+
+/* Secondary: transparent with a toned border outline. */
+.cta[data-variant='secondary'] {
+    border-color: var(--portal-tone-border);
+    background: transparent;
+    color: var(--portal-color-text-0);
+}
+
+.cta[data-variant='secondary']:hover:not(:disabled),
+.cta[data-variant='secondary']:active:not(:disabled) {
+    border-color: var(--portal-tone-accent);
+    background: var(--portal-tone-fill);
+}
+
+/* Ghost: transparent, accent text surfacing on hover/active. */
+.cta[data-variant='ghost'] {
+    border-color: transparent;
+    background: transparent;
+    color: var(--portal-color-text-1);
+}
+
+.cta[data-variant='ghost']:hover:not(:disabled),
+.cta[data-variant='ghost']:active:not(:disabled) {
+    background: var(--portal-tone-fill);
+    color: var(--portal-tone-accent);
+}
+
+/* Danger: the danger status surface. The seed is forced to the danger token so
+ * the derived ramp resolves to danger regardless of any passed tone. */
+.cta[data-variant='danger'] {
+    --portal-tone: var(--portal-color-danger);
+
+    border-color: var(--portal-tone-accent);
+    background: var(--portal-tone-fill);
+    color: var(--portal-color-text-0);
+}
+
+.cta[data-variant='danger']:hover:not(:disabled),
+.cta[data-variant='danger']:active:not(:disabled) {
+    box-shadow: 0 0 0 var(--portal-border-thickness-bold) var(--portal-tone-glow);
+}
+
+.cta:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

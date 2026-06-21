@@ -1,0 +1,39 @@
+/*
+ * Read-only label + value chip for the generic UI layer. The root carries the
+ * tone scope and consumes only the derived --portal-tone-* vars plus --portal-*
+ * tokens - no literal colors or pixels. The chip is non-interactive: it has no
+ * button, no focus target, and no motion. The value uses tabular-nums so digit
+ * columns stay aligned. The leading accent bar is decorative and aria-hidden.
+ */
+.pill {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--portal-space-2);
+    padding-block: var(--portal-space-1);
+    padding-inline: var(--portal-space-3);
+    border: var(--portal-border-thickness-thin) solid var(--portal-tone-border);
+    border-radius: var(--portal-radius-pill);
+    background-color: var(--portal-tone-fill);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+    line-height: var(--portal-line-height-tight);
+}
+
+.accent {
+    inline-size: var(--portal-space-1);
+    block-size: var(--portal-space-3);
+    border-radius: var(--portal-radius-pill);
+    background-color: var(--portal-tone-accent);
+}
+
+.label {
+    font-size: var(--portal-size-text-sm);
+    letter-spacing: var(--portal-letter-spacing-wide);
+    color: var(--portal-color-text-1);
+}
+
+.value {
+    font-size: var(--portal-size-text-sm);
+    color: var(--portal-color-text-0);
+    font-variant-numeric: tabular-nums;
+}

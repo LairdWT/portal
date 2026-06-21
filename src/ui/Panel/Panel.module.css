@@ -1,0 +1,43 @@
+/*
+ * Panel - generic titled container for the domain-agnostic UI layer. The root
+ * carries .toneScope (from tone.module.css) so the derived --portal-tone-* vars
+ * resolve; this file references only --portal-* tokens and the derived tone
+ * vars, never literal colors or px. Surface is token-driven and switches on the
+ * data-elevation attribute (flat = base surface, raised = secondary surface).
+ * The container styles only its own bounded surface and pads with the safe-area
+ * insets so it stays usable when edge-anchored over a transparent WebView.
+ */
+.panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-3);
+    padding-block: max(var(--portal-space-4), env(safe-area-inset-top))
+        max(var(--portal-space-4), env(safe-area-inset-bottom));
+    padding-inline: max(var(--portal-space-4), env(safe-area-inset-left))
+        max(var(--portal-space-4), env(safe-area-inset-right));
+    border: var(--portal-border-thickness-thin) solid var(--portal-tone-border);
+    border-radius: var(--portal-radius-md);
+    background-color: var(--portal-color-surface-0);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+    inline-size: 100%;
+}
+
+.panel[data-elevation='raised'] {
+    background-color: var(--portal-color-surface-1);
+}
+
+.title {
+    margin: 0;
+    font-size: var(--portal-size-text-lg);
+    line-height: var(--portal-line-height-tight);
+    letter-spacing: var(--portal-letter-spacing-wide);
+    color: var(--portal-tone-on);
+}
+
+.body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-3);
+    color: var(--portal-color-text-0);
+}
