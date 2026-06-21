@@ -5,6 +5,11 @@ library. It provides reusable button, input, slider, panel, HUD, and
 controller components, a decoupled input core, and an optional React Three
 Fiber presentation surface.
 
+## Demo
+
+Live, interactive Storybook (every control plus the Unity-binding example):
+https://lairdwt.github.io/portal/
+
 ## Stack
 
 - React and TypeScript.
