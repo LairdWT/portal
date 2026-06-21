@@ -6,20 +6,21 @@
  * data-size scales padding and text while keeping the 48px touch minimum, and
  * data-status routes the danger seed through the tone scope. No literal colors
  * or pixels; tokens and the derived tone vars drive every value. Motion is gated
- * behind prefers-reduced-motion.
+ * behind prefers-reduced-motion. Emphasized fills stay on the dark tone scrim so
+ * the foreground keeps AA contrast; the accent reads as border and outer glow.
  */
 
 .cta {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--portal-space-2);
     min-inline-size: var(--portal-touch-target-min);
     min-block-size: var(--portal-touch-target-min);
     padding-inline: var(--portal-space-4);
     padding-block: var(--portal-space-2);
     border: var(--portal-border-thickness-normal) solid transparent;
-    border-radius: var(--portal-radius-md);
+    border-radius: var(--portal-radius-lg);
+    corner-shape: squircle;
     background: transparent;
     color: var(--portal-color-text-0);
     font-family: var(--portal-font-sans);
@@ -32,9 +33,24 @@
     user-select: none;
 }
 
+.content {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--portal-space-2);
+
+    /* letter-spacing (inherited from .cta) adds a trailing gap after the last
+     * glyph; without trimming an equal end margin the centred content sits left
+     * of centre by half the letter-spacing. The fix lives on a flex wrapper so an
+     * icon plus text gap is preserved. Mirrors the ActionButton/BevelButton
+     * label fix. */
+    margin-inline-end: calc(-1 * var(--portal-letter-spacing-wide));
+}
+
 @media (prefers-reduced-motion: no-preference) {
     .cta {
         transition:
+            transform var(--portal-duration-fast) var(--portal-easing-standard),
             background var(--portal-duration-fast) var(--portal-easing-standard),
             border-color var(--portal-duration-fast) var(--portal-easing-standard),
             color var(--portal-duration-fast) var(--portal-easing-standard),
@@ -60,20 +76,24 @@
 }
 
 /* Primary: emphasized. A solid mid-tone fill cannot meet AA contrast for an
- * arbitrary tone, so the fill is the dark tone scrim (always high-contrast with
- * the foreground) and the accent reads as a bold border plus a hover glow. */
+ * arbitrary tone, so the fill is a dark tone-scrim gradient (always high-contrast
+ * with the foreground) and the accent reads as a bold border plus a hover glow. */
 .cta[data-variant='primary'] {
     border-color: var(--portal-tone-accent);
-    background: var(--portal-tone-fill);
+    background: linear-gradient(
+        160deg,
+        var(--portal-tone-fill) 0%,
+        var(--portal-color-surface-0) 100%
+    );
     color: var(--portal-color-text-0);
 }
 
 .cta[data-variant='primary']:hover:not(:disabled),
 .cta[data-variant='primary']:active:not(:disabled) {
-    box-shadow: 0 0 0 var(--portal-border-thickness-bold) var(--portal-tone-glow);
+    box-shadow: 0 0 var(--portal-space-4) var(--portal-tone-glow-strong);
 }
 
-/* Secondary: transparent with a toned border outline. */
+/* Secondary: transparent with a toned border outline that fills on interaction. */
 .cta[data-variant='secondary'] {
     border-color: var(--portal-tone-border);
     background: transparent;
@@ -83,7 +103,12 @@
 .cta[data-variant='secondary']:hover:not(:disabled),
 .cta[data-variant='secondary']:active:not(:disabled) {
     border-color: var(--portal-tone-accent);
-    background: var(--portal-tone-fill);
+    background: linear-gradient(
+        160deg,
+        var(--portal-tone-fill) 0%,
+        var(--portal-color-surface-0) 100%
+    );
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow);
 }
 
 /* Ghost: transparent, accent text surfacing on hover/active. */
@@ -105,16 +130,24 @@
     --portal-tone: var(--portal-color-danger);
 
     border-color: var(--portal-tone-accent);
-    background: var(--portal-tone-fill);
+    background: linear-gradient(
+        160deg,
+        var(--portal-tone-fill) 0%,
+        var(--portal-color-surface-0) 100%
+    );
     color: var(--portal-color-text-0);
 }
 
 .cta[data-variant='danger']:hover:not(:disabled),
 .cta[data-variant='danger']:active:not(:disabled) {
-    box-shadow: 0 0 0 var(--portal-border-thickness-bold) var(--portal-tone-glow);
+    box-shadow: 0 0 var(--portal-space-4) var(--portal-tone-glow-strong);
 }
 
 .cta:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+.cta:active:not(:disabled) {
+    transform: scale(0.95);
 }

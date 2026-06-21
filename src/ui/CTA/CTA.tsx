@@ -62,7 +62,7 @@ export function CTA({
             aria-label={children === undefined ? label : undefined}
             onClick={handleClick}
         >
-            {content}
+            <span className={styles.content}>{content}</span>
         </button>
     );
 }
