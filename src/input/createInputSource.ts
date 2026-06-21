@@ -13,13 +13,10 @@ import type {
     InputValue,
 } from './InputContract';
 import { EInputValueType } from './InputContract';
+import type { TimeProvider } from './TimeProvider';
 
 // Sink for produced signals.
 export type EmitInputSignal = (signal: InputSignal) => void;
-
-// Injectable clock. Returns the current time in milliseconds. Supplied by the
-// caller so this module never calls Date.now itself.
-export type TimeProvider = () => number;
 
 // Producer returned by the factory. Each method builds a typed InputValue and
 // emits a complete InputSignal. timeStampMs may be passed per call; when omitted
