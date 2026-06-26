@@ -36,6 +36,7 @@
     --portal-color-focus: #8992bb;
     --portal-color-danger: #a0444d;
     --portal-color-success: #5ce0a0;
+    --portal-color-warning: #d8a24a;
     --portal-color-grid-cell: #2a2f45;
 
     /* Metallic trim. A brushed-silver ramp plus a composed gradient and sheen
@@ -131,6 +132,11 @@
     --portal-border-thickness-thin: 2px;
     --portal-border-thickness-normal: 4px;
     --portal-border-thickness-bold: 6px;
+
+    /* Stacking. The overlay layer for portal-rendered surfaces (Popover and the
+     * Tooltip/Menu/Select/Dialog overlays built on it) so they sit above page
+     * content. Overlays read this token instead of inlining a z-index literal. */
+    --portal-z-overlay: 1000;
 
     /* Motion durations */
     --portal-duration-fast: 8ms;

@@ -1,0 +1,96 @@
+/*
+ * Removable tag chip for the generic UI layer. The root carries the tone scope
+ * and consumes only the derived --portal-tone-* vars plus --portal-* tokens - no
+ * literal colors or fixed pixels. The chip presents arbitrary label content and,
+ * when removable, a dedicated remove button. Selected state is conveyed by the
+ * data-state attribute together with a non-color marker dot, never by tone color
+ * alone. The remove button is the only interactive control. Layout is intrinsic
+ * and the remove button keeps the minimum touch target.
+ */
+
+.root {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--portal-space-2);
+    min-block-size: var(--portal-touch-target-min);
+    padding-block: var(--portal-space-1);
+    padding-inline: var(--portal-space-3);
+    border: var(--portal-border-thickness-thin) solid var(--portal-tone-border);
+    border-radius: var(--portal-radius-pill);
+    background-color: var(--portal-tone-fill);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+    font-size: var(--portal-size-text-sm);
+    line-height: var(--portal-line-height-tight);
+}
+
+.root[data-state='selected'] {
+    border-color: var(--portal-tone-accent);
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow-strong);
+}
+
+.root[data-enabled='disabled'] {
+    opacity: 0.5;
+}
+
+/*
+ * The selected marker: a tone-accent dot that reads alongside the data-state and
+ * border change, so selection is not signalled by color contrast alone.
+ */
+.marker {
+    inline-size: var(--portal-space-2);
+    block-size: var(--portal-space-2);
+    border-radius: var(--portal-radius-pill);
+    background-color: var(--portal-tone-accent);
+}
+
+.label {
+    color: var(--portal-color-text-0);
+    letter-spacing: var(--portal-letter-spacing-wide);
+}
+
+.remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: var(--portal-touch-target-min);
+    min-block-size: var(--portal-touch-target-min);
+    padding: var(--portal-space-1);
+    border: var(--portal-border-thickness-thin) solid transparent;
+    border-radius: var(--portal-radius-pill);
+    background-color: transparent;
+    color: var(--portal-color-text-1);
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .remove {
+        transition:
+            background-color var(--portal-duration-ms128)
+                var(--portal-easing-standard),
+            border-color var(--portal-duration-ms128) var(--portal-easing-standard),
+            color var(--portal-duration-ms128) var(--portal-easing-standard);
+    }
+}
+
+.remove:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: var(--portal-space-1);
+}
+
+.remove:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.remove:hover:not(:disabled) {
+    border-color: var(--portal-tone-border);
+    color: var(--portal-color-text-0);
+}
+
+.removeGlyph {
+    font-size: var(--portal-size-text-md);
+    line-height: var(--portal-line-height-tight);
+}

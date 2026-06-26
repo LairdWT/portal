@@ -111,7 +111,9 @@ export {
     type DigitalPressOptions,
     useDigitalPress,
 } from './react/hooks/useDigitalPress';
+export { useDismiss, type UseDismissOptions } from './react/hooks/useDismiss';
 export { type EmitBinding, useEmitBinding } from './react/hooks/useEmitBinding';
+export { useFocusTrap, type UseFocusTrapOptions } from './react/hooks/useFocusTrap';
 export { useGesture } from './react/hooks/useGesture';
 export {
     EGesture,
@@ -158,6 +160,12 @@ export {
     EVisibility,
 } from './state/state';
 export { PORTAL_TOKENS, type PortalTokens } from './theme/tokens';
+export { Badge } from './ui/Badge/Badge';
+export { type BadgeProps, EBadgeKind } from './ui/Badge/Badge.types';
+export { Banner } from './ui/Banner/Banner';
+export { type BannerProps, EBannerKind } from './ui/Banner/Banner.types';
+export { Chip } from './ui/Chip/Chip';
+export { type ChipProps, EChipState } from './ui/Chip/Chip.types';
 export { CTA } from './ui/CTA/CTA';
 export {
     type CTAProps,
@@ -165,17 +173,52 @@ export {
     ECtaSize,
     ECtaVariant,
 } from './ui/CTA/CTA.types';
+export { EmptyState } from './ui/EmptyState/EmptyState';
+export {
+    EEmptyStateRole,
+    type EmptyStateHeadingLevel,
+    type EmptyStateProps,
+} from './ui/EmptyState/EmptyState.types';
 export { Panel } from './ui/Panel/Panel';
 export {
     EPanelElevation,
     type PanelHeadingLevel,
     type PanelProps,
 } from './ui/Panel/Panel.types';
+export { Popover } from './ui/Popover/Popover';
+export {
+    EPopoverPlacement,
+    EPopoverRole,
+    type PopoverProps,
+} from './ui/Popover/Popover.types';
+export { Progress } from './ui/Progress/Progress';
+export {
+    type DeterminateProgressProps,
+    EProgressMode,
+    type IndeterminateProgressProps,
+    type ProgressProps,
+} from './ui/Progress/Progress.types';
 export { ReadoutPanel } from './ui/ReadoutPanel/ReadoutPanel';
 export {
     type ReadoutPanelProps,
     type UiReadout,
 } from './ui/ReadoutPanel/ReadoutPanel.types';
+export { SearchBox } from './ui/SearchBox/SearchBox';
+export {
+    ESearchBoxState,
+    type SearchBoxProps,
+} from './ui/SearchBox/SearchBox.types';
+export { Section } from './ui/Section/Section';
+export {
+    type SectionHeadingLevel,
+    type SectionProps,
+} from './ui/Section/Section.types';
+export { SegmentedControl } from './ui/SegmentedControl/SegmentedControl';
+export {
+    ESegmentState,
+    type SegmentedControlProps,
+    type UiSegmentItem,
+} from './ui/SegmentedControl/SegmentedControl.types';
 export { SelectableTile } from './ui/SelectableTile/SelectableTile';
 export {
     ESelectionState,
@@ -191,6 +234,13 @@ export {
 } from './ui/StepTrack/StepTrack.types';
 export { Tabs } from './ui/Tabs/Tabs';
 export { ETabState, type TabsProps, type UiTabItem } from './ui/Tabs/Tabs.types';
+export { Text } from './ui/Text/Text';
+export {
+    ETextRole,
+    type TextElement,
+    type TextHeadingLevel,
+    type TextProps,
+} from './ui/Text/Text.types';
 export { TextField } from './ui/TextField/TextField';
 export {
     ETextFieldType,

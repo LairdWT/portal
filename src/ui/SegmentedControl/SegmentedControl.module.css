@@ -1,0 +1,99 @@
+/*
+ * SegmentedControl. A role="radiogroup" of real <button role="radio"> controls
+ * for the generic UI layer, presenting a single-select segment group. The
+ * selected segment is conveyed by the aria-checked attribute and the data-state
+ * attribute the component sets; the scrim, border, and indicator derive from the
+ * inherited tone ramp (never a literal color), so a consumer themes a region by
+ * passing a tone color. The selected surface fills with the dark tone scrim and
+ * keeps text on --portal-color-text-0, letting the accent read only as border and
+ * indicator - text is never placed on a solid accent fill. Layout is intrinsic
+ * and each segment keeps the minimum touch target.
+ */
+
+.group {
+    display: inline-flex;
+    align-items: stretch;
+    gap: var(--portal-space-1);
+    padding: var(--portal-space-1);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-radius-lg);
+    background-color: var(--portal-color-surface-0);
+}
+
+.segment {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: var(--portal-touch-target-min);
+    min-block-size: var(--portal-touch-target-min);
+    padding-block: var(--portal-space-2);
+    padding-inline: var(--portal-space-4);
+    border: var(--portal-border-thickness-thin) solid transparent;
+    border-radius: var(--portal-radius-md);
+    corner-shape: squircle;
+    background-color: transparent;
+    color: var(--portal-color-text-1);
+    font-family: var(--portal-font-sans);
+    font-size: var(--portal-size-text-md);
+    line-height: var(--portal-line-height-normal);
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .segment {
+        transition:
+            transform var(--portal-duration-ms128) var(--portal-easing-standard),
+            border-color var(--portal-duration-ms128) var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ms128) var(--portal-easing-standard),
+            background-color var(--portal-duration-ms128)
+                var(--portal-easing-standard),
+            color var(--portal-duration-ms128) var(--portal-easing-standard);
+    }
+}
+
+.segment:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: var(--portal-space-1);
+}
+
+.segment:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.segment:active:not(:disabled) {
+    transform: scale(0.95);
+}
+
+.segment[data-state='selected'] {
+    border-color: var(--portal-tone-accent);
+    background: linear-gradient(
+        160deg,
+        var(--portal-tone-fill) 0%,
+        var(--portal-color-surface-0) 100%
+    );
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow-strong);
+    color: var(--portal-color-text-0);
+}
+
+/*
+ * The selected indicator: a tone-accent rail under the active segment. It is a
+ * non-color-only redundancy alongside aria-checked and the text-contrast scrim,
+ * not the sole signal of selection.
+ */
+.segment[data-state='selected']::after {
+    content: '';
+    position: absolute;
+    inset-inline: var(--portal-space-3);
+    inset-block-end: calc(-1 * var(--portal-space-1));
+    block-size: var(--portal-border-thickness-normal);
+    border-radius: var(--portal-radius-pill);
+    background-color: var(--portal-tone-accent);
+}
+
+.label {
+    color: inherit;
+}

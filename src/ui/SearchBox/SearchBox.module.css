@@ -1,0 +1,198 @@
+/*
+ * SearchBox. The generic, domain-agnostic search input of the UI layer. The root
+ * carries the shared .toneScope, so the derived --portal-tone-* vars resolve from
+ * an optional inline --portal-tone. The bordered field surface is the dark tone
+ * scrim (--portal-color-surface-0); the accent reads only as the focus border,
+ * focus ring, and the leading search affordance, while the text stays on the dark
+ * surface (a mid-tone solid accent fill cannot meet AA for an arbitrary tone). No
+ * literal colors or fixed pixels; tokens and the derived tone vars drive every
+ * value, and percentages keep the affordance and clear glyph intrinsic. Logical
+ * properties throughout. Motion is gated behind prefers-reduced-motion.
+ */
+
+.root {
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-1);
+    font-family: var(--portal-font-sans);
+}
+
+.label {
+    font-size: var(--portal-size-text-sm);
+    letter-spacing: var(--portal-letter-spacing-wide);
+    line-height: var(--portal-line-height-tight);
+    color: var(--portal-color-text-1);
+}
+
+.field {
+    display: flex;
+    align-items: center;
+    gap: var(--portal-space-2);
+    box-sizing: border-box;
+    min-block-size: var(--portal-touch-target-min);
+    padding-inline: var(--portal-space-3);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-radius-lg);
+    background-color: var(--portal-color-surface-0);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .field {
+        transition:
+            border-color var(--portal-duration-ms128) var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ms128) var(--portal-easing-standard);
+    }
+}
+
+.field:focus-within {
+    border-color: var(--portal-tone-accent);
+    outline: var(--portal-border-thickness-thin) solid var(--portal-color-focus);
+    outline-offset: var(--portal-border-thickness-thin);
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow-strong);
+}
+
+/* The leading search affordance: a token-drawn magnifier (lens ring + handle).
+ * Decorative and aria-hidden; it tints with the tone accent so the field reads as
+ * a search surface without bundling an icon dependency. */
+.affordance {
+    position: relative;
+    flex: none;
+    inline-size: var(--portal-space-4);
+    block-size: var(--portal-space-4);
+    color: var(--portal-tone-accent);
+}
+
+.affordance::before {
+    content: '';
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    inline-size: 65%;
+    block-size: 65%;
+    border: var(--portal-border-thickness-thin) solid currentcolor;
+    border-radius: var(--portal-radius-pill);
+}
+
+.affordance::after {
+    content: '';
+    position: absolute;
+    inset-block-end: 0;
+    inset-inline-end: 0;
+    inline-size: 45%;
+    block-size: var(--portal-border-thickness-thin);
+    background-color: currentcolor;
+    border-radius: var(--portal-radius-pill);
+    transform: rotate(45deg);
+    transform-origin: 100% 100%;
+}
+
+.input {
+    flex: 1 1 auto;
+    box-sizing: border-box;
+    min-inline-size: 0;
+    min-block-size: var(--portal-touch-target-min);
+    border: 0;
+    background-color: transparent;
+    color: var(--portal-color-text-0);
+    font-family: inherit;
+    font-size: var(--portal-size-text-md);
+    line-height: var(--portal-line-height-normal);
+}
+
+.input::placeholder {
+    color: var(--portal-color-text-1);
+}
+
+.input:focus {
+    outline: none;
+}
+
+/* Hide the native UA search affordances; the tone-driven affordance and the
+ * explicit clear button own those roles so the control stays consistent. */
+.input::-webkit-search-decoration,
+.input::-webkit-search-cancel-button {
+    appearance: none;
+}
+
+/* The clear control is a real pointer target, so it holds the minimum touch size
+ * even though its glyph is small. */
+.clear {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    inline-size: var(--portal-touch-target-min);
+    min-inline-size: var(--portal-touch-target-min);
+    block-size: var(--portal-touch-target-min);
+    min-block-size: var(--portal-touch-target-min);
+    padding: 0;
+    border: 0;
+    border-radius: var(--portal-radius-md);
+    background-color: transparent;
+    color: var(--portal-color-text-1);
+    font-family: inherit;
+    cursor: pointer;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .clear {
+        transition: color var(--portal-duration-ms128) var(--portal-easing-standard);
+    }
+}
+
+.clear:focus-visible {
+    outline: var(--portal-border-thickness-thin) solid var(--portal-color-focus);
+    outline-offset: var(--portal-border-thickness-thin);
+}
+
+.clear:disabled {
+    cursor: not-allowed;
+}
+
+.clear:hover:not(:disabled) {
+    color: var(--portal-color-text-0);
+}
+
+/* The clear glyph: two token-thick bars crossed into an X. Decorative; the
+ * button's aria-label carries the meaning. */
+.clearGlyph {
+    position: relative;
+    inline-size: var(--portal-space-3);
+    block-size: var(--portal-space-3);
+}
+
+.clearGlyph::before,
+.clearGlyph::after {
+    content: '';
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 0;
+    inline-size: 100%;
+    block-size: var(--portal-border-thickness-thin);
+    background-color: currentcolor;
+    border-radius: var(--portal-radius-pill);
+}
+
+.clearGlyph::before {
+    transform: translateY(-50%) rotate(45deg);
+}
+
+.clearGlyph::after {
+    transform: translateY(-50%) rotate(-45deg);
+}
+
+/* A populated query lifts the field border toward the tone, a subtle state cue
+ * the styles key off the root data-state attribute. */
+.root[data-state='filled'] .field {
+    border-color: var(--portal-tone-border);
+}
+
+/* The disabled field dims and refuses the text cursor; the native disabled
+ * attribute still owns interaction blocking. */
+.root[data-enabled='disabled'] .field {
+    opacity: 0.5;
+}
+
+.root[data-enabled='disabled'] .input {
+    cursor: not-allowed;
+}

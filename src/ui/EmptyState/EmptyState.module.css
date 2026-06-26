@@ -1,0 +1,67 @@
+/*
+ * EmptyState - centered placeholder for the domain-agnostic UI layer, shown
+ * when a region has no data. The root carries .toneScope (from tone.module.css)
+ * so the derived --portal-tone-* vars resolve; this file references only
+ * --portal-* tokens and the derived tone vars, never literal colors or fixed
+ * px. Layout is intrinsic and centered: a stacked, centered flex column whose
+ * content block is width-clamped and auto-margined, so it stays readable over
+ * an arbitrary backdrop without stretching to the viewport. The component is
+ * non-interactive and carries no motion; any pointer target lives in the
+ * consumer-supplied action slot.
+ */
+.root {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--portal-space-3);
+    inline-size: 100%;
+    max-inline-size: min(100%, 32rem);
+    margin-inline: auto;
+    padding-block: var(--portal-space-6);
+    padding-inline: var(--portal-space-5);
+    text-align: center;
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+}
+
+.icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: var(--portal-space-8);
+    block-size: var(--portal-space-8);
+    font-size: var(--portal-size-font-large);
+    line-height: var(--portal-line-height-tight);
+    color: var(--portal-tone-accent);
+}
+
+.icon > svg {
+    inline-size: 100%;
+    block-size: 100%;
+}
+
+.title {
+    margin: 0;
+    font-size: var(--portal-size-text-lg);
+    line-height: var(--portal-line-height-tight);
+    letter-spacing: var(--portal-letter-spacing-wide);
+    color: var(--portal-tone-on);
+}
+
+.description {
+    margin: 0;
+    max-inline-size: min(100%, 40ch);
+    font-size: var(--portal-size-text-md);
+    line-height: var(--portal-line-height-normal);
+    color: var(--portal-color-text-1);
+}
+
+.action {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--portal-space-2);
+    margin-block-start: var(--portal-space-2);
+}

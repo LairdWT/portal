@@ -24,6 +24,7 @@ export type PortalTokens = {
         readonly focus: string;
         readonly danger: string;
         readonly success: string;
+        readonly warning: string;
     };
     readonly space: {
         readonly s1: string;
@@ -55,6 +56,9 @@ export type PortalTokens = {
         readonly thin: string;
         readonly normal: string;
         readonly bold: string;
+    };
+    readonly zIndex: {
+        readonly overlay: string;
     };
     readonly duration: {
         readonly fast: string;
@@ -95,6 +99,7 @@ export const PORTAL_TOKENS: PortalTokens = {
         focus: 'var(--portal-color-focus)',
         danger: 'var(--portal-color-danger)',
         success: 'var(--portal-color-success)',
+        warning: 'var(--portal-color-warning)',
     },
     space: {
         s1: 'var(--portal-space-1)',
@@ -126,6 +131,9 @@ export const PORTAL_TOKENS: PortalTokens = {
         thin: 'var(--portal-border-thickness-thin)',
         normal: 'var(--portal-border-thickness-normal)',
         bold: 'var(--portal-border-thickness-bold)',
+    },
+    zIndex: {
+        overlay: 'var(--portal-z-overlay)',
     },
     duration: {
         fast: 'var(--portal-duration-fast)',

@@ -1,0 +1,79 @@
+/*
+ * Progress feedback for the generic UI layer. The root carries the tone scope
+ * and consumes only the derived --portal-tone-* vars plus --portal-* tokens - no
+ * literal colors or fixed pixels. The track clips its child; a determinate fill
+ * sizes from the data-driven --portal-progress-fill ratio, and an indeterminate
+ * indicator slides only when motion is allowed. All motion lives inside the
+ * prefers-reduced-motion: no-preference media query AND keys off the data-motion
+ * attribute the component sets from useReducedMotion, so the bar holds static
+ * under reduced motion. Progress is non-interactive: no focus target, no pointer
+ * handling.
+ */
+
+.root {
+    display: block;
+    inline-size: 100%;
+    min-inline-size: var(--portal-touch-target-min);
+    font-family: var(--portal-font-sans);
+}
+
+.track {
+    position: relative;
+    display: block;
+    inline-size: 100%;
+    block-size: var(--portal-space-2);
+    overflow: hidden;
+    border: var(--portal-border-thickness-thin) solid var(--portal-tone-border);
+    border-radius: var(--portal-radius-pill);
+    background-color: var(--portal-color-surface-0);
+}
+
+.fill {
+    display: block;
+    block-size: 100%;
+    inline-size: calc(var(--portal-progress-fill, 0) * 100%);
+    border-radius: var(--portal-radius-pill);
+    background-color: var(--portal-tone-accent);
+    box-shadow: 0 0 var(--portal-space-2) var(--portal-tone-glow);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .fill {
+        transition: inline-size var(--portal-duration-ms128)
+            var(--portal-easing-standard);
+    }
+}
+
+/*
+ * Indeterminate segment. Its resting state (reduced motion, or data-motion =
+ * static) is a centered segment, so the indeterminate bar still reads as active
+ * without animation. When motion is allowed it starts at the inline edge and the
+ * keyframes carry it across the clipped track.
+ */
+.indicator {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 30%;
+    inline-size: 40%;
+    border-radius: var(--portal-radius-pill);
+    background-color: var(--portal-tone-accent);
+    box-shadow: 0 0 var(--portal-space-2) var(--portal-tone-glow);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .root[data-motion='animate'] .indicator {
+        inset-inline-start: 0;
+        animation: progress-activity calc(var(--portal-duration-ms128) * 12)
+            var(--portal-easing-standard) infinite;
+    }
+}
+
+@keyframes progress-activity {
+    from {
+        transform: translateX(-100%);
+    }
+
+    to {
+        transform: translateX(250%);
+    }
+}

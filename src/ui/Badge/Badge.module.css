@@ -1,0 +1,57 @@
+/*
+ * Non-interactive badge for the generic UI layer. Two forms switch off the
+ * data-kind attribute: a labelled status chip (dot + label) and a clamped
+ * numeric count badge. The root carries the tone scope and consumes only the
+ * derived --portal-tone-* vars plus --portal-* tokens - no literal colors or
+ * fixed pixels. There is no button, no focus target, and no motion. The status
+ * dot is decorative (aria-hidden); the label text carries the meaning. The count
+ * uses tabular-nums so digit columns stay aligned.
+ */
+.root {
+    display: inline-flex;
+    align-items: center;
+    box-sizing: border-box;
+    font-family: var(--portal-font-sans);
+    line-height: var(--portal-line-height-tight);
+}
+
+.root[data-kind='status'] {
+    gap: var(--portal-space-2);
+    padding-block: var(--portal-space-1);
+    padding-inline: var(--portal-space-3);
+    border: var(--portal-border-thickness-thin) solid var(--portal-tone-border);
+    border-radius: var(--portal-radius-pill);
+    background-color: var(--portal-tone-fill);
+    box-shadow: 0 0 var(--portal-space-2) var(--portal-tone-glow);
+}
+
+.root[data-kind='count'] {
+    justify-content: center;
+    min-inline-size: var(--portal-space-5);
+    block-size: var(--portal-space-5);
+    padding-inline: var(--portal-space-2);
+    border: var(--portal-border-thickness-thin) solid var(--portal-tone-border);
+    border-radius: var(--portal-radius-pill);
+    background-color: var(--portal-tone-fill);
+    box-shadow: 0 0 var(--portal-space-2) var(--portal-tone-glow);
+    color: var(--portal-tone-on);
+}
+
+.dot {
+    inline-size: var(--portal-space-2);
+    block-size: var(--portal-space-2);
+    border-radius: var(--portal-radius-pill);
+    background-color: var(--portal-tone-accent);
+}
+
+.label {
+    font-size: var(--portal-size-text-sm);
+    letter-spacing: var(--portal-letter-spacing-wide);
+    color: var(--portal-color-text-1);
+}
+
+.count {
+    font-size: var(--portal-size-text-sm);
+    font-variant-numeric: tabular-nums;
+    color: var(--portal-color-text-0);
+}

@@ -1,0 +1,124 @@
+/*
+ * Inline alert strip for the generic UI layer. The root carries the tone scope
+ * and consumes only the derived --portal-tone-* vars plus --portal-* tokens - no
+ * literal colors or fixed pixels. The leading inline border reads as the
+ * severity rail; it derives from the tone accent so a consumer themes the strip
+ * by passing a tone (or relies on the per-kind default seed below). The danger
+ * and success kinds take their seed from the shared tone scope via data-status;
+ * info keeps the default accent seed and warning sets its own token seed here.
+ * Layout is intrinsic and the dismiss button keeps the minimum touch target.
+ */
+
+.banner {
+    display: flex;
+    align-items: center;
+    gap: var(--portal-space-3);
+    inline-size: 100%;
+    padding-block: var(--portal-space-3);
+    padding-inline: var(--portal-space-4);
+    border: var(--portal-border-thickness-thin) solid var(--portal-tone-border);
+    border-inline-start-width: var(--portal-border-thickness-bold);
+    border-radius: var(--portal-radius-md);
+    background-color: var(--portal-tone-fill);
+    box-shadow: 0 0 var(--portal-space-2) var(--portal-tone-glow);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+    line-height: var(--portal-line-height-normal);
+}
+
+/*
+ * Per-kind default tone seed. success/danger are driven by data-status through
+ * tone.module.css, so only the info/warning seeds need setting here; info keeps
+ * the scope's accent default. An inline tone (from toneProperties) overrides
+ * either, so a consumer-supplied tone always wins.
+ */
+.banner[data-kind='warning'] {
+    --portal-tone: var(--portal-color-warning);
+}
+
+.icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    color: var(--portal-tone-accent);
+    font-size: var(--portal-size-text-lg);
+    line-height: var(--portal-line-height-tight);
+}
+
+.message {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+    font-size: var(--portal-size-text-md);
+    color: var(--portal-color-text-0);
+}
+
+.dismiss {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    min-inline-size: var(--portal-touch-target-min);
+    min-block-size: var(--portal-touch-target-min);
+    padding: var(--portal-space-2);
+    border: var(--portal-border-thickness-thin) solid transparent;
+    border-radius: var(--portal-radius-md);
+    background-color: transparent;
+    color: var(--portal-color-text-1);
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .dismiss {
+        transition:
+            transform var(--portal-duration-ms128) var(--portal-easing-standard),
+            border-color var(--portal-duration-ms128) var(--portal-easing-standard),
+            color var(--portal-duration-ms128) var(--portal-easing-standard);
+    }
+}
+
+.dismiss:hover {
+    color: var(--portal-color-text-0);
+    border-color: var(--portal-tone-border);
+}
+
+.dismiss:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: var(--portal-space-1);
+}
+
+.dismiss:active {
+    transform: scale(0.95);
+}
+
+/*
+ * The dismiss glyph is a CSS-drawn cross (two rotated bars on currentColor), so
+ * the close affordance carries no literal text or icon dependency. It is
+ * decorative (aria-hidden); the button's aria-label "Dismiss" names the action.
+ */
+.dismissGlyph {
+    position: relative;
+    inline-size: var(--portal-space-4);
+    block-size: var(--portal-space-4);
+}
+
+.dismissGlyph::before,
+.dismissGlyph::after {
+    content: '';
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 0;
+    inline-size: 100%;
+    block-size: var(--portal-border-thickness-thin);
+    border-radius: var(--portal-radius-pill);
+    background-color: currentcolor;
+}
+
+.dismissGlyph::before {
+    transform: rotate(45deg);
+}
+
+.dismissGlyph::after {
+    transform: rotate(-45deg);
+}

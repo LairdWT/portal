@@ -1,0 +1,62 @@
+/*
+ * Popover - floating panel primitive for the overlay layer. The panel is
+ * portal-rendered and positioned with inline top/left from the runtime; this
+ * file styles only its surface and consumes only --portal-* tokens and the
+ * derived --portal-tone-* vars (no literal colors or fixed pixel sizing). It
+ * sits on the overlay stacking layer via the --portal-z-overlay token rather
+ * than an inline z-index literal. The box is shrink-to-fit, capped to the
+ * viewport with logical max sizes so long content scrolls instead of
+ * overflowing. Entrance motion is gated behind both the reduced-motion media
+ * query and the data-motion attribute the component sets.
+ */
+
+/* Inline wrapper around a consumer-supplied trigger node, so the Popover holds a
+ * measurable anchor element without disturbing the trigger's own layout. */
+.anchor {
+    display: inline-flex;
+}
+
+.panel {
+    position: fixed;
+    z-index: var(--portal-z-overlay);
+    box-sizing: border-box;
+    max-inline-size: calc(100dvw - 2 * var(--portal-space-6));
+    max-block-size: calc(100dvh - 2 * var(--portal-space-6));
+    padding: var(--portal-space-4);
+    overflow: auto;
+    border: var(--portal-border-thickness-thin) solid var(--portal-tone-border);
+    border-radius: var(--portal-radius-md);
+    background-color: var(--portal-color-surface-0);
+    box-shadow:
+        0 0 var(--portal-space-4) var(--portal-tone-glow),
+        0 var(--portal-space-2) var(--portal-space-6)
+            color-mix(in oklab, var(--portal-color-bg-0) 60%, transparent);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+    font-size: var(--portal-size-text-md);
+    line-height: var(--portal-line-height-normal);
+}
+
+.panel:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: var(--portal-space-1);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .panel[data-motion='full'] {
+        animation: portal-popover-in var(--portal-duration-ms128)
+            var(--portal-easing-standard);
+    }
+}
+
+@keyframes portal-popover-in {
+    from {
+        opacity: 0;
+        transform: translateY(calc(-1 * var(--portal-space-1)));
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

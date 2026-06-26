@@ -1,0 +1,75 @@
+/*
+ * Typed typography for the generic UI layer. The root carries the tone scope and
+ * a data-role attribute; every role drives font size/weight/color/letter spacing
+ * from --portal-* tokens and the derived --portal-tone-* vars only - no literal
+ * colors and no fixed-pixel sizing. Text is non-interactive: no focus target, no
+ * pointer behaviour, and no motion, so there is nothing to gate behind
+ * reduced-motion. The accent role is the sole tone-aware role and reads
+ * --portal-tone-accent; the dim role derives a quieter foreground from the text
+ * token via color-mix, and the styled role clips the metal gradient to the glyph
+ * shapes for an aesthetic display run.
+ */
+
+.root {
+    margin: 0;
+    font-family: var(--portal-font-sans);
+    font-size: var(--portal-size-text-md);
+    line-height: var(--portal-line-height-normal);
+    color: var(--portal-color-text-0);
+}
+
+.root[data-role='heading'] {
+    font-size: var(--portal-size-text-lg);
+    font-weight: 700;
+    line-height: var(--portal-line-height-tight);
+    color: var(--portal-color-text-0);
+}
+
+.root[data-role='body'] {
+    font-size: var(--portal-size-text-md);
+    color: var(--portal-color-text-0);
+}
+
+.root[data-role='section'] {
+    font-size: var(--portal-size-text-sm);
+    font-weight: 600;
+    letter-spacing: var(--portal-letter-spacing-wide);
+    line-height: var(--portal-line-height-tight);
+    text-transform: uppercase;
+    color: var(--portal-color-text-1);
+}
+
+.root[data-role='secondary'] {
+    font-size: var(--portal-size-text-sm);
+    letter-spacing: var(--portal-letter-spacing-wide);
+    color: var(--portal-color-text-1);
+}
+
+.root[data-role='dim'] {
+    font-size: var(--portal-size-text-sm);
+    color: color-mix(
+        in oklab,
+        var(--portal-color-text-1) 70%,
+        var(--portal-color-bg-0)
+    );
+}
+
+.root[data-role='accent'] {
+    font-weight: 600;
+    color: var(--portal-tone-accent);
+}
+
+.root[data-role='mono'] {
+    font-family: var(--portal-font-mono);
+    font-variant-numeric: tabular-nums;
+    color: var(--portal-color-text-0);
+}
+
+.root[data-role='styled'] {
+    font-size: var(--portal-size-text-lg);
+    font-weight: 700;
+    line-height: var(--portal-line-height-tight);
+    background: var(--portal-gradient-metal);
+    background-clip: text;
+    color: transparent;
+}

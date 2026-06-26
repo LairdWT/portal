@@ -1,0 +1,60 @@
+/*
+ * Section - lightweight titled content grouping for the generic UI layer. Unlike
+ * Panel it carries NO elevation or surface chrome: no filled background and no
+ * shadow, so the grouping reads as structure rather than a card. The root carries
+ * .toneScope (from tone.module.css) so the derived --portal-tone-* vars resolve;
+ * this file references only --portal-* tokens and the derived tone vars, never
+ * literal colors or px. The header pairs a decorative tone-accent bar with a
+ * tone-bordered rule for a tone-able header accent, while the body stays chrome
+ * free. The component is non-interactive, so there is no pointer target and no
+ * motion - any controls live in the consumer-supplied actions slot.
+ */
+.root {
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-3);
+    inline-size: 100%;
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    gap: var(--portal-space-3);
+    padding-block-end: var(--portal-space-2);
+    border-block-end: var(--portal-border-thickness-thin) solid
+        var(--portal-tone-border);
+}
+
+.accent {
+    flex: none;
+    inline-size: var(--portal-space-1);
+    block-size: var(--portal-size-text-lg);
+    border-radius: var(--portal-radius-pill);
+    background-color: var(--portal-tone-accent);
+}
+
+.title {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+    margin: 0;
+    font-size: var(--portal-size-text-lg);
+    line-height: var(--portal-line-height-tight);
+    letter-spacing: var(--portal-letter-spacing-wide);
+    color: var(--portal-tone-on);
+}
+
+.actions {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: var(--portal-space-2);
+}
+
+.body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-3);
+    color: var(--portal-color-text-0);
+}
