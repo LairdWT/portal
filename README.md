@@ -25,7 +25,7 @@ https://lairdwt.github.io/portal/
 ## Install
 
 ```sh
-pnpm add portal
+pnpm add @laird-wt/portal
 ```
 
 React and React DOM are required peer dependencies (version 18 or newer):
@@ -47,9 +47,9 @@ Import components from the package root and load the stylesheet once at your
 application entry point:
 
 ```tsx
-import 'portal/styles.css';
+import '@laird-wt/portal/styles.css';
 
-import { CTA } from 'portal';
+import { CTA } from '@laird-wt/portal';
 
 export function Example(): JSX.Element {
     return <CTA onClick={() => undefined}>Press</CTA>;
@@ -59,7 +59,7 @@ export function Example(): JSX.Element {
 The optional 3D surface lives behind a separate entry point:
 
 ```tsx
-import { ControllerSurface } from 'portal/r3f';
+import { ControllerSurface } from '@laird-wt/portal/r3f';
 ```
 
 ## Theming
@@ -80,7 +80,7 @@ The theme entry point exports the token names and default values for
 programmatic use:
 
 ```ts
-import { portalTokens } from 'portal/theme';
+import { portalTokens } from '@laird-wt/portal/theme';
 ```
 
 Sizing uses `clamp`, `min`, `max`, and intrinsic units rather than fixed
@@ -104,7 +104,7 @@ Override it through `TimeProviderContext` to make emission deterministic in
 tests or to align the clock with a host application:
 
 ```tsx
-import { TimeProviderContext } from 'portal';
+import { TimeProviderContext } from '@laird-wt/portal';
 
 <TimeProviderContext.Provider value={() => engineClock.nowMs()}>
     <Controller />
@@ -117,7 +117,7 @@ registry, and a binding can be scoped to a named context (a profile such as
 `menu` or `gameplay`) with a global fallback:
 
 ```ts
-import { createRegistry } from 'portal';
+import { createRegistry } from '@laird-wt/portal';
 
 const registry = createRegistry([
     { inputId: 'fire', actionId: 'weapon.primary' },
@@ -148,7 +148,7 @@ component sets `--portal-tone` from it and derives its accent, border, glow, and
 fill, so a consumer maps any domain palette without per-component CSS:
 
 ```tsx
-import { SelectableTile, StatPill } from 'portal';
+import { SelectableTile, StatPill } from '@laird-wt/portal';
 
 <SelectableTile id="ship-1" tone="var(--faction-crimson)" onSelect={select}>
     Frigate
