@@ -2,6 +2,7 @@ import {
     type KeyboardEvent,
     type ReactElement,
     type RefObject,
+    useEffect,
     useRef,
 } from 'react';
 
@@ -15,6 +16,14 @@ import {
     type SegmentedControlProps,
     type UiSegmentItem,
 } from './SegmentedControl.types';
+
+// Dev-only diagnostic emitted when the radiogroup has no accessible name. The
+// `label` prop stays optional (making it required would be a breaking change), so
+// a runtime guard - gated on import.meta.env.DEV and stripped from production
+// builds - surfaces the missing name during development instead of letting an
+// unnamed radiogroup ship.
+const MISSING_NAME_MESSAGE: string =
+    'SegmentedControl: a radiogroup needs an accessible name; pass a non-empty `label`.';
 
 // Resolves the index of the currently selected segment, falling back to the
 // first segment when the controlled value matches no item, so focus and roving
@@ -40,12 +49,30 @@ export function SegmentedControl({
     const resolvedEnabled: EEnabledState = useResolvedEnabled(enabled);
     const isDisabled: boolean = resolvedEnabled === EEnabledState.Disabled;
     const selectedIndex: number = resolveSelectedIndex(items, value);
-    const segmentRefs: RefObject<readonly (HTMLButtonElement | null)[]> = useRef<
-        readonly (HTMLButtonElement | null)[]
+    // A fixed-index ref array: the ref callback writes refs.current[index] = el
+    // (no per-call spread that would accumulate stale entries). An effect keyed on
+    // items keeps the array length in sync so a shrinking item set prunes the
+    // trailing refs.
+    const segmentRefs: RefObject<(HTMLButtonElement | null)[]> = useRef<
+        (HTMLButtonElement | null)[]
     >([]);
     const className: string = [toneStyles.toneScope, styles.group]
         .filter((entry: string | undefined): entry is string => entry !== undefined)
         .join(' ');
+
+    useEffect((): void => {
+        if (!import.meta.env.DEV) {
+            return;
+        }
+        if (label !== undefined && label.length > 0) {
+            return;
+        }
+        console.error(MISSING_NAME_MESSAGE);
+    }, [label]);
+
+    useEffect((): void => {
+        segmentRefs.current.length = items.length;
+    }, [items]);
 
     function select(index: number): void {
         switch (resolvedEnabled) {
@@ -127,11 +154,7 @@ export function SegmentedControl({
                     <button
                         key={item.id}
                         ref={(element: HTMLButtonElement | null): void => {
-                            const next: (HTMLButtonElement | null)[] = [
-                                ...segmentRefs.current,
-                            ];
-                            next[index] = element;
-                            segmentRefs.current = next;
+                            segmentRefs.current[index] = element;
                         }}
                         type="button"
                         role="radio"

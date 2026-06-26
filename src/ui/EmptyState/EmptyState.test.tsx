@@ -33,6 +33,13 @@ describe('EmptyState', (): void => {
         expect(heading).toHaveTextContent('No results');
     });
 
+    it('renders the title at heading level four', (): void => {
+        render(<EmptyState title="No results" headingLevel={4} />);
+
+        const heading: HTMLElement = screen.getByRole('heading', { level: 4 });
+        expect(heading).toHaveTextContent('No results');
+    });
+
     it('defaults to a status live region labelled by the title', (): void => {
         render(<EmptyState title="No results" />);
 

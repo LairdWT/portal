@@ -78,17 +78,17 @@
     }
 }
 
-.dismiss:hover {
-    color: var(--portal-color-text-0);
-    border-color: var(--portal-tone-border);
-}
-
 .dismiss:focus-visible {
     outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
     outline-offset: var(--portal-space-1);
 }
 
-.dismiss:active {
+.dismiss:hover:not(:disabled) {
+    color: var(--portal-color-text-0);
+    border-color: var(--portal-tone-border);
+}
+
+.dismiss:active:not(:disabled) {
     transform: scale(0.95);
 }
 

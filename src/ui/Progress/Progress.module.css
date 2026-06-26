@@ -2,7 +2,8 @@
  * Progress feedback for the generic UI layer. The root carries the tone scope
  * and consumes only the derived --portal-tone-* vars plus --portal-* tokens - no
  * literal colors or fixed pixels. The track clips its child; a determinate fill
- * sizes from the data-driven --portal-progress-fill ratio, and an indeterminate
+ * spans the full track and is scaled to the data-driven --portal-progress-fill
+ * ratio with transform: scaleX (a compositor-only property), and an indeterminate
  * indicator slides only when motion is allowed. All motion lives inside the
  * prefers-reduced-motion: no-preference media query AND keys off the data-motion
  * attribute the component sets from useReducedMotion, so the bar holds static
@@ -28,18 +29,29 @@
     background-color: var(--portal-color-surface-0);
 }
 
+/*
+ * The determinate fill spans the full track and is scaled horizontally to the
+ * fill ratio. Driving width with transform: scaleX keeps the animation on the
+ * compositor (no per-frame reflow), unlike animating inline-size. The clipping
+ * track (overflow: hidden + pill radius) owns the rounded ends, so the fill needs
+ * no radius of its own. transform-origin has no logical keyword; 0 50% pins the
+ * scale to the inline-start edge in the default writing mode. Documented tradeoff
+ * (per the conformance plan): the tone glow rides on the fill, so its blur scales
+ * slightly with the ratio - a minor, accepted cosmetic effect.
+ */
 .fill {
     display: block;
     block-size: 100%;
-    inline-size: calc(var(--portal-progress-fill, 0) * 100%);
-    border-radius: var(--portal-radius-pill);
+    inline-size: 100%;
+    transform: scaleX(var(--portal-progress-fill, 0));
+    transform-origin: 0 50%;
     background-color: var(--portal-tone-accent);
     box-shadow: 0 0 var(--portal-space-2) var(--portal-tone-glow);
 }
 
 @media (prefers-reduced-motion: no-preference) {
     .fill {
-        transition: inline-size var(--portal-duration-ms128)
+        transition: transform var(--portal-duration-ms128)
             var(--portal-easing-standard);
     }
 }

@@ -58,6 +58,44 @@ describe('Text', (): void => {
         expect(element).toHaveAttribute('data-role', ETextRole.Body);
     });
 
+    it('keeps the heading role on data-role when as overrides the element', (): void => {
+        render(
+            <Text role={ETextRole.Heading} as="div">
+                Heading as div
+            </Text>,
+        );
+
+        const element: HTMLElement = screen.getByText('Heading as div');
+        expect(element.tagName).toBe('DIV');
+        expect(element).toHaveAttribute('data-role', ETextRole.Heading);
+        // A div carries no implicit heading semantics, so the override drops the
+        // heading role even though the styling role is retained.
+        expect(screen.queryByRole('heading')).not.toBeInTheDocument();
+    });
+
+    it('exposes data-role for the secondary, dim, and styled roles', (): void => {
+        render(
+            <>
+                <Text role={ETextRole.Secondary}>Secondary copy</Text>
+                <Text role={ETextRole.Dim}>Dim copy</Text>
+                <Text role={ETextRole.Styled}>Styled copy</Text>
+            </>,
+        );
+
+        expect(screen.getByText('Secondary copy')).toHaveAttribute(
+            'data-role',
+            ETextRole.Secondary,
+        );
+        expect(screen.getByText('Dim copy')).toHaveAttribute(
+            'data-role',
+            ETextRole.Dim,
+        );
+        expect(screen.getByText('Styled copy')).toHaveAttribute(
+            'data-role',
+            ETextRole.Styled,
+        );
+    });
+
     it('carries the tone scope class on the root', (): void => {
         render(<Text>Body copy</Text>);
 

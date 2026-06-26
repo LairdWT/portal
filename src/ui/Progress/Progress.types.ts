@@ -26,6 +26,23 @@ export const EProgressMode: {
 };
 export type EProgressMode = (typeof EProgressMode)[keyof typeof EProgressMode];
 
+// The indeterminate motion state, surfaced through the data-motion attribute the
+// CSS keys off. Modeled as an E-prefixed annotated const-object enum (matching
+// every other data-attribute vocabulary in this layer) rather than a bare inline
+// union. `animate` plays the activity keyframes; `static` holds the resting
+// segment when reduced motion is requested. NOTE: this stays distinct from the
+// Popover overlay's data-motion vocabulary ('full' | 'reduced'); unifying the two
+// would require editing Popover, which is outside this conformance pass.
+export const EProgressMotion: {
+    readonly Animate: 'animate';
+    readonly Static: 'static';
+} = {
+    Animate: 'animate',
+    Static: 'static',
+};
+export type EProgressMotion =
+    (typeof EProgressMotion)[keyof typeof EProgressMotion];
+
 // Fields shared by both modes.
 type ProgressCommon = Readonly<{
     label: string;

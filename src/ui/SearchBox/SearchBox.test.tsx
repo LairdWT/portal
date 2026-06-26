@@ -1,4 +1,9 @@
-import { render, type RenderResult, screen } from '@testing-library/react';
+import {
+    fireEvent,
+    render,
+    type RenderResult,
+    screen,
+} from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { type Dispatch, type SetStateAction, useState } from 'react';
 import { describe, expect, it, type Mock, vi } from 'vitest';
@@ -55,6 +60,25 @@ describe('SearchBox', (): void => {
 
         expect(onSubmit).toHaveBeenCalledTimes(1);
         expect(onSubmit).toHaveBeenLastCalledWith('troll');
+    });
+
+    it('does not fire onSubmit on Enter when disabled', (): void => {
+        const onSubmit: Mock<(value: string) => void> =
+            vi.fn<(value: string) => void>();
+        render(
+            <SearchBox
+                label={FIELD_LABEL}
+                value="troll"
+                enabled={EEnabledState.Disabled}
+                onSubmit={onSubmit}
+            />,
+        );
+
+        // fireEvent dispatches straight to the handler so the disabled guard in
+        // handleKeyDown is exercised even though a disabled input is unfocusable.
+        fireEvent.keyDown(screen.getByRole('searchbox'), { key: 'Enter' });
+
+        expect(onSubmit).not.toHaveBeenCalled();
     });
 
     it('hides the clear button while the value is empty', (): void => {

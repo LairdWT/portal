@@ -1,6 +1,6 @@
 import { type ReactElement, type ReactNode, useId } from 'react';
 
-import { toneProperties } from '../tone';
+import { EUiStatus, toneProperties } from '../tone';
 import toneStyles from '../tone.module.css';
 import styles from './EmptyState.module.css';
 import {
@@ -46,7 +46,7 @@ export function EmptyState({
     action,
     headingLevel = 2,
     role = EEmptyStateRole.Status,
-    status,
+    status = EUiStatus.None,
     tone,
 }: EmptyStateProps): ReactElement {
     // A stable id lets the root label itself with the title via aria-labelledby,

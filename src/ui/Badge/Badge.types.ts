@@ -37,6 +37,13 @@ type BadgeStatusProps = Readonly<{
 // exceeds `max` (default 99) it renders `${max}+` (for example "99+"). An
 // optional `label` names what is being counted; it is combined with the rendered
 // number into the badge's accessible label (for example "12 notifications").
+//
+// Intentional role asymmetry with the status badge: the count badge is a static,
+// named indicator and carries NO role="status". A frequently-incrementing count
+// (notifications, unread) would otherwise announce on every change and flood a
+// screen reader. The count is read when navigated to, not announced live; the
+// status badge alone is the live region. If a consumer needs a count change
+// announced, they own a live region around the badge.
 type BadgeCountProps = Readonly<{
     kind: typeof EBadgeKind.Count;
     count: number;

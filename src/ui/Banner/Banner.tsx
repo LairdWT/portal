@@ -5,14 +5,28 @@ import toneStyles from '../tone.module.css';
 import styles from './Banner.module.css';
 import { type BannerProps, EBannerKind } from './Banner.types';
 
+// The accessible name of the dismiss control. Hoisted to a module const (the
+// same pattern SearchBox uses for CLEAR_LABEL) so the component and its tests
+// agree on the exact label without duplicating the literal.
+const DISMISS_LABEL: string = 'Dismiss';
+
 // The live-region role per severity: the danger kind is assertive (role="alert")
 // so it is announced immediately; the lower-severity kinds are polite
 // (role="status"). Severity is never conveyed by color alone - the role and the
 // message text carry it.
 type BannerRole = 'status' | 'alert';
 
+// Branch on the kind with an exhaustive switch and NO default, so a future kind
+// is a compile error rather than silently defaulting to the polite role.
 function resolveRole(kind: EBannerKind): BannerRole {
-    return kind === EBannerKind.Danger ? 'alert' : 'status';
+    switch (kind) {
+        case EBannerKind.Danger:
+            return 'alert';
+        case EBannerKind.Info:
+        case EBannerKind.Success:
+        case EBannerKind.Warning:
+            return 'status';
+    }
 }
 
 // Map the kind onto the universal status the tone scope reads. success/danger
@@ -68,7 +82,7 @@ export function Banner({
                 <button
                     type="button"
                     className={styles.dismiss}
-                    aria-label="Dismiss"
+                    aria-label={DISMISS_LABEL}
                     onClick={handleDismiss}
                 >
                     <span className={styles.dismissGlyph} aria-hidden="true" />

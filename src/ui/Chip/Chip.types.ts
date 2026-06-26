@@ -23,7 +23,11 @@ export type EChipState = (typeof EChipState)[keyof typeof EChipState];
 // text used to build the remove button's accessible name ("Remove <label>") and
 // to name the chip root for assistive technology; supply it whenever the chip is
 // removable so the control reads clearly. `selected` flags the visual selected
-// state, exposed through data-state and a non-color marker. `onRemove` opts the
+// state, exposed through data-state and a non-color marker. Selection is
+// presentational only: it is reflected visually but is NOT announced to assistive
+// technology (the chip is a labelled group, not a toggle). A consumer that needs
+// an announced on/off state should wrap the chip in a real toggle control
+// (for example a button with aria-pressed). `onRemove` opts the
 // chip into removable behaviour: it renders a dedicated remove button (activated
 // by click or Enter/Space). `status` is the universal danger/success override and
 // `tone` flows through the shared tone scope; `enabled` is resolved through

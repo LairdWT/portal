@@ -1,6 +1,6 @@
-import type { ReactElement } from 'react';
+import { type CSSProperties, type ReactElement } from 'react';
 
-import { toneProperties } from '../tone';
+import { EUiStatus, toneProperties } from '../tone';
 import toneStyles from '../tone.module.css';
 import styles from './Badge.module.css';
 import { type BadgeProps, EBadgeKind } from './Badge.types';
@@ -23,43 +23,55 @@ function formatCount(count: number, max: number): string {
 }
 
 export function Badge(props: BadgeProps): ReactElement {
-    const { status, tone }: BadgeProps = props;
+    const { tone }: BadgeProps = props;
+    // Default the universal status to 'none' so data-status is always present,
+    // matching Chip/Section/Progress/SearchBox/SegmentedControl/Banner (X5).
+    const status: EUiStatus = props.status ?? EUiStatus.None;
     const className: string = [toneStyles.toneScope, styles.root]
         .filter((entry: string | undefined): entry is string => entry !== undefined)
         .join(' ');
+    const style: CSSProperties = toneProperties(tone);
 
-    if (props.kind === EBadgeKind.Count) {
-        const max: number = props.max ?? DEFAULT_COUNT_MAX;
-        const displayText: string = formatCount(props.count, max);
-        const accessibleLabel: string =
-            props.label !== undefined
-                ? `${displayText} ${props.label}`
-                : displayText;
-        return (
-            <span
-                className={className}
-                style={toneProperties(tone)}
-                data-kind={props.kind}
-                data-status={status}
-                aria-label={accessibleLabel}
-            >
-                <span className={styles.count}>{displayText}</span>
-            </span>
-        );
+    // Branch on the discriminant with an exhaustive switch and NO default: each
+    // kind returns inside its case, so adding a third kind is a compile error
+    // rather than a silent fall-through to the status form.
+    switch (props.kind) {
+        case EBadgeKind.Count: {
+            const max: number = props.max ?? DEFAULT_COUNT_MAX;
+            const displayText: string = formatCount(props.count, max);
+            const accessibleLabel: string =
+                props.label !== undefined
+                    ? `${displayText} ${props.label}`
+                    : displayText;
+            return (
+                <span
+                    className={className}
+                    style={style}
+                    data-kind={props.kind}
+                    data-status={status}
+                    aria-label={accessibleLabel}
+                >
+                    <span className={styles.count}>{displayText}</span>
+                </span>
+            );
+        }
+        case EBadgeKind.Status: {
+            const showDot: boolean = props.showDot !== false;
+            return (
+                <span
+                    role="status"
+                    className={className}
+                    style={style}
+                    data-kind={props.kind}
+                    data-status={status}
+                    aria-label={props.label}
+                >
+                    {showDot ? (
+                        <span className={styles.dot} aria-hidden="true" />
+                    ) : null}
+                    <span className={styles.label}>{props.label}</span>
+                </span>
+            );
+        }
     }
-
-    const showDot: boolean = props.showDot !== false;
-    return (
-        <span
-            role="status"
-            className={className}
-            style={toneProperties(tone)}
-            data-kind={props.kind}
-            data-status={status}
-            aria-label={props.label}
-        >
-            {showDot ? <span className={styles.dot} aria-hidden="true" /> : null}
-            <span className={styles.label}>{props.label}</span>
-        </span>
-    );
 }

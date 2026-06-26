@@ -4,7 +4,11 @@ import { useReducedMotion } from '../../react/hooks/useReducedMotion';
 import { EUiStatus, toneProperties } from '../tone';
 import toneStyles from '../tone.module.css';
 import styles from './Progress.module.css';
-import { EProgressMode, type ProgressProps } from './Progress.types';
+import {
+    EProgressMode,
+    EProgressMotion,
+    type ProgressProps,
+} from './Progress.types';
 
 // String-typed (not a string literal) so the computed key satisfies the
 // CSSProperties type, matching the existing --portal-slider-fill pattern.
@@ -31,6 +35,7 @@ export function Progress(props: ProgressProps): ReactElement {
         const max: number = props.max ?? 1;
         const ratio: number = computeFillRatio(props.value, max);
         const valueNow: number = Math.min(Math.max(props.value, 0), max);
+        const percent: number = Math.round(ratio * 100);
         const rootStyle: CSSProperties = {
             ...toneProperties(props.tone),
             [FILL_PROPERTY]: String(ratio),
@@ -46,6 +51,7 @@ export function Progress(props: ProgressProps): ReactElement {
                 aria-valuemin={0}
                 aria-valuemax={max}
                 aria-valuenow={valueNow}
+                aria-valuetext={`${String(percent)}%`}
             >
                 <span className={styles.track}>
                     <span className={styles.fill} />
@@ -58,7 +64,9 @@ export function Progress(props: ProgressProps): ReactElement {
     // when this reads 'animate' AND the prefers-reduced-motion: no-preference
     // query holds, so motion is gated twice - here via useReducedMotion and
     // again in the stylesheet.
-    const motion: 'animate' | 'static' = reducedMotion ? 'static' : 'animate';
+    const motion: EProgressMotion = reducedMotion
+        ? EProgressMotion.Static
+        : EProgressMotion.Animate;
     return (
         <div
             className={className}

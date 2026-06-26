@@ -48,6 +48,12 @@ describe('Section', (): void => {
         expect(screen.getByRole('button', { name: 'Clear' })).toBeInTheDocument();
     });
 
+    it('omits the actions region when no actions are supplied', (): void => {
+        render(<Section title="Telemetry">Body</Section>);
+
+        expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    });
+
     it('applies the tone style to the root', (): void => {
         const toneColor: string = 'rgb(255, 0, 0)';
         render(

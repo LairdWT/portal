@@ -70,6 +70,31 @@ describe('Progress', (): void => {
         expect(bar.style.getPropertyValue('--portal-progress-fill')).toBe('1');
     });
 
+    it('drives the fill ratio and value text for a mid-range value', (): void => {
+        render(
+            <Progress mode={EProgressMode.Determinate} label="Sync" value={0.6} />,
+        );
+
+        const bar: HTMLElement = screen.getByRole('progressbar', { name: 'Sync' });
+        expect(bar.style.getPropertyValue('--portal-progress-fill')).toBe('0.6');
+        expect(bar).toHaveAttribute('aria-valuetext', '60%');
+    });
+
+    it('reports a zero fill ratio when max is not positive', (): void => {
+        render(
+            <Progress
+                mode={EProgressMode.Determinate}
+                label="Sync"
+                value={5}
+                max={0}
+            />,
+        );
+
+        const bar: HTMLElement = screen.getByRole('progressbar', { name: 'Sync' });
+        expect(bar.style.getPropertyValue('--portal-progress-fill')).toBe('0');
+        expect(bar).toHaveAttribute('aria-valuenow', '0');
+    });
+
     it('applies the tone style to the root', (): void => {
         const toneColor: string = 'rgb(255, 0, 0)';
         render(

@@ -144,9 +144,10 @@ describe('Chip', (): void => {
         });
         expect(removeButton).toBeDisabled();
 
+        // Clicking the disabled remove button is a no-op. (There is deliberately
+        // no Backspace-to-remove handler on the container, so pressing Backspace
+        // would prove nothing about the disabled contract.)
         await user.click(removeButton);
-        screen.getByLabelText('Crimson').focus();
-        await user.keyboard('{Backspace}');
 
         expect(onRemove).not.toHaveBeenCalled();
     });

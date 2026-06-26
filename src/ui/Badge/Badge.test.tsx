@@ -52,6 +52,25 @@ describe('Badge', (): void => {
         expect(screen.getByLabelText('3 notifications')).toBeInTheDocument();
     });
 
+    it('clamps to the default max of 99 when no max is supplied', (): void => {
+        render(<Badge kind={EBadgeKind.Count} count={150} />);
+
+        expect(screen.getByText('99+')).toBeInTheDocument();
+        expect(screen.getByLabelText('99+')).toBeInTheDocument();
+    });
+
+    it('floors a negative count to zero', (): void => {
+        render(<Badge kind={EBadgeKind.Count} count={-3} />);
+
+        expect(screen.getByText('0')).toBeInTheDocument();
+    });
+
+    it('renders a non-finite count as zero', (): void => {
+        render(<Badge kind={EBadgeKind.Count} count={Number.NaN} />);
+
+        expect(screen.getByText('0')).toBeInTheDocument();
+    });
+
     it('applies tabular-nums via the count class', (): void => {
         render(<Badge kind={EBadgeKind.Count} count={7} />);
 
