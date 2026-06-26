@@ -60,9 +60,11 @@ export default defineConfig({
             },
         ],
         onConsoleLog: (log: string): boolean | undefined => {
-            // three r183 deprecated THREE.Clock; the warning originates inside
+            // three r183 deprecated THREE.Clock; the warning fires inside
             // @react-three/fiber when a Canvas mounts, not in Portal source.
-            // Suppress only that one line so test stderr stays signal.
+            // Suppress only that one line so test stderr stays signal. The
+            // Storybook browser project relays the same warning through a channel
+            // this hook does not see; it is filtered in .storybook/preview.tsx.
             if (log.includes('THREE.Clock: This module has been deprecated')) {
                 return false;
             }
