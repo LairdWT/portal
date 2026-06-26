@@ -26,8 +26,7 @@ import { SecretField } from './SecretField';
 import { ESecretAutocomplete, type SecretFieldProps } from './SecretField.types';
 
 const FIELD_LABEL: string = 'Password';
-const REVEAL_LABEL: string = 'Show password';
-const CONCEAL_LABEL: string = 'Hide password';
+const TOGGLE_LABEL: string = 'Reveal password';
 const CAPS_WARNING: string = 'Caps Lock is on';
 const SECRET: string = 'hunter2-correct-horse';
 
@@ -117,26 +116,25 @@ describe('SecretField', (): void => {
             />,
         );
 
+        // One stable-named toggle throughout: shown/hidden is conveyed by
+        // aria-pressed, and the accessible NAME must not change as it toggles.
         const toggle: HTMLElement = screen.getByRole('button', {
-            name: REVEAL_LABEL,
+            name: TOGGLE_LABEL,
         });
         expect(toggle).toHaveAttribute('aria-pressed', 'false');
 
         await user.click(toggle);
         expect(screen.getByLabelText(FIELD_LABEL)).toHaveAttribute('type', 'text');
-        const concealToggle: HTMLElement = screen.getByRole('button', {
-            name: CONCEAL_LABEL,
-        });
-        expect(concealToggle).toHaveAttribute('aria-pressed', 'true');
+        expect(toggle).toHaveAttribute('aria-pressed', 'true');
+        expect(toggle).toHaveAccessibleName(TOGGLE_LABEL);
 
-        await user.click(concealToggle);
+        await user.click(toggle);
         expect(screen.getByLabelText(FIELD_LABEL)).toHaveAttribute(
             'type',
             'password',
         );
-        expect(
-            screen.getByRole('button', { name: REVEAL_LABEL }),
-        ).toBeInTheDocument();
+        expect(toggle).toHaveAttribute('aria-pressed', 'false');
+        expect(toggle).toHaveAccessibleName(TOGGLE_LABEL);
     });
 
     it('does not submit a surrounding form when the toggle is pressed', async (): Promise<void> => {
@@ -153,7 +151,7 @@ describe('SecretField', (): void => {
             </form>,
         );
 
-        await user.click(screen.getByRole('button', { name: REVEAL_LABEL }));
+        await user.click(screen.getByRole('button', { name: TOGGLE_LABEL }));
 
         expect(onSubmit).not.toHaveBeenCalled();
     });
@@ -197,7 +195,7 @@ describe('SecretField', (): void => {
         expect(onValueChange).not.toHaveBeenCalled();
 
         const toggle: HTMLElement = screen.getByRole('button', {
-            name: REVEAL_LABEL,
+            name: TOGGLE_LABEL,
         });
         expect(toggle).toBeDisabled();
         await user.click(toggle);
@@ -269,8 +267,12 @@ describe('SecretField', (): void => {
         );
 
         await user.type(screen.getByLabelText(FIELD_LABEL), SECRET);
-        await user.click(screen.getByRole('button', { name: REVEAL_LABEL }));
-        await user.click(screen.getByRole('button', { name: CONCEAL_LABEL }));
+        // The single stable-named toggle reveals then re-masks across two clicks.
+        const toggle: HTMLElement = screen.getByRole('button', {
+            name: TOGGLE_LABEL,
+        });
+        await user.click(toggle);
+        await user.click(toggle);
         await user.click(screen.getByRole('button', { name: 'Submit' }));
 
         const loggedCalls: string = JSON.stringify([
@@ -296,7 +298,7 @@ describe('SecretField', (): void => {
         const input: HTMLInputElement =
             screen.getByLabelText<HTMLInputElement>(FIELD_LABEL);
         await user.type(input, SECRET);
-        await user.click(screen.getByRole('button', { name: REVEAL_LABEL }));
+        await user.click(screen.getByRole('button', { name: TOGGLE_LABEL }));
 
         // The value lives only in the input's own value property; native masking is
         // visual, not a value copy.

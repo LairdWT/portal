@@ -67,11 +67,10 @@ export type ConfirmDialogProps = Readonly<{
 // the discriminant that swaps the prompt's TextField for a SecretField; its
 // REQUIRED `autoComplete` makes a half-built secret prompt unrepresentable (a
 // masked prompt cannot be requested without choosing current/new-password). The
-// reveal/conceal/caps strings forward to the field for i18n.
+// stable reveal-toggle label and caps string forward to the field for i18n.
 export type SecretPromptOptions = Readonly<{
     autoComplete: ESecretAutocomplete;
-    revealLabel?: string;
-    concealLabel?: string;
+    toggleLabel?: string;
     capsLockWarning?: string;
 }>;
 

@@ -24,7 +24,7 @@ test('the reveal toggle clears the 48px touch target', async ({
     page: Page;
 }): Promise<void> => {
     await page.goto('/');
-    const toggle: Locator = page.getByRole('button', { name: 'Show password' });
+    const toggle: Locator = page.getByRole('button', { name: 'Reveal password' });
     await expect(toggle).toBeVisible();
     const box: {
         x: number;
@@ -49,12 +49,14 @@ test('the reveal toggle flips the masked state without submitting', async ({
     const counter: Locator = page.locator('[data-submit-count]');
     await expect(counter).toHaveAttribute('data-submit-count', '0');
 
-    const toggle: Locator = page.getByRole('button', { name: 'Show password' });
+    // The toggle keeps one stable accessible name; shown/hidden is conveyed by
+    // aria-pressed on the same button before and after the click.
+    const toggle: Locator = page.getByRole('button', { name: 'Reveal password' });
+    await expect(toggle).toHaveAttribute('aria-pressed', 'false');
     await toggle.click();
 
     await expect(input).toHaveAttribute('type', 'text');
-    const conceal: Locator = page.getByRole('button', { name: 'Hide password' });
-    await expect(conceal).toHaveAttribute('aria-pressed', 'true');
+    await expect(toggle).toHaveAttribute('aria-pressed', 'true');
     await expect(counter).toHaveAttribute('data-submit-count', '0');
 });
 

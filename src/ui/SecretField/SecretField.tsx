@@ -19,11 +19,10 @@ import {
     type SecretFieldProps,
 } from './SecretField.types';
 
-// Default accessible name of the reveal toggle while the secret is masked. Kept as
-// constants so the component and its tests agree on the exact literal.
-const DEFAULT_REVEAL_LABEL: string = 'Show password';
-// Default accessible name of the reveal toggle while the secret is shown.
-const DEFAULT_CONCEAL_LABEL: string = 'Hide password';
+// Stable accessible name of the reveal toggle. It is deliberately
+// state-independent: shown/hidden is conveyed by aria-pressed, not by a changing
+// name. Kept as a constant so the component and its tests agree on the exact literal.
+const DEFAULT_TOGGLE_LABEL: string = 'Reveal password';
 // Default caps-lock advisory, announced politely while focused because a masked
 // field hides the mis-casing caps lock would otherwise reveal.
 const DEFAULT_CAPS_WARNING: string = 'Caps Lock is on';
@@ -38,8 +37,7 @@ export function SecretField({
     placeholder,
     enabled,
     error,
-    revealLabel,
-    concealLabel,
+    toggleLabel,
     capsLockWarning,
     tone,
 }: SecretFieldProps): ReactElement {
@@ -72,8 +70,7 @@ export function SecretField({
     const inputType: 'password' | 'text' = isRevealed ? 'text' : 'password';
     const hasError: boolean = error !== undefined;
     const capsOn: boolean = capsLock === ECapsLockState.On;
-    const resolvedRevealLabel: string = revealLabel ?? DEFAULT_REVEAL_LABEL;
-    const resolvedConcealLabel: string = concealLabel ?? DEFAULT_CONCEAL_LABEL;
+    const resolvedToggleLabel: string = toggleLabel ?? DEFAULT_TOGGLE_LABEL;
 
     // Compose aria-describedby from whichever advisories are present, mirroring the
     // className filter/join idiom; an empty result omits the attribute entirely.
@@ -157,9 +154,7 @@ export function SecretField({
                 <button
                     type="button"
                     className={styles.toggle}
-                    aria-label={
-                        isRevealed ? resolvedConcealLabel : resolvedRevealLabel
-                    }
+                    aria-label={resolvedToggleLabel}
                     aria-pressed={isRevealed}
                     aria-controls={inputId}
                     data-reveal={reveal}

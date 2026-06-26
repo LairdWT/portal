@@ -157,7 +157,7 @@ describe('PromptDialog', (): void => {
         const user: UserEvent = userEvent.setup();
         render(<SecretHarness onSubmit={onSubmit} onClose={vi.fn<() => void>()} />);
 
-        await user.click(screen.getByRole('button', { name: 'Show password' }));
+        await user.click(screen.getByRole('button', { name: 'Reveal password' }));
 
         expect(screen.getByLabelText('Password')).toHaveAttribute('type', 'text');
         expect(onSubmit).not.toHaveBeenCalled();
@@ -202,8 +202,11 @@ describe('PromptDialog', (): void => {
         );
 
         await user.type(screen.getByLabelText('Password'), dialogSecret);
-        await user.click(screen.getByRole('button', { name: 'Show password' }));
-        await user.click(screen.getByRole('button', { name: 'Hide password' }));
+        const toggle: HTMLElement = screen.getByRole('button', {
+            name: 'Reveal password',
+        });
+        await user.click(toggle);
+        await user.click(toggle);
         await user.click(screen.getByRole('button', { name: 'OK' }));
 
         const loggedCalls: string = JSON.stringify([

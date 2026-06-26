@@ -50,11 +50,8 @@ export function PromptDialog({
                         onValueChange={onValueChange}
                         autoComplete={secret.autoComplete}
                         {...(placeholder !== undefined ? { placeholder } : {})}
-                        {...(secret.revealLabel !== undefined
-                            ? { revealLabel: secret.revealLabel }
-                            : {})}
-                        {...(secret.concealLabel !== undefined
-                            ? { concealLabel: secret.concealLabel }
+                        {...(secret.toggleLabel !== undefined
+                            ? { toggleLabel: secret.toggleLabel }
                             : {})}
                         {...(secret.capsLockWarning !== undefined
                             ? { capsLockWarning: secret.capsLockWarning }

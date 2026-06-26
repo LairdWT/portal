@@ -46,9 +46,11 @@ export type ECapsLockState = (typeof ECapsLockState)[keyof typeof ECapsLockState
 // event; the component retains and logs nothing). A <label> is always rendered and
 // associated by id (`id` falls back to a generated useId). `autoComplete` is
 // REQUIRED and constrained to current/new-password. `name` is optional, forwarded
-// so a password manager can associate the field. `revealLabel`/`concealLabel`/
-// `capsLockWarning` override the toggle and caps-advisory strings for i18n.
-// `enabled` resolves through useResolvedEnabled; `tone` drives the focus ring and
+// so a password manager can associate the field. `toggleLabel`/`capsLockWarning`
+// override the reveal-toggle and caps-advisory strings for i18n. The toggle name is
+// deliberately stable (state-independent): shown/hidden is conveyed by aria-pressed,
+// not by a changing accessible name. `enabled` resolves through useResolvedEnabled;
+// `tone` drives the focus ring and
 // border accent through the tone scope. Masking is the native input type - there is
 // no plaintext copy in component state - so reveal toggles the type rather than
 // reconstructing a value.
@@ -63,8 +65,7 @@ export type SecretFieldProps = Readonly<
         placeholder?: string;
         enabled?: EEnabledState;
         error?: string;
-        revealLabel?: string;
-        concealLabel?: string;
+        toggleLabel?: string;
         capsLockWarning?: string;
     } & Toned
 >;
