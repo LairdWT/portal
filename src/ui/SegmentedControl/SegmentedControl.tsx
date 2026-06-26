@@ -17,14 +17,6 @@ import {
     type UiSegmentItem,
 } from './SegmentedControl.types';
 
-// Dev-only diagnostic emitted when the radiogroup has no accessible name. The
-// `label` prop stays optional (making it required would be a breaking change), so
-// a runtime guard - gated on import.meta.env.DEV and stripped from production
-// builds - surfaces the missing name during development instead of letting an
-// unnamed radiogroup ship.
-const MISSING_NAME_MESSAGE: string =
-    'SegmentedControl: a radiogroup needs an accessible name; pass a non-empty `label`.';
-
 // Resolves the index of the currently selected segment, falling back to the
 // first segment when the controlled value matches no item, so focus and roving
 // tabindex always have a valid target.
@@ -43,6 +35,7 @@ export function SegmentedControl({
     value,
     onChange,
     label,
+    labelledBy,
     enabled,
     tone,
 }: SegmentedControlProps): ReactElement {
@@ -59,16 +52,6 @@ export function SegmentedControl({
     const className: string = [toneStyles.toneScope, styles.group]
         .filter((entry: string | undefined): entry is string => entry !== undefined)
         .join(' ');
-
-    useEffect((): void => {
-        if (!import.meta.env.DEV) {
-            return;
-        }
-        if (label !== undefined && label.length > 0) {
-            return;
-        }
-        console.error(MISSING_NAME_MESSAGE);
-    }, [label]);
 
     useEffect((): void => {
         segmentRefs.current.length = items.length;
@@ -139,11 +122,12 @@ export function SegmentedControl({
     return (
         <div
             role="radiogroup"
-            aria-label={label}
             className={className}
             style={toneProperties(tone)}
             data-status={EUiStatus.None}
             data-enabled={resolvedEnabled}
+            {...(label !== undefined ? { 'aria-label': label } : {})}
+            {...(labelledBy !== undefined ? { 'aria-labelledby': labelledBy } : {})}
         >
             {items.map((item: UiSegmentItem, index: number): ReactElement => {
                 const isSelected: boolean = item.id === value;

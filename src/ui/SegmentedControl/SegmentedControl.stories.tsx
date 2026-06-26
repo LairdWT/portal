@@ -8,10 +8,19 @@ import {
 
 import { EEnabledState } from '../../state/state';
 import { SegmentedControl } from './SegmentedControl';
-import {
-    type SegmentedControlProps,
-    type UiSegmentItem,
-} from './SegmentedControl.types';
+import { type UiSegmentItem } from './SegmentedControl.types';
+
+// A single (non-union) story args shape. The component's own props are an XOR
+// union (AccessibleName), which collapses Storybook's arg inference to `never`;
+// the stories only ever exercise the `label` form, so a flat args type keeps the
+// meta and story typing sound while still feeding valid SegmentedControl props.
+type SegmentedControlStoryArgs = Readonly<{
+    items: readonly UiSegmentItem[];
+    value: string;
+    label: string;
+    enabled?: EEnabledState;
+    tone?: string;
+}>;
 
 const ITEMS: readonly UiSegmentItem[] = [
     { id: 'day', label: 'Day' },
@@ -30,13 +39,13 @@ const MANY_ITEMS: readonly UiSegmentItem[] = [
 // A controlled wrapper the stories share: SegmentedControl is controlled, so the
 // story owns the selected id and feeds it back through `value`, the pattern a
 // consumer wiring it to app state uses.
-function ControlledSegmentedControl(args: SegmentedControlProps): ReactElement {
+function ControlledSegmentedControl(args: SegmentedControlStoryArgs): ReactElement {
     const [value, setValue]: [string, Dispatch<SetStateAction<string>>] =
         useState<string>(args.value);
     return <SegmentedControl {...args} value={value} onChange={setValue} />;
 }
 
-const meta: Meta<typeof SegmentedControl> = {
+const meta: Meta<SegmentedControlStoryArgs> = {
     title: 'UI/SegmentedControl',
     component: SegmentedControl,
     args: {
@@ -44,14 +53,14 @@ const meta: Meta<typeof SegmentedControl> = {
         value: 'day',
         label: 'Time range',
     },
-    render: (args: SegmentedControlProps): ReactElement => (
+    render: (args: SegmentedControlStoryArgs): ReactElement => (
         <ControlledSegmentedControl {...args} />
     ),
 };
 
 export default meta;
 
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<SegmentedControlStoryArgs>;
 
 export const Default: Story = {};
 

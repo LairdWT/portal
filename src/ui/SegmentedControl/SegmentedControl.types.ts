@@ -1,6 +1,7 @@
 import { type ReactNode } from 'react';
 
 import { type EEnabledState } from '../../state/state';
+import { type AccessibleName } from '../accessibleName';
 import { type Toned } from '../tone';
 
 // Per-segment presentation state. Modeled as an E-prefixed const-object enum so
@@ -33,8 +34,10 @@ export type UiSegmentItem = Readonly<{
 // and `onChange` is a plain value-shaped callback reporting the next id.
 // Selection is automatic on arrow navigation: Arrow Right/Down move to the next
 // segment and report it, Arrow Left/Up move to the previous, Home/End jump to
-// the first/last, and Enter/Space select the focused segment. `label` is the
-// accessible name applied to the radiogroup. `enabled` is an enum resolved
+// the first/last, and Enter/Space select the focused segment. The radiogroup is
+// a named role, so an accessible name is required through the shared
+// AccessibleName union: pass EXACTLY ONE of `label` (wired to aria-label) or
+// `labelledBy` (an id wired to aria-labelledby). `enabled` is an enum resolved
 // through useResolvedEnabled; the native disabled attribute on each segment
 // derives from it. `tone` flows through the shared tone scope and drives the
 // selected-segment indicator only.
@@ -42,7 +45,7 @@ export type SegmentedControlProps = Readonly<{
     items: readonly UiSegmentItem[];
     value: string;
     onChange?: (id: string) => void;
-    label?: string;
     enabled?: EEnabledState;
 }> &
+    AccessibleName &
     Toned;

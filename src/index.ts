@@ -164,6 +164,7 @@ export {
     EVisibility,
 } from './state/state';
 export { PORTAL_TOKENS, type PortalTokens } from './theme/tokens';
+export { type AccessibleName } from './ui/accessibleName';
 export { Badge } from './ui/Badge/Badge';
 export { type BadgeProps, EBadgeKind } from './ui/Badge/Badge.types';
 export { Banner } from './ui/Banner/Banner';

@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
-import { describe, expect, it, type Mock, type MockInstance, vi } from 'vitest';
+import { describe, expect, it, type Mock, vi } from 'vitest';
 
 import { EEnabledState } from '../../state/state';
 import { SegmentedControl } from './SegmentedControl';
@@ -12,9 +12,9 @@ const ITEMS: readonly UiSegmentItem[] = [
     { id: 'month', label: 'Month' },
 ];
 
-// Every render passes an accessible name: a nameless radiogroup is exactly the
-// defect the component now guards against, so the suite keeps its instances named
-// (the missing-name guard has its own dedicated test below).
+// Every render passes an accessible name: the AccessibleName union now makes a
+// nameless radiogroup a compile error, so the suite always supplies a name
+// (label here, with a dedicated labelledBy variant test below).
 const GROUP_LABEL: string = 'Time range';
 
 describe('SegmentedControl', (): void => {
@@ -26,6 +26,34 @@ describe('SegmentedControl', (): void => {
         ).toBeInTheDocument();
         const segments: readonly HTMLElement[] = screen.getAllByRole('radio');
         expect(segments).toHaveLength(ITEMS.length);
+    });
+
+    it('wires label to aria-label on the radiogroup', (): void => {
+        render(<SegmentedControl items={ITEMS} value="day" label={GROUP_LABEL} />);
+
+        expect(screen.getByRole('radiogroup')).toHaveAttribute(
+            'aria-label',
+            GROUP_LABEL,
+        );
+    });
+
+    it('names the radiogroup through labelledBy when provided', (): void => {
+        render(
+            <>
+                <span id="range-heading">Time range</span>
+                <SegmentedControl
+                    items={ITEMS}
+                    value="day"
+                    labelledBy="range-heading"
+                />
+            </>,
+        );
+
+        const group: HTMLElement = screen.getByRole('radiogroup', {
+            name: 'Time range',
+        });
+        expect(group).toHaveAttribute('aria-labelledby', 'range-heading');
+        expect(group).not.toHaveAttribute('aria-label');
     });
 
     it('tracks the controlled value through aria-checked', (): void => {
@@ -241,25 +269,5 @@ describe('SegmentedControl', (): void => {
         });
 
         expect(onChange).not.toHaveBeenCalled();
-    });
-
-    it('warns in development when the radiogroup has no accessible name', (): void => {
-        const errorSpy: MockInstance = vi
-            .spyOn(console, 'error')
-            .mockImplementation((): void => undefined);
-
-        const { unmount }: { unmount: () => void } = render(
-            <SegmentedControl items={ITEMS} value="day" />,
-        );
-        expect(errorSpy).toHaveBeenCalledWith(
-            expect.stringContaining('accessible name'),
-        );
-
-        unmount();
-        errorSpy.mockClear();
-        render(<SegmentedControl items={ITEMS} value="day" label={GROUP_LABEL} />);
-        expect(errorSpy).not.toHaveBeenCalled();
-
-        errorSpy.mockRestore();
     });
 });

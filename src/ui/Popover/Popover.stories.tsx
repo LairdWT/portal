@@ -8,11 +8,19 @@ import {
 } from 'react';
 
 import { Popover } from './Popover';
-import {
-    EPopoverPlacement,
-    EPopoverRole,
-    type PopoverProps,
-} from './Popover.types';
+import { EPopoverPlacement, EPopoverRole } from './Popover.types';
+
+// A single (non-union) story args shape. PopoverProps is a role-discriminated
+// XOR union (the dialog role requires an AccessibleName), which collapses
+// Storybook's arg inference to `never`; the stories exercise the dialog role
+// with a `label`, so a flat args type keeps the meta and story typing sound.
+type PopoverStoryArgs = Readonly<{
+    open?: boolean;
+    label?: string;
+    placement?: EPopoverPlacement;
+    tone?: string;
+    trapFocus?: boolean;
+}>;
 
 const TRIGGER_STYLE: CSSProperties = {
     minBlockSize: 'var(--portal-touch-target-min)',
@@ -35,16 +43,25 @@ const CONTENT_STYLE: CSSProperties = {
 // story owns `open` and feeds it back, the pattern a consumer wiring it to app
 // state uses. The trigger is passed as a node (the trigger render path); the
 // consumer owns its aria-expanded and onClick because it owns the open state.
-function PopoverDemo(args: Partial<PopoverProps>): ReactElement {
+function PopoverDemo(args: PopoverStoryArgs): ReactElement {
     const [open, setOpen]: [boolean, Dispatch<SetStateAction<boolean>>] =
         useState<boolean>(args.open ?? false);
+    // The stories exercise the dialog role exclusively, which requires an
+    // accessible name; resolve a concrete label string (defaulting) so the
+    // dialog branch of the PopoverProps union is satisfied.
+    const label: string =
+        typeof args.label === 'string' ? args.label : 'Example popover';
     return (
         <Popover
-            {...args}
             open={open}
             onClose={(): void => {
                 setOpen(false);
             }}
+            label={label}
+            role={EPopoverRole.Dialog}
+            {...(args.placement !== undefined ? { placement: args.placement } : {})}
+            {...(args.trapFocus !== undefined ? { trapFocus: args.trapFocus } : {})}
+            {...(args.tone !== undefined ? { tone: args.tone } : {})}
             trigger={
                 <button
                     type="button"
@@ -79,21 +96,23 @@ function PopoverDemo(args: Partial<PopoverProps>): ReactElement {
     );
 }
 
-const meta: Meta<typeof Popover> = {
+const meta: Meta<PopoverStoryArgs> = {
     title: 'UI/Popover',
-    component: Popover,
+    // The controlled wrapper is the story component: Popover owns required
+    // children/open the story supplies internally, so the flat story args map to
+    // the wrapper, not to Popover directly.
+    component: PopoverDemo,
     args: {
         open: false,
         label: 'Example popover',
-        role: EPopoverRole.Dialog,
         placement: EPopoverPlacement.Bottom,
     },
-    render: (args: PopoverProps): ReactElement => <PopoverDemo {...args} />,
+    render: (args: PopoverStoryArgs): ReactElement => <PopoverDemo {...args} />,
 };
 
 export default meta;
 
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<PopoverStoryArgs>;
 
 export const Default: Story = {};
 
@@ -122,17 +141,15 @@ export const Composition: Story = {
                 gap: 'var(--portal-space-4)',
             }}
         >
-            <PopoverDemo open={false} label="First" role={EPopoverRole.Dialog} />
+            <PopoverDemo open={false} label="First" />
             <PopoverDemo
                 open={false}
                 label="Second"
-                role={EPopoverRole.Dialog}
                 placement={EPopoverPlacement.Top}
             />
             <PopoverDemo
                 open={false}
                 label="Third"
-                role={EPopoverRole.Dialog}
                 placement={EPopoverPlacement.Right}
             />
         </div>
