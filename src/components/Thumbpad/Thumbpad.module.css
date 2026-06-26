@@ -84,7 +84,8 @@
         calc(-50% + var(--portal-pad-x, 0) * 40%),
         calc(-50% + var(--portal-pad-y, 0) * 40%)
     );
-    transition: transform var(--portal-duration-base) var(--portal-easing-standard);
+    transition: transform var(--portal-duration-frame-base)
+        var(--portal-easing-standard);
     pointer-events: none;
 }
 
@@ -108,7 +109,8 @@
         calc(-50% + var(--portal-pad-x, 0) * 20%),
         calc(-50% + var(--portal-pad-y, 0) * 20%)
     );
-    transition: transform var(--portal-duration-base) var(--portal-easing-standard);
+    transition: transform var(--portal-duration-frame-base)
+        var(--portal-easing-standard);
     pointer-events: none;
 }
 

@@ -57,7 +57,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
     .readout {
-        transition: border-color var(--portal-duration-ms128)
+        transition: border-color var(--portal-duration-ui-base)
             var(--portal-easing-standard);
     }
 }

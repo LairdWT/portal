@@ -68,10 +68,11 @@
 @media (prefers-reduced-motion: no-preference) {
     .remove {
         transition:
-            background-color var(--portal-duration-ms128)
+            background-color var(--portal-duration-ui-fast)
                 var(--portal-easing-standard),
-            border-color var(--portal-duration-ms128) var(--portal-easing-standard),
-            color var(--portal-duration-ms128) var(--portal-easing-standard);
+            border-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard),
+            color var(--portal-duration-ui-fast) var(--portal-easing-standard);
     }
 }
 

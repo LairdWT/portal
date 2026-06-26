@@ -107,12 +107,12 @@
 
 @media (prefers-reduced-motion: no-preference) {
     .input::-webkit-slider-thumb {
-        transition: background-color var(--portal-duration-fast)
+        transition: background-color var(--portal-duration-frame-fast)
             var(--portal-easing-standard);
     }
 
     .input::-moz-range-thumb {
-        transition: background-color var(--portal-duration-fast)
+        transition: background-color var(--portal-duration-frame-fast)
             var(--portal-easing-standard);
     }
 }

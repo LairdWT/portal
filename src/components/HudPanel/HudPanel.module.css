@@ -45,7 +45,7 @@
     inline-size: clamp(0%, var(--portal-bar-fill), 100%);
     border-radius: var(--portal-radius-pill);
     background-color: var(--portal-color-accent-highlight);
-    transition: inline-size var(--portal-duration-base)
+    transition: inline-size var(--portal-duration-frame-base)
         var(--portal-easing-standard);
 }
 

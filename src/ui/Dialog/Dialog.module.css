@@ -68,22 +68,23 @@
 
 @media (prefers-reduced-motion: no-preference) {
     .panel[data-motion='full'] {
-        animation: portal-dialog-in var(--portal-duration-ms128)
+        animation: portal-dialog-in var(--portal-duration-ui-slow)
             var(--portal-easing-standard);
     }
 
     .backdrop[data-motion='full'] {
-        animation: portal-dialog-fade var(--portal-duration-ms128)
+        animation: portal-dialog-fade var(--portal-duration-ui-slow)
             var(--portal-easing-standard);
     }
 
     .actionPrimary,
     .actionSecondary {
         transition:
-            transform var(--portal-duration-ms128) var(--portal-easing-standard),
-            border-color var(--portal-duration-ms128) var(--portal-easing-standard),
-            box-shadow var(--portal-duration-ms128) var(--portal-easing-standard),
-            color var(--portal-duration-ms128) var(--portal-easing-standard);
+            transform var(--portal-duration-ui-fast) var(--portal-easing-standard),
+            border-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ui-fast) var(--portal-easing-standard),
+            color var(--portal-duration-ui-fast) var(--portal-easing-standard);
     }
 }
 

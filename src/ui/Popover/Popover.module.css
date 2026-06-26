@@ -44,7 +44,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
     .panel[data-motion='full'] {
-        animation: portal-popover-in var(--portal-duration-ms128)
+        animation: portal-popover-in var(--portal-duration-ui-base)
             var(--portal-easing-standard);
     }
 }

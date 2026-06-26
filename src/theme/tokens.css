@@ -138,12 +138,17 @@
      * content. Overlays read this token instead of inlining a z-index literal. */
     --portal-z-overlay: 1000;
 
-    /* Motion durations */
-    --portal-duration-fast: 8ms;
-    --portal-duration-base: 16ms;
-    --portal-duration-slow: 32ms;
-    --portal-duration-ms64: 64ms;
-    --portal-duration-ms128: 128ms;
+    /* Motion durations - two intent-named families.
+     *
+     * frame-*: real per-frame budgets for tactile game-input feedback, so a
+     * controller's snap lands inside a render frame. ui-*: conventional
+     * affordance timings for the generic UI layer. */
+    --portal-duration-frame-fast: 7ms; /* ~144 fps frame budget */
+    --portal-duration-frame-base: 16ms; /* ~60 fps frame budget */
+    --portal-duration-frame-slow: 33ms; /* ~30 fps budget; reserved for symmetry */
+    --portal-duration-ui-fast: 120ms;
+    --portal-duration-ui-base: 200ms;
+    --portal-duration-ui-slow: 320ms;
 
     /* Motion easing */
     --portal-easing-standard: cubic-bezier(0.2, 0, 0, 1);

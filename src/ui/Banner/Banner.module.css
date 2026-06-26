@@ -72,9 +72,10 @@
 @media (prefers-reduced-motion: no-preference) {
     .dismiss {
         transition:
-            transform var(--portal-duration-ms128) var(--portal-easing-standard),
-            border-color var(--portal-duration-ms128) var(--portal-easing-standard),
-            color var(--portal-duration-ms128) var(--portal-easing-standard);
+            transform var(--portal-duration-ui-fast) var(--portal-easing-standard),
+            border-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard),
+            color var(--portal-duration-ui-fast) var(--portal-easing-standard);
     }
 }
 

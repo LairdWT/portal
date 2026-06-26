@@ -98,7 +98,8 @@
         calc(-50% + var(--portal-pad-x, 0) * var(--joystick-travel)),
         calc(-50% + var(--portal-pad-y, 0) * var(--joystick-travel))
     );
-    transition: box-shadow var(--portal-duration-base) var(--portal-easing-standard);
+    transition: box-shadow var(--portal-duration-frame-base)
+        var(--portal-easing-standard);
     pointer-events: none;
 }
 
@@ -122,7 +123,8 @@
         calc(-50% + var(--portal-pad-x, 0) * var(--joystick-travel)),
         calc(-50% + var(--portal-pad-y, 0) * var(--joystick-travel))
     );
-    transition: box-shadow var(--portal-duration-base) var(--portal-easing-standard);
+    transition: box-shadow var(--portal-duration-frame-base)
+        var(--portal-easing-standard);
     pointer-events: none;
 }
 
@@ -131,8 +133,8 @@
 .base:not([data-active='true']) .thumb {
     transform: translate(-50%, -50%);
     transition:
-        transform var(--portal-duration-base) var(--portal-easing-emphasized),
-        box-shadow var(--portal-duration-base) var(--portal-easing-standard);
+        transform var(--portal-duration-frame-base) var(--portal-easing-emphasized),
+        box-shadow var(--portal-duration-frame-base) var(--portal-easing-standard);
 }
 
 @media (prefers-reduced-motion: reduce) {

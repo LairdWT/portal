@@ -39,8 +39,9 @@
 @media (prefers-reduced-motion: no-preference) {
     .field {
         transition:
-            border-color var(--portal-duration-ms128) var(--portal-easing-standard),
-            box-shadow var(--portal-duration-ms128) var(--portal-easing-standard);
+            border-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ui-fast) var(--portal-easing-standard);
     }
 }
 
@@ -136,7 +137,8 @@
 
 @media (prefers-reduced-motion: no-preference) {
     .clear {
-        transition: color var(--portal-duration-ms128) var(--portal-easing-standard);
+        transition: color var(--portal-duration-ui-fast)
+            var(--portal-easing-standard);
     }
 }
 

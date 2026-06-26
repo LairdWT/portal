@@ -55,8 +55,9 @@
 @media (prefers-reduced-motion: no-preference) {
     .trigger {
         transition:
-            border-color var(--portal-duration-ms128) var(--portal-easing-standard),
-            box-shadow var(--portal-duration-ms128) var(--portal-easing-standard);
+            border-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ui-fast) var(--portal-easing-standard);
     }
 }
 
@@ -101,7 +102,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
     .arrow {
-        transition: transform var(--portal-duration-ms128)
+        transition: transform var(--portal-duration-ui-fast)
             var(--portal-easing-standard);
     }
 }
@@ -130,7 +131,8 @@
 
 @media (prefers-reduced-motion: no-preference) {
     .clear {
-        transition: color var(--portal-duration-ms128) var(--portal-easing-standard);
+        transition: color var(--portal-duration-ui-fast)
+            var(--portal-easing-standard);
     }
 }
 

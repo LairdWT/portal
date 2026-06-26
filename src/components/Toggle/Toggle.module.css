@@ -47,7 +47,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
     .track {
-        transition: background-color var(--portal-duration-ms128)
+        transition: background-color var(--portal-duration-ui-base)
             var(--portal-easing-standard);
     }
 }
@@ -79,7 +79,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
     .knob {
-        transition: inset-inline-start var(--portal-duration-ms128)
+        transition: inset-inline-start var(--portal-duration-ui-base)
             var(--portal-easing-emphasized);
     }
 }

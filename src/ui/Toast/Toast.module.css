@@ -57,7 +57,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
     .card[data-motion='full'] {
-        animation: portal-toast-in var(--portal-duration-ms128)
+        animation: portal-toast-in var(--portal-duration-ui-base)
             var(--portal-easing-standard);
     }
 }

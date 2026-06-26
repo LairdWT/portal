@@ -51,7 +51,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
     .fill {
-        transition: transform var(--portal-duration-ms128)
+        transition: transform var(--portal-duration-ui-base)
             var(--portal-easing-standard);
     }
 }
@@ -75,7 +75,7 @@
 @media (prefers-reduced-motion: no-preference) {
     .root[data-motion='animate'] .indicator {
         inset-inline-start: 0;
-        animation: progress-activity calc(var(--portal-duration-ms128) * 12)
+        animation: progress-activity calc(var(--portal-duration-ui-base) * 12)
             var(--portal-easing-standard) infinite;
     }
 }

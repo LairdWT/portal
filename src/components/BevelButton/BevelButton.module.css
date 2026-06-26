@@ -34,7 +34,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
     .bevel {
-        transition: transform var(--portal-duration-fast)
+        transition: transform var(--portal-duration-frame-fast)
             var(--portal-easing-standard);
         animation: portal-bevel-sheen var(--portal-duration-metal-sheen) linear
             infinite;

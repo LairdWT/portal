@@ -56,7 +56,7 @@
     background-color: var(--portal-color-surface-1);
     color: var(--portal-color-text-0);
     appearance: none;
-    transition: background-color var(--portal-duration-fast)
+    transition: background-color var(--portal-duration-frame-fast)
         var(--portal-easing-standard);
 
     /*

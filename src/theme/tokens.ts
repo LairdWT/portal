@@ -61,11 +61,16 @@ export type PortalTokens = {
         readonly overlay: string;
     };
     readonly duration: {
-        readonly fast: string;
-        readonly base: string;
-        readonly slow: string;
-        readonly ms64: string;
-        readonly ms128: string;
+        readonly frame: {
+            readonly fast: string;
+            readonly base: string;
+            readonly slow: string;
+        };
+        readonly ui: {
+            readonly fast: string;
+            readonly base: string;
+            readonly slow: string;
+        };
     };
     readonly easing: {
         readonly standard: string;
@@ -136,11 +141,16 @@ export const PORTAL_TOKENS: PortalTokens = {
         overlay: 'var(--portal-z-overlay)',
     },
     duration: {
-        fast: 'var(--portal-duration-fast)',
-        base: 'var(--portal-duration-base)',
-        slow: 'var(--portal-duration-slow)',
-        ms64: 'var(--portal-duration-ms64)',
-        ms128: 'var(--portal-duration-ms128)',
+        frame: {
+            fast: 'var(--portal-duration-frame-fast)',
+            base: 'var(--portal-duration-frame-base)',
+            slow: 'var(--portal-duration-frame-slow)',
+        },
+        ui: {
+            fast: 'var(--portal-duration-ui-fast)',
+            base: 'var(--portal-duration-ui-base)',
+            slow: 'var(--portal-duration-ui-slow)',
+        },
     },
     easing: {
         standard: 'var(--portal-easing-standard)',

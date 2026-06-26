@@ -45,12 +45,13 @@
 @media (prefers-reduced-motion: no-preference) {
     .segment {
         transition:
-            transform var(--portal-duration-ms128) var(--portal-easing-standard),
-            border-color var(--portal-duration-ms128) var(--portal-easing-standard),
-            box-shadow var(--portal-duration-ms128) var(--portal-easing-standard),
-            background-color var(--portal-duration-ms128)
+            transform var(--portal-duration-ui-base) var(--portal-easing-standard),
+            border-color var(--portal-duration-ui-base)
                 var(--portal-easing-standard),
-            color var(--portal-duration-ms128) var(--portal-easing-standard);
+            box-shadow var(--portal-duration-ui-base) var(--portal-easing-standard),
+            background-color var(--portal-duration-ui-base)
+                var(--portal-easing-standard),
+            color var(--portal-duration-ui-base) var(--portal-easing-standard);
     }
 }
 

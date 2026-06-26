@@ -50,11 +50,12 @@
 @media (prefers-reduced-motion: no-preference) {
     .cta {
         transition:
-            transform var(--portal-duration-fast) var(--portal-easing-standard),
-            background var(--portal-duration-fast) var(--portal-easing-standard),
-            border-color var(--portal-duration-fast) var(--portal-easing-standard),
-            color var(--portal-duration-fast) var(--portal-easing-standard),
-            box-shadow var(--portal-duration-fast) var(--portal-easing-standard);
+            transform var(--portal-duration-ui-fast) var(--portal-easing-standard),
+            background var(--portal-duration-ui-fast) var(--portal-easing-standard),
+            border-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard),
+            color var(--portal-duration-ui-fast) var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ui-fast) var(--portal-easing-standard);
     }
 }
 
