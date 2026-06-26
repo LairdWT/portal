@@ -13,14 +13,12 @@ import { useDismiss } from '../../react/hooks/useDismiss';
 import { useFocusTrap } from '../../react/hooks/useFocusTrap';
 import { useReducedMotion } from '../../react/hooks/useReducedMotion';
 import { useScrollLock } from '../../react/hooks/useScrollLock';
+import { EOverlayMotion } from '../overlayMotion';
 import { ensureOverlayRoot } from '../overlayRoot';
 import { EUiStatus, toneProperties } from '../tone';
 import toneStyles from '../tone.module.css';
 import styles from './Dialog.module.css';
 import { type DialogProps, EDialogSize } from './Dialog.types';
-
-const MOTION_FULL: string = 'full';
-const MOTION_REDUCED: string = 'reduced';
 
 export function Dialog({
     open,
@@ -70,7 +68,9 @@ export function Dialog({
         return null;
     }
 
-    const motion: string = prefersReducedMotion ? MOTION_REDUCED : MOTION_FULL;
+    const motion: EOverlayMotion = prefersReducedMotion
+        ? EOverlayMotion.Reduced
+        : EOverlayMotion.Full;
     const panelClassName: string = [toneStyles.toneScope, styles.panel]
         .filter((entry: string | undefined): entry is string => entry !== undefined)
         .join(' ');

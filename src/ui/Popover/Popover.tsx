@@ -16,6 +16,7 @@ import { createPortal } from 'react-dom';
 import { useDismiss } from '../../react/hooks/useDismiss';
 import { useFocusTrap } from '../../react/hooks/useFocusTrap';
 import { useReducedMotion } from '../../react/hooks/useReducedMotion';
+import { EOverlayMotion } from '../overlayMotion';
 import { ensureOverlayRoot } from '../overlayRoot';
 import { EUiStatus, toneProperties } from '../tone';
 import toneStyles from '../tone.module.css';
@@ -30,9 +31,6 @@ import {
     EPopoverRole,
     type PopoverProps,
 } from './Popover.types';
-
-const MOTION_FULL: string = 'full';
-const MOTION_REDUCED: string = 'reduced';
 
 export function Popover({
     open,
@@ -252,7 +250,9 @@ export function Popover({
                       data-status={EUiStatus.None}
                       data-placement={resolvedPlacement}
                       data-motion={
-                          prefersReducedMotion ? MOTION_REDUCED : MOTION_FULL
+                          prefersReducedMotion
+                              ? EOverlayMotion.Reduced
+                              : EOverlayMotion.Full
                       }
                       tabIndex={-1}
                       aria-modal={trapFocus ? true : undefined}

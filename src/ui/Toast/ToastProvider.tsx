@@ -16,6 +16,7 @@ import { createPortal } from 'react-dom';
 import { useReducedMotion } from '../../react/hooks/useReducedMotion';
 import { Banner } from '../Banner/Banner';
 import { EBannerKind } from '../Banner/Banner.types';
+import { EOverlayMotion } from '../overlayMotion';
 import { ensureOverlayRoot } from '../overlayRoot';
 import styles from './Toast.module.css';
 import {
@@ -30,8 +31,6 @@ import { ToastContext } from './useToast';
 
 const DEFAULT_DURATION_MS: number = 6000;
 const DEFAULT_MAX: number = 4;
-const MOTION_FULL: string = 'full';
-const MOTION_REDUCED: string = 'reduced';
 const VIEWPORT_LABEL: string = 'Notifications';
 
 // A live auto-dismiss timer plus the bookkeeping needed to pause and resume it:
@@ -81,7 +80,9 @@ function ToastCard({
         <div
             className={styles.card}
             data-kind={toast.kind}
-            data-motion={reducedMotion ? MOTION_REDUCED : MOTION_FULL}
+            data-motion={
+                reducedMotion ? EOverlayMotion.Reduced : EOverlayMotion.Full
+            }
         >
             <Banner
                 kind={toBannerKind(toast.kind)}
