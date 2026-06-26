@@ -1,0 +1,19 @@
+# Normalize all text files to LF in the repository and the working tree.
+# This makes prettier --check (endOfLine: lf) and the verify gate deterministic
+# across Windows and POSIX checkouts, independent of core.autocrlf.
+* text=auto eol=lf
+
+# Known binary assets: never normalize or diff as text.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.pdf binary
+*.mp4 binary
+*.webm binary
