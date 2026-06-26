@@ -52,7 +52,9 @@ export type EPopoverRole = (typeof EPopoverRole)[keyof typeof EPopoverRole];
 // focus trap (off for tooltips and menus); `restoreFocus` returns focus to the
 // element focused before opening when focus would otherwise be lost.
 // `initialFocusRef` overrides the first focus target while trapping. `tone` flows
-// through the shared tone scope.
+// through the shared tone scope. `id` is applied to the panel element so a
+// consumer can wire an ARIA relationship to it (for example a trigger's
+// aria-describedby or a combobox's aria-controls); it is purely additive.
 export type PopoverProps = Readonly<{
     open: boolean;
     onClose?: () => void;
@@ -63,6 +65,7 @@ export type PopoverProps = Readonly<{
     role?: EPopoverRole;
     label?: string;
     labelledBy?: string;
+    id?: string;
     offset?: number;
     viewportPadding?: number;
     trapFocus?: boolean;

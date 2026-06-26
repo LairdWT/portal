@@ -6,10 +6,25 @@ import {
     type SetStateAction,
     useState,
 } from 'react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { Popover, resolvePopoverPosition } from './Popover';
-import { EPopoverPlacement, EPopoverRole } from './Popover.types';
+import { Popover } from './Popover';
+import { EPopoverRole } from './Popover.types';
+
+// Mutable reduced-motion flag the mocked hook reads, so a test can flip the
+// preference without touching window.matchMedia. Hoisted so the vi.mock factory
+// may reference it.
+const reducedMotion: { value: boolean } = vi.hoisted((): { value: boolean } => ({
+    value: false,
+}));
+
+vi.mock('../../react/hooks/useReducedMotion', () => ({
+    useReducedMotion: (): boolean => reducedMotion.value,
+}));
+
+beforeEach((): void => {
+    reducedMotion.value = false;
+});
 
 afterEach((): void => {
     document.body.innerHTML = '';
@@ -18,6 +33,7 @@ afterEach((): void => {
 type HarnessProps = Readonly<{
     initialOpen?: boolean;
     trapFocus?: boolean;
+    id?: string;
 }>;
 
 function Harness(props: HarnessProps): ReactElement {
@@ -32,6 +48,7 @@ function Harness(props: HarnessProps): ReactElement {
             label="Test popover"
             role={EPopoverRole.Dialog}
             trapFocus={props.trapFocus ?? false}
+            {...(props.id !== undefined ? { id: props.id } : {})}
             trigger={
                 <button
                     type="button"
@@ -50,84 +67,6 @@ function Harness(props: HarnessProps): ReactElement {
         </Popover>
     );
 }
-
-describe('resolvePopoverPosition', (): void => {
-    const viewport: { width: number; height: number } = {
-        width: 1000,
-        height: 800,
-    };
-
-    it('places the panel below the anchor for the bottom placement', (): void => {
-        const coords: ReturnType<typeof resolvePopoverPosition> =
-            resolvePopoverPosition({
-                anchor: { top: 300, left: 400, width: 100, height: 40 },
-                panel: { top: 0, left: 0, width: 200, height: 100 },
-                viewport,
-                placement: EPopoverPlacement.Bottom,
-                offset: 8,
-                padding: 8,
-            });
-        expect(coords).toEqual({
-            top: 348,
-            left: 400,
-            placement: EPopoverPlacement.Bottom,
-        });
-    });
-
-    it('flips to the top when there is no room below', (): void => {
-        const coords: ReturnType<typeof resolvePopoverPosition> =
-            resolvePopoverPosition({
-                anchor: { top: 740, left: 400, width: 100, height: 40 },
-                panel: { top: 0, left: 0, width: 200, height: 100 },
-                viewport,
-                placement: EPopoverPlacement.Bottom,
-                offset: 8,
-                padding: 8,
-            });
-        expect(coords.placement).toBe(EPopoverPlacement.Top);
-        expect(coords.top).toBe(632);
-    });
-
-    it('shifts left to keep a right-overflowing panel in view', (): void => {
-        const coords: ReturnType<typeof resolvePopoverPosition> =
-            resolvePopoverPosition({
-                anchor: { top: 300, left: 900, width: 80, height: 40 },
-                panel: { top: 0, left: 0, width: 200, height: 100 },
-                viewport,
-                placement: EPopoverPlacement.Bottom,
-                offset: 8,
-                padding: 8,
-            });
-        expect(coords.left).toBe(792);
-    });
-
-    it('clamps a left-overflowing panel to the viewport padding', (): void => {
-        const coords: ReturnType<typeof resolvePopoverPosition> =
-            resolvePopoverPosition({
-                anchor: { top: 300, left: -20, width: 80, height: 40 },
-                panel: { top: 0, left: 0, width: 200, height: 100 },
-                viewport,
-                placement: EPopoverPlacement.Bottom,
-                offset: 8,
-                padding: 8,
-            });
-        expect(coords.left).toBe(8);
-    });
-
-    it('flips a right placement to the left near the right edge', (): void => {
-        const coords: ReturnType<typeof resolvePopoverPosition> =
-            resolvePopoverPosition({
-                anchor: { top: 300, left: 850, width: 100, height: 40 },
-                panel: { top: 0, left: 0, width: 200, height: 100 },
-                viewport,
-                placement: EPopoverPlacement.Right,
-                offset: 8,
-                padding: 8,
-            });
-        expect(coords.placement).toBe(EPopoverPlacement.Left);
-        expect(coords.left).toBe(642);
-    });
-});
 
 describe('Popover', (): void => {
     it('renders no panel while closed', (): void => {
@@ -158,6 +97,52 @@ describe('Popover', (): void => {
         expect(panel.style.left).toBe('8px');
         expect(panel.style.visibility).toBe('visible');
         expect(panel).toHaveAttribute('data-placement', 'bottom');
+    });
+
+    it('applies a passed id to the panel', (): void => {
+        render(<Harness initialOpen id="popover-panel" />);
+
+        const panel: HTMLElement = screen.getByRole('dialog', {
+            name: 'Test popover',
+        });
+        expect(panel).toHaveAttribute('id', 'popover-panel');
+    });
+
+    it('omits aria-modal in non-modal mode', (): void => {
+        render(<Harness initialOpen />);
+
+        const panel: HTMLElement = screen.getByRole('dialog', {
+            name: 'Test popover',
+        });
+        expect(panel).not.toHaveAttribute('aria-modal');
+    });
+
+    it('marks the panel aria-modal in modal mode', (): void => {
+        render(<Harness initialOpen trapFocus />);
+
+        const panel: HTMLElement = screen.getByRole('dialog', {
+            name: 'Test popover',
+        });
+        expect(panel).toHaveAttribute('aria-modal', 'true');
+    });
+
+    it('reports full motion when reduced motion is not preferred', (): void => {
+        render(<Harness initialOpen />);
+
+        const panel: HTMLElement = screen.getByRole('dialog', {
+            name: 'Test popover',
+        });
+        expect(panel).toHaveAttribute('data-motion', 'full');
+    });
+
+    it('reports reduced motion when the user prefers reduced motion', (): void => {
+        reducedMotion.value = true;
+        render(<Harness initialOpen />);
+
+        const panel: HTMLElement = screen.getByRole('dialog', {
+            name: 'Test popover',
+        });
+        expect(panel).toHaveAttribute('data-motion', 'reduced');
     });
 
     it('closes on the Escape key', async (): Promise<void> => {

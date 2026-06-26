@@ -16,168 +16,23 @@ import { createPortal } from 'react-dom';
 import { useDismiss } from '../../react/hooks/useDismiss';
 import { useFocusTrap } from '../../react/hooks/useFocusTrap';
 import { useReducedMotion } from '../../react/hooks/useReducedMotion';
+import { ensureOverlayRoot } from '../overlayRoot';
 import { EUiStatus, toneProperties } from '../tone';
 import toneStyles from '../tone.module.css';
 import styles from './Popover.module.css';
+import {
+    type PopoverCoords,
+    resolvePopoverPosition,
+    toRect,
+} from './Popover.position';
 import {
     EPopoverPlacement,
     EPopoverRole,
     type PopoverProps,
 } from './Popover.types';
 
-// A minimal rectangle (a subset of DOMRect) the positioning math consumes.
-export type PopoverRect = Readonly<{
-    top: number;
-    left: number;
-    width: number;
-    height: number;
-}>;
-
-export type PopoverViewport = Readonly<{
-    width: number;
-    height: number;
-}>;
-
-// The resolved fixed-position coordinates plus the side actually used after any
-// flip, so the caller can mirror it onto data-placement.
-export type PopoverCoords = Readonly<{
-    top: number;
-    left: number;
-    placement: EPopoverPlacement;
-}>;
-
-export type ResolvePopoverPositionInput = Readonly<{
-    anchor: PopoverRect;
-    panel: PopoverRect;
-    viewport: PopoverViewport;
-    placement: EPopoverPlacement;
-    offset: number;
-    padding: number;
-}>;
-
 const MOTION_FULL: string = 'full';
 const MOTION_REDUCED: string = 'reduced';
-const OVERLAY_ROOT_ATTRIBUTE: string = 'data-portal-overlay-root';
-
-function clampValue(value: number, min: number, max: number): number {
-    if (max < min) {
-        return min;
-    }
-    if (value < min) {
-        return min;
-    }
-    if (value > max) {
-        return max;
-    }
-    return value;
-}
-
-// Pure positioning: place the panel on the preferred side of the anchor, flip to
-// the opposite side when the preferred side cannot fit but the opposite can, then
-// shift along the cross axis to stay within the padded viewport. Coordinates are
-// viewport-relative (the panel is position: fixed), so no scroll offset is added.
-export function resolvePopoverPosition(
-    input: ResolvePopoverPositionInput,
-): PopoverCoords {
-    const {
-        anchor,
-        panel,
-        viewport,
-        placement,
-        offset,
-        padding,
-    }: ResolvePopoverPositionInput = input;
-    const anchorBottom: number = anchor.top + anchor.height;
-    const anchorRight: number = anchor.left + anchor.width;
-
-    if (
-        placement === EPopoverPlacement.Left ||
-        placement === EPopoverPlacement.Right
-    ) {
-        const spaceRight: number = viewport.width - anchorRight - offset;
-        const spaceLeft: number = anchor.left - offset;
-        let resolved: EPopoverPlacement = placement;
-        if (
-            placement === EPopoverPlacement.Right &&
-            panel.width > spaceRight &&
-            panel.width <= spaceLeft
-        ) {
-            resolved = EPopoverPlacement.Left;
-        } else if (
-            placement === EPopoverPlacement.Left &&
-            panel.width > spaceLeft &&
-            panel.width <= spaceRight
-        ) {
-            resolved = EPopoverPlacement.Right;
-        }
-        const left: number =
-            resolved === EPopoverPlacement.Right
-                ? anchorRight + offset
-                : anchor.left - panel.width - offset;
-        const top: number = clampValue(
-            anchor.top,
-            padding,
-            viewport.height - panel.height - padding,
-        );
-        return { top, left, placement: resolved };
-    }
-
-    const spaceBelow: number = viewport.height - anchorBottom - offset;
-    const spaceAbove: number = anchor.top - offset;
-    let resolved: EPopoverPlacement = placement;
-    if (
-        placement === EPopoverPlacement.Bottom &&
-        panel.height > spaceBelow &&
-        panel.height <= spaceAbove
-    ) {
-        resolved = EPopoverPlacement.Top;
-    } else if (
-        placement === EPopoverPlacement.Top &&
-        panel.height > spaceAbove &&
-        panel.height <= spaceBelow
-    ) {
-        resolved = EPopoverPlacement.Bottom;
-    }
-    const top: number =
-        resolved === EPopoverPlacement.Bottom
-            ? anchorBottom + offset
-            : anchor.top - panel.height - offset;
-    const left: number = clampValue(
-        anchor.left,
-        padding,
-        viewport.width - panel.width - padding,
-    );
-    return { top, left, placement: resolved };
-}
-
-function toRect(rect: DOMRect): PopoverRect {
-    return {
-        top: rect.top,
-        left: rect.left,
-        width: rect.width,
-        height: rect.height,
-    };
-}
-
-// Find or lazily create the single overlay root appended to <body>. All popovers
-// portal into the same element; it is a bare mount point (panels are positioned
-// fixed and carry the z-index token), so it adds no layout or stacking of its
-// own. Returns null with no DOM (SSR), so the panel simply does not render.
-function ensureOverlayRoot(): HTMLElement | null {
-    if (typeof document === 'undefined') {
-        return null;
-    }
-    const existing: Element | null = document.querySelector(
-        `[${OVERLAY_ROOT_ATTRIBUTE}]`,
-    );
-    if (existing instanceof HTMLElement) {
-        return existing;
-    }
-    const root: HTMLElement = document.createElement('div');
-    root.setAttribute(OVERLAY_ROOT_ATTRIBUTE, '');
-    document.body.appendChild(root);
-    return root;
-}
 
 export function Popover({
     open,
@@ -189,6 +44,7 @@ export function Popover({
     role = EPopoverRole.Dialog,
     label,
     labelledBy,
+    id,
     offset = 8,
     viewportPadding = 8,
     trapFocus = false,
@@ -209,6 +65,16 @@ export function Popover({
         PopoverCoords | null,
         Dispatch<SetStateAction<PopoverCoords | null>>,
     ] = useState<PopoverCoords | null>(null);
+
+    // The shared overlay mount point. Acquired through a lazy state initializer so
+    // the find-or-create runs once on mount instead of on every render; the
+    // accessor is idempotent (one shared root on <body>), so StrictMode's double
+    // invocation of the initializer never churns or duplicates it. Null under SSR,
+    // where the panel simply does not portal.
+    const [overlayRoot]: [
+        HTMLElement | null,
+        Dispatch<SetStateAction<HTMLElement | null>>,
+    ] = useState<HTMLElement | null>((): HTMLElement | null => ensureOverlayRoot());
 
     // Resolve the active anchor: an explicit external ref wins, otherwise the
     // trigger the Popover rendered. Stable across renders unless anchorRef
@@ -257,9 +123,13 @@ export function Popover({
     // Position the panel and keep it in view. Recomputes on scroll (capture, to
     // catch any scroll container), on window resize, and on element resize via
     // ResizeObserver where available. Every listener and the observer are removed
-    // on cleanup; the effect re-runs only when open or a geometry input changes.
+    // on cleanup; the effect re-runs only when open, the overlay root, or a
+    // geometry input changes.
     useLayoutEffect((): (() => void) | undefined => {
         if (!open) {
+            return undefined;
+        }
+        if (overlayRoot === null) {
             return undefined;
         }
         const panel: HTMLDivElement | null = panelRef.current;
@@ -316,7 +186,7 @@ export function Popover({
                 observer.disconnect();
             }
         };
-    }, [open, placement, offset, viewportPadding, readAnchor]);
+    }, [open, placement, offset, viewportPadding, readAnchor, overlayRoot]);
 
     // Non-modal focus restoration. Capture the focused element when opening; on
     // close, return focus to it only when focus fell back to <body> - i.e. the
@@ -364,8 +234,6 @@ export function Popover({
             : { visibility: 'hidden' }),
     };
 
-    const overlayRoot: HTMLElement | null = ensureOverlayRoot();
-
     const triggerSlot: ReactNode =
         trigger !== undefined ? (
             <span ref={setTriggerNode} className={styles.anchor}>
@@ -387,6 +255,8 @@ export function Popover({
                           prefersReducedMotion ? MOTION_REDUCED : MOTION_FULL
                       }
                       tabIndex={-1}
+                      aria-modal={trapFocus ? true : undefined}
+                      {...(id !== undefined ? { id } : {})}
                       {...(label !== undefined ? { 'aria-label': label } : {})}
                       {...(labelledBy !== undefined
                           ? { 'aria-labelledby': labelledBy }
