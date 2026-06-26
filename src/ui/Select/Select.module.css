@@ -1,0 +1,208 @@
+/*
+ * Select - a single-select listbox-popup combobox. The root carries the shared
+ * tone scope so the derived --portal-tone-* vars resolve from an optional inline
+ * --portal-tone. The trigger is a bordered control on the dark surface; the tone
+ * reads as the open-state border, focus glow, and the disclosure caret, while
+ * text stays on --portal-color-text-0 (an arbitrary tone cannot meet AA as a
+ * solid fill). The listbox panel and its entrance come from the shared Popover;
+ * this file styles only the trigger, the clear affordance, and the option rows.
+ * Only --portal-* tokens and derived --portal-tone-* vars are used; no literal
+ * colors or fixed pixels, logical properties throughout, motion reduced-gated,
+ * and the global focus ring owns :focus-visible.
+ */
+
+.root {
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-1);
+    font-family: var(--portal-font-sans);
+}
+
+.label {
+    color: var(--portal-color-text-1);
+    font-size: var(--portal-size-text-sm);
+    letter-spacing: var(--portal-letter-spacing-wide);
+    line-height: var(--portal-line-height-tight);
+}
+
+.control {
+    display: flex;
+    align-items: stretch;
+    gap: var(--portal-space-2);
+}
+
+.trigger {
+    display: inline-flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--portal-space-2);
+    min-inline-size: 0;
+    min-block-size: var(--portal-touch-target-min);
+    padding-block: var(--portal-space-2);
+    padding-inline: var(--portal-space-3);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-radius-lg);
+    background-color: var(--portal-color-surface-0);
+    color: var(--portal-color-text-0);
+    font-family: inherit;
+    font-size: var(--portal-size-text-md);
+    line-height: var(--portal-line-height-normal);
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .trigger {
+        transition:
+            border-color var(--portal-duration-ms128) var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ms128) var(--portal-easing-standard);
+    }
+}
+
+.trigger[data-open='true'] {
+    border-color: var(--portal-tone-accent);
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow-strong);
+}
+
+.trigger:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.value {
+    overflow: hidden;
+    flex: 1 1 auto;
+    min-inline-size: 0;
+    text-align: start;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.value[data-placeholder='true'] {
+    color: var(--portal-color-text-1);
+}
+
+/*
+ * The disclosure caret: a token-drawn chevron (two borders rotated) that flips
+ * when the listbox opens. Decorative (aria-hidden); the combobox role plus
+ * aria-expanded carry the open state.
+ */
+.arrow {
+    flex: 0 0 auto;
+    inline-size: var(--portal-space-3);
+    block-size: var(--portal-space-3);
+    border-inline-end: var(--portal-border-thickness-thin) solid
+        var(--portal-tone-accent);
+    border-block-end: var(--portal-border-thickness-thin) solid
+        var(--portal-tone-accent);
+    transform: rotate(45deg);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .arrow {
+        transition: transform var(--portal-duration-ms128)
+            var(--portal-easing-standard);
+    }
+}
+
+.trigger[data-open='true'] .arrow {
+    transform: rotate(-135deg);
+}
+
+.clear {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    inline-size: var(--portal-touch-target-min);
+    min-inline-size: var(--portal-touch-target-min);
+    block-size: var(--portal-touch-target-min);
+    min-block-size: var(--portal-touch-target-min);
+    padding: 0;
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-radius-md);
+    background-color: transparent;
+    color: var(--portal-color-text-1);
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .clear {
+        transition: color var(--portal-duration-ms128) var(--portal-easing-standard);
+    }
+}
+
+.clear:hover {
+    color: var(--portal-color-text-0);
+}
+
+/* The clear glyph: two token-thick bars crossed into an X. Decorative; the
+ * button's aria-label carries the meaning. */
+.clearGlyph {
+    position: relative;
+    inline-size: var(--portal-space-3);
+    block-size: var(--portal-space-3);
+}
+
+.clearGlyph::before,
+.clearGlyph::after {
+    content: '';
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 0;
+    inline-size: 100%;
+    block-size: var(--portal-border-thickness-thin);
+    background-color: currentcolor;
+    border-radius: var(--portal-radius-pill);
+}
+
+.clearGlyph::before {
+    transform: translateY(-50%) rotate(45deg);
+}
+
+.clearGlyph::after {
+    transform: translateY(-50%) rotate(-45deg);
+}
+
+.option {
+    display: flex;
+    align-items: center;
+    min-block-size: var(--portal-touch-target-min);
+    padding-block: var(--portal-space-2);
+    padding-inline: var(--portal-space-3);
+    border-radius: var(--portal-radius-md);
+    color: var(--portal-color-text-0);
+    font-size: var(--portal-size-text-md);
+    line-height: var(--portal-line-height-normal);
+    cursor: pointer;
+    user-select: none;
+}
+
+.option[data-active='true'] {
+    background-color: var(--portal-tone-fill);
+}
+
+.option[data-selected='true'] {
+    font-weight: 600;
+}
+
+/* A check shape marks the selected option as a non-color-only redundancy
+ * alongside aria-selected. */
+.option[data-selected='true']::after {
+    content: '';
+    inline-size: var(--portal-space-2);
+    block-size: var(--portal-space-3);
+    margin-inline-start: auto;
+    border-inline-end: var(--portal-border-thickness-thin) solid
+        var(--portal-tone-accent);
+    border-block-end: var(--portal-border-thickness-thin) solid
+        var(--portal-tone-accent);
+    transform: rotate(45deg);
+}
+
+.option[data-disabled='true'] {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

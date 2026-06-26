@@ -1,0 +1,84 @@
+/*
+ * Toast viewport and card wrapper. The viewport is a fixed, corner-anchored
+ * stack on the shared overlay layer (via the --portal-z-overlay token, never an
+ * inline z-index literal); it is sized with min()/calc() against the dynamic
+ * viewport so it never forces horizontal overflow. The card surface itself comes
+ * from the imported Banner (tone/status tint, severity role, dismiss button);
+ * this file only positions the stack and adds the reduced-motion-gated entrance.
+ * pointer-events are released on the empty viewport area and re-enabled per card,
+ * so the corner gutter never blocks the page beneath. Only --portal-* tokens and
+ * derived --portal-tone-* vars are used; no literal colors.
+ */
+
+.viewport {
+    position: fixed;
+    z-index: var(--portal-z-overlay);
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-3);
+    inline-size: min(24rem, calc(100dvw - 2 * var(--portal-space-5)));
+    padding: var(--portal-space-5);
+    pointer-events: none;
+}
+
+.viewport > * {
+    pointer-events: auto;
+}
+
+.viewport[data-placement='top-right'] {
+    inset-block-start: 0;
+    inset-inline-end: 0;
+    align-items: flex-end;
+}
+
+.viewport[data-placement='top-left'] {
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    align-items: flex-start;
+}
+
+.viewport[data-placement='bottom-right'] {
+    inset-block-end: 0;
+    inset-inline-end: 0;
+    flex-direction: column-reverse;
+    align-items: flex-end;
+}
+
+.viewport[data-placement='bottom-left'] {
+    inset-block-end: 0;
+    inset-inline-start: 0;
+    flex-direction: column-reverse;
+    align-items: flex-start;
+}
+
+.card {
+    inline-size: 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .card[data-motion='full'] {
+        animation: portal-toast-in var(--portal-duration-ms128)
+            var(--portal-easing-standard);
+    }
+}
+
+@keyframes portal-toast-in {
+    from {
+        opacity: 0;
+        transform: translateY(var(--portal-space-3));
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.title {
+    display: block;
+    font-weight: 600;
+}
+
+.message {
+    display: block;
+}

@@ -1,0 +1,37 @@
+/*
+ * Tooltip content laid out inside the shared Popover panel (which owns the
+ * surface, border, glow, portal, and entrance motion). This file styles only the
+ * bubble's inner title/body stack and consumes only --portal-* tokens and the
+ * derived --portal-tone-* vars - no literal colors or fixed pixel sizing. The
+ * title reads as a bold heading above the body; both keep the primary text color
+ * on the dark panel surface so contrast holds for any tone (a dim accent text
+ * color cannot guarantee AA against the surface, so the accent is not used for
+ * text - tone reads through the panel border and glow the Popover already draws).
+ */
+
+/* Wraps the consumer trigger so the show/hide pointer and focus handlers attach
+ * via JSX (React's synthetic enter/leave reaches this ancestor) without cloning
+ * handlers onto the trigger element. It adds no layout of its own. */
+.triggerWrap {
+    display: inline-flex;
+}
+
+.tooltip {
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-1);
+    max-inline-size: 20rem;
+}
+
+.title {
+    color: var(--portal-color-text-0);
+    font-size: var(--portal-size-text-sm);
+    font-weight: 600;
+    line-height: var(--portal-line-height-tight);
+}
+
+.body {
+    color: var(--portal-color-text-0);
+    font-size: var(--portal-size-text-sm);
+    line-height: var(--portal-line-height-normal);
+}

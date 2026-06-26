@@ -1,0 +1,203 @@
+/*
+ * Dialog - modal surface shared by the base Dialog and the Confirm/Prompt
+ * compositions. The backdrop and panel are portaled into the shared overlay root
+ * and sit on the overlay stacking layer via the --portal-z-overlay token (never
+ * an inline z-index literal). The panel is centered by a fixed flex positioner
+ * (so the entrance animation can use transform without fighting a centering
+ * translate) and capped to the dynamic viewport with min()/calc(), so it never
+ * overflows. Only --portal-* tokens and derived --portal-tone-* vars are used;
+ * the panel carries the tone scope, so data-status (e.g. danger) recolors the
+ * accent that drives the primary action. Entrance motion is gated behind both
+ * the reduced-motion media query and the data-motion attribute. Action buttons
+ * keep the minimum touch target; the global focus ring owns :focus-visible.
+ */
+
+.backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: var(--portal-z-overlay);
+    background-color: color-mix(
+        in oklab,
+        var(--portal-color-bg-0) 72%,
+        transparent
+    );
+}
+
+.positioner {
+    position: fixed;
+    inset: 0;
+    z-index: var(--portal-z-overlay);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--portal-space-5);
+    pointer-events: none;
+}
+
+.panel {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-4);
+    max-block-size: calc(100dvh - 2 * var(--portal-space-6));
+    padding: var(--portal-space-5);
+    overflow: auto;
+    border: var(--portal-border-thickness-thin) solid var(--portal-tone-border);
+    border-radius: var(--portal-radius-lg);
+    background-color: var(--portal-color-surface-0);
+    box-shadow:
+        0 0 var(--portal-space-4) var(--portal-tone-glow),
+        0 var(--portal-space-2) var(--portal-space-6)
+            color-mix(in oklab, var(--portal-color-bg-0) 60%, transparent);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+    pointer-events: auto;
+}
+
+.panel[data-size='sm'] {
+    inline-size: min(22rem, calc(100dvw - 2 * var(--portal-space-6)));
+}
+
+.panel[data-size='md'] {
+    inline-size: min(30rem, calc(100dvw - 2 * var(--portal-space-6)));
+}
+
+.panel[data-size='lg'] {
+    inline-size: min(46rem, calc(100dvw - 2 * var(--portal-space-6)));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .panel[data-motion='full'] {
+        animation: portal-dialog-in var(--portal-duration-ms128)
+            var(--portal-easing-standard);
+    }
+
+    .backdrop[data-motion='full'] {
+        animation: portal-dialog-fade var(--portal-duration-ms128)
+            var(--portal-easing-standard);
+    }
+
+    .actionPrimary,
+    .actionSecondary {
+        transition:
+            transform var(--portal-duration-ms128) var(--portal-easing-standard),
+            border-color var(--portal-duration-ms128) var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ms128) var(--portal-easing-standard),
+            color var(--portal-duration-ms128) var(--portal-easing-standard);
+    }
+}
+
+@keyframes portal-dialog-in {
+    from {
+        opacity: 0;
+        transform: translateY(var(--portal-space-4));
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes portal-dialog-fade {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.title {
+    margin: 0;
+    color: var(--portal-color-text-0);
+    font-size: var(--portal-size-text-lg);
+    font-weight: 600;
+    line-height: var(--portal-line-height-tight);
+}
+
+.description {
+    margin: 0;
+    color: var(--portal-color-text-1);
+    font-size: var(--portal-size-text-md);
+    line-height: var(--portal-line-height-normal);
+}
+
+.body {
+    color: var(--portal-color-text-0);
+    font-size: var(--portal-size-text-md);
+    line-height: var(--portal-line-height-normal);
+}
+
+.message {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--portal-space-3);
+    color: var(--portal-color-text-0);
+    font-size: var(--portal-size-text-md);
+    line-height: var(--portal-line-height-normal);
+}
+
+.icon {
+    flex: 0 0 auto;
+    color: var(--portal-tone-accent);
+    font-size: var(--portal-size-text-lg);
+    line-height: var(--portal-line-height-tight);
+}
+
+.promptForm {
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-4);
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--portal-space-3);
+}
+
+.actionPrimary,
+.actionSecondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: var(--portal-touch-target-min);
+    min-block-size: var(--portal-touch-target-min);
+    padding-block: var(--portal-space-2);
+    padding-inline: var(--portal-space-5);
+    border-radius: var(--portal-radius-md);
+    font-family: inherit;
+    font-size: var(--portal-size-text-md);
+    font-weight: 600;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.actionPrimary {
+    border: var(--portal-border-thickness-thin) solid var(--portal-tone-accent);
+    background-color: var(--portal-tone-fill);
+    color: var(--portal-color-text-0);
+}
+
+.actionSecondary {
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    background-color: transparent;
+    color: var(--portal-color-text-1);
+}
+
+.actionPrimary:hover {
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow-strong);
+}
+
+.actionSecondary:hover {
+    border-color: var(--portal-tone-border);
+    color: var(--portal-color-text-0);
+}
+
+.actionPrimary:active,
+.actionSecondary:active {
+    transform: scale(0.97);
+}

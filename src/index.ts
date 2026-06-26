@@ -132,6 +132,10 @@ export {
     useScalarControl,
 } from './react/hooks/useScalarControl';
 export {
+    useScrollLock,
+    type UseScrollLockOptions,
+} from './react/hooks/useScrollLock';
+export {
     type EntrancePreset,
     MOTION_DURATION,
     type MotionPreset,
@@ -173,6 +177,15 @@ export {
     ECtaSize,
     ECtaVariant,
 } from './ui/CTA/CTA.types';
+export { ConfirmDialog } from './ui/Dialog/ConfirmDialog';
+export { Dialog } from './ui/Dialog/Dialog';
+export {
+    type ConfirmDialogProps,
+    type DialogProps,
+    EDialogSize,
+    type PromptDialogProps,
+} from './ui/Dialog/Dialog.types';
+export { PromptDialog } from './ui/Dialog/PromptDialog';
 export { EmptyState } from './ui/EmptyState/EmptyState';
 export {
     EEmptyStateRole,
@@ -219,6 +232,8 @@ export {
     type SegmentedControlProps,
     type UiSegmentItem,
 } from './ui/SegmentedControl/SegmentedControl.types';
+export { Select } from './ui/Select/Select';
+export { type SelectProps, type UiSelectOption } from './ui/Select/Select.types';
 export { SelectableTile } from './ui/SelectableTile/SelectableTile';
 export {
     ESelectionState,
@@ -246,4 +261,15 @@ export {
     ETextFieldType,
     type TextFieldProps,
 } from './ui/TextField/TextField.types';
+export {
+    EToastKind,
+    EToastPlacement,
+    type ToastContextValue,
+    type ToastProviderProps,
+    type ToastRecord,
+} from './ui/Toast/Toast.types';
+export { ToastProvider } from './ui/Toast/ToastProvider';
+export { useToast } from './ui/Toast/useToast';
 export { EUiStatus, PORTAL_TONE, type Toned, toneProperties } from './ui/tone';
+export { Tooltip } from './ui/Tooltip/Tooltip';
+export { type TooltipProps } from './ui/Tooltip/Tooltip.types';
