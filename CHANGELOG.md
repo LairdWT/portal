@@ -4,13 +4,13 @@ All notable changes to this project are documented in this file. The format is
 based on Keep a Changelog, and the project follows Semantic Versioning with the
 0.x caveat that, before 1.0, a minor version may carry a breaking change.
 
-## [Unreleased]
+## [0.9.0] - 2026-06-26
 
 ### Added
 
 - `SecretField`: a masked secret/password input with native masking, a required
   current/new-password `autoComplete`, an accessible 48px show/hide toggle
-  (`aria-pressed`, dynamic `aria-label`, non-submitting button), and caps-lock
+  (`aria-pressed`, a stable `aria-label`, non-submitting button), and caps-lock
   awareness. The value is parent-owned and is logged and reflected nowhere but
   the field's own input value.
 - `PromptDialog` gains an opt-in `secret` prop (`SecretPromptOptions`) that
