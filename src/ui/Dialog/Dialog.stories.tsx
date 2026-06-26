@@ -7,6 +7,7 @@ import {
     useState,
 } from 'react';
 
+import { ESecretAutocomplete } from '../SecretField/SecretField.types';
 import { EUiStatus } from '../tone';
 import { ConfirmDialog } from './ConfirmDialog';
 import { Dialog } from './Dialog';
@@ -134,6 +135,46 @@ function PromptDemo(props: Readonly<{ initialOpen?: boolean }>): ReactElement {
     );
 }
 
+function SecretPromptDemo(
+    props: Readonly<{ initialOpen?: boolean }>,
+): ReactElement {
+    const [open, setOpen]: [boolean, Dispatch<SetStateAction<boolean>>] =
+        useState<boolean>(props.initialOpen ?? true);
+    const [value, setValue]: [string, Dispatch<SetStateAction<string>>] =
+        useState<string>('');
+    return (
+        <>
+            <button
+                type="button"
+                style={OPENER_STYLE}
+                onClick={(): void => {
+                    setOpen(true);
+                }}
+            >
+                Open secret prompt
+            </button>
+            <PromptDialog
+                open={open}
+                onClose={(): void => {
+                    setOpen(false);
+                }}
+                title="Enter your password"
+                label="Password"
+                value={value}
+                onValueChange={setValue}
+                onSubmit={(): void => {
+                    setOpen(false);
+                }}
+                onCancel={(): void => {
+                    setOpen(false);
+                }}
+                placeholder="Enter your password"
+                secret={{ autoComplete: ESecretAutocomplete.Current }}
+            />
+        </>
+    );
+}
+
 const meta: Meta<typeof Dialog> = {
     title: 'UI/Dialog',
     component: Dialog,
@@ -163,6 +204,10 @@ export const Acknowledge: Story = {
 
 export const Prompt: Story = {
     render: (): ReactElement => <PromptDemo />,
+};
+
+export const SecretPrompt: Story = {
+    render: (): ReactElement => <SecretPromptDemo />,
 };
 
 export const Sized: Story = {

@@ -7,6 +7,8 @@ import {
     type InputSignal,
 } from '@laird-wt/portal';
 
+import { SecretFieldDemo } from './SecretFieldDemo';
+
 // Live readouts derived from the most recent signal of each value type. The
 // example keeps a small immutable map keyed by descriptor id so the embedded
 // HudPanel reflects real-time movement and action magnitudes.
@@ -58,12 +60,17 @@ export function App(): ReactElement {
         Object.values(readoutMap);
 
     return (
-        <ControlSurface
-            onSignal={handleSignal}
-            leftLabel="Movement"
-            primaryLabel="A"
-            secondaryLabel="B"
-            readouts={readouts}
-        />
+        <>
+            <ControlSurface
+                onSignal={handleSignal}
+                leftLabel="Movement"
+                primaryLabel="A"
+                secondaryLabel="B"
+                readouts={readouts}
+            />
+            <section aria-label="Secret field demo">
+                <SecretFieldDemo />
+            </section>
+        </>
     );
 }

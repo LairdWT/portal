@@ -185,6 +185,7 @@ export {
     type DialogProps,
     EDialogSize,
     type PromptDialogProps,
+    type SecretPromptOptions,
 } from './ui/Dialog/Dialog.types';
 export { PromptDialog } from './ui/Dialog/PromptDialog';
 export { EmptyState } from './ui/EmptyState/EmptyState';
@@ -222,6 +223,13 @@ export {
     ESearchBoxState,
     type SearchBoxProps,
 } from './ui/SearchBox/SearchBox.types';
+export { SecretField } from './ui/SecretField/SecretField';
+export {
+    ECapsLockState,
+    ERevealState,
+    ESecretAutocomplete,
+    type SecretFieldProps,
+} from './ui/SecretField/SecretField.types';
 export { Section } from './ui/Section/Section';
 export {
     type SectionHeadingLevel,

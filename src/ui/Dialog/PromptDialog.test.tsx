@@ -6,11 +6,21 @@ import {
     type SetStateAction,
     useState,
 } from 'react';
-import { afterEach, describe, expect, it, type Mock, vi } from 'vitest';
+import {
+    afterEach,
+    describe,
+    expect,
+    it,
+    type Mock,
+    type MockInstance,
+    vi,
+} from 'vitest';
 
+import { ESecretAutocomplete } from '../SecretField/SecretField.types';
 import { PromptDialog } from './PromptDialog';
 
 afterEach((): void => {
+    vi.restoreAllMocks();
     document.body.innerHTML = '';
     document.body.style.overflow = '';
     document.body.style.paddingRight = '';
@@ -35,6 +45,26 @@ function Harness(props: HarnessProps): ReactElement {
             onValueChange={setValue}
             onSubmit={props.onSubmit}
             placeholder="name"
+            {...(props.onCancel !== undefined ? { onCancel: props.onCancel } : {})}
+        />
+    );
+}
+
+// The masked variant: passing `secret` swaps the prompt's TextField for a
+// SecretField while keeping the same form contract.
+function SecretHarness(props: HarnessProps): ReactElement {
+    const [value, setValue]: [string, Dispatch<SetStateAction<string>>] =
+        useState<string>('');
+    return (
+        <PromptDialog
+            open
+            onClose={props.onClose}
+            title="Set a password"
+            label="Password"
+            value={value}
+            onValueChange={setValue}
+            onSubmit={props.onSubmit}
+            secret={{ autoComplete: ESecretAutocomplete.Current }}
             {...(props.onCancel !== undefined ? { onCancel: props.onCancel } : {})}
         />
     );
@@ -106,5 +136,83 @@ describe('PromptDialog', (): void => {
         await waitFor((): void => {
             expect(screen.getByLabelText('Loadout name')).toHaveFocus();
         });
+    });
+
+    it('renders a masked secret field when secret is set', (): void => {
+        render(
+            <SecretHarness
+                onSubmit={vi.fn<(value: string) => void>()}
+                onClose={vi.fn<() => void>()}
+            />,
+        );
+
+        const input: HTMLElement = screen.getByLabelText('Password');
+        expect(input).toHaveAttribute('type', 'password');
+        expect(input).toHaveAttribute('autocomplete', 'current-password');
+    });
+
+    it('reveals the masked prompt without submitting it', async (): Promise<void> => {
+        const onSubmit: Mock<(value: string) => void> =
+            vi.fn<(value: string) => void>();
+        const user: UserEvent = userEvent.setup();
+        render(<SecretHarness onSubmit={onSubmit} onClose={vi.fn<() => void>()} />);
+
+        await user.click(screen.getByRole('button', { name: 'Show password' }));
+
+        expect(screen.getByLabelText('Password')).toHaveAttribute('type', 'text');
+        expect(onSubmit).not.toHaveBeenCalled();
+    });
+
+    it('submits the secret value when Enter is pressed in the field', async (): Promise<void> => {
+        const onSubmit: Mock<(value: string) => void> =
+            vi.fn<(value: string) => void>();
+        const user: UserEvent = userEvent.setup();
+        render(<SecretHarness onSubmit={onSubmit} onClose={vi.fn<() => void>()} />);
+
+        await user.type(screen.getByLabelText('Password'), 's3cret{Enter}');
+
+        expect(onSubmit).toHaveBeenCalledWith('s3cret');
+    });
+
+    it('never logs the secret across the dialog cycle', async (): Promise<void> => {
+        const dialogSecret: string = 'd1alog-secret-value';
+        const logSpy: MockInstance<typeof console.log> = vi.spyOn(console, 'log');
+        const infoSpy: MockInstance<typeof console.info> = vi.spyOn(
+            console,
+            'info',
+        );
+        const warnSpy: MockInstance<typeof console.warn> = vi.spyOn(
+            console,
+            'warn',
+        );
+        const errorSpy: MockInstance<typeof console.error> = vi.spyOn(
+            console,
+            'error',
+        );
+        const debugSpy: MockInstance<typeof console.debug> = vi.spyOn(
+            console,
+            'debug',
+        );
+        const user: UserEvent = userEvent.setup();
+        render(
+            <SecretHarness
+                onSubmit={vi.fn<(value: string) => void>()}
+                onClose={vi.fn<() => void>()}
+            />,
+        );
+
+        await user.type(screen.getByLabelText('Password'), dialogSecret);
+        await user.click(screen.getByRole('button', { name: 'Show password' }));
+        await user.click(screen.getByRole('button', { name: 'Hide password' }));
+        await user.click(screen.getByRole('button', { name: 'OK' }));
+
+        const loggedCalls: string = JSON.stringify([
+            logSpy.mock.calls,
+            infoSpy.mock.calls,
+            warnSpy.mock.calls,
+            errorSpy.mock.calls,
+            debugSpy.mock.calls,
+        ]);
+        expect(loggedCalls).not.toContain(dialogSecret);
     });
 });

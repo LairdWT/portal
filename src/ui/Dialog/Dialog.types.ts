@@ -1,5 +1,6 @@
 import { type ReactNode, type RefObject } from 'react';
 
+import { type ESecretAutocomplete } from '../SecretField/SecretField.types';
 import { type EUiStatus, type Toned } from '../tone';
 
 // Size of the dialog panel. The kebab-case values double as the data-size
@@ -62,11 +63,25 @@ export type ConfirmDialogProps = Readonly<{
 }> &
     Toned;
 
+// Opt-in masked-prompt options for PromptDialog. The presence of this object is
+// the discriminant that swaps the prompt's TextField for a SecretField; its
+// REQUIRED `autoComplete` makes a half-built secret prompt unrepresentable (a
+// masked prompt cannot be requested without choosing current/new-password). The
+// reveal/conceal/caps strings forward to the field for i18n.
+export type SecretPromptOptions = Readonly<{
+    autoComplete: ESecretAutocomplete;
+    revealLabel?: string;
+    concealLabel?: string;
+    capsLockWarning?: string;
+}>;
+
 // Props for PromptDialog: the input-dialog composition over Dialog and the
 // existing TextField. The field is controlled (`value` in, `onValueChange` out).
 // `onSubmit` fires with the current value on OK or Enter; `onCancel`, when
 // provided, adds a Cancel action. `submitLabel` / `cancelLabel` default to
-// 'OK' / 'Cancel'. `placeholder` forwards to the field.
+// 'OK' / 'Cancel'. `placeholder` forwards to the field. `secret`, when set, renders
+// the prompt as a masked SecretField instead of a TextField; the common text
+// prompt is unchanged when it is omitted.
 export type PromptDialogProps = Readonly<{
     open: boolean;
     onClose: () => void;
@@ -79,5 +94,6 @@ export type PromptDialogProps = Readonly<{
     submitLabel?: string;
     cancelLabel?: string;
     placeholder?: string;
+    secret?: SecretPromptOptions;
 }> &
     Toned;

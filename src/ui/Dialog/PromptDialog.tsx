@@ -1,5 +1,6 @@
 import { type ReactElement, type SyntheticEvent } from 'react';
 
+import { SecretField } from '../SecretField/SecretField';
 import { TextField } from '../TextField/TextField';
 import { Dialog } from './Dialog';
 import styles from './Dialog.module.css';
@@ -17,6 +18,7 @@ export function PromptDialog({
     submitLabel = 'OK',
     cancelLabel = 'Cancel',
     placeholder,
+    secret,
     tone,
 }: PromptDialogProps): ReactElement {
     // A native form gives Enter-to-submit for free (the submit button is the
@@ -41,12 +43,31 @@ export function PromptDialog({
             {...(tone !== undefined ? { tone } : {})}
         >
             <form className={styles.promptForm} onSubmit={handleSubmit}>
-                <TextField
-                    label={label}
-                    value={value}
-                    onValueChange={onValueChange}
-                    {...(placeholder !== undefined ? { placeholder } : {})}
-                />
+                {secret !== undefined ? (
+                    <SecretField
+                        label={label}
+                        value={value}
+                        onValueChange={onValueChange}
+                        autoComplete={secret.autoComplete}
+                        {...(placeholder !== undefined ? { placeholder } : {})}
+                        {...(secret.revealLabel !== undefined
+                            ? { revealLabel: secret.revealLabel }
+                            : {})}
+                        {...(secret.concealLabel !== undefined
+                            ? { concealLabel: secret.concealLabel }
+                            : {})}
+                        {...(secret.capsLockWarning !== undefined
+                            ? { capsLockWarning: secret.capsLockWarning }
+                            : {})}
+                    />
+                ) : (
+                    <TextField
+                        label={label}
+                        value={value}
+                        onValueChange={onValueChange}
+                        {...(placeholder !== undefined ? { placeholder } : {})}
+                    />
+                )}
                 <div className={styles.actions}>
                     {onCancel !== undefined ? (
                         <button
