@@ -1,0 +1,229 @@
+/*
+ * Menu - the machined-HUD dropdown menu family (Menu, MenuBar, ContextMenu).
+ * The root list mounts inside the shared Popover panel, which already paints the
+ * beveled frame, border, padding, and entrance; this file styles only the list
+ * itself, the rows, the submenu fly-out (which renders OUTSIDE a panel and so
+ * carries its own frame), and the horizontal menubar. Only --portal-* tokens and
+ * the derived --portal-tone-* vars are used: no literal colors, no magic layout
+ * pixels, logical properties throughout, and every transition is reduced-motion
+ * gated. Checkable state is shown by a token-drawn shape in the .indicator slot
+ * (a redundancy alongside aria-checked, never color alone).
+ */
+
+/* One menu level: a role=menu column. The root level inherits the panel's frame
+ * and padding; the layout (flex column) lives here. */
+.menu {
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-1);
+    min-inline-size: calc(var(--portal-touch-target-min) * 3);
+    font-family: var(--portal-font-sans);
+}
+
+/* A submenu fly-out is positioned fixed OUTSIDE the Popover panel, so it earns
+ * its own beveled HUD frame, padding, and lift. Composed onto .menu. */
+.flyout {
+    composes: beveled from '../../theme/surfaces.module.css';
+    padding: var(--portal-space-2);
+    border: var(--portal-border-thickness-thin) solid var(--portal-tone-border);
+    border-radius: var(--portal-bevel-2);
+    background-color: var(--portal-color-surface-0);
+    box-shadow:
+        0 0 var(--portal-space-4) var(--portal-tone-glow),
+        0 var(--portal-space-2) var(--portal-space-6)
+            color-mix(in oklab, var(--portal-color-bg-0) 60%, transparent);
+}
+
+/* The fixed-position wrapper that escapes the panel's overflow clip. Stacks on
+ * the shared overlay layer; its top/left are set inline from the runtime. */
+.flyoutAnchor {
+    z-index: var(--portal-z-overlay);
+}
+
+/* A menu row: indicator | icon | label | shortcut | chevron. The label flexes to
+ * fill, pushing the shortcut and submenu chevron to the inline-end edge. */
+.item {
+    composes: beveled from '../../theme/surfaces.module.css';
+    display: flex;
+    align-items: center;
+    gap: var(--portal-space-2);
+    min-block-size: var(--portal-touch-target-min);
+    padding-block: var(--portal-space-1);
+    padding-inline: var(--portal-space-2);
+    border-radius: var(--portal-bevel-1);
+    color: var(--portal-color-text-0);
+    font-size: var(--portal-size-text-md);
+    line-height: var(--portal-line-height-normal);
+    cursor: pointer;
+    user-select: none;
+    outline: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .item {
+        transition: background-color var(--portal-duration-ui-fast)
+            var(--portal-easing-standard);
+    }
+}
+
+/* Roving-focus highlight: the tone fill marks the active row. */
+.item[data-active='true'] {
+    background-color: var(--portal-tone-fill);
+}
+
+.item[aria-disabled='true'] {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* The roving focus lands real DOM focus on each row, so it earns a visible inset
+ * ring from the shared focus token. */
+.item:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: calc(-1 * var(--portal-border-thickness-normal));
+}
+
+/* Reserved leading slot for the checkable shape. Always present so labels align
+ * whether or not a row is checkable. */
+.indicator {
+    position: relative;
+    flex: 0 0 auto;
+    inline-size: var(--portal-space-3);
+    block-size: var(--portal-space-3);
+}
+
+/* Checkbox tick: two token-thick borders rotated into a check. Shown only when
+ * aria-checked is true; the role + aria-checked carry the semantics. */
+.item[data-kind='checkbox'][aria-checked='true'] .indicator::after {
+    content: '';
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 35%;
+    inline-size: var(--portal-space-1);
+    block-size: var(--portal-space-2);
+    border-inline-end: var(--portal-border-thickness-normal) solid
+        var(--portal-tone-accent);
+    border-block-end: var(--portal-border-thickness-normal) solid
+        var(--portal-tone-accent);
+    transform: rotate(45deg);
+}
+
+/* Radio dot: a filled token-drawn disc, shown only when aria-checked is true. */
+.item[data-kind='radio'][aria-checked='true'] .indicator::after {
+    content: '';
+    position: absolute;
+    inset: 25%;
+    border-radius: var(--portal-radius-pill);
+    background-color: var(--portal-tone-accent);
+}
+
+/* Optional leading icon slot. */
+.icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    inline-size: var(--portal-space-4);
+    block-size: var(--portal-space-4);
+}
+
+.label {
+    overflow: hidden;
+    flex: 1 1 auto;
+    min-inline-size: 0;
+    text-align: start;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Display-only accelerator hint, set in the mono face on the dimmed text tone. */
+.shortcut {
+    flex: 0 0 auto;
+    margin-inline-start: var(--portal-space-3);
+    color: var(--portal-color-text-1);
+    font-family: var(--portal-font-mono);
+    font-size: var(--portal-size-text-sm);
+    letter-spacing: var(--portal-letter-spacing-wide);
+}
+
+/* Submenu arrow: a token-drawn chevron pointing toward the inline-end fly-out.
+ * Decorative; aria-haspopup + aria-expanded on the row carry the meaning. */
+.chevron {
+    flex: 0 0 auto;
+    inline-size: var(--portal-space-2);
+    block-size: var(--portal-space-2);
+    border-inline-end: var(--portal-border-thickness-thin) solid
+        var(--portal-tone-accent);
+    border-block-end: var(--portal-border-thickness-thin) solid
+        var(--portal-tone-accent);
+    transform: rotate(-45deg);
+}
+
+/* A non-interactive hairline rule between groups of rows. */
+.separator {
+    block-size: var(--portal-border-thickness-thin);
+    margin-block: var(--portal-space-1);
+    margin-inline: var(--portal-space-1);
+    border: 0;
+    background-color: var(--portal-color-border);
+}
+
+/* The horizontal menubar shell: a beveled HUD strip of top-level buttons. */
+.menubar {
+    composes: beveled from '../../theme/surfaces.module.css';
+    display: inline-flex;
+    align-items: stretch;
+    gap: var(--portal-space-1);
+    padding: var(--portal-space-1);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-bevel-2);
+    background-color: var(--portal-color-surface-1);
+    font-family: var(--portal-font-sans);
+}
+
+/* A top-level menubar button. Beveled, transparent until open; [data-open] lifts
+ * it with the tone border, fill, and glow. */
+.barButton {
+    composes: beveled from '../../theme/surfaces.module.css';
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--portal-touch-target-min);
+    padding-block: var(--portal-space-2);
+    padding-inline: var(--portal-space-3);
+    border: var(--portal-border-thickness-thin) solid transparent;
+    border-radius: var(--portal-bevel-1);
+    background-color: transparent;
+    color: var(--portal-color-text-0);
+    font-family: inherit;
+    font-size: var(--portal-size-text-md);
+    letter-spacing: var(--portal-letter-spacing-wide);
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .barButton {
+        transition:
+            border-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard),
+            background-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ui-fast) var(--portal-easing-standard);
+    }
+}
+
+.barButton[data-open='true'] {
+    border-color: var(--portal-tone-accent);
+    background-color: var(--portal-tone-fill);
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow-strong);
+}
+
+.barButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.barButton:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: calc(-1 * var(--portal-border-thickness-normal));
+}

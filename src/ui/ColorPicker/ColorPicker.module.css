@@ -1,0 +1,111 @@
+/*
+ * ColorPicker. A controlled, domain-agnostic color editor that reads as part of
+ * the machined-metal HUD family, not a generic rounded kit. The root and the
+ * preview-swatch frame adopt the shared bevel/metal language from
+ * surfaces.module.css (composed by reference, never re-invented): the root carries
+ * the beveled corner identity and an HUD edge, and the swatch frame adds the
+ * animated metal trim. Every value resolves from a --portal-* token or the derived
+ * --portal-tone-* vars; this module introduces no color or size literal (gradient
+ * geometry percentages are allowed, as in the sibling surfaces). The only value
+ * that reaches CSS is the live swatch color, set inline as a custom property.
+ * Motion is gated behind prefers-reduced-motion.
+ */
+
+.root {
+    composes: beveled from '../../theme/surfaces.module.css';
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-3);
+    padding: var(--portal-space-4);
+    border: var(--portal-hud-edge-width) solid var(--portal-color-border-accent);
+    border-radius: var(--portal-bevel-3);
+    background-color: var(--portal-color-surface-0);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .root {
+        transition:
+            border-color var(--portal-duration-ui-base)
+                var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ui-base) var(--portal-easing-standard);
+    }
+}
+
+/* A subtle outer glow when any child control is focused; the child controls own
+ * their own focus rings (the Portal per-component focus pattern). */
+.root:focus-within {
+    border-color: var(--portal-tone-border);
+    box-shadow: 0 0 var(--portal-space-4) var(--portal-tone-glow);
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--portal-space-3);
+}
+
+/* The bold machined HUD title, the group's single accessible name source. */
+.title {
+    composes: wideLabel from '../../theme/surfaces.module.css';
+    font-family: var(--portal-font-sans);
+    font-size: var(--portal-size-text-lg);
+    font-weight: var(--portal-weight-label-bold);
+    color: var(--portal-color-text-0);
+}
+
+/* The preview-swatch frame: the metal trim ring around the readout, a
+ * HUD-readout element where the animated trim is weight-appropriate. */
+.swatchFrame {
+    composes: beveled metalTrim from '../../theme/surfaces.module.css';
+    display: flex;
+    flex: 0 0 auto;
+    inline-size: var(--portal-touch-target-min);
+    block-size: var(--portal-touch-target-min);
+    padding: var(--portal-space-1);
+    border-radius: var(--portal-bevel-2);
+}
+
+/* The swatch sits over a token-only transparency checker so alpha reads. The
+ * checker is a repeating-conic-gradient of the two surface tokens; the live color
+ * is painted on top by the ::after layer, letting a semi-transparent color reveal
+ * the checker behind it. */
+.swatch {
+    composes: beveled from '../../theme/surfaces.module.css';
+    position: relative;
+    flex: 1 1 auto;
+    overflow: hidden;
+    border-radius: var(--portal-bevel-1);
+    background-image: repeating-conic-gradient(
+        var(--portal-color-surface-1) 0% 25%,
+        var(--portal-color-surface-0) 0% 50%
+    );
+    background-size: var(--portal-space-3) var(--portal-space-3);
+}
+
+.swatch::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: var(--portal-color-picker-swatch, transparent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .swatch::after {
+        transition: background-color var(--portal-duration-ui-base)
+            var(--portal-easing-standard);
+    }
+}
+
+.channels {
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-3);
+}
+
+.hexField {
+    display: flex;
+    flex-direction: column;
+}

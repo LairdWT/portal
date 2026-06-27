@@ -1,0 +1,299 @@
+/*
+ * DataTable - a machined-HUD console grid. The root is the beveled HUD frame and
+ * the scroll viewport; the sticky header is the milled console strip (the shared
+ * animated metal-ring trim from surfaces.module.css); the body is a clean data
+ * field of windowed rows. Selection reads as an angular toned inline-start edge
+ * plus a tone scrim, never a rounded pill or color alone (aria-selected carries
+ * the state too). Only --portal-* / derived --portal-tone-* values are used; no
+ * literal colors and no fixed-pixel LAYOUT sizing (column tracks are fr; the one
+ * px value, the uniform row height, arrives as an inline custom property fed from
+ * a TS constant). Logical properties throughout; every transition and the metal
+ * sheen are reduced-motion gated.
+ */
+
+.root {
+    composes: beveled from '../../theme/surfaces.module.css';
+    position: relative;
+    overflow: auto;
+    inline-size: 100%;
+    max-block-size: var(--portal-datatable-body-max, clamp(12rem, 60dvh, 40rem));
+    border: var(--portal-hud-edge-width) solid var(--portal-tone-border);
+    border-radius: var(--portal-bevel-3);
+    background-color: var(--portal-color-surface-0);
+    box-shadow: inset 0 0 var(--portal-space-4) var(--portal-tone-glow);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+}
+
+.root:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: calc(-1 * var(--portal-border-thickness-normal));
+}
+
+.root[data-enabled='disabled'] {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* The sticky milled console strip. The metal-ring trim (and its gated sheen) is
+ * inherited from surfaces.module.css; the padding-box fill is the solid HUD
+ * surface, so body rows scroll cleanly under it. */
+.headerGroup {
+    composes: metalTrim from '../../theme/surfaces.module.css';
+    position: sticky;
+    inset-block-start: 0;
+    z-index: var(--portal-z-overlay);
+}
+
+.headerRow {
+    display: grid;
+    grid-template-columns: var(--portal-datatable-columns);
+    align-items: center;
+    gap: var(--portal-space-2);
+    min-block-size: var(--portal-datatable-row-height);
+    padding-inline: var(--portal-space-2);
+}
+
+/* Bold HUD column label, echoing the BevelButton key face and Helicon's strong
+ * mono accent header. data-align drives the justification. */
+.columnheader {
+    display: flex;
+    align-items: center;
+    min-inline-size: 0;
+    block-size: 100%;
+
+    /* The brightened accent rather than --portal-tone-accent: a column header is
+     * AA-critical text, and an arbitrary tone (or the default accent) cannot
+     * guarantee 4.5:1 on the dark surface, so tone drives the carets/edges while
+     * the header label stays on a contrast-safe accent (the Select precedent). */
+    color: var(--portal-color-accent-highlight);
+    font-size: var(--portal-size-text-sm);
+    font-weight: var(--portal-weight-label-bold);
+    letter-spacing: var(--portal-letter-spacing-wide);
+    text-transform: uppercase;
+}
+
+.columnheader[data-align='center'] {
+    justify-content: center;
+    text-align: center;
+}
+
+.columnheader[data-align='end'] {
+    justify-content: flex-end;
+    text-align: end;
+}
+
+.columnheader[data-active='true'] {
+    box-shadow: inset 0 0 0 var(--portal-border-thickness-thin)
+        var(--portal-color-focus);
+}
+
+/* A real button so pointer click works natively and the control clears the 48px
+ * touch floor; keyboard activation is routed from the grid container, so it stays
+ * out of the tab order (tabIndex -1). */
+.sortButton {
+    composes: beveled from '../../theme/surfaces.module.css';
+    display: inline-flex;
+    align-items: center;
+    gap: var(--portal-space-2);
+    inline-size: 100%;
+    min-block-size: var(--portal-touch-target-min);
+    padding-block: var(--portal-space-1);
+    padding-inline: var(--portal-space-2);
+    border: var(--portal-border-thickness-thin) solid transparent;
+    border-radius: var(--portal-bevel-1);
+    background-color: transparent;
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.sortButton[data-align='center'] {
+    justify-content: center;
+}
+
+.sortButton[data-align='end'] {
+    justify-content: flex-end;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .sortButton {
+        transition:
+            transform var(--portal-duration-ui-fast) var(--portal-easing-standard),
+            border-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ui-fast) var(--portal-easing-standard);
+    }
+}
+
+.sortButton:focus-visible {
+    outline: var(--portal-border-thickness-thin) solid var(--portal-color-focus);
+    outline-offset: calc(-1 * var(--portal-border-thickness-thin));
+}
+
+.sortButton:disabled {
+    cursor: not-allowed;
+}
+
+.sortButton:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+.headerLabel {
+    overflow: hidden;
+    min-inline-size: 0;
+    color: inherit;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Token-drawn sort caret (decorative, aria-hidden). Hidden until the column is
+ * the active sort, then a triangle keyed off the columnheader's aria-sort. */
+.sortCaret {
+    flex: 0 0 auto;
+    inline-size: 0;
+    block-size: 0;
+    border-inline: var(--portal-space-1) solid transparent;
+    opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .sortCaret {
+        transition: opacity var(--portal-duration-ui-fast)
+            var(--portal-easing-standard);
+    }
+}
+
+.columnheader[aria-sort='ascending'] .sortCaret {
+    border-block-end: var(--portal-space-1) solid var(--portal-tone-accent);
+    opacity: 1;
+}
+
+.columnheader[aria-sort='descending'] .sortCaret {
+    border-block-start: var(--portal-space-1) solid var(--portal-tone-accent);
+    opacity: 1;
+}
+
+/* The body data field. A transparent inline border matches the header strip's
+ * trim width so columns line up across the header / body boundary. block-size is
+ * set inline to the full virtual height, giving the viewport its scrollbar. */
+.body {
+    position: relative;
+    inline-size: 100%;
+    border-inline: var(--portal-hud-edge-width) solid transparent;
+}
+
+.row {
+    position: absolute;
+    inset-inline: 0;
+    display: grid;
+    grid-template-columns: var(--portal-datatable-columns);
+    align-items: center;
+    gap: var(--portal-space-2);
+    block-size: var(--portal-datatable-row-height);
+    padding-inline: var(--portal-space-2);
+    border-block-end: var(--portal-border-thickness-thin) solid
+        var(--portal-color-border);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .row {
+        transition:
+            background-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ui-fast) var(--portal-easing-standard);
+    }
+}
+
+/* Zebra from the ABSOLUTE row index (data-parity), not :nth-child, because
+ * virtualized rows recycle and DOM position is not the data position. */
+.row[data-parity='1'] {
+    background-color: var(--portal-color-surface-1);
+}
+
+/* Selected row: an angular toned scrim plus an inset inline-start accent edge.
+ * Redundant with aria-selected; never a rounded pill or color alone. */
+.row[data-selected='true'] {
+    background: linear-gradient(
+        160deg,
+        var(--portal-tone-fill) 0%,
+        var(--portal-color-surface-0) 100%
+    );
+    box-shadow: inset 0 0 var(--portal-space-3) var(--portal-tone-glow);
+}
+
+.row[data-selected='true']::before {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    inline-size: var(--portal-border-thickness-bold);
+    background-color: var(--portal-tone-accent);
+}
+
+.cell {
+    overflow: hidden;
+    min-inline-size: 0;
+    block-size: 100%;
+    display: flex;
+    align-items: center;
+    padding-inline: var(--portal-space-3);
+    color: var(--portal-color-text-0);
+    font-size: var(--portal-size-text-md);
+    line-height: var(--portal-line-height-normal);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.cell[data-align='center'] {
+    justify-content: center;
+    text-align: center;
+}
+
+.cell[data-align='end'] {
+    justify-content: flex-end;
+    text-align: end;
+}
+
+.cell[data-active='true'] {
+    box-shadow: inset 0 0 0 var(--portal-border-thickness-thin)
+        var(--portal-color-focus);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .cell {
+        transition: box-shadow var(--portal-duration-ui-fast)
+            var(--portal-easing-standard);
+    }
+}
+
+.emptyRow {
+    display: flex;
+    min-block-size: var(--portal-datatable-row-height);
+}
+
+.emptyCell {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+    padding: var(--portal-space-4);
+    color: var(--portal-color-text-1);
+}
+
+.emptyText {
+    font-size: var(--portal-size-text-md);
+    letter-spacing: var(--portal-letter-spacing-wide);
+    color: var(--portal-color-text-1);
+}
+
+/* The disabled scrim's pointer-events lock targets .sortButton and .row, which
+ * are higher specificity than their base rules above; placed last so selector
+ * specificity never descends. */
+.root[data-enabled='disabled'] .sortButton,
+.root[data-enabled='disabled'] .row {
+    pointer-events: none;
+}

@@ -1,0 +1,252 @@
+/*
+ * TreeView - a controlled, interface-forwarding ARIA tree styled in the machined
+ * HUD/console language (the BevelButton / HudPanel family), NOT a generic rounded
+ * kit. The container is a beveled HUD console frame; each row is an angular
+ * treeitem whose selected/focused states fill with a beveled tone edge; branches
+ * carry a machined brushed-metal twisty chip that rotates on expand; nested
+ * groups read as indented console rails. Only --portal-* tokens and the derived
+ * --portal-tone-* vars are used (no literal colors or fixed pixels); logical
+ * properties throughout; every interactive row meets the 3rem touch floor; all
+ * motion is transform/opacity only and reduced-motion gated (both the
+ * media query and the root data-reduced-motion attribute).
+ */
+
+.tree {
+    composes: beveled from '../../theme/surfaces.module.css';
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-1);
+    padding: var(--portal-space-2);
+    border: var(--portal-hud-edge-width) solid var(--portal-tone-border);
+    border-radius: var(--portal-bevel-3);
+    background-color: var(--portal-color-surface-0);
+    box-shadow: 0 0 var(--portal-space-4) var(--portal-hud-glow);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+    inline-size: 100%;
+    min-inline-size: min(100%, 16rem);
+}
+
+/* The treeitem is a generic container holding the visible row plus, for an
+ * expanded branch, its child group; the visible treatment lives on .rowContent so
+ * the selection fill and focus ring never wrap the nested group. */
+.treeitem {
+    display: block;
+}
+
+.treeitem:focus-visible {
+    outline: none;
+}
+
+.rowContent {
+    composes: beveled from '../../theme/surfaces.module.css';
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--portal-space-2);
+    min-block-size: var(--portal-touch-target-min);
+    padding-inline: var(--portal-space-1) var(--portal-space-3);
+    border: var(--portal-border-thickness-thin) solid transparent;
+    border-radius: var(--portal-bevel-2);
+    color: var(--portal-color-text-1);
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .rowContent {
+        transition:
+            border-color var(--portal-duration-ui-base)
+                var(--portal-easing-standard),
+            background-color var(--portal-duration-ui-base)
+                var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ui-base) var(--portal-easing-standard),
+            color var(--portal-duration-ui-base) var(--portal-easing-standard);
+    }
+}
+
+.rowContent:hover {
+    background-color: var(--portal-color-surface-1);
+}
+
+/* Branch headers read bolder than the subordinate leaves (Helicon: a bold branch
+ * over dim leaf rows). The base .label rule precedes these higher-specificity
+ * branch-label overrides so selector specificity never descends. */
+.label {
+    color: inherit;
+    font-size: var(--portal-size-text-md);
+    line-height: var(--portal-line-height-tight);
+}
+
+.treeitem[data-state='expanded'] > .rowContent > .label,
+.treeitem[data-state='collapsed'] > .rowContent > .label {
+    color: var(--portal-color-text-0);
+    font-weight: var(--portal-weight-label-strong);
+}
+
+/* Selected row: a beveled tone-accent edge plus the dark tone scrim fill (the
+ * Tabs selected recipe, beveled), text kept on --portal-color-text-0 (never on a
+ * solid accent fill). */
+.treeitem[data-selected='true'] > .rowContent {
+    border-color: var(--portal-tone-accent);
+    background: linear-gradient(
+        160deg,
+        var(--portal-tone-fill) 0%,
+        var(--portal-color-surface-0) 100%
+    );
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow-strong);
+    color: var(--portal-color-text-0);
+}
+
+/* A beveled accent rail on the row's inline-start edge - angular, not the pill
+ * rail Tabs uses - as a non-color-only redundancy alongside aria-selected. */
+.treeitem[data-selected='true'] > .rowContent::after {
+    content: '';
+    position: absolute;
+    inset-block: var(--portal-space-2);
+    inset-inline-start: calc(-1 * var(--portal-border-thickness-thin));
+    inline-size: var(--portal-border-thickness-normal);
+    border-radius: var(--portal-bevel-1);
+    corner-shape: var(--portal-corner-shape);
+    background-color: var(--portal-tone-accent);
+}
+
+.treeitem[data-enabled='disabled'] > .rowContent {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* A sharp angular HUD focus edge traced on the row, driven by the focusable
+ * treeitem. The beveled corner shape (composed above) makes the outline follow
+ * the machined corners rather than a soft rounded ring. These pseudo-class rules
+ * are the highest-specificity .rowContent selectors, so they come last to keep
+ * selector specificity non-descending. */
+.treeitem[data-enabled='enabled']:focus-visible > .rowContent {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: calc(-1 * var(--portal-border-thickness-thin));
+}
+
+.treeitem[data-enabled='enabled']:active > .rowContent {
+    transform: scale(0.99);
+}
+
+/* The disclosure control: a 3rem touch box (the touch floor applies to the
+ * twisty hit area, not just the row) centering a small machined chip. */
+.twisty {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: var(--portal-touch-target-min);
+    min-block-size: var(--portal-touch-target-min);
+    cursor: pointer;
+}
+
+.treeitem[data-enabled='disabled'] > .rowContent > .twisty {
+    cursor: not-allowed;
+}
+
+/* The machined chip: a beveled brushed-metal box (consuming the shared metal
+ * gradient at small scale, density-appropriate trim) with a chevron drawn from
+ * two borders. The chip is static; only the chevron rotates on expand. */
+.twistyMark {
+    composes: beveled from '../../theme/surfaces.module.css';
+    position: relative;
+    inline-size: var(--portal-space-4);
+    block-size: var(--portal-space-4);
+    border-radius: var(--portal-bevel-1);
+    background: var(--portal-gradient-metal);
+}
+
+.twistyMark::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    inline-size: var(--portal-space-2);
+    block-size: var(--portal-space-2);
+    border-inline-end: var(--portal-border-thickness-thin) solid
+        var(--portal-color-bg-0);
+    border-block-end: var(--portal-border-thickness-thin) solid
+        var(--portal-color-bg-0);
+    transform: rotate(-45deg);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .twistyMark::after {
+        transition: transform var(--portal-duration-ui-fast)
+            var(--portal-easing-standard);
+    }
+}
+
+.twisty[data-state='expanded'] .twistyMark::after {
+    transform: rotate(45deg);
+}
+
+/* The leaf marker shares the twisty column width so labels align, and renders a
+ * dim angular HUD tick (the web analog of Helicon's dim leaf dash). */
+.leafTick {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: var(--portal-touch-target-min);
+    block-size: var(--portal-touch-target-min);
+}
+
+.leafTick::after {
+    content: '';
+    inline-size: var(--portal-space-2);
+    block-size: var(--portal-border-thickness-thin);
+    border-radius: var(--portal-bevel-1);
+    corner-shape: var(--portal-corner-shape);
+    background-color: var(--portal-color-text-1);
+    opacity: 0.6;
+}
+
+/* A child group: an indent step plus a thin angular tone-border guide rail, so
+ * the hierarchy reads as nested console rails. */
+.group {
+    margin-inline-start: var(--portal-space-5);
+    padding-inline-start: var(--portal-space-2);
+    border-inline-start: var(--portal-hud-edge-width) solid
+        var(--portal-tone-border);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .group {
+        animation: portal-tree-group-in var(--portal-duration-ui-base)
+            var(--portal-easing-standard);
+    }
+}
+
+@keyframes portal-tree-group-in {
+    from {
+        opacity: 0;
+        transform: translateY(calc(-1 * var(--portal-space-2)));
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Belt-and-braces reduced-motion suppression: the root attribute mirrors the
+ * media query so JS-observed reduced motion also halts the twisty and group
+ * motion. */
+.tree[data-reduced-motion='true'] .twistyMark::after,
+.tree[data-reduced-motion='true'] .group {
+    transition: none;
+    animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rowContent,
+    .twistyMark::after,
+    .group {
+        transition: none;
+        animation: none;
+    }
+}

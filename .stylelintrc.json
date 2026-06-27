@@ -1,6 +1,7 @@
 {
     "extends": ["stylelint-config-standard", "stylelint-config-css-modules"],
     "rules": {
-        "selector-class-pattern": null
+        "selector-class-pattern": null,
+        "value-keyword-case": ["lower", { "ignoreProperties": ["composes"] }]
     }
 }

@@ -136,6 +136,13 @@ export {
     type UseScrollLockOptions,
 } from './react/hooks/useScrollLock';
 export {
+    FALLBACK_VIEWPORT_ROWS,
+    OVERSCAN_DEFAULT,
+    useVirtualWindow,
+    type VirtualWindowOptions,
+    type VirtualWindowState,
+} from './react/hooks/useVirtualWindow';
+export {
     type EntrancePreset,
     MOTION_DURATION,
     type MotionPreset,
@@ -193,6 +200,11 @@ export { RatioBar } from './ui/Chart/RatioBar';
 export { StackedBar } from './ui/Chart/StackedBar';
 export { Chip } from './ui/Chip/Chip';
 export { type ChipProps, EChipState } from './ui/Chip/Chip.types';
+export { ColorPicker } from './ui/ColorPicker/ColorPicker';
+export {
+    type ColorPickerProps,
+    EColorMode,
+} from './ui/ColorPicker/ColorPicker.types';
 export { CTA } from './ui/CTA/CTA';
 export {
     type CTAProps,
@@ -200,6 +212,16 @@ export {
     ECtaSize,
     ECtaVariant,
 } from './ui/CTA/CTA.types';
+export { DataTable } from './ui/DataTable/DataTable';
+export {
+    type DataTableProps,
+    EColumnAlign,
+    ESelectionMode,
+    ESortDirection,
+    type TableCellContext,
+    type TableColumn,
+    type TableSort,
+} from './ui/DataTable/DataTable.types';
 export { ConfirmDialog } from './ui/Dialog/ConfirmDialog';
 export { Dialog } from './ui/Dialog/Dialog';
 export {
@@ -216,12 +238,35 @@ export {
     type EmptyStateHeadingLevel,
     type EmptyStateProps,
 } from './ui/EmptyState/EmptyState.types';
+export {
+    collapseAll,
+    expandAll,
+    setExpanded,
+    toggleExpanded,
+} from './ui/expansion';
 export { KeyValue } from './ui/KeyValue/KeyValue';
 export {
     EKeyValueOverflow,
     type KeyValuePair,
     type KeyValueProps,
 } from './ui/KeyValue/KeyValue.types';
+export { ContextMenu } from './ui/Menu/ContextMenu';
+export { Menu } from './ui/Menu/Menu';
+export {
+    type ContextMenuProps,
+    EMenuNodeKind,
+    EMenuOrientation,
+    type MenuBarProps,
+    type MenuProps,
+    type UiMenuActionNode,
+    type UiMenuBarMenu,
+    type UiMenuCheckboxNode,
+    type UiMenuNode,
+    type UiMenuRadioNode,
+    type UiMenuSeparatorNode,
+    type UiMenuSubmenuNode,
+} from './ui/Menu/Menu.types';
+export { MenuBar } from './ui/Menu/MenuBar';
 export { NavRail } from './ui/NavRail/NavRail';
 export {
     ENavItemState,
@@ -336,3 +381,9 @@ export { useToast } from './ui/Toast/useToast';
 export { EUiStatus, PORTAL_TONE, type Toned, toneProperties } from './ui/tone';
 export { Tooltip } from './ui/Tooltip/Tooltip';
 export { type TooltipProps } from './ui/Tooltip/Tooltip.types';
+export { TreeView } from './ui/TreeView/TreeView';
+export {
+    ETreeNodeState,
+    type TreeNode,
+    type TreeViewProps,
+} from './ui/TreeView/TreeView.types';
