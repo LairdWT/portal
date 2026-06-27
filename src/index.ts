@@ -112,6 +112,7 @@ export {
     useDigitalPress,
 } from './react/hooks/useDigitalPress';
 export { useDismiss, type UseDismissOptions } from './react/hooks/useDismiss';
+export { type ElementSize, useElementSize } from './react/hooks/useElementSize';
 export { type EmitBinding, useEmitBinding } from './react/hooks/useEmitBinding';
 export { useFocusTrap, type UseFocusTrapOptions } from './react/hooks/useFocusTrap';
 export { useGesture } from './react/hooks/useGesture';
@@ -124,6 +125,13 @@ export {
 export { useInputBinding } from './react/hooks/useInputBinding';
 export { useInputSource } from './react/hooks/useInputSource';
 export { usePointerControl } from './react/hooks/usePointerControl';
+export {
+    type PointerDragAxis,
+    type PointerDragBinding,
+    type PointerDragOptions,
+    type PointerDragState,
+    usePointerDrag,
+} from './react/hooks/usePointerDrag';
 export { useReducedMotion } from './react/hooks/useReducedMotion';
 export { useRelativePointerControl } from './react/hooks/useRelativePointerControl';
 export { useResolvedEnabled } from './react/hooks/useResolvedEnabled';
