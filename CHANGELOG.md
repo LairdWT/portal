@@ -4,6 +4,44 @@ All notable changes to this project are documented in this file. The format is
 based on Keep a Changelog, and the project follows Semantic Versioning with the
 0.x caveat that, before 1.0, a minor version may carry a breaking change.
 
+## [0.12.0] - 2026-06-27
+
+Adds the four standard web primitives a full-coverage component library expects
+but Helicon does not model as discrete widgets, all in the machined-HUD bevel
+language and under the established generic-UI patterns.
+
+### Added
+
+- `Checkbox` - a controlled, tri-aware boolean control over a real native
+  checkbox input visually replaced by a beveled box. `indeterminate` is set
+  imperatively on the DOM node (it is a property, not an attribute); a
+  `CheckboxNaming` XOR union (a visible `label` or a `labelledBy` id) makes the
+  accessible name a compile-time guarantee. Native focus, Space-to-toggle, and
+  optional `name`/`value`/`required` form participation are preserved.
+- `RadioGroup` - a controlled single-select radiogroup modeled on
+  `SegmentedControl` (items array, roving tabindex, selection-follows-focus,
+  Home/End, required `AccessibleName`) rendering circular radio markers, with
+  per-item `disabled` that roving navigation skips and an `ERadioOrientation`
+  (vertical default / horizontal) that sets the announced axis and layout.
+- `Avatar` - a static identity marker with an image -> initials -> icon ->
+  glyph fallback chain (declarative `onError` recovery), `EAvatarShape`
+  Circle/Bevel, three token-driven `EAvatarSize` sizes, and an optional
+  presence dot that carries a required visually-hidden label. Initials are
+  derived by a pure, surrogate-pair-safe helper.
+- `Skeleton` - a decorative loading placeholder with `ESkeletonVariant`
+  Text/Block/Circle (multi-line Text with a ragged last bar) and
+  `ESkeletonAnimation` Shimmer/Pulse/None. It is `aria-hidden` by default with
+  an opt-in `label` that switches to a `role="status"` polite live region; both
+  animations are gated behind `prefers-reduced-motion` with a static fallback.
+
+### Changed
+
+- New shared tokens for the additions: `--portal-avatar-size-sm/md/lg` and
+  `--portal-skeleton-base` / `--portal-skeleton-highlight` /
+  `--portal-skeleton-shimmer-duration` (mirrored into `PORTAL_TOKENS`). The
+  skeleton shimmer duration sits outside the `--portal-duration-*` intent
+  families by design (decorative looping motion, not an affordance timing).
+
 ## [0.11.0] - 2026-06-27
 
 Completes Helicon component-type parity for the P3 (shells / advanced /
