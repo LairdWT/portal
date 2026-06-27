@@ -133,6 +133,23 @@
     --portal-border-thickness-normal: 4px;
     --portal-border-thickness-bold: 6px;
 
+    /* Bevel / HUD visual language - the machined-console aesthetic shared with
+     * the game-input controllers. corner-shape is progressive: where a browser
+     * lacks it, the radius value is the rounded fallback. The bevel sizes alias
+     * the radius scale so a beveled cut matches the reference BevelButton /
+     * ActionButton corner sizes (no new magic numbers). The shared utilities in
+     * surfaces.module.css consume these by reference, so no component re-invents
+     * a bevel or metal value. */
+    --portal-corner-shape: bevel;
+    --portal-bevel-1: var(--portal-radius-sm); /* tags, chips, dense markers */
+    --portal-bevel-2: var(--portal-radius-md); /* buttons, inputs, segments, tabs */
+    --portal-bevel-3: var(--portal-radius-lg); /* panels, dialogs, cards, decks */
+    --portal-hud-fill: var(--portal-color-surface-0);
+    --portal-hud-edge-width: var(--portal-border-thickness-thin);
+    --portal-hud-glow: var(--portal-tone-glow);
+    --portal-weight-label-bold: 900;
+    --portal-weight-label-strong: 700;
+
     /* Stacking. The overlay layer for portal-rendered surfaces (Popover and the
      * Tooltip/Menu/Select/Dialog overlays built on it) so they sit above page
      * content. Overlays read this token instead of inlining a z-index literal. */
