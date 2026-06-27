@@ -22,20 +22,24 @@ export type EPopoverPlacement =
     (typeof EPopoverPlacement)[keyof typeof EPopoverPlacement];
 
 // ARIA role applied to the floating panel. Constrained to the overlay roles the
-// primitives built on Popover need (Tooltip, Menu, Select/Combobox, Dialog), so
-// the role is a named member set rather than an arbitrary string. A role that
-// names a window (dialog) requires an accessible name: pass `label` or
-// `labelledBy`.
+// primitives built on Popover need (Tooltip, Menu, Select/Combobox, Dialog, plus
+// Group for a plain disclosure region whose revealed content carries no special
+// widget semantics), so the role is a named member set rather than an arbitrary
+// string. A role that names a window (dialog) requires an accessible name: pass
+// `label` or `labelledBy`. Group needs no name (it is a generic grouping, not a
+// landmark), so it falls into the optional-name branch like Menu/Listbox/Tooltip.
 export const EPopoverRole: {
     readonly Dialog: 'dialog';
     readonly Menu: 'menu';
     readonly Listbox: 'listbox';
     readonly Tooltip: 'tooltip';
+    readonly Group: 'group';
 } = {
     Dialog: 'dialog',
     Menu: 'menu',
     Listbox: 'listbox',
     Tooltip: 'tooltip',
+    Group: 'group',
 };
 export type EPopoverRole = (typeof EPopoverRole)[keyof typeof EPopoverRole];
 

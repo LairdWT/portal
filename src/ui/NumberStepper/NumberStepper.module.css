@@ -1,0 +1,157 @@
+/*
+ * NumberStepper. The machined-HUD numeric stepper of the generic UI layer: two
+ * beveled brushed-metal step keys flanking a recessed beveled HUD value readout,
+ * mirroring Helicon's [-] value [+]. Corners adopt the shared .beveled corner
+ * identity (corner-shape: bevel + a --portal-bevel-N radius fallback); no
+ * rounded/squircle radius appears. The keys reuse the shared metal tokens - a
+ * brushed-metal face inside the animated --portal-gradient-metal-ring trim, the
+ * BevelButton machined key - and recess to the steel end of the ramp on press.
+ * The readout is a dark, inset-milled HUD cell with a tabular monospace value.
+ * Only --portal-* tokens and the derived --portal-tone-* vars drive every value:
+ * no literal colors, no fixed-pixel layout. The accent reads only as the HUD
+ * border, the focus ring, and the glow; text stays on the dark surface for
+ * contrast (tone is never a solid mid-tone fill behind text). All motion - the
+ * ring sheen and the transitions - is gated behind prefers-reduced-motion.
+ *
+ * The camelCase surface utilities (.metalTrim/.wideLabel) are NOT composed: the
+ * project stylelint value-keyword-case rule rejects a camelCase name inside
+ * composes. Only the lowercase .beveled utility is composed (the established
+ * codebase pattern); the ring, sheen, and tracked-label effects are reproduced
+ * here from the same shared --portal-* tokens, matching BevelButton/ActionButton.
+ */
+
+.root {
+    composes: beveled from '../../theme/surfaces.module.css';
+    display: inline-flex;
+    align-items: stretch;
+    gap: var(--portal-space-2);
+    padding: var(--portal-space-2);
+    border: var(--portal-hud-edge-width) solid var(--portal-tone-border);
+    border-radius: var(--portal-bevel-3);
+    background-color: var(--portal-color-surface-0);
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-hud-glow);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+}
+
+.key {
+    composes: beveled from '../../theme/surfaces.module.css';
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: var(--portal-touch-target-min);
+    min-block-size: var(--portal-touch-target-min);
+    padding-block: var(--portal-space-2);
+    padding-inline: var(--portal-space-3);
+    border: var(--portal-hud-edge-width) solid transparent;
+    border-radius: var(--portal-bevel-2);
+
+    /* A brushed-metal face (padding-box) inside the animated metal ring
+     * (border-box), driven by the shared metal tokens - the BevelButton machined
+     * key. The ring rotates via the registered --portal-metal-angle. */
+    background:
+        var(--portal-gradient-metal) padding-box,
+        var(--portal-gradient-metal-ring) border-box;
+    color: var(--portal-color-bg-0);
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .key {
+        transition: transform var(--portal-duration-ui-fast)
+            var(--portal-easing-standard);
+        animation: portal-stepper-sheen var(--portal-duration-metal-sheen) linear
+            infinite;
+    }
+
+    .value {
+        transition: border-color var(--portal-duration-ui-base)
+            var(--portal-easing-standard);
+    }
+}
+
+/* The shared metal-ring sweep. A local keyframe (BevelButton/ActionButton do the
+ * same) animating the registered angle token, so the conic ring rotates seamlessly
+ * with no seam at the 0deg/360deg wrap. */
+@keyframes portal-stepper-sheen {
+    to {
+        --portal-metal-angle: 360deg;
+    }
+}
+
+.key:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: var(--portal-space-1);
+}
+
+.key:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.key:active:not(:disabled) {
+    transform: scale(0.97);
+
+    /* Pressed reads as recessed steel: the face darkens to the steel end of the
+     * metal ramp while the ring carries over (the clip persists from the base
+     * rule). Matches the BevelButton press treatment. */
+    background-image:
+        linear-gradient(
+            160deg,
+            var(--portal-color-metal-0) 0%,
+            var(--portal-color-metal-1) 55%,
+            var(--portal-color-metal-0) 100%
+        ),
+        var(--portal-gradient-metal-ring);
+    color: var(--portal-color-text-0);
+}
+
+.glyph {
+    display: inline-block;
+
+    /* The shared tracked-label treatment, reproduced from tokens: wide tracking
+     * with an equal end-margin trim re-centering the last tracked glyph. */
+    margin-inline-end: calc(-1 * var(--portal-letter-spacing-wide));
+    font-family: var(--portal-font-mono);
+    font-weight: var(--portal-weight-label-bold);
+    line-height: var(--portal-line-height-tight);
+    letter-spacing: var(--portal-letter-spacing-wide);
+}
+
+.value {
+    composes: beveled from '../../theme/surfaces.module.css';
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: var(--portal-touch-target-min);
+    min-block-size: var(--portal-touch-target-min);
+    padding-block: var(--portal-space-2);
+    padding-inline: var(--portal-space-4);
+    border: var(--portal-hud-edge-width) solid var(--portal-tone-border);
+    border-radius: var(--portal-bevel-2);
+    background-color: var(--portal-color-surface-0);
+
+    /* A subtle outer HUD glow follows the tone; the inset shadow reads the cell
+     * as a milled recess. */
+    box-shadow:
+        0 0 var(--portal-space-2) var(--portal-hud-glow),
+        inset 0 var(--portal-space-1) var(--portal-space-2)
+            color-mix(in oklab, var(--portal-color-bg-0) 65%, transparent);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-mono);
+    font-weight: var(--portal-weight-label-strong);
+    font-variant-numeric: tabular-nums;
+    line-height: var(--portal-line-height-tight);
+}
+
+.value:focus-visible {
+    border-color: var(--portal-tone-accent);
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: var(--portal-space-1);
+}
+
+.root[data-enabled='disabled'] .value {
+    opacity: 0.5;
+}

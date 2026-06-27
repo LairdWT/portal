@@ -1,0 +1,146 @@
+/*
+ * Rating. A machined-HUD rating row for the generic UI layer. It copies
+ * SegmentedControl's STRUCTURE and LOGIC but adopts the beveled console-panel
+ * visual language instead of a rounded/squircle card: the container composes the
+ * shared `.beveled` corner identity and carries the HUD edge (bevel cut + border
+ * + faint inner glow), and each mark is an angular beveled pip - a SOLID
+ * tone-accent face when filled, an OUTLINE-only pip when empty. Distinguishing
+ * filled from empty by shape/fill (not color alone) is the forced-colors-safe
+ * choice. Every value resolves from a --portal-* / --portal-tone-* token; this
+ * file introduces no color, size, or radius literal. State is keyed off the
+ * data-state / data-active / data-readonly attributes the component sets, never
+ * off an inline color. Motion is pure CSS gated behind prefers-reduced-motion.
+ */
+
+.root {
+    composes: beveled from '../../theme/surfaces.module.css';
+    display: inline-flex;
+    align-items: center;
+    gap: var(--portal-space-1);
+    padding: var(--portal-space-1);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-bevel-2);
+    background-color: var(--portal-color-surface-0);
+    box-shadow: inset 0 0 var(--portal-space-3) var(--portal-tone-glow);
+}
+
+/*
+ * The interactive radio hit area: a transparent bevel frame at the minimum touch
+ * target that centers the smaller visible pip. It carries the focus ring, the
+ * press feedback, and the disabled affordance; the pip carries the fill.
+ */
+.mark {
+    composes: beveled from '../../theme/surfaces.module.css';
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: var(--portal-touch-target-min);
+    min-block-size: var(--portal-touch-target-min);
+    border: var(--portal-border-thickness-thin) solid transparent;
+    border-radius: var(--portal-bevel-1);
+    background-color: transparent;
+    color: var(--portal-tone-accent);
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+}
+
+.mark:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: var(--portal-space-1);
+}
+
+.mark:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Transform-only press feedback is reduced-motion safe, so it stays outside the
+ * motion query (matching SegmentedControl). */
+.mark:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+/*
+ * The visible beveled pip. Empty = an outline-only frame (transparent face);
+ * overflow clipping keeps the partial fill overlay and the metal ring inside the
+ * beveled silhouette.
+ */
+.pip {
+    composes: beveled from '../../theme/surfaces.module.css';
+    position: relative;
+    inline-size: var(--portal-space-4);
+    block-size: var(--portal-space-4);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-bevel-1);
+    background-color: transparent;
+    overflow: hidden;
+}
+
+/* Filled: a solid tone-accent face with a faint tone glow for the HUD weight. */
+.pip[data-state='filled'] {
+    border-color: var(--portal-tone-accent);
+    background-color: var(--portal-tone-accent);
+    box-shadow: 0 0 var(--portal-space-2) var(--portal-tone-glow-strong);
+}
+
+/* Preview: a lighter, provisional tone treatment so a hover/focus preview reads
+ * as not-yet-committed and never as the solid filled face. */
+.pip[data-state='preview'] {
+    border-color: var(--portal-tone-edge);
+    background-color: var(--portal-tone-edge);
+}
+
+/*
+ * The committed leading pip earns the machined "set" weight: the brushed-metal
+ * ring trim over the accent face, the same border-box conic ring the controllers
+ * use. The sheen rotation is gated behind prefers-reduced-motion below.
+ */
+.pip[data-active='true'] {
+    border: var(--portal-hud-edge-width) solid transparent;
+    background:
+        var(--portal-tone-accent) padding-box,
+        var(--portal-gradient-metal-ring) border-box;
+}
+
+/* Partial (readonly half-step): an empty pip with a tone-accent overlay clipped
+ * to the fractional fill. The clip is static per value; it animates nothing. */
+.pip[data-state='partial'] {
+    border-color: var(--portal-tone-accent);
+}
+
+.pip[data-state='partial']::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: var(--portal-tone-accent);
+    clip-path: inset(0 calc((1 - var(--portal-rating-fill, 0)) * 100%) 0 0);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .mark {
+        transition: transform var(--portal-duration-ui-base)
+            var(--portal-easing-standard);
+    }
+
+    .pip {
+        transition:
+            background-color var(--portal-duration-ui-base)
+                var(--portal-easing-standard),
+            border-color var(--portal-duration-ui-base)
+                var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ui-base) var(--portal-easing-standard);
+    }
+
+    .pip[data-active='true'] {
+        animation: portal-rating-sheen var(--portal-duration-metal-sheen) linear
+            infinite;
+    }
+}
+
+@keyframes portal-rating-sheen {
+    to {
+        --portal-metal-angle: 360deg;
+    }
+}

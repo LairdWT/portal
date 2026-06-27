@@ -169,6 +169,12 @@ export { Badge } from './ui/Badge/Badge';
 export { type BadgeProps, EBadgeKind } from './ui/Badge/Badge.types';
 export { Banner } from './ui/Banner/Banner';
 export { type BannerProps, EBannerKind } from './ui/Banner/Banner.types';
+export { Breadcrumb } from './ui/Breadcrumb/Breadcrumb';
+export {
+    type BreadcrumbItem,
+    type BreadcrumbProps,
+    EBreadcrumbCrumbState,
+} from './ui/Breadcrumb/Breadcrumb.types';
 export { Chip } from './ui/Chip/Chip';
 export { type ChipProps, EChipState } from './ui/Chip/Chip.types';
 export { CTA } from './ui/CTA/CTA';
@@ -194,6 +200,10 @@ export {
     type EmptyStateHeadingLevel,
     type EmptyStateProps,
 } from './ui/EmptyState/EmptyState.types';
+export { NumberStepper } from './ui/NumberStepper/NumberStepper';
+export { type NumberStepperProps } from './ui/NumberStepper/NumberStepper.types';
+export { Pagination } from './ui/Pagination/Pagination';
+export { type PaginationProps } from './ui/Pagination/Pagination.types';
 export { Panel } from './ui/Panel/Panel';
 export {
     EPanelElevation,
@@ -213,6 +223,13 @@ export {
     type IndeterminateProgressProps,
     type ProgressProps,
 } from './ui/Progress/Progress.types';
+export { Rating } from './ui/Rating/Rating';
+export {
+    ERatingMarkState,
+    type RatingInteractiveProps,
+    type RatingProps,
+    type RatingReadonlyProps,
+} from './ui/Rating/Rating.types';
 export { ReadoutPanel } from './ui/ReadoutPanel/ReadoutPanel';
 export {
     type ReadoutPanelProps,

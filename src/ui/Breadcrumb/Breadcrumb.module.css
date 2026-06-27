@@ -1,0 +1,202 @@
+/*
+ * Breadcrumb. A <nav aria-label> landmark wrapping an ordered list of path
+ * crumbs for the generic UI layer. Ancestor crumbs are real <button> controls;
+ * the current (last) crumb is an inert bold HUD label carrying aria-current. A
+ * dim monospace chevron separates crumbs and is decorative (aria-hidden), drawn
+ * via CSS content so it is never selectable text or part of an accessible name.
+ *
+ * The machined-HUD identity is adopted BY REFERENCE: the interactive surfaces
+ * compose the shared .beveled corner and the current node composes the static
+ * .metalEdge trim plus the .wideLabel tracking from surfaces.module.css, so no
+ * bevel or metal value is forked here. The animated metal sheen is reserved for
+ * button-weight controllers - a breadcrumb is text-weight, so its metal trim is
+ * static. The tone accent is carried by the lit HUD edge and glow (border/shadow,
+ * not text); crumb text stays on the high-contrast neutral ramp so the trail
+ * keeps its contrast over an arbitrary tone seed (CodingStandards/axe contrast
+ * wins over a literal accent-on-dark fill). Every value resolves from a
+ * --portal-* token or the derived --portal-tone-* ramp; no literal here.
+ */
+
+.nav {
+    display: inline-flex;
+    font-family: var(--portal-font-sans);
+}
+
+.list {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--portal-space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.crumb {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--portal-space-2);
+}
+
+/*
+ * Decorative chevron between crumbs. The glyph is CSS-drawn and the element
+ * carries aria-hidden, so assistive tech reads only the real crumbs and the
+ * order comes from the <ol>.
+ */
+.separator {
+    color: var(--portal-color-text-1);
+    font-family: var(--portal-font-mono);
+    line-height: var(--portal-line-height-tight);
+    user-select: none;
+}
+
+.separator::before {
+    content: '>';
+}
+
+/*
+ * Shared crumb base. Every crumb - the interactive ancestor button, the inert
+ * no-handler span, the current span, and the overflow trigger - adopts this
+ * beveled text-weight base: a transparent HUD edge at rest with neutral text.
+ * The per-crumb visual state is keyed off the data-state attribute the component
+ * sets (read below for the current node), so state is never class-only and the
+ * attribute is load-bearing, matching Pagination/Tabs/StepTrack.
+ */
+.crumbLabel {
+    composes: beveled from '../../theme/surfaces.module.css';
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding-block: var(--portal-space-2);
+    padding-inline: var(--portal-space-3);
+    border: var(--portal-hud-edge-width) solid transparent;
+    border-radius: var(--portal-bevel-2);
+    background-color: transparent;
+    color: var(--portal-color-text-1);
+    font-size: var(--portal-size-text-md);
+    line-height: var(--portal-line-height-tight);
+    letter-spacing: var(--portal-letter-spacing-wide);
+}
+
+/*
+ * The interactive ancestor button (and the overflow trigger) earns the full
+ * machined key affordance: the minimum touch target, the pointer cues, and the
+ * lit edge / press scale. The inert no-handler span deliberately does NOT take
+ * this sizing or the raised edge, so a non-navigable crumb reads as text, not as
+ * a button-sized target it can never activate.
+ */
+button.crumbLabel {
+    min-block-size: var(--portal-touch-target-min);
+    min-inline-size: var(--portal-touch-target-min);
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    button.crumbLabel {
+        transition:
+            transform var(--portal-duration-ui-fast) var(--portal-easing-standard),
+            border-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ui-fast) var(--portal-easing-standard),
+            color var(--portal-duration-ui-fast) var(--portal-easing-standard);
+    }
+}
+
+/*
+ * Focus-visible raises the HUD edge to the tone accent with a soft glow, brightens
+ * the label, and adds the focus ring - a machined trim lighting up, not a filled
+ * chip. Hover (below) mirrors this exact lit edge, so there is no hover-only
+ * feedback. The lower-specificity state rules (focus, disabled) precede the
+ * higher-specificity :not(:disabled) rules so specificity ascends in source order.
+ */
+button.crumbLabel:focus-visible {
+    border-color: var(--portal-tone-accent);
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow);
+    outline: var(--portal-border-thickness-thin) solid var(--portal-color-focus);
+    outline-offset: var(--portal-space-1);
+    color: var(--portal-color-text-0);
+}
+
+button.crumbLabel:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+button.crumbLabel:hover:not(:disabled) {
+    border-color: var(--portal-tone-accent);
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow);
+    color: var(--portal-color-text-0);
+}
+
+button.crumbLabel:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+/*
+ * The inert current node, selected by data-state='current' (read here, redundant
+ * with aria-current so "you are here" is never color-only): a bold HUD label on a
+ * static machined-metal edge (the .metalEdge recipe inlined from the shared
+ * tokens, since stylelint value-keyword-case rejects a camelCase name inside
+ * composes) with the shared wide-label tracking trim. It is never interactive.
+ */
+.crumbLabel[data-state='current'] {
+    min-block-size: var(--portal-touch-target-min);
+    border: var(--portal-hud-edge-width) solid transparent;
+    background:
+        var(--portal-hud-fill) padding-box,
+        var(--portal-gradient-metal) border-box;
+    margin-inline-end: calc(-1 * var(--portal-letter-spacing-wide));
+    color: var(--portal-color-text-0);
+    font-weight: var(--portal-weight-label-bold);
+}
+
+/*
+ * The overflow trigger carries the interactive crumb edge (the component applies
+ * the .crumbLabel class alongside this one, rather than a camelCase local
+ * `composes` that stylelint value-keyword-case rejects) and adds a decorative CSS
+ * ellipsis. The open state lifts the edge to the active accent so the disclosure
+ * has a non-color-only cue alongside aria-expanded.
+ */
+.overflowTrigger::before {
+    content: '...';
+}
+
+.overflowTrigger[aria-expanded='true'] {
+    border-color: var(--portal-tone-accent);
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow);
+}
+
+/*
+ * The hidden crumbs inside the Popover panel: a plain column of full-width crumb
+ * controls. The panel chrome itself is owned by Popover.module.css.
+ */
+.overflowList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.overflowItem {
+    display: flex;
+}
+
+.overflowItem .crumbLabel {
+    inline-size: 100%;
+}
+
+/*
+ * When the whole landmark is disabled, dim the navigable crumbs. The inert
+ * ancestor spans have no :disabled state of their own; the buttons additionally
+ * show not-allowed through button.crumbLabel:disabled. The current node is
+ * deliberately excluded - it is a non-disabled span, so dimming it would drop its
+ * bold label below the AA contrast floor (a disabled <button> is exempt from the
+ * contrast check, an inert <span> is not).
+ */
+.nav[data-enabled='disabled'] .crumbLabel:not([data-state='current']) {
+    opacity: 0.5;
+}
