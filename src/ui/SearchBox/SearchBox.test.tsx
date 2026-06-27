@@ -50,6 +50,23 @@ describe('SearchBox', (): void => {
         expect(onChange).toHaveBeenLastCalledWith('orc');
     });
 
+    it('forwards ariaControls onto the input aria-controls', (): void => {
+        render(
+            <SearchBox label={FIELD_LABEL} value="" ariaControls="target-list" />,
+        );
+
+        expect(screen.getByRole('searchbox').getAttribute('aria-controls')).toBe(
+            'target-list',
+        );
+    });
+
+    it('emits no aria-controls when ariaControls is omitted', (): void => {
+        render(<SearchBox label={FIELD_LABEL} value="" />);
+
+        const input: HTMLElement = screen.getByRole('searchbox');
+        expect(input.hasAttribute('aria-controls')).toBe(false);
+    });
+
     it('fires onSubmit with the current value on Enter', async (): Promise<void> => {
         const onSubmit: Mock<(value: string) => void> =
             vi.fn<(value: string) => void>();

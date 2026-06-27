@@ -104,6 +104,16 @@ describe('SearchableList', (): void => {
         expect(screen.getByRole('option', { name: 'Mercury' })).toBeInTheDocument();
     });
 
+    it('wires the search input aria-controls to the listbox root id', (): void => {
+        render(<Harness />);
+
+        const searchbox: HTMLElement = screen.getByRole('searchbox');
+        const listbox: HTMLElement = screen.getByRole('listbox');
+        const controls: string | null = searchbox.getAttribute('aria-controls');
+        expect(controls).not.toBeNull();
+        expect(controls).toBe(listbox.getAttribute('id'));
+    });
+
     it('reports typed query through onQueryChange', async (): Promise<void> => {
         const onQueryChange: Mock<(query: string) => void> =
             vi.fn<(query: string) => void>();

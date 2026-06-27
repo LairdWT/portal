@@ -4,6 +4,8 @@ import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
+import { PORTAL_TOKENS } from './tokens';
+
 /**
  * Bevel / HUD visual-language token + utility coverage.
  *
@@ -42,6 +44,7 @@ const EXPECTED_TOKENS: readonly TokenDeclaration[] = [
     { token: '--portal-hud-glow', value: 'var(--portal-tone-glow)' },
     { token: '--portal-weight-label-bold', value: '900' },
     { token: '--portal-weight-label-strong', value: '700' },
+    { token: '--portal-press-scale', value: '0.97' },
 ];
 
 // The shared utility classes any component composes by reference.
@@ -123,5 +126,15 @@ describe('shared surface utilities', (): void => {
         expect(surfaces).toContain('var(--portal-duration-metal-sheen)');
         // The sheen must stay reduced-motion gated.
         expect(surfaces).toContain('prefers-reduced-motion: no-preference');
+    });
+
+    it('drives the press scale from the token, not a hard-coded literal', (): void => {
+        const surfaces: string = readSource(surfacesCssPath);
+        expect(surfaces).toContain('scale(var(--portal-press-scale))');
+        expect(surfaces).not.toContain('scale(0.97)');
+    });
+
+    it('mirrors the press scale token in PORTAL_TOKENS', (): void => {
+        expect(PORTAL_TOKENS.press.scale).toBe('var(--portal-press-scale)');
     });
 });

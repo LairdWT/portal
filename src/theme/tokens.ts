@@ -102,6 +102,9 @@ export type PortalTokens = {
         readonly highlight: string;
         readonly shimmerDuration: string;
     };
+    readonly press: {
+        readonly scale: string;
+    };
 };
 
 export const PORTAL_TOKENS: PortalTokens = {
@@ -196,5 +199,8 @@ export const PORTAL_TOKENS: PortalTokens = {
         base: 'var(--portal-skeleton-base)',
         highlight: 'var(--portal-skeleton-highlight)',
         shimmerDuration: 'var(--portal-skeleton-shimmer-duration)',
+    },
+    press: {
+        scale: 'var(--portal-press-scale)',
     },
 };

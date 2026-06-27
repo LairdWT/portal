@@ -6,38 +6,55 @@
  * accent, so untoned UI matches the base theme. A data-status attribute swaps the
  * seed for the universal danger/success tokens. Fill mixes heavily toward the
  * dark surface so foreground text keeps contrast over an arbitrary backdrop.
+ *
+ * Status must be AUTHORITATIVE over an inline tone. A component sets --portal-tone
+ * inline via the style attribute, and an inline custom-property declaration beats
+ * any stylesheet selector regardless of specificity - so a [data-status] rule that
+ * overrode --portal-tone directly would be dead whenever an inline tone was also
+ * present. To make status win, derivation reads an intermediate seed,
+ * --portal-tone-resolved, which the consumer never sets (it only ever sets
+ * --portal-tone). The base rule resolves it to the inline seam; the more-specific
+ * [data-status] rules override the resolved seed to the danger/success token, so
+ * status beats inline tone deterministically while tone-only and status-only
+ * behavior are unchanged. The public derived --portal-tone-* var names are
+ * unchanged; only their internal source moves to --portal-tone-resolved.
  */
 .toneScope {
     --portal-tone: var(--portal-color-accent);
-    --portal-tone-accent: var(--portal-tone);
+    --portal-tone-resolved: var(--portal-tone);
+    --portal-tone-accent: var(--portal-tone-resolved);
     --portal-tone-border: color-mix(
         in oklab,
-        var(--portal-tone) 55%,
+        var(--portal-tone-resolved) 55%,
         var(--portal-color-border)
     );
     --portal-tone-edge: color-mix(
         in oklab,
-        var(--portal-tone) 45%,
+        var(--portal-tone-resolved) 45%,
         var(--portal-color-accent-highlight)
     );
-    --portal-tone-glow: color-mix(in oklab, var(--portal-tone) 40%, transparent);
+    --portal-tone-glow: color-mix(
+        in oklab,
+        var(--portal-tone-resolved) 40%,
+        transparent
+    );
     --portal-tone-glow-strong: color-mix(
         in oklab,
-        var(--portal-tone) 60%,
+        var(--portal-tone-resolved) 60%,
         transparent
     );
     --portal-tone-fill: color-mix(
         in oklab,
-        var(--portal-tone) 18%,
+        var(--portal-tone-resolved) 18%,
         var(--portal-color-surface-0)
     );
     --portal-tone-on: var(--portal-color-text-0);
 }
 
 .toneScope[data-status='danger'] {
-    --portal-tone: var(--portal-color-danger);
+    --portal-tone-resolved: var(--portal-color-danger);
 }
 
 .toneScope[data-status='success'] {
-    --portal-tone: var(--portal-color-success);
+    --portal-tone-resolved: var(--portal-color-success);
 }

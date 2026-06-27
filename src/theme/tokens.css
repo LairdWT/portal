@@ -114,6 +114,10 @@
     /* Control sizing */
     --portal-size-pad: clamp(6rem, 24vw, 12rem);
 
+    /* Press feedback - the controllers' recessed press scale, a unitless
+     * scale() factor consumed by surfaces.module.css .pressScale. */
+    --portal-press-scale: 0.97;
+
     /* Metric tile grid floor. The responsive auto-fit minimum tile width that
      * TileRow wraps below; a rem layout floor, distinct from the bevel/metal
      * visual tokens. */

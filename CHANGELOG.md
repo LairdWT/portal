@@ -4,6 +4,33 @@ All notable changes to this project are documented in this file. The format is
 based on Keep a Changelog, and the project follows Semantic Versioning with the
 0.x caveat that, before 1.0, a minor version may carry a breaking change.
 
+## [Unreleased]
+
+Deferred-backlog quality work; no breaking changes.
+
+### Fixed
+
+- Tone layer: a universal `data-status` (danger/success) is now authoritative
+  over an inline `--portal-tone` seed. Previously a component given BOTH a tone
+  and a danger/success status rendered the tone (an inline custom property beats
+  a stylesheet selector), silently dropping the status. The derived tone vars
+  now read an intermediate `--portal-tone-resolved` seed that the `[data-status]`
+  selector overrides and that the inline tone cannot reach, so status wins while
+  plain tone is unchanged. A browser-project precedence-lock test guards it.
+
+### Added
+
+- `SearchableList` now wires `aria-controls` from its search input to the list
+  it filters, via new optional, additive props: `id` on `List` (applied to its
+  list/listbox root) and `ariaControls` on `SearchBox` (forwarded to the input).
+  Existing `List`/`SearchBox` consumers are unaffected.
+
+### Changed
+
+- Internal: the shared `.pressScale` surface utility's `scale()` factor moved
+  from a literal to a `--portal-press-scale` token (mirrored in `PORTAL_TOKENS`),
+  removing the last magic number from `surfaces.module.css`.
+
 ## [0.12.0] - 2026-06-27
 
 Adds the four standard web primitives a full-coverage component library expects

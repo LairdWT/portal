@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, type RenderResult, screen } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import {
     type Dispatch,
@@ -374,5 +374,65 @@ describe('List', (): void => {
         listbox.focus();
         await user.keyboard('{End}');
         expect(activeRow(listbox)).toHaveTextContent('Row 4999');
+    });
+
+    it('applies an explicit id to the interactive listbox root', (): void => {
+        render(
+            <List<string>
+                id="my-list"
+                label="Fruit"
+                items={ITEMS}
+                getItemKey={itemKey}
+                renderItem={renderRow}
+                selectionMode={EListSelectionMode.Single}
+            />,
+        );
+
+        expect(screen.getByRole('listbox').getAttribute('id')).toBe('my-list');
+    });
+
+    it('applies an explicit id to the presentational list root', (): void => {
+        render(
+            <List<string>
+                id="my-list"
+                label="Fruit"
+                items={ITEMS}
+                getItemKey={itemKey}
+                renderItem={renderRow}
+                selectionMode={EListSelectionMode.None}
+            />,
+        );
+
+        expect(screen.getByRole('list').getAttribute('id')).toBe('my-list');
+    });
+
+    it('applies an explicit id to the empty-state root so the node resolves', (): void => {
+        const { container }: RenderResult = render(
+            <List<string>
+                id="my-list"
+                label="Fruit"
+                items={[]}
+                getItemKey={itemKey}
+                renderItem={renderRow}
+                selectionMode={EListSelectionMode.Single}
+            />,
+        );
+
+        const root: HTMLElement | null = container.querySelector('#my-list');
+        expect(root).not.toBeNull();
+    });
+
+    it('emits no id attribute when id is omitted', (): void => {
+        render(
+            <List<string>
+                label="Fruit"
+                items={ITEMS}
+                getItemKey={itemKey}
+                renderItem={renderRow}
+                selectionMode={EListSelectionMode.Single}
+            />,
+        );
+
+        expect(screen.getByRole('listbox').hasAttribute('id')).toBe(false);
     });
 });

@@ -24,6 +24,7 @@ export function SearchBox({
     onChange,
     onSubmit,
     id,
+    ariaControls,
     placeholder,
     enabled,
     tone,
@@ -98,6 +99,9 @@ export function SearchBox({
                     type="search"
                     value={value}
                     {...(placeholder !== undefined ? { placeholder } : {})}
+                    {...(ariaControls !== undefined
+                        ? { 'aria-controls': ariaControls }
+                        : {})}
                     disabled={isDisabled}
                     onChange={handleChange}
                     onKeyDown={handleKeyDown}

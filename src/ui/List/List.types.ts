@@ -107,6 +107,10 @@ export type ListProps<Item> = Readonly<{
     // Bounded block size of the scroll viewport (a CSS length / clamp expression,
     // not a literal px). A token-based clamp default applies when omitted.
     maxBlockSize?: string;
+    // Optional explicit DOM id applied to the list/listbox root element so an
+    // external control can reference it (e.g. a search field's aria-controls).
+    // Distinct from the internal id used for row ids.
+    id?: string;
 }> &
     AccessibleName &
     Toned;

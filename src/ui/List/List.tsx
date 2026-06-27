@@ -102,6 +102,7 @@ export function List<Item>(props: ListProps<Item>): ReactElement {
         status = EUiStatus.None,
         emptyContent,
         maxBlockSize,
+        id,
         tone,
     }: ListProps<Item> = props;
     const label: string | undefined = 'label' in props ? props.label : undefined;
@@ -443,6 +444,7 @@ export function List<Item>(props: ListProps<Item>): ReactElement {
         return (
             <div
                 ref={viewportRef}
+                {...(id !== undefined ? { id } : {})}
                 className={emptyClassName}
                 style={rootStyle}
                 data-status={status}
@@ -485,6 +487,7 @@ export function List<Item>(props: ListProps<Item>): ReactElement {
             <div
                 ref={viewportRef}
                 role="list"
+                {...(id !== undefined ? { id } : {})}
                 className={rootClassName}
                 style={rootStyle}
                 {...(label !== undefined ? { 'aria-label': label } : {})}
@@ -509,6 +512,7 @@ export function List<Item>(props: ListProps<Item>): ReactElement {
         <div
             ref={viewportRef}
             role="listbox"
+            {...(id !== undefined ? { id } : {})}
             className={rootClassName}
             style={rootStyle}
             {...(label !== undefined ? { 'aria-label': label } : {})}

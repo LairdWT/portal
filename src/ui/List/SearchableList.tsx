@@ -2,6 +2,7 @@ import {
     type CSSProperties,
     type ReactElement,
     type ReactNode,
+    useId,
     useMemo,
 } from 'react';
 
@@ -47,6 +48,11 @@ export function SearchableList<Item>(
 
     const resolvedEnabled: EEnabledState = useResolvedEnabled(enabled);
     const hasDetail: boolean = renderDetail !== undefined;
+
+    // One generated id is the single source of truth tying the search input's
+    // aria-controls to the List root element id, so AT users can discover that
+    // the input drives the list.
+    const listId: string = useId();
 
     // Case-insensitive contains over getFilterText - exactly Helicon's
     // searchable_filter_predicate (needle.is_empty() || label.contains(needle)).
@@ -111,6 +117,7 @@ export function SearchableList<Item>(
                     label={searchLabel}
                     value={query}
                     onChange={onQueryChange}
+                    ariaControls={listId}
                     {...(searchPlaceholder !== undefined
                         ? { placeholder: searchPlaceholder }
                         : {})}
@@ -118,6 +125,7 @@ export function SearchableList<Item>(
                     {...(tone !== undefined ? { tone } : {})}
                 />
                 <List<Item>
+                    id={listId}
                     label={listLabel ?? searchLabel}
                     items={filtered}
                     getItemKey={getItemKey}

@@ -65,5 +65,5 @@
 /* Shared press feedback - the controllers' recessed scale. Transform only, so
  * it is reduced-motion safe. */
 .pressScale {
-    transform: scale(0.97);
+    transform: scale(var(--portal-press-scale));
 }
