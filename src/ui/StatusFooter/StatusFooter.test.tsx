@@ -159,9 +159,25 @@ describe('StatusFooter', (): void => {
             />,
         );
 
+        // aria-live="off" is emitted explicitly (not omitted): role="status" is an
+        // implicit polite live region, so only an explicit "off" silences it.
         const footer: HTMLElement = screen.getByRole('contentinfo');
-        expect(footer).not.toHaveAttribute('aria-live');
+        expect(footer).toHaveAttribute('aria-live', 'off');
         expect(footer).not.toHaveAttribute('aria-atomic');
+    });
+
+    it('silences the implicit status live region with an explicit off', (): void => {
+        render(
+            <StatusFooter
+                status={EFooterStatus.Ok}
+                region={EFooterRegion.Status}
+                liveness={EFooterLiveness.Off}
+                label="App status"
+            />,
+        );
+
+        const footer: HTMLElement = screen.getByRole('status');
+        expect(footer).toHaveAttribute('aria-live', 'off');
     });
 
     it('renders the message node when provided', (): void => {

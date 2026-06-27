@@ -97,7 +97,8 @@ export const WithBreadcrumb: Story = {
     },
 };
 
-// A consumer tone color drives the bottom readout edge and the tagline accent.
+// A consumer tone color drives the bottom readout edge and glow only; the
+// tagline accent is a fixed AA-safe token, not tone-driven.
 export const Toned: Story = {
     args: {
         tagline: 'TACTICAL OPPORTUNITY DISPLAY',

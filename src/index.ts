@@ -231,6 +231,7 @@ export {
     ECommandRowKind,
     type UiCommand,
 } from './ui/CommandPalette/CommandPalette.types';
+export { type FuzzyMatch, fuzzyMatch } from './ui/CommandPalette/fuzzyMatch';
 export { CTA } from './ui/CTA/CTA';
 export {
     type CTAProps,

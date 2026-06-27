@@ -106,6 +106,18 @@ function edgeMovesBottom(edge: EWindowResizeEdge): boolean {
     );
 }
 
+// Whether an edge resizes along the horizontal / vertical axis. A single-axis
+// edge (e.g. East) honors only its own axis; a corner honors both. Consumers use
+// these to ignore a cross-axis arrow key and to advertise the matching
+// aria-keyshortcuts per handle.
+export function edgeHonorsHorizontal(edge: EWindowResizeEdge): boolean {
+    return edgeMovesLeft(edge) || edgeMovesRight(edge);
+}
+
+export function edgeHonorsVertical(edge: EWindowResizeEdge): boolean {
+    return edgeMovesTop(edge) || edgeMovesBottom(edge);
+}
+
 // Resize a rectangle by dragging one edge/corner: the dragged sides move by the
 // raw cumulative delta, then the min-extent floor is enforced on the side that is
 // actually moving (so a west/north drag never inverts the box). Viewport capping

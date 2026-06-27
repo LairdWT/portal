@@ -222,6 +222,11 @@
     padding-inline: var(--portal-space-4);
     overflow: auto;
     border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+
+    /* The bottom corners complete the beveled frame (the title bar carries the
+     * top two), so the composed corner-shape: bevel has a non-zero radius to act
+     * on rather than being a silent no-op. */
+    border-radius: 0 0 var(--portal-bevel-3) var(--portal-bevel-3);
     background: var(--portal-color-surface-0);
     color: var(--portal-color-text-0);
     font-size: var(--portal-size-text-md);
@@ -229,7 +234,6 @@
 }
 
 .resizeHandle {
-    composes: beveled from '../../theme/surfaces.module.css';
     position: absolute;
     margin: 0;
     padding: 0;

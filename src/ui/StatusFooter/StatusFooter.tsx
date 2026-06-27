@@ -105,10 +105,12 @@ export function StatusFooter({
         .join(' ');
 
     // aria-live is applied to the strip root with aria-atomic so a status/message
-    // change announces "[STATUS: ERROR] disk full" as one unit. Off omits both.
+    // change announces "[STATUS: ERROR] disk full" as one unit. Off emits an
+    // explicit aria-live="off" rather than omitting it, because role="status" is
+    // an implicit polite live region - omitting the attribute would NOT silence it.
     const liveProps: Readonly<Record<string, string>> =
         resolvedLiveness === EFooterLiveness.Off
-            ? {}
+            ? { 'aria-live': 'off' }
             : { 'aria-live': resolvedLiveness, 'aria-atomic': 'true' };
 
     return (

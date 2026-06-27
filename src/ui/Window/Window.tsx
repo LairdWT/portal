@@ -41,6 +41,8 @@ import {
     applyDragDelta,
     applyResizeDelta,
     clampWindowRect,
+    edgeHonorsHorizontal,
+    edgeHonorsVertical,
     type WindowViewport,
 } from './windowGeometry';
 
@@ -199,13 +201,22 @@ function ResizeHandle(props: ResizeHandleProps): ReactElement {
         onResizeKeyDown(edge, event);
     }
 
+    // Advertise only the arrows this edge actually honors (a single-axis grip
+    // honors one axis; a corner honors both), matching the keyboard handler.
+    const resizeKeyshortcuts: string = [
+        edgeHonorsVertical(edge) ? 'ArrowUp ArrowDown' : '',
+        edgeHonorsHorizontal(edge) ? 'ArrowLeft ArrowRight' : '',
+    ]
+        .filter((part: string): boolean => part.length > 0)
+        .join(' ');
+
     return (
         <button
             type="button"
             className={styles.resizeHandle}
             data-edge={edge}
             aria-label={label}
-            aria-keyshortcuts="ArrowUp ArrowDown ArrowLeft ArrowRight"
+            aria-keyshortcuts={resizeKeyshortcuts}
             onKeyDown={handleKeyDown}
             onPointerDown={binding.onPointerDown}
         />
@@ -444,6 +455,15 @@ export function Window(props: WindowProps): ReactElement | null {
             default:
                 return;
         }
+        // Ignore a cross-axis arrow (e.g. ArrowUp on an east/west grip): this edge
+        // does not honor that axis, so leave the key unhandled (no preventDefault)
+        // and emit no no-op resize.
+        if (
+            (dx !== 0 && !edgeHonorsHorizontal(edge)) ||
+            (dy !== 0 && !edgeHonorsVertical(edge))
+        ) {
+            return;
+        }
         event.preventDefault();
         const next: WindowRect = clampWindowRect(
             applyResizeDelta(resolvedRect, edge, dx, dy, resolvedMinSize),
@@ -452,6 +472,9 @@ export function Window(props: WindowProps): ReactElement | null {
         );
         commitRect(next);
         onResize?.({ width: next.width, height: next.height });
+        // A position-moving edge (west/north and the corners) shifts x/y as it
+        // resizes; report it so the keyboard path matches the pointer resize.
+        onMove?.({ x: next.x, y: next.y });
     }
 
     function handleClose(): void {
