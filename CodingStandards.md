@@ -8,7 +8,12 @@ global preference where they conflict.
 
 - Strict TypeScript. No `any`. No `as unknown as T` chains. No non-null
   assertion without a local justification and a safer alternative considered.
-- Explicit return types on every exported function, React component, and hook.
+- Explicit return types on every function: exported functions, React
+  components, and hooks (the public boundary), and also internal/non-exported
+  named functions and const-assigned arrow functions. Inline, contextually-typed
+  callbacks (e.g. an argument to `.map`/`addEventListener`) are exempt. Enforced
+  by `explicit-module-boundary-types` (the boundary) and
+  `explicit-function-return-type` (internal declarations).
 - Prefer `type` aliases over `interface` for data, props, and messages.
 - Use discriminated unions for multi-state values and messages.
 - Enums are banned as a language feature (erasable syntax only). Model named

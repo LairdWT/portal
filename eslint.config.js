@@ -91,6 +91,39 @@ export default tseslint.config(
                     variableDeclarationIgnoreFunction: false,
                 },
             ],
+            '@typescript-eslint/explicit-module-boundary-types': [
+                'error',
+                {
+                    allowDirectConstAssertionInArrowFunctions: true,
+                    allowHigherOrderFunctions: true,
+                    allowTypedFunctionExpressions: true,
+                    allowOverloadFunctions: true,
+                },
+            ],
+            // A no-default union switch (the house dispatch idiom) still requires
+            // every member, so a new member breaks the build. A union switch with
+            // a MEANINGFUL default (a pass-through transform, a parse that returns
+            // null for any non-member) is accepted - considerDefaultExhaustiveForUnions
+            // true keeps that legitimate idiom from being churned into a verbose
+            // case-per-member enumeration. requireDefaultForNonUnion still forces a
+            // default on open (string/number) switches.
+            '@typescript-eslint/switch-exhaustiveness-check': [
+                'error',
+                {
+                    requireDefaultForNonUnion: true,
+                    considerDefaultExhaustiveForUnions: true,
+                },
+            ],
+            '@typescript-eslint/explicit-function-return-type': [
+                'error',
+                {
+                    allowExpressions: true,
+                    allowTypedFunctionExpressions: true,
+                    allowHigherOrderFunctions: true,
+                    allowDirectConstAssertionInArrowFunctions: true,
+                    allowConciseArrowFunctionExpressionsStartingWithVoid: true,
+                },
+            ],
         },
     },
     // The decoupled input core must not import React.
