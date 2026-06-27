@@ -119,6 +119,15 @@
      * visual tokens. */
     --portal-stat-tile-min: 12rem;
 
+    /* Scanline overlay (decorative). Honors Helicon scanlines.rs defaults: 3px
+     * pitch, ~16/255 line alpha. The alpha is kept low so the overlay never
+     * pulls underlying body text below the WCAG AA contrast floor; the flicker
+     * timing reuses the slow UI affordance duration. Per-instance overrides come
+     * from the component's pitch/opacity props as inline custom properties. */
+    --portal-scanline-pitch: 3px; /* Helicon DEFAULT_PITCH_PIXELS = 3.0 */
+    --portal-scanline-alpha: 0.06; /* Helicon DEFAULT_ALPHA 16/255 ~= 0.063 */
+    --portal-scanline-flicker-duration: var(--portal-duration-ui-slow);
+
     /* Auxiliary font sizes */
     --portal-size-font-tiny: 0.5rem;
     --portal-size-font-small: 1rem;

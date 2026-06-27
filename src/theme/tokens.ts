@@ -87,6 +87,11 @@ export type PortalTokens = {
     readonly letterSpacing: {
         readonly wide: string;
     };
+    readonly scanline: {
+        readonly pitch: string;
+        readonly alpha: string;
+        readonly flickerDuration: string;
+    };
 };
 
 export const PORTAL_TOKENS: PortalTokens = {
@@ -166,5 +171,10 @@ export const PORTAL_TOKENS: PortalTokens = {
     },
     letterSpacing: {
         wide: 'var(--portal-letter-spacing-wide)',
+    },
+    scanline: {
+        pitch: 'var(--portal-scanline-pitch)',
+        alpha: 'var(--portal-scanline-alpha)',
+        flickerDuration: 'var(--portal-scanline-flicker-duration)',
     },
 };

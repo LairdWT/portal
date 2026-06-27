@@ -1,0 +1,162 @@
+/*
+ * Marquee - a machined-HUD readout band whose over-long content scrolls past a
+ * fixed-width clip. Consumes only --portal-* / --portal-tone-* tokens and the
+ * shared surfaces.module.css utilities (via composes); zero literal colors and
+ * zero authored fixed-px layout (the only measured value is the JS-computed
+ * inline --portal-marquee-duration; the gap is a consumer token via
+ * --portal-marquee-gap). Logical properties throughout.
+ *
+ * Motion is gated TWO ways: the scroll keyframe lives entirely under
+ * @media (prefers-reduced-motion: no-preference), and the component's JS swaps
+ * to a static, focusable, manually-scrollable single copy when reduced motion is
+ * preferred (or the content fits, or speed is 0). Tone drives the border/glow
+ * and edge-fade only - never the AA-critical text color.
+ */
+.root {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--portal-space-2);
+    max-inline-size: 100%;
+}
+
+.viewport {
+    composes: beveled metalEdge from '../../theme/surfaces.module.css';
+    position: relative;
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    min-inline-size: 0;
+    min-block-size: var(--portal-touch-target-min);
+    padding-inline: var(--portal-space-3);
+    overflow: hidden;
+    border-radius: var(--portal-bevel-3);
+    box-shadow: 0 0 var(--portal-space-2) var(--portal-hud-glow);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-mono);
+}
+
+.viewport[data-scrollable='true'] {
+    overflow: auto hidden;
+}
+
+.viewport:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: calc(-1 * var(--portal-border-thickness-normal));
+}
+
+.track {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    will-change: transform;
+}
+
+.copy {
+    flex: 0 0 auto;
+    padding-inline-end: var(--portal-marquee-gap);
+    white-space: nowrap;
+}
+
+/* Hidden probe sized to the gap token so its measured content-box width feeds
+ * the gap value back to JS as px (the distance the seamless loop must travel is
+ * one copy plus this gap). Out of flow and invisible; never read by AT. */
+.gapProbe {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    inline-size: var(--portal-marquee-gap);
+    block-size: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.control {
+    composes: beveled metalEdge pressScale from '../../theme/surfaces.module.css';
+    display: inline-flex;
+    align-items: center;
+    gap: var(--portal-space-2);
+    min-block-size: var(--portal-touch-target-min);
+    min-inline-size: var(--portal-touch-target-min);
+    padding-inline: var(--portal-space-3);
+    border-radius: var(--portal-bevel-2);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-mono);
+    font-weight: var(--portal-weight-label-bold);
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.control:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: calc(-1 * var(--portal-border-thickness-normal));
+}
+
+.control:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.control:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+.marker {
+    color: var(--portal-tone-accent);
+    font-family: var(--portal-font-mono);
+}
+
+.controlLabel {
+    color: var(--portal-color-text-0);
+    letter-spacing: var(--portal-letter-spacing-wide);
+}
+
+/* All motion lives behind the no-preference gate. Under reduce there is no
+ * animation at all; combined with the JS static-fallback path the strip is a
+ * readable, manually-scrollable ticker. */
+@media (prefers-reduced-motion: no-preference) {
+    .control {
+        transition: transform var(--portal-duration-ui-fast)
+            var(--portal-easing-standard);
+    }
+
+    .viewport[data-animating='true'] {
+        mask-image: linear-gradient(
+            to right,
+            transparent 0,
+            black var(--portal-space-4),
+            black calc(100% - var(--portal-space-4)),
+            transparent 100%
+        );
+    }
+
+    .viewport[data-animating='true'] .track {
+        animation: portal-marquee-scroll var(--portal-marquee-duration) linear
+            infinite;
+    }
+
+    .root[data-play-state='paused'] .track {
+        animation-play-state: paused;
+    }
+
+    .viewport[data-animating='true'] .track[data-direction='end'] {
+        animation-direction: reverse;
+    }
+
+    .root[data-pause-on-focus='true']:focus-within .track {
+        animation-play-state: paused;
+    }
+
+    .root[data-pause-on-hover='true'] .viewport:hover .track {
+        animation-play-state: paused;
+    }
+}
+
+@keyframes portal-marquee-scroll {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-50%);
+    }
+}

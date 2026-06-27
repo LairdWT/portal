@@ -1,0 +1,69 @@
+/*
+ * Scanlines - a decorative CRT scanline overlay. A single composited layer that
+ * paints evenly-spaced horizontal lines with one repeating-linear-gradient (no
+ * per-frame work; the compositor handles scroll/resize), the DOM realization of
+ * Helicon scanlines::draw_overlay / draw_overlay_rect. The root carries
+ * .toneScope (from tone.module.css) so --portal-tone-accent resolves as the line
+ * color; this file references only --portal-* tokens and the derived tone vars,
+ * never literal colors or lengths (pitch/alpha come from the --portal-scanline-*
+ * tokens, overridable per instance via inline custom properties).
+ *
+ * DELIBERATE bevel-utility exception: this is a borderless, transparent,
+ * full-bleed texture with NO box edge, NO corners and NO surface fill, so it
+ * does NOT compose .beveled/.metalTrim/.metalEdge from surfaces.module.css and
+ * authors NO border-radius and NO corner-shape (it can never read as rounded;
+ * the square horizontal lines are maximally machined). In Contained mode a
+ * beveled host with overflow:hidden clips the overlay to the host's machined
+ * corners, so the scanlines take the HUD corner geometry without authoring any.
+ *
+ * No z-index is authored: as a positioned last child the overlay paints above
+ * its host's static content (the documented placement) without borrowing
+ * --portal-z-overlay, which is reserved for portal-rendered overlays.
+ *
+ * Non-interactive: pointer-events:none, no :hover/:active/:focus rules, no
+ * motion except the optional flicker, which animates opacity ONLY and is gated
+ * behind prefers-reduced-motion: no-preference (static is the safe default).
+ */
+.root {
+    pointer-events: none;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+        to bottom,
+        var(--portal-tone-accent) 0,
+        var(--portal-tone-accent) 1px,
+        transparent 1px,
+        transparent var(--portal-scanline-pitch)
+    );
+    opacity: var(--portal-scanline-alpha);
+}
+
+/* Contained - fills the nearest positioned ancestor (Helicon draw_overlay_rect).
+ * The host must be position:relative (documented in the prop JSDoc and stories). */
+.root[data-extent='contained'] {
+    position: absolute;
+}
+
+/* Fixed - viewport overlay regardless of scroll (Helicon draw_overlay). */
+.root[data-extent='fixed'] {
+    position: fixed;
+}
+
+/* The flicker is declared only inside the no-preference block below, so under
+ * prefers-reduced-motion: reduce the overlay is simply static at the base alpha. */
+@media (prefers-reduced-motion: no-preference) {
+    .root[data-flicker='subtle'] {
+        animation: portal-scanline-flicker var(--portal-scanline-flicker-duration)
+            steps(2, end) infinite alternate;
+    }
+}
+
+/* Opacity ONLY - compositor-friendly, never a layout or paint property. */
+@keyframes portal-scanline-flicker {
+    from {
+        opacity: var(--portal-scanline-alpha);
+    }
+
+    to {
+        opacity: calc(var(--portal-scanline-alpha) * 0.6);
+    }
+}

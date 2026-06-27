@@ -1,0 +1,113 @@
+/*
+ * StatusFooter. A beveled machined-HUD bottom status strip for the generic UI
+ * layer: a status badge (inline-start) + a one-line message (center, grows) + a
+ * caller-owned end block (inline-end). The three-slot strip layout is INLINED
+ * here (not a shared cross-component primitive) so the build stays independent of
+ * TitleBar. The root carries the shared .toneScope and composes .beveled +
+ * .metalEdge from surfaces so the brushed-metal edge and bevel corner come from
+ * the foundation, never a per-component literal. Only --portal-* tokens and the
+ * derived --portal-tone-* vars are referenced - no literal colors or pixels. The
+ * dark --portal-hud-fill keeps the badge/message text at AA contrast; the status
+ * color is confined to the decorative dot and the outer tone glow, never the
+ * AA-critical bracket label or message text. Logical properties throughout so RTL
+ * mirrors automatically; edge padding respects the device safe area (block-end
+ * inset for the bottom bar). Motion is gated behind prefers-reduced-motion.
+ */
+
+.root {
+    composes: beveled metalEdge from '../../theme/surfaces.module.css';
+    display: flex;
+    align-items: center;
+    gap: var(--portal-space-3);
+    box-sizing: border-box;
+    inline-size: 100%;
+    min-block-size: var(--portal-touch-target-min);
+    padding-block: var(--portal-space-2)
+        max(var(--portal-space-2), env(safe-area-inset-bottom));
+    padding-inline: max(var(--portal-space-4), env(safe-area-inset-left))
+        max(var(--portal-space-4), env(safe-area-inset-right));
+    border-radius: var(--portal-bevel-2);
+    box-shadow: 0 0 var(--portal-space-4) var(--portal-tone-glow);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+    line-height: var(--portal-line-height-normal);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .root {
+        transition: box-shadow var(--portal-duration-ui-base)
+            var(--portal-easing-standard);
+    }
+}
+
+/*
+ * Per-status tone seed. Ok/Error are driven by data-status through
+ * tone.module.css (success/danger); only Warning and Idle need their own seed
+ * here. Warning takes the warning token; Idle takes the dim foreground token
+ * (--portal-color-text-1 - the project ships no --portal-color-text-2, so the
+ * dimmest existing text token stands in; see notes). An inline tone always wins.
+ */
+.root[data-footer-status='warning'] {
+    --portal-tone: var(--portal-color-warning);
+}
+
+.root[data-footer-status='idle'] {
+    --portal-tone: var(--portal-color-text-1);
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+    gap: var(--portal-space-2);
+}
+
+.label {
+    composes: wideLabel from '../../theme/surfaces.module.css';
+    font-size: var(--portal-size-text-sm);
+    font-weight: 700;
+    color: var(--portal-color-text-0);
+}
+
+/*
+ * The decorative status dot (aria-hidden): a small beveled marker, NOT a pill.
+ * corner-shape: bevel is a no-op without a border-radius, so .beveled is paired
+ * with --portal-bevel-1. Its color is the tone accent, seeded per status above,
+ * so status reads through the dot AND the bracket label string - never color
+ * alone.
+ */
+.dot {
+    composes: beveled from '../../theme/surfaces.module.css';
+    flex: 0 0 auto;
+    inline-size: var(--portal-space-2);
+    block-size: var(--portal-space-2);
+    border-radius: var(--portal-bevel-1);
+    background-color: var(--portal-tone-accent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .dot {
+        transition: background-color var(--portal-duration-ui-base)
+            var(--portal-easing-standard);
+    }
+}
+
+.message {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+    overflow: hidden;
+    font-size: var(--portal-size-text-sm);
+    color: var(--portal-color-text-1);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.end {
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+    gap: var(--portal-space-2);
+    font-size: var(--portal-size-text-sm);
+    color: var(--portal-color-text-1);
+    font-variant-numeric: tabular-nums;
+}

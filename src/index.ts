@@ -223,6 +223,14 @@ export {
     type ColorPickerProps,
     EColorMode,
 } from './ui/ColorPicker/ColorPicker.types';
+export { CommandPalette } from './ui/CommandPalette/CommandPalette';
+export {
+    type CommandPaletteProps,
+    type CommandRow,
+    ECommandFilterMode,
+    ECommandRowKind,
+    type UiCommand,
+} from './ui/CommandPalette/CommandPalette.types';
 export { CTA } from './ui/CTA/CTA';
 export {
     type CTAProps,
@@ -287,6 +295,12 @@ export {
 } from './ui/List/List.types';
 export { SearchableList } from './ui/List/SearchableList';
 export { type SearchableListProps } from './ui/List/SearchableList.types';
+export { Marquee } from './ui/Marquee/Marquee';
+export {
+    EMarqueeDirection,
+    EMarqueePlayState,
+    type MarqueeProps,
+} from './ui/Marquee/Marquee.types';
 export { ContextMenu } from './ui/Menu/ContextMenu';
 export { Menu } from './ui/Menu/Menu';
 export {
@@ -348,6 +362,12 @@ export {
     type ReadoutPanelProps,
     type UiReadout,
 } from './ui/ReadoutPanel/ReadoutPanel.types';
+export { Scanlines } from './ui/Scanlines/Scanlines';
+export {
+    EScanlineExtent,
+    EScanlineFlicker,
+    type ScanlinesProps,
+} from './ui/Scanlines/Scanlines.types';
 export { SearchBox } from './ui/SearchBox/SearchBox';
 export {
     ESearchBoxState,
@@ -394,6 +414,13 @@ export {
 } from './ui/StatTile/StatTile.types';
 export { TileRow } from './ui/StatTile/TileRow';
 export { type TileRowProps } from './ui/StatTile/TileRow.types';
+export { StatusFooter } from './ui/StatusFooter/StatusFooter';
+export {
+    EFooterLiveness,
+    EFooterRegion,
+    EFooterStatus,
+    type StatusFooterProps,
+} from './ui/StatusFooter/StatusFooter.types';
 export { StepTrack } from './ui/StepTrack/StepTrack';
 export {
     EStepState,
@@ -414,6 +441,12 @@ export {
     ETextFieldType,
     type TextFieldProps,
 } from './ui/TextField/TextField.types';
+export { TitleBar } from './ui/TitleBar/TitleBar';
+export {
+    ETitleBarLandmark,
+    type TitleBarHeadingLevel,
+    type TitleBarProps,
+} from './ui/TitleBar/TitleBar.types';
 export {
     EToastKind,
     EToastPlacement,

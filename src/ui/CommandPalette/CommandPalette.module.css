@@ -1,0 +1,403 @@
+/*
+ * CommandPalette - a modal fuzzy command launcher in the machined-HUD family.
+ * The backdrop and panel portal into the shared overlay root on the
+ * --portal-z-overlay layer (never an inline z-index literal). The panel is the
+ * beveled, static-metal-edged modal surface (Tier 2: .beveled + .metalEdge, no
+ * animated sheen); it is a flex column holding a beveled combobox field over a
+ * virtualized listbox. Result rows are angular (never pills): the active cursor
+ * reads as a dark tone scrim plus a SHARP inline-start tone-accent rail drawn
+ * with ::before, redundant with data-active / aria-selected. Only --portal-*
+ * and derived --portal-tone-* values are used; the only inline pixels are the
+ * JS-computed per-row block-size / translate derived from the rowHeight prop.
+ * Logical properties throughout; every transition is reduced-motion gated.
+ */
+
+.backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: var(--portal-z-overlay);
+    background-color: color-mix(
+        in oklab,
+        var(--portal-color-bg-0) 72%,
+        transparent
+    );
+}
+
+.positioner {
+    position: fixed;
+    inset: 0;
+    z-index: var(--portal-z-overlay);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: var(--portal-space-5);
+    padding-block-start: clamp(var(--portal-space-6), 12dvh, var(--portal-space-8));
+    pointer-events: none;
+}
+
+.panel {
+    composes: beveled metalEdge from '../../theme/surfaces.module.css';
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-3);
+    inline-size: min(40rem, calc(100dvw - 2 * var(--portal-space-6)));
+    max-block-size: min(44rem, calc(100dvh - 2 * var(--portal-space-7)));
+    padding: var(--portal-space-4);
+    overflow: hidden;
+    border-radius: var(--portal-bevel-3);
+    box-shadow:
+        0 0 var(--portal-space-4) var(--portal-tone-glow),
+        0 var(--portal-space-2) var(--portal-space-6)
+            color-mix(in oklab, var(--portal-color-bg-0) 60%, transparent);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+    pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .panel[data-motion='full'] {
+        animation: portal-palette-in var(--portal-duration-ui-slow)
+            var(--portal-easing-standard);
+    }
+
+    .backdrop[data-motion='full'] {
+        animation: portal-palette-fade var(--portal-duration-ui-slow)
+            var(--portal-easing-standard);
+    }
+}
+
+@keyframes portal-palette-in {
+    from {
+        opacity: 0;
+        transform: translateY(calc(-1 * var(--portal-space-4)));
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes portal-palette-fade {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* The combobox field: a beveled HUD input shell over the dark scrim surface,
+ * mirroring the SearchBox treatment but with the bevel corner. */
+.combobox {
+    composes: beveled from '../../theme/surfaces.module.css';
+    display: flex;
+    align-items: center;
+    gap: var(--portal-space-2);
+    box-sizing: border-box;
+    flex: none;
+    min-block-size: var(--portal-touch-target-min);
+    padding-inline: var(--portal-space-3);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-bevel-2);
+    background-color: var(--portal-color-surface-0);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .combobox {
+        transition:
+            border-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ui-fast) var(--portal-easing-standard);
+    }
+}
+
+.combobox:focus-within {
+    border-color: var(--portal-tone-accent);
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: var(--portal-space-1);
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow-strong);
+}
+
+.combobox[data-enabled='disabled'] {
+    opacity: 0.5;
+}
+
+/* The leading search affordance: a token-drawn magnifier, decorative and
+ * aria-hidden, tinted with the tone accent. */
+.affordance {
+    position: relative;
+    flex: none;
+    inline-size: var(--portal-space-4);
+    block-size: var(--portal-space-4);
+    color: var(--portal-tone-accent);
+}
+
+.affordance::before {
+    content: '';
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    inline-size: 65%;
+    block-size: 65%;
+    border: var(--portal-border-thickness-thin) solid currentcolor;
+    border-radius: var(--portal-radius-pill);
+}
+
+.affordance::after {
+    content: '';
+    position: absolute;
+    inset-block-end: 0;
+    inset-inline-end: 0;
+    inline-size: 45%;
+    block-size: var(--portal-border-thickness-thin);
+    background-color: currentcolor;
+    border-radius: var(--portal-radius-pill);
+    transform: rotate(45deg);
+    transform-origin: 100% 100%;
+}
+
+.input {
+    flex: 1 1 auto;
+    box-sizing: border-box;
+    min-inline-size: 0;
+    min-block-size: var(--portal-touch-target-min);
+    border: 0;
+    background-color: transparent;
+    color: var(--portal-color-text-0);
+    font-family: inherit;
+    font-size: var(--portal-size-text-md);
+    line-height: var(--portal-line-height-normal);
+}
+
+.input::placeholder {
+    color: var(--portal-color-text-1);
+}
+
+.input:focus {
+    outline: none;
+}
+
+/* The clear control is a real pointer target, so it holds the minimum touch
+ * size even though its glyph is small. */
+.clear {
+    composes: beveled from '../../theme/surfaces.module.css';
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    inline-size: var(--portal-touch-target-min);
+    min-inline-size: var(--portal-touch-target-min);
+    block-size: var(--portal-touch-target-min);
+    min-block-size: var(--portal-touch-target-min);
+    padding: 0;
+    border: 0;
+    border-radius: var(--portal-bevel-1);
+    background-color: transparent;
+    color: var(--portal-color-text-1);
+    font-family: inherit;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .clear {
+        transition: color var(--portal-duration-ui-fast)
+            var(--portal-easing-standard);
+    }
+}
+
+.clear:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: var(--portal-space-1);
+}
+
+.clear:disabled {
+    cursor: not-allowed;
+}
+
+.clear:hover:not(:disabled) {
+    color: var(--portal-color-text-0);
+}
+
+.clearGlyph {
+    position: relative;
+    inline-size: var(--portal-space-3);
+    block-size: var(--portal-space-3);
+}
+
+.clearGlyph::before,
+.clearGlyph::after {
+    content: '';
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 0;
+    inline-size: 100%;
+    block-size: var(--portal-border-thickness-thin);
+    background-color: currentcolor;
+    border-radius: var(--portal-radius-pill);
+}
+
+.clearGlyph::before {
+    transform: translateY(-50%) rotate(45deg);
+}
+
+.clearGlyph::after {
+    transform: translateY(-50%) rotate(-45deg);
+}
+
+/* The scroll viewport. Bounded by the panel's max-block-size so a large corpus
+ * scrolls (and windows); angular, never rounded. The sizer carries the full
+ * virtual height inline; only the windowed rows live inside it. */
+.listbox {
+    position: relative;
+    flex: 1 1 auto;
+    min-block-size: var(--portal-touch-target-min);
+    overflow: auto;
+}
+
+.sizer {
+    position: relative;
+    inline-size: 100%;
+}
+
+/* Each windowed row is absolutely positioned and translated into place by an
+ * inline transform; block-size is set inline from rowHeight. min-block-size keeps
+ * a row at or above the 3rem touch floor. */
+.row {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--portal-space-3);
+    box-sizing: border-box;
+    min-block-size: var(--portal-touch-target-min);
+    padding-inline: var(--portal-space-3);
+    border-block-end: var(--portal-border-thickness-thin) solid
+        var(--portal-color-border);
+    color: var(--portal-color-text-0);
+    font-size: var(--portal-size-text-md);
+    line-height: var(--portal-line-height-normal);
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .row {
+        transition:
+            background-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ui-fast) var(--portal-easing-standard);
+    }
+}
+
+/* Active cursor: a dark angular tone scrim plus a sharp inline-start accent rail
+ * (the ::before below). Redundant with data-active / aria-selected; text stays on
+ * --portal-color-text-0 for AA contrast (tone never colours the label). */
+.row[data-active='true'] {
+    background: linear-gradient(
+        160deg,
+        var(--portal-tone-fill) 0%,
+        var(--portal-color-surface-0) 100%
+    );
+    box-shadow: inset 0 0 var(--portal-space-3) var(--portal-tone-glow);
+}
+
+.row[aria-disabled='true'] {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* The sharp inline-start accent rail. A pseudo-element, so it carries the
+ * highest specificity in the row scope and is ordered last. */
+.row[data-active='true']::before {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    inline-size: var(--portal-border-thickness-bold);
+    background-color: var(--portal-tone-accent);
+}
+
+/* Group header rows: a dim, wide-tracked tone-edge label; non-interactive. */
+.header {
+    composes: wideLabel from '../../theme/surfaces.module.css';
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline: 0;
+    display: flex;
+    align-items: flex-end;
+    box-sizing: border-box;
+    padding-block-end: var(--portal-space-1);
+    padding-inline: var(--portal-space-3);
+    border-block-end: var(--portal-border-thickness-thin) solid
+        var(--portal-tone-edge);
+    color: var(--portal-color-text-1);
+    font-size: var(--portal-size-text-sm);
+    text-transform: uppercase;
+}
+
+.icon {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    color: var(--portal-tone-accent);
+}
+
+.rowBody {
+    display: flex;
+    flex-direction: column;
+    min-inline-size: 0;
+    flex: 1 1 auto;
+}
+
+.rowLabel {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.rowDescription {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: var(--portal-color-text-1);
+    font-size: var(--portal-size-text-sm);
+}
+
+/* The matched characters in a label. Emphasis via weight + the AA-safe accent
+ * highlight token (never a tone-derived colour, which is not AA-guaranteed). */
+.match {
+    color: var(--portal-color-accent-highlight);
+    font-weight: 600;
+}
+
+/* The trailing shortcut chip: a small beveled machined-key tag, aria-hidden. */
+.shortcut {
+    composes: beveled from '../../theme/surfaces.module.css';
+    flex: none;
+    padding-block: var(--portal-space-1);
+    padding-inline: var(--portal-space-2);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-metal-1);
+    border-radius: var(--portal-bevel-1);
+    background-color: color-mix(
+        in oklab,
+        var(--portal-color-metal-0) 32%,
+        transparent
+    );
+    color: var(--portal-color-text-1);
+    font-size: var(--portal-size-text-sm);
+    line-height: var(--portal-line-height-tight);
+}
+
+.empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    block-size: 100%;
+    min-block-size: var(--portal-touch-target-min);
+    padding: var(--portal-space-5);
+}

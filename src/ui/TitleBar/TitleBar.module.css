@@ -1,0 +1,112 @@
+/*
+ * TitleBar - a beveled machined-HUD masthead strip for the generic UI layer. The
+ * root carries .toneScope (from tone.module.css) so the derived --portal-tone-*
+ * vars resolve, and composes the SHIPPED surface foundation (.beveled for the
+ * machined corner identity, .metalEdge for the STATIC brushed-metal border with
+ * no animated sheen, so a persistent always-on-screen masthead hosts no perpetual
+ * animation). This file references only --portal-* tokens and the derived
+ * --portal-tone-* vars - never a literal color, size, or fixed-pixel layout, and
+ * logical properties throughout. Tone drives the bottom readout edge and the
+ * accent glow ONLY; AA-critical text uses the fixed text/foreground tokens. The
+ * single bottom-edge tone glow transition is gated behind prefers-reduced-motion.
+ */
+
+.bar {
+    composes: beveled metalEdge from '../../theme/surfaces.module.css';
+    display: flex;
+    flex-direction: column;
+    inline-size: 100%;
+    container-type: inline-size;
+    padding-block: max(var(--portal-space-3), env(safe-area-inset-top))
+        var(--portal-space-3);
+    padding-inline: max(var(--portal-space-4), env(safe-area-inset-left))
+        max(var(--portal-space-4), env(safe-area-inset-right));
+    border-radius: var(--portal-bevel-3);
+    border-block-end: var(--portal-border-thickness-thin) solid
+        var(--portal-tone-border);
+    background-color: var(--portal-color-surface-0);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+}
+
+.titleRow {
+    display: flex;
+    align-items: center;
+    gap: var(--portal-space-3);
+    min-block-size: var(--portal-touch-target-min);
+}
+
+.leading {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: var(--portal-space-2);
+}
+
+.title {
+    composes: wideLabel from '../../theme/surfaces.module.css';
+    flex: 0 1 auto;
+    margin-block: 0;
+    margin-inline-start: 0;
+    font-size: var(--portal-size-text-lg);
+    color: var(--portal-tone-on);
+}
+
+.separator {
+    flex: 0 0 auto;
+    font-family: var(--portal-font-mono);
+    color: var(--portal-color-text-1);
+}
+
+.tagline {
+    flex: 0 1 auto;
+    font-weight: var(--portal-weight-label-strong);
+
+    /* The brightened accent, not --portal-tone-accent: the tagline is
+     * AA-critical text and the default accent (and the danger tone) fall below
+     * 4.5:1 on the dark surface. Tone drives the bar's border and glow only. */
+    color: var(--portal-color-accent-highlight);
+}
+
+.trailing {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: var(--portal-space-2);
+
+    /* Push the end slot to the inline-end edge - the web equivalent of Helicon's
+     * right_to_left right_content block. */
+    margin-inline-start: auto;
+}
+
+.breadcrumbRow {
+    padding-block-start: var(--portal-space-2);
+    border-block-start: var(--portal-border-thickness-thin) solid
+        var(--portal-color-border);
+}
+
+/* The narrow-width tagline collapse uses a container query, never a fixed-pixel
+ * breakpoint; the decorative separator drops with it. */
+@container (inline-size < 24rem) {
+    .separator,
+    .tagline {
+        display: none;
+    }
+}
+
+/* Only the bottom readout-edge tone glow animates, on box-shadow / border-color
+ * (compositor-cheap) and gated so reduced-motion snaps to the same final state. */
+@media (prefers-reduced-motion: no-preference) {
+    .bar {
+        transition:
+            border-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ui-fast) var(--portal-easing-standard);
+    }
+}
+
+.bar:hover,
+.bar:focus-within {
+    box-shadow: 0 var(--portal-space-1) var(--portal-space-4)
+        var(--portal-tone-glow);
+}
