@@ -1,0 +1,122 @@
+/*
+ * Skeleton. A quiet, non-interactive loading placeholder for the generic UI
+ * layer. It paints a low-contrast machined block on its own neutral
+ * --portal-skeleton-* fill (NOT the tone ramp) while real content loads. The
+ * painted nodes adopt the shared `.beveled` corner identity (Block/Text) or the
+ * allowed circular marker (Circle); every beveled box also sets a non-zero
+ * --portal-bevel-N radius so the corner shape is never a silent no-op. Every
+ * color/size resolves from a --portal-* / --portal-skeleton-* token; only
+ * neutral layout ratios (the ragged last-bar 60%) are literal, in the spirit of
+ * Progress's 30%/40%. Motion is pure CSS gated behind prefers-reduced-motion
+ * with the static base fill as the reduced-motion fallback. This file
+ * references neither --portal-duration-frame-* nor --portal-duration-ui-*: it
+ * rides the dedicated --portal-skeleton-shimmer-duration cadence, keeping it out
+ * of the duration intent families entirely.
+ */
+
+.root {
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-2);
+}
+
+/*
+ * Shared base of every painted node. position/overflow clip the translating
+ * sheen to the silhouette; the flat base fill is the static (and reduced-motion)
+ * resting state.
+ */
+.fill {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--portal-skeleton-base);
+}
+
+.block {
+    composes: fill;
+    composes: beveled from '../../theme/surfaces.module.css';
+    inline-size: 100%;
+    block-size: var(--portal-space-6);
+    border-radius: var(--portal-bevel-2);
+}
+
+.circle {
+    composes: fill;
+    inline-size: var(--portal-space-6);
+    block-size: var(--portal-space-6);
+    border-radius: var(--portal-radius-pill);
+    align-self: flex-start;
+}
+
+.line {
+    composes: fill;
+    composes: beveled from '../../theme/surfaces.module.css';
+    inline-size: 100%;
+    block-size: var(--portal-space-3);
+    border-radius: var(--portal-bevel-1);
+}
+
+/* The ragged-paragraph trim: a neutral layout ratio (matching Progress's 40%
+ * literal width), shortening only the final bar relative to the column. */
+.lineLast {
+    inline-size: 60%;
+}
+
+/* The repo's per-component sr-only idiom (clip the node out of flow while it
+ * stays in the DOM and the accessibility tree). Only rendered in the labeled
+ * (role=status) path. Copied from the Chart/SelectableTile technique, not
+ * shared. */
+.visuallyHidden {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* The shimmer sheen band. Parked off-stage at translateX(-100%) so the static
+ * (and reduced-motion) fallback shows only the flat base fill. */
+.fill[data-animation='shimmer']::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        var(--portal-skeleton-highlight) 50%,
+        transparent 100%
+    );
+    transform: translateX(-100%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .fill[data-animation='shimmer']::after {
+        animation: portal-skeleton-shimmer var(--portal-skeleton-shimmer-duration)
+            var(--portal-easing-standard) infinite;
+    }
+
+    .fill[data-animation='pulse'] {
+        animation: portal-skeleton-pulse var(--portal-skeleton-shimmer-duration)
+            var(--portal-easing-standard) infinite;
+    }
+}
+
+@keyframes portal-skeleton-shimmer {
+    to {
+        transform: translateX(100%);
+    }
+}
+
+@keyframes portal-skeleton-pulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.4;
+    }
+}

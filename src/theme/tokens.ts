@@ -92,6 +92,16 @@ export type PortalTokens = {
         readonly alpha: string;
         readonly flickerDuration: string;
     };
+    readonly avatar: {
+        readonly sizeSm: string;
+        readonly sizeMd: string;
+        readonly sizeLg: string;
+    };
+    readonly skeleton: {
+        readonly base: string;
+        readonly highlight: string;
+        readonly shimmerDuration: string;
+    };
 };
 
 export const PORTAL_TOKENS: PortalTokens = {
@@ -176,5 +186,15 @@ export const PORTAL_TOKENS: PortalTokens = {
         pitch: 'var(--portal-scanline-pitch)',
         alpha: 'var(--portal-scanline-alpha)',
         flickerDuration: 'var(--portal-scanline-flicker-duration)',
+    },
+    avatar: {
+        sizeSm: 'var(--portal-avatar-size-sm)',
+        sizeMd: 'var(--portal-avatar-size-md)',
+        sizeLg: 'var(--portal-avatar-size-lg)',
+    },
+    skeleton: {
+        base: 'var(--portal-skeleton-base)',
+        highlight: 'var(--portal-skeleton-highlight)',
+        shimmerDuration: 'var(--portal-skeleton-shimmer-duration)',
     },
 };

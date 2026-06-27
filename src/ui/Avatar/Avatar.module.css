@@ -1,0 +1,130 @@
+/*
+ * Avatar. A static, non-interactive identity marker for the generic UI layer:
+ * an image with a robust fallback chain (image -> initials -> icon -> generic
+ * glyph), an optional decorative presence dot, the shared tone scope, and two
+ * shapes (Circle decorative marker | Bevel machined HUD). Tone drives the box
+ * border, fill, glow, and the presence dot only - never the AA-critical initials
+ * text, which stays on --portal-color-text-0. Only --portal-* tokens and the
+ * derived --portal-tone-* vars are referenced; the lone literals are unitless
+ * ratios of the box token and the 50% circle marker radius. Motion is a single
+ * one-shot image fade-in gated behind prefers-reduced-motion: no-preference with
+ * an opacity:1 static fallback.
+ */
+
+.root {
+    position: relative;
+    overflow: visible;
+    inline-size: var(--portal-avatar-box);
+    block-size: var(--portal-avatar-box);
+    font-family: var(--portal-font-sans);
+    line-height: var(--portal-line-height-tight);
+}
+
+.root[data-size='sm'] {
+    --portal-avatar-box: var(--portal-avatar-size-sm);
+}
+
+.root[data-size='md'] {
+    --portal-avatar-box: var(--portal-avatar-size-md);
+}
+
+.root[data-size='lg'] {
+    --portal-avatar-box: var(--portal-avatar-size-lg);
+}
+
+.figure {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: var(--portal-border-thickness-thin) solid var(--portal-tone-border);
+    background-color: var(--portal-tone-fill);
+    box-shadow: 0 0 var(--portal-space-2) var(--portal-tone-glow);
+    color: var(--portal-color-text-0);
+}
+
+.shapeCircle {
+    /* A fully-rounded decorative circular marker, explicitly permitted. */
+    border-radius: 50%;
+}
+
+.shapeBevel {
+    composes: beveled from '../../theme/surfaces.module.css';
+
+    /* The bevel corner cut is a silent no-op without a paired non-zero radius. */
+    border-radius: var(--portal-bevel-2);
+}
+
+.image {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+
+    /* Static fallback: fully visible with no animation. */
+    opacity: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .image {
+        animation: portal-avatar-fade var(--portal-duration-ui-base)
+            var(--portal-easing-standard);
+    }
+}
+
+@keyframes portal-avatar-fade {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.initials {
+    /* A unitless ratio of the box token, not a size literal. */
+    font-size: calc(var(--portal-avatar-box) * 0.42);
+    font-weight: var(--portal-weight-label-bold);
+    letter-spacing: var(--portal-letter-spacing-wide);
+
+    /* AA-critical text stays on text-0, never on the tone seed. */
+    color: var(--portal-color-text-0);
+}
+
+.glyph {
+    display: inline-flex;
+    align-items: center;
+    font-size: calc(var(--portal-avatar-box) * 0.5);
+    color: var(--portal-color-text-1);
+}
+
+.presence {
+    position: absolute;
+    inset-block-end: 0;
+    inset-inline-end: 0;
+}
+
+.dot {
+    inline-size: calc(var(--portal-avatar-box) * 0.3);
+    block-size: calc(var(--portal-avatar-box) * 0.3);
+    border-radius: var(--portal-radius-pill);
+    background-color: var(--portal-tone-accent);
+
+    /* A separating ring so the dot reads against the avatar edge. */
+    box-shadow: 0 0 0 var(--portal-border-thickness-thin) var(--portal-color-bg-0);
+}
+
+.srOnly {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}

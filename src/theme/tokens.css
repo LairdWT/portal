@@ -119,6 +119,14 @@
      * visual tokens. */
     --portal-stat-tile-min: 12rem;
 
+    /* Avatar box sizes. Avatar is non-interactive, so it is not bound by the
+     * 3rem touch floor; the sizes align to the rem ladder. The initials font and
+     * the presence dot derive from the box via unitless ratios, so only the box
+     * size needs a token. */
+    --portal-avatar-size-sm: 2rem;
+    --portal-avatar-size-md: 3rem;
+    --portal-avatar-size-lg: 4rem;
+
     /* Scanline overlay (decorative). Honors Helicon scanlines.rs defaults: 3px
      * pitch, ~16/255 line alpha. The alpha is kept low so the overlay never
      * pulls underlying body text below the WCAG AA contrast floor; the flicker
@@ -127,6 +135,15 @@
     --portal-scanline-pitch: 3px; /* Helicon DEFAULT_PITCH_PIXELS = 3.0 */
     --portal-scanline-alpha: 0.06; /* Helicon DEFAULT_ALPHA 16/255 ~= 0.063 */
     --portal-scanline-flicker-duration: var(--portal-duration-ui-slow);
+
+    /* Skeleton loading placeholder (decorative). A neutral low-contrast fill and
+     * a brighter sheen color for the shimmer band. The shimmer / pulse cadence
+     * sits OUTSIDE the --portal-duration-* intent families on purpose: it is
+     * decorative looping motion, not an affordance timing, so the duration test
+     * does not fence it. Decorative only - never carries AA-critical text. */
+    --portal-skeleton-base: #1b1f31;
+    --portal-skeleton-highlight: #2b3149;
+    --portal-skeleton-shimmer-duration: 1.5s;
 
     /* Auxiliary font sizes */
     --portal-size-font-tiny: 0.5rem;

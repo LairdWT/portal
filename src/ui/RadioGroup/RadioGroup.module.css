@@ -1,0 +1,122 @@
+/*
+ * RadioGroup. A role="radiogroup" of real <button role="radio"> controls for
+ * the generic UI layer, presenting a controlled single-select group. Each option
+ * carries a decorative circular dot marker whose selected ring/dot/glow derive
+ * from the inherited tone ramp (never a literal color); selection is conveyed
+ * redundantly by aria-checked and the data-state attribute, not by tone color
+ * alone. The AA-critical label sits on a text token and is never tinted by tone.
+ * Layout is intrinsic, governed by data-orientation, and each option keeps the
+ * minimum touch target.
+ */
+
+.group {
+    composes: beveled from '../../theme/surfaces.module.css';
+    display: flex;
+    gap: var(--portal-space-2);
+    padding: var(--portal-space-1);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-bevel-3);
+    background-color: var(--portal-color-surface-0);
+}
+
+.group[data-orientation='vertical'] {
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.group[data-orientation='horizontal'] {
+    flex-flow: row wrap;
+    align-items: center;
+}
+
+.option {
+    composes: beveled from '../../theme/surfaces.module.css';
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: var(--portal-space-3);
+    min-block-size: var(--portal-touch-target-min);
+    min-inline-size: var(--portal-touch-target-min);
+    padding-block: var(--portal-space-2);
+    padding-inline: var(--portal-space-3);
+    border: var(--portal-border-thickness-thin) solid transparent;
+    border-radius: var(--portal-bevel-2);
+    background-color: transparent;
+    color: var(--portal-color-text-1);
+    font-family: var(--portal-font-sans);
+    font-size: var(--portal-size-text-md);
+    line-height: var(--portal-line-height-normal);
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+}
+
+.option:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: var(--portal-space-1);
+}
+
+.option:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.option:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+/*
+ * The decorative circular dot marker. Idle: a hollow ring on the border token.
+ * Selected: a tone-accent ring plus a filled inner dot via the ::after pseudo.
+ * The ring and dot are tone-driven and decorative (aria-hidden); the AA-critical
+ * label is unaffected.
+ */
+.marker {
+    position: relative;
+    flex: 0 0 auto;
+    inline-size: var(--portal-space-5);
+    block-size: var(--portal-space-5);
+    border: var(--portal-border-thickness-normal) solid var(--portal-color-border);
+    border-radius: var(--portal-radius-pill);
+    background-color: transparent;
+}
+
+.option[data-state='selected'] .marker {
+    border-color: var(--portal-tone-accent);
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow-strong);
+}
+
+.option[data-state='selected'] .marker::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    inline-size: var(--portal-space-2);
+    block-size: var(--portal-space-2);
+    border-radius: var(--portal-radius-pill);
+    background-color: var(--portal-tone-accent);
+}
+
+.label {
+    color: inherit;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .option {
+        transition:
+            transform var(--portal-duration-ui-base) var(--portal-easing-standard),
+            border-color var(--portal-duration-ui-base)
+                var(--portal-easing-standard),
+            background-color var(--portal-duration-ui-base)
+                var(--portal-easing-standard),
+            color var(--portal-duration-ui-base) var(--portal-easing-standard);
+    }
+
+    .marker {
+        transition:
+            border-color var(--portal-duration-ui-base)
+                var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ui-base) var(--portal-easing-standard);
+    }
+}

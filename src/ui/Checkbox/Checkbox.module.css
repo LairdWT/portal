@@ -1,0 +1,159 @@
+/*
+ * Checkbox. A controlled, tri-aware boolean control for the generic UI layer. A
+ * real native <input type="checkbox"> owns state, focus, and keyboard; it is
+ * visually hidden with the sr-only clip technique (kept focusable and in the tab
+ * order) and replaced by a beveled machined-HUD box that shows a checkmark when
+ * checked and a dash when indeterminate. All presentation derives from the native
+ * pseudo-classes (:checked, :indeterminate, :disabled, :focus-visible) through an
+ * adjacent-sibling selector onto the box - there is no presentation enum and no
+ * data-state attribute. Every value resolves from a --portal-* / --portal-tone-*
+ * token; this file introduces no color, size, or radius literal. tone drives the
+ * checked/indeterminate fill + border and the decorative markers only, never the
+ * AA-critical label text. Filled-vs-empty is conveyed by marker SHAPE (check /
+ * dash) and the native control semantics, so the control stays forced-colors and
+ * color-blind safe. Motion is pure CSS gated behind prefers-reduced-motion.
+ */
+
+.root {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--portal-space-3);
+    min-block-size: var(--portal-touch-target-min);
+    color: var(--portal-color-text-0);
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+}
+
+/*
+ * The visually hidden native checkbox (sr-only clip technique, matching
+ * SelectableTile's .srOnly). It STAYS focusable and in the tab order; Space
+ * toggles it natively. Its own focus ring is clipped, so the ring is re-expressed
+ * on .box below.
+ */
+.input {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+/*
+ * The styled beveled square. composes the shared bevel corner identity and pairs
+ * it with a non-zero border-radius so the bevel corner-shape is not a no-op.
+ */
+.box {
+    composes: beveled from '../../theme/surfaces.module.css';
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: var(--portal-space-5);
+    block-size: var(--portal-space-5);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-bevel-1);
+    background-color: transparent;
+    color: var(--portal-tone-on);
+    overflow: hidden;
+}
+
+/* The SVG checkmark - hidden by default, revealed when the input is checked. */
+.check {
+    inline-size: var(--portal-space-4);
+    block-size: var(--portal-space-4);
+    opacity: 0;
+    transform: scale(0.6);
+}
+
+/* The indeterminate bar - hidden by default, revealed when indeterminate. */
+.dash {
+    inline-size: var(--portal-space-3);
+    block-size: var(--portal-border-thickness-bold);
+    border-radius: var(--portal-radius-pill);
+    background-color: var(--portal-tone-on);
+    opacity: 0;
+}
+
+/* The visible label text. AA-critical, so it stays on the text token, never tone. */
+.label {
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+    font-size: var(--portal-size-text-md);
+    line-height: var(--portal-line-height-normal);
+}
+
+/* Checked OR indeterminate: the box reads as active (tone fill + border + glow). */
+.input:checked + .box,
+.input:indeterminate + .box {
+    border-color: var(--portal-tone-accent);
+    background-color: var(--portal-tone-accent);
+    box-shadow: 0 0 var(--portal-space-2) var(--portal-tone-glow-strong);
+}
+
+/* Checked shows the checkmark. */
+.input:checked + .box .check {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Indeterminate WINS over checked for the markers: dash on, check off. Declared
+ * AFTER the checked rule so source order resolves the override. */
+.input:indeterminate + .box .check {
+    opacity: 0;
+    transform: scale(0.6);
+}
+
+.input:indeterminate + .box .dash {
+    opacity: 1;
+}
+
+/* Focus ring re-expressed on the box (the native input ring is clipped). */
+.input:focus-visible + .box {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: var(--portal-space-1);
+}
+
+/* Disabled affordance. */
+.input:disabled + .box {
+    opacity: 0.5;
+}
+
+.input:disabled ~ .label {
+    opacity: 0.5;
+}
+
+.root:has(.input:disabled) {
+    cursor: not-allowed;
+}
+
+/* Transform-only press feedback - reduced-motion safe, so OUTSIDE the query. */
+.input:active:not(:disabled) + .box {
+    transform: scale(0.97);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .box {
+        transition:
+            background-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard),
+            border-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ui-fast) var(--portal-easing-standard);
+    }
+
+    .check {
+        transition:
+            opacity var(--portal-duration-ui-fast) var(--portal-easing-emphasized),
+            transform var(--portal-duration-ui-fast) var(--portal-easing-emphasized);
+    }
+
+    .dash {
+        transition: opacity var(--portal-duration-ui-fast)
+            var(--portal-easing-standard);
+    }
+}

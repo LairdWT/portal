@@ -190,6 +190,14 @@ export {
     EAccordionItemState,
     EAccordionMode,
 } from './ui/Accordion/Accordion.types';
+export { Avatar } from './ui/Avatar/Avatar';
+export {
+    type AvatarProps,
+    type AvatarStatus,
+    EAvatarContent,
+    EAvatarShape,
+    EAvatarSize,
+} from './ui/Avatar/Avatar.types';
 export { Badge } from './ui/Badge/Badge';
 export { type BadgeProps, EBadgeKind } from './ui/Badge/Badge.types';
 export { Banner } from './ui/Banner/Banner';
@@ -216,6 +224,11 @@ export { LegendRow } from './ui/Chart/LegendRow';
 export { RankedBars } from './ui/Chart/RankedBars';
 export { RatioBar } from './ui/Chart/RatioBar';
 export { StackedBar } from './ui/Chart/StackedBar';
+export { Checkbox } from './ui/Checkbox/Checkbox';
+export {
+    type CheckboxNaming,
+    type CheckboxProps,
+} from './ui/Checkbox/Checkbox.types';
 export { Chip } from './ui/Chip/Chip';
 export { type ChipProps, EChipState } from './ui/Chip/Chip.types';
 export { ColorPicker } from './ui/ColorPicker/ColorPicker';
@@ -351,6 +364,13 @@ export {
     type IndeterminateProgressProps,
     type ProgressProps,
 } from './ui/Progress/Progress.types';
+export { RadioGroup } from './ui/RadioGroup/RadioGroup';
+export {
+    ERadioOrientation,
+    ERadioState,
+    type RadioGroupProps,
+    type UiRadioItem,
+} from './ui/RadioGroup/RadioGroup.types';
 export { Rating } from './ui/Rating/Rating';
 export {
     ERatingMarkState,
@@ -399,6 +419,12 @@ export {
     ESelectionState,
     type SelectableTileProps,
 } from './ui/SelectableTile/SelectableTile.types';
+export { Skeleton } from './ui/Skeleton/Skeleton';
+export {
+    ESkeletonAnimation,
+    ESkeletonVariant,
+    type SkeletonProps,
+} from './ui/Skeleton/Skeleton.types';
 export { SplitPane } from './ui/SplitPane/SplitPane';
 export {
     ESplitOrientation,
