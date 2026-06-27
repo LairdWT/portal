@@ -4,6 +4,45 @@ All notable changes to this project are documented in this file. The format is
 based on Keep a Changelog, and the project follows Semantic Versioning with the
 0.x caveat that, before 1.0, a minor version may carry a breaking change.
 
+## [0.11.0] - 2026-06-27
+
+Completes Helicon component-type parity for the P3 (shells / advanced /
+aesthetic) tier - eight new component types plus two shared hooks, all in the
+machined-HUD bevel language.
+
+### Added
+
+- `usePointerDrag` - a dependency-free pointer drag/resize primitive (single
+  active pointer with capture, a primary-button guard, an optional axis lock, a
+  cumulative-delta callback model, and full cleanup on drag end and on unmount
+  mid-drag). `useElementSize` - a ResizeObserver content-box measurement hook.
+- `SplitPane` - a controlled resizable two-pane split with a role=separator
+  divider (integer-percent aria-valuenow/min/max, full keyboard resize, a 3rem
+  touch hit-zone).
+- `Drawer` - an edge-docked panel with an `EDrawerMode` union (overlay modal
+  sheet with focus-trap + scroll-lock, or in-flow docked) over `EDrawerEdge`
+  (logical, RTL-aware), with a keyboard-resizable grip.
+- `Window` - a draggable, optionally resizable floating frame (Floating + Modal)
+  with a title-bar drag handle, viewport clamping, z-order/focus, and per-edge
+  keyboard resize.
+- `CommandPalette` - a fuzzy command launcher: a modal overlay over a SearchBox
+  combobox and a virtualized command listbox (aria-activedescendant), with an
+  exported `fuzzyMatch` primitive.
+- `TitleBar` - a beveled HUD masthead with slot-forwarded leading/title/tagline/
+  trailing/breadcrumb content over an `ETitleBarLandmark` union.
+- `StatusFooter` - a beveled HUD bottom status strip with status tones and an
+  optional live region.
+- `Marquee` - a CSS-transform scrolling ticker with a seamless loop,
+  pause-on-hover/focus, and a static reduced-motion fallback.
+- `Scanlines` - a decorative CSS CRT overlay (pointer-events none, aria-hidden,
+  reduced-motion gated) driven by new low-alpha `--portal-scanline-*` tokens.
+
+### Changed
+
+- Internal only: the standards-audit lint hardening from 0.10.1 now also gates
+  these new components; the bevel/HUD foundation gained the scanline tokens
+  (mirrored into `PORTAL_TOKENS`).
+
 ## [0.10.1] - 2026-06-27
 
 Internal tooling only; no public API, component, or runtime behavior change.
