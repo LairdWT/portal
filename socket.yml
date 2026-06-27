@@ -19,9 +19,9 @@
 version: 2
 
 githubApp:
-  enabled: true
-  # Keep PR alerts ON so any NEW alert - including the same classes triaged
-  # above - on a future runtime/production dependency is surfaced for review.
-  pullRequestAlertsEnabled: true
-  dependencyOverviewEnabled: true
-  projectReportsEnabled: true
+    enabled: true
+    # Keep PR alerts ON so any NEW alert - including the same classes triaged
+    # above - on a future runtime/production dependency is surfaced for review.
+    pullRequestAlertsEnabled: true
+    dependencyOverviewEnabled: true
+    projectReportsEnabled: true
