@@ -9,6 +9,7 @@
  */
 
 .root {
+    composes: beveled from '../../theme/surfaces.module.css';
     display: inline-flex;
     align-items: center;
     gap: var(--portal-space-2);
@@ -16,7 +17,7 @@
     padding-block: var(--portal-space-1);
     padding-inline: var(--portal-space-3);
     border: var(--portal-border-thickness-thin) solid var(--portal-tone-border);
-    border-radius: var(--portal-radius-pill);
+    border-radius: var(--portal-bevel-1);
     background-color: var(--portal-tone-fill);
     color: var(--portal-color-text-0);
     font-family: var(--portal-font-sans);
@@ -50,6 +51,7 @@
 }
 
 .remove {
+    composes: beveled from '../../theme/surfaces.module.css';
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -57,7 +59,7 @@
     min-block-size: var(--portal-touch-target-min);
     padding: var(--portal-space-1);
     border: var(--portal-border-thickness-thin) solid transparent;
-    border-radius: var(--portal-radius-pill);
+    border-radius: var(--portal-bevel-1);
     background-color: transparent;
     color: var(--portal-color-text-1);
     cursor: pointer;

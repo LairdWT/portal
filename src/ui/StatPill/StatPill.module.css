@@ -6,13 +6,14 @@
  * columns stay aligned. The leading accent bar is decorative and aria-hidden.
  */
 .pill {
+    composes: beveled from '../../theme/surfaces.module.css';
     display: inline-flex;
     align-items: center;
     gap: var(--portal-space-2);
     padding-block: var(--portal-space-1);
     padding-inline: var(--portal-space-3);
     border: var(--portal-border-thickness-thin) solid var(--portal-tone-border);
-    border-radius: var(--portal-radius-pill);
+    border-radius: var(--portal-bevel-1);
     background-color: var(--portal-tone-fill);
     box-shadow: 0 0 var(--portal-space-2) var(--portal-tone-glow);
     color: var(--portal-color-text-0);

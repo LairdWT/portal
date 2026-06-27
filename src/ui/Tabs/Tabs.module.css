@@ -10,16 +10,18 @@
  */
 
 .tablist {
+    composes: beveled from '../../theme/surfaces.module.css';
     display: inline-flex;
     align-items: stretch;
     gap: var(--portal-space-1);
     padding: var(--portal-space-1);
     border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
-    border-radius: var(--portal-radius-lg);
+    border-radius: var(--portal-bevel-3);
     background-color: var(--portal-color-surface-0);
 }
 
 .tab {
+    composes: beveled from '../../theme/surfaces.module.css';
     position: relative;
     display: inline-flex;
     align-items: center;
@@ -29,8 +31,7 @@
     padding-block: var(--portal-space-2);
     padding-inline: var(--portal-space-4);
     border: var(--portal-border-thickness-thin) solid transparent;
-    border-radius: var(--portal-radius-md);
-    corner-shape: squircle;
+    border-radius: var(--portal-bevel-2);
     background-color: transparent;
     color: var(--portal-color-text-1);
     font-family: var(--portal-font-sans);
@@ -65,7 +66,7 @@
 }
 
 .tab:active:not(:disabled) {
-    transform: scale(0.95);
+    transform: scale(0.97);
 }
 
 .tab[data-state='selected'] {

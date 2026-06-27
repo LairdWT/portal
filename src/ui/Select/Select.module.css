@@ -32,6 +32,7 @@
 }
 
 .trigger {
+    composes: beveled from '../../theme/surfaces.module.css';
     display: inline-flex;
     flex: 1 1 auto;
     align-items: center;
@@ -42,7 +43,7 @@
     padding-block: var(--portal-space-2);
     padding-inline: var(--portal-space-3);
     border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
-    border-radius: var(--portal-radius-lg);
+    border-radius: var(--portal-bevel-2);
     background-color: var(--portal-color-surface-0);
     color: var(--portal-color-text-0);
     font-family: inherit;
@@ -112,6 +113,7 @@
 }
 
 .clear {
+    composes: beveled from '../../theme/surfaces.module.css';
     display: inline-flex;
     flex: 0 0 auto;
     align-items: center;
@@ -122,7 +124,7 @@
     min-block-size: var(--portal-touch-target-min);
     padding: 0;
     border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
-    border-radius: var(--portal-radius-md);
+    border-radius: var(--portal-bevel-1);
     background-color: transparent;
     color: var(--portal-color-text-1);
     cursor: pointer;
@@ -169,12 +171,13 @@
 }
 
 .option {
+    composes: beveled from '../../theme/surfaces.module.css';
     display: flex;
     align-items: center;
     min-block-size: var(--portal-touch-target-min);
     padding-block: var(--portal-space-2);
     padding-inline: var(--portal-space-3);
-    border-radius: var(--portal-radius-md);
+    border-radius: var(--portal-bevel-1);
     color: var(--portal-color-text-0);
     font-size: var(--portal-size-text-md);
     line-height: var(--portal-line-height-normal);

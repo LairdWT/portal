@@ -10,6 +10,7 @@
  */
 
 .banner {
+    composes: beveled from '../../theme/surfaces.module.css';
     display: flex;
     align-items: center;
     gap: var(--portal-space-3);
@@ -18,7 +19,7 @@
     padding-inline: var(--portal-space-4);
     border: var(--portal-border-thickness-thin) solid var(--portal-tone-border);
     border-inline-start-width: var(--portal-border-thickness-bold);
-    border-radius: var(--portal-radius-md);
+    border-radius: var(--portal-bevel-2);
     background-color: var(--portal-tone-fill);
     box-shadow: 0 0 var(--portal-space-2) var(--portal-tone-glow);
     color: var(--portal-color-text-0);
@@ -54,6 +55,7 @@
 }
 
 .dismiss {
+    composes: beveled from '../../theme/surfaces.module.css';
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -62,7 +64,7 @@
     min-block-size: var(--portal-touch-target-min);
     padding: var(--portal-space-2);
     border: var(--portal-border-thickness-thin) solid transparent;
-    border-radius: var(--portal-radius-md);
+    border-radius: var(--portal-bevel-1);
     background-color: transparent;
     color: var(--portal-color-text-1);
     cursor: pointer;
@@ -90,7 +92,7 @@
 }
 
 .dismiss:active:not(:disabled) {
-    transform: scale(0.95);
+    transform: scale(0.97);
 }
 
 /*

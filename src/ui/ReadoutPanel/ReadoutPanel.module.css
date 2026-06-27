@@ -11,6 +11,7 @@
  */
 
 .panel {
+    composes: beveled from '../../theme/surfaces.module.css';
     display: flex;
     flex-direction: column;
     gap: var(--portal-space-3);
@@ -18,7 +19,7 @@
     padding-inline: max(var(--portal-space-4), env(safe-area-inset-left))
         max(var(--portal-space-4), env(safe-area-inset-right));
     border: var(--portal-border-thickness-thin) solid var(--portal-tone-border);
-    border-radius: var(--portal-radius-lg);
+    border-radius: var(--portal-bevel-3);
     background-color: var(--portal-tone-fill);
     box-shadow:
         0 0 var(--portal-space-4) var(--portal-tone-glow),
@@ -44,6 +45,7 @@
 }
 
 .readout {
+    composes: beveled from '../../theme/surfaces.module.css';
     display: flex;
     align-items: baseline;
     justify-content: space-between;
@@ -52,7 +54,7 @@
     padding-inline: var(--portal-space-2);
     border-inline-start: var(--portal-border-thickness-thin) solid
         var(--portal-tone-accent);
-    border-radius: var(--portal-radius-sm);
+    border-radius: var(--portal-bevel-1);
 }
 
 @media (prefers-reduced-motion: no-preference) {

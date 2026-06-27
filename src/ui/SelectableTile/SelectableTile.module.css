@@ -9,6 +9,7 @@
  */
 
 .tile {
+    composes: beveled from '../../theme/surfaces.module.css';
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -16,8 +17,7 @@
     min-block-size: var(--portal-touch-target-min);
     padding: var(--portal-space-3) var(--portal-space-4);
     border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
-    border-radius: var(--portal-radius-lg);
-    corner-shape: squircle;
+    border-radius: var(--portal-bevel-2);
     background-color: var(--portal-color-surface-0);
     color: var(--portal-color-text-0);
     font-family: var(--portal-font-sans);
@@ -51,7 +51,7 @@
 }
 
 .tile:active:not(:disabled) {
-    transform: scale(0.95);
+    transform: scale(0.97);
 }
 
 .tile[data-state='selected'] {

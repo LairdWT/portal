@@ -24,12 +24,13 @@
 }
 
 .input {
+    composes: beveled from '../../theme/surfaces.module.css';
     box-sizing: border-box;
     min-block-size: var(--portal-touch-target-min);
     padding-inline: var(--portal-space-3);
     padding-block: var(--portal-space-2);
     border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
-    border-radius: var(--portal-radius-lg);
+    border-radius: var(--portal-bevel-2);
     background-color: var(--portal-color-surface-0);
     color: var(--portal-color-text-0);
     font-family: inherit;

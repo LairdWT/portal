@@ -19,13 +19,14 @@
 }
 
 .track {
+    composes: beveled from '../../theme/surfaces.module.css';
     position: relative;
     display: block;
     inline-size: 100%;
     block-size: var(--portal-space-2);
     overflow: hidden;
     border: var(--portal-border-thickness-thin) solid var(--portal-tone-border);
-    border-radius: var(--portal-radius-pill);
+    border-radius: var(--portal-bevel-1);
     background-color: var(--portal-color-surface-0);
 }
 

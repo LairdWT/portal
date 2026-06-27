@@ -28,13 +28,14 @@
 }
 
 .marker {
+    composes: beveled from '../../theme/surfaces.module.css';
     display: inline-flex;
     align-items: center;
     justify-content: center;
     inline-size: var(--portal-space-5);
     block-size: var(--portal-space-5);
     border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
-    border-radius: var(--portal-radius-pill);
+    border-radius: var(--portal-bevel-1);
     background-color: var(--portal-color-surface-0);
 }
 

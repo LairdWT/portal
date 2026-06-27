@@ -17,6 +17,7 @@
 }
 
 .panel {
+    composes: beveled from '../../theme/surfaces.module.css';
     position: fixed;
     z-index: var(--portal-z-overlay);
     box-sizing: border-box;
@@ -25,7 +26,7 @@
     padding: var(--portal-space-4);
     overflow: auto;
     border: var(--portal-border-thickness-thin) solid var(--portal-tone-border);
-    border-radius: var(--portal-radius-md);
+    border-radius: var(--portal-bevel-2);
     background-color: var(--portal-color-surface-0);
     box-shadow:
         0 0 var(--portal-space-4) var(--portal-tone-glow),

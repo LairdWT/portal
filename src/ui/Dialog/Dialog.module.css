@@ -35,6 +35,7 @@
 }
 
 .panel {
+    composes: beveled from '../../theme/surfaces.module.css';
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -43,7 +44,7 @@
     padding: var(--portal-space-5);
     overflow: auto;
     border: var(--portal-border-thickness-thin) solid var(--portal-tone-border);
-    border-radius: var(--portal-radius-lg);
+    border-radius: var(--portal-bevel-3);
     background-color: var(--portal-color-surface-0);
     box-shadow:
         0 0 var(--portal-space-4) var(--portal-tone-glow),
@@ -169,7 +170,7 @@
     min-block-size: var(--portal-touch-target-min);
     padding-block: var(--portal-space-2);
     padding-inline: var(--portal-space-5);
-    border-radius: var(--portal-radius-md);
+    border-radius: var(--portal-bevel-2);
     font-family: inherit;
     font-size: var(--portal-size-text-md);
     font-weight: 600;
@@ -178,12 +179,14 @@
 }
 
 .actionPrimary {
+    composes: beveled from '../../theme/surfaces.module.css';
     border: var(--portal-border-thickness-thin) solid var(--portal-tone-accent);
     background-color: var(--portal-tone-fill);
     color: var(--portal-color-text-0);
 }
 
 .actionSecondary {
+    composes: beveled from '../../theme/surfaces.module.css';
     border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
     background-color: transparent;
     color: var(--portal-color-text-1);

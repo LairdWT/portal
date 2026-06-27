@@ -25,6 +25,7 @@
 }
 
 .field {
+    composes: beveled from '../../theme/surfaces.module.css';
     display: flex;
     align-items: center;
     gap: var(--portal-space-2);
@@ -32,7 +33,7 @@
     min-block-size: var(--portal-touch-target-min);
     padding-inline: var(--portal-space-3);
     border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
-    border-radius: var(--portal-radius-lg);
+    border-radius: var(--portal-bevel-2);
     background-color: var(--portal-color-surface-0);
 }
 
@@ -118,6 +119,7 @@
 /* The clear control is a real pointer target, so it holds the minimum touch size
  * even though its glyph is small. */
 .clear {
+    composes: beveled from '../../theme/surfaces.module.css';
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -128,7 +130,7 @@
     min-block-size: var(--portal-touch-target-min);
     padding: 0;
     border: 0;
-    border-radius: var(--portal-radius-md);
+    border-radius: var(--portal-bevel-1);
     background-color: transparent;
     color: var(--portal-color-text-1);
     font-family: inherit;
