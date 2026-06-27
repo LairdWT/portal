@@ -1,0 +1,27 @@
+# socket.yml - Socket.dev supply-chain scanning configuration
+# Package: @laird-wt/portal  (publishes only ./dist; runtime dependencies = {})
+#
+# POSTURE: This file intentionally does NOT disable any Socket alert class.
+# The Socket `issueRules` map is global-only and deprecated; disabling an
+# alert class here would also hide that class on a future PRODUCTION
+# dependency, which is unsafe. All alert classes therefore remain ENABLED.
+#
+# The six dependency-tab alerts triaged for the published 0.11.0/0.12.0
+# (obfuscatedFile + gptSecurity on three examples/jsm, networkAccess +
+# usesEval on @mediapipe/tasks-vision, shellAccess on cross-spawn,
+# trivialPackage on is-promise) are ALL dev-only or optional-peer transitive,
+# are not imported by src/, and are not bundled into any dist/ artifact.
+# Each is dispositioned with reproducible evidence in:
+#     docs/security/supply-chain-triage.md
+# Accepted instances are acknowledged per-instance in the Socket dashboard,
+# not blanket-suppressed in this file.
+
+version: 2
+
+githubApp:
+  enabled: true
+  # Keep PR alerts ON so any NEW alert - including the same classes triaged
+  # above - on a future runtime/production dependency is surfaced for review.
+  pullRequestAlertsEnabled: true
+  dependencyOverviewEnabled: true
+  projectReportsEnabled: true
