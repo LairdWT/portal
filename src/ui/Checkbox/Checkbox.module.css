@@ -18,7 +18,17 @@
     display: inline-flex;
     align-items: center;
     gap: var(--portal-space-3);
+
+    /*
+     * Both axes hold the >= 3rem touch floor. The block floor covers every arm;
+     * the inline floor matters for the labelledBy arm, where no visible label is
+     * rendered and the only laid-out child is the ~1.5rem .box, which would
+     * otherwise collapse the clickable label below the touch target on the inline
+     * axis. In the visible-label arm the row already exceeds the floor, so this is
+     * inert there.
+     */
     min-block-size: var(--portal-touch-target-min);
+    min-inline-size: var(--portal-touch-target-min);
     color: var(--portal-color-text-0);
     cursor: pointer;
     touch-action: manipulation;

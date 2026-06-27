@@ -34,7 +34,11 @@ describe('Skeleton', (): void => {
         render(<Skeleton label="Loading profile" />);
 
         const status: HTMLElement = screen.getByRole('status');
-        expect(status).toHaveAttribute('aria-busy', 'true');
+        // No aria-busy: a permanent aria-busy="true" would defer the live-region
+        // announcement indefinitely (it never flips to false, since the Skeleton
+        // unmounts on load), suppressing the polite announcement the label opts
+        // into. The bare role="status" is the house polite live-region pattern.
+        expect(status).not.toHaveAttribute('aria-busy');
         expect(status).not.toHaveAttribute('aria-hidden');
         expect(screen.getByText('Loading profile')).toBeInTheDocument();
     });

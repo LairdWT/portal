@@ -16,12 +16,17 @@ import {
 // Helicon parity: Helicon ships an immediate-mode loading rectangle with no
 // semantic layer; this React primitive adds the variant set, the multi-line
 // Text composition, the reduced-motion-gated shimmer/pulse, and the opt-in
-// role="status" busy announcement.
+// role="status" polite announcement.
 //
 // a11y: decorative by default (aria-hidden removes the subtree from the a11y
-// tree); passing `label` opts into a single polite live region
-// (role="status" + aria-busy) whose only exposed content is a visually-hidden
-// copy of `label`. The painted nodes are ALWAYS aria-hidden. Skeleton is
+// tree); passing `label` opts into a single polite live region (role="status",
+// the implicit aria-live="polite" loading announcement) whose only exposed
+// content is a visually-hidden copy of `label`. No aria-busy is set: a
+// permanent aria-busy="true" would defer assistive-tech processing of the
+// region indefinitely (it never flips to false - the Skeleton unmounts when
+// content loads), suppressing the very announcement the label opts into. The
+// bare role="status" is the house live-region pattern (see StatusFooter /
+// Badge). The painted nodes are ALWAYS aria-hidden. Skeleton is
 // non-interactive, so the >= 3rem hit-target rule does not apply (no
 // interactive target). Both animations are pure CSS gated behind
 // prefers-reduced-motion; the static base fill is the reduced-motion fallback,
@@ -169,7 +174,8 @@ export function Skeleton({
     );
     // Decorative by default: aria-hidden removes the whole subtree from the a11y
     // tree. Negative-first: the no-label decorative path is the early return;
-    // the announced (role=status, aria-busy) path is the unindented work below.
+    // the announced (role=status polite live region) path is the unindented
+    // work below.
     if (label === undefined) {
         return (
             <div className={styles.root} aria-hidden="true">
@@ -178,7 +184,7 @@ export function Skeleton({
         );
     }
     return (
-        <div className={styles.root} role="status" aria-busy="true">
+        <div className={styles.root} role="status">
             {visual}
             <span className={styles.visuallyHidden}>{label}</span>
         </div>

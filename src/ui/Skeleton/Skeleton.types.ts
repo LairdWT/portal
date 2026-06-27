@@ -6,10 +6,13 @@
 // a11y model (decide-and-document): a skeleton is DECORATIVE by default, so the
 // visual nodes are aria-hidden and the whole element is removed from the
 // accessibility tree. Passing `label` opts into an announced loading state: the
-// root becomes a single polite live region (role="status", aria-busy="true")
-// and a visually-hidden copy of `label` is the only thing a screen reader
-// reads, so the decorative bars never reach assistive tech. Default =
-// aria-hidden decorative; opt-in = role=status busy. This is the recommended
+// root becomes a single polite live region (role="status", the implicit
+// aria-live="polite") and a visually-hidden copy of `label` is the only thing a
+// screen reader reads, so the decorative bars never reach assistive tech. No
+// aria-busy is set - a permanent aria-busy="true" never flips to false (the
+// Skeleton unmounts on load) and would defer the announcement indefinitely.
+// Default = aria-hidden decorative; opt-in = role=status polite. This is the
+// recommended
 // default because most skeletons sit beside a heading or region that already
 // owns the loading semantics.
 //
@@ -69,7 +72,7 @@ export type ESkeletonAnimation =
 //     for Block/Circle.
 //   - `animation` selects the motion mode (default Shimmer).
 //   - `label`, when set, opts into the announced loading state: the root
-//     becomes role="status" aria-busy="true" with a visually-hidden copy of
+//     becomes a role="status" polite live region with a visually-hidden copy of
 //     `label`. When omitted, the root is aria-hidden decorative.
 export type SkeletonProps = Readonly<{
     variant?: ESkeletonVariant;
