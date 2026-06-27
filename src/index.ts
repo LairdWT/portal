@@ -172,6 +172,16 @@ export {
 } from './state/state';
 export { PORTAL_TOKENS, type PortalTokens } from './theme/tokens';
 export { type AccessibleName } from './ui/accessibleName';
+export { Accordion } from './ui/Accordion/Accordion';
+export {
+    type AccordionHeadingLevel,
+    type AccordionItem,
+    type AccordionMultipleProps,
+    type AccordionProps,
+    type AccordionSingleProps,
+    EAccordionItemState,
+    EAccordionMode,
+} from './ui/Accordion/Accordion.types';
 export { Badge } from './ui/Badge/Badge';
 export { type BadgeProps, EBadgeKind } from './ui/Badge/Badge.types';
 export { Banner } from './ui/Banner/Banner';
@@ -250,6 +260,15 @@ export {
     type KeyValuePair,
     type KeyValueProps,
 } from './ui/KeyValue/KeyValue.types';
+export { List } from './ui/List/List';
+export {
+    EListRowState,
+    EListSelectionMode,
+    type ListProps,
+    type ListRowRenderState,
+} from './ui/List/List.types';
+export { SearchableList } from './ui/List/SearchableList';
+export { type SearchableListProps } from './ui/List/SearchableList.types';
 export { ContextMenu } from './ui/Menu/ContextMenu';
 export { Menu } from './ui/Menu/Menu';
 export {

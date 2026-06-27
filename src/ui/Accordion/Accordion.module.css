@@ -1,0 +1,145 @@
+/*
+ * Accordion - a stacked machined-HUD disclosure list. Each header is a beveled
+ * HUD press bar wearing the shared static metal edge from surfaces.module.css
+ * (the animated metalTrim sheen is intentionally NOT applied per row: an
+ * accordion can stack many headers and N concurrent infinite sheens is the perf
+ * cost the family avoids - the expanded header instead earns the tone glow, the
+ * DataTable selection precedent). The body is a recessed beveled surface revealed
+ * by a CSS grid-template-rows 0fr -> 1fr transition (no JS animation), gated so
+ * reduced-motion users get an instant snap. Every value resolves from a
+ * --portal-* / derived --portal-tone-* token; no literal colors, no fixed-pixel
+ * layout. Logical properties throughout; the 3rem touch floor is enforced on the
+ * header. Tone drives the marker, the expanded border, and the glow only - never
+ * AA-critical text, which sits on --portal-color-text-0.
+ */
+
+.root {
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-1);
+}
+
+/* The disabled affordance lives on the header buttons (.header:disabled), which
+ * axe exempts from contrast. A root-level opacity is deliberately NOT used: it
+ * would dim an expanded panel's readable body text below the 4.5:1 AA floor (the
+ * panel content is not a disabled control, so axe checks it). A disabled
+ * accordion cannot be toggled, but any open content stays readable. */
+
+.section {
+    display: block;
+}
+
+/* Layout-neutral wrapper around the header button: zero the default heading
+ * margins so the press bar controls its own spacing. */
+.heading {
+    margin: 0;
+}
+
+/* The beveled HUD press bar. The bevel corner shape comes from the composed
+ * .beveled utility and the static brushed-metal ring from .metalEdge; this rule
+ * owns only layout, typography, and the bevel-radius fallback. */
+.header {
+    composes: beveled from '../../theme/surfaces.module.css';
+    composes: metalEdge from '../../theme/surfaces.module.css';
+    display: inline-flex;
+    align-items: center;
+    gap: var(--portal-space-2);
+    inline-size: 100%;
+    min-block-size: var(--portal-touch-target-min);
+    padding-block: var(--portal-space-2);
+    padding-inline: var(--portal-space-4);
+    border-radius: var(--portal-bevel-2);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+    font-size: var(--portal-size-text-md);
+    font-weight: var(--portal-weight-label-bold);
+    line-height: var(--portal-line-height-tight);
+    letter-spacing: var(--portal-letter-spacing-wide);
+    text-align: start;
+    cursor: pointer;
+    user-select: none;
+    touch-action: manipulation;
+}
+
+/* Accent mono disclosure marker echoing Helicon's [-]/[+]. aria-hidden in the
+ * TSX, so its tone color carries no accessible-name or contrast obligation. */
+.marker {
+    flex: none;
+    font-family: var(--portal-font-mono);
+    font-weight: var(--portal-weight-label-strong);
+    color: var(--portal-tone-accent);
+}
+
+.title {
+    color: inherit;
+    line-height: var(--portal-line-height-tight);
+}
+
+/* The grid-rows reveal container. The track animates 0fr -> 1fr; the clip child
+ * collapses to zero so the recessed inner surface is hidden when closed. */
+.panel {
+    display: grid;
+    grid-template-rows: 0fr;
+}
+
+/* Clip layer: carries the overflow + zero min size that let the grid track drive
+ * the height. It holds no padding or border, so a collapsed panel is truly 0. */
+.panelClip {
+    overflow: hidden;
+    min-block-size: 0;
+}
+
+/* Recessed beveled HUD body surface. The bevel corner shape is composed; the
+ * inset shadow and darker fill read as a milled recess under the press bar. */
+.panelInner {
+    composes: beveled from '../../theme/surfaces.module.css';
+    padding-block: var(--portal-space-3);
+    padding-inline: var(--portal-space-4);
+    border-radius: var(--portal-bevel-2);
+    background-color: var(--portal-color-surface-1);
+    box-shadow: inset 0 0 var(--portal-space-3) var(--portal-hud-glow);
+    color: var(--portal-color-text-1);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .header {
+        transition:
+            transform var(--portal-duration-ui-base) var(--portal-easing-standard),
+            border-color var(--portal-duration-ui-base)
+                var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ui-base) var(--portal-easing-standard),
+            color var(--portal-duration-ui-base) var(--portal-easing-standard);
+    }
+
+    .panel {
+        transition: grid-template-rows var(--portal-duration-ui-base)
+            var(--portal-easing-standard);
+    }
+}
+
+/* Expanded emphasis: the tone glow and a tone-accent ring drawn as a box-shadow
+ * so the composed metal edge is preserved. State is also on aria-expanded and the
+ * marker, never glow alone. */
+.header[data-state='expanded'] {
+    box-shadow:
+        0 0 0 var(--portal-border-thickness-normal) var(--portal-tone-accent),
+        0 0 var(--portal-space-3) var(--portal-tone-glow-strong);
+}
+
+.panel[data-state='expanded'] {
+    grid-template-rows: 1fr;
+}
+
+.header:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: var(--portal-space-1);
+}
+
+.header:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.header:active:not(:disabled) {
+    transform: scale(0.97);
+}

@@ -1,0 +1,52 @@
+/*
+ * SearchableList - the master-detail layout for the List family. A CSS grid lays
+ * the filter+list column beside the optional detail column; a container query
+ * collapses to a single column on narrow widths (no fixed-px breakpoint). The
+ * detail panel is a beveled HUD surface in the same machined family as the inner
+ * List frame, never a rounded card. Only --portal-* / derived --portal-tone-*
+ * values are used; no literal colors and no authored fixed-px layout. Logical
+ * properties throughout.
+ */
+
+.root {
+    container-type: inline-size;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--portal-space-4);
+    inline-size: 100%;
+}
+
+.root[data-detail='true'] {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+}
+
+/* No root-level opacity dim on disabled: the SearchBox and the inner List each
+ * dim themselves through their own disabled state, and dimming the whole root
+ * would also dim the (non-interactive, contrast-critical) detail panel text. */
+
+/* The filter + list stack. min-inline-size 0 lets the list track shrink within
+ * the grid rather than overflow. */
+.listColumn {
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-3);
+    min-inline-size: 0;
+}
+
+/* The detail panel: a beveled static-metal HUD surface, distinct from the inner
+ * List frame so the master and detail read as separate console panels. */
+.detail {
+    composes: beveled metalEdge from '../../theme/surfaces.module.css';
+    min-inline-size: 0;
+    padding: var(--portal-space-4);
+    border-radius: var(--portal-bevel-3);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+}
+
+/* Narrow container: collapse the master-detail grid to a single stacked column. */
+@container (max-inline-size: 32rem) {
+    .root[data-detail='true'] {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

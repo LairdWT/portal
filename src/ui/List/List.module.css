@@ -1,0 +1,110 @@
+/*
+ * List / VirtualList - a machined-HUD console list. The root is the beveled HUD
+ * frame and the scroll viewport; the body is a single spacer of the full virtual
+ * height inside which only the windowed rows mount, each absolutely positioned by
+ * a JS-computed inline transform derived from the rowHeight prop (the one px
+ * value; no fixed-pixel LAYOUT sizing is authored here). Selection reads as an
+ * angular toned inline-start rail plus a tone scrim, never a rounded pill or
+ * color alone (aria-selected carries the state too); the active cursor is a
+ * separate tone-edge ring so cursor and selection stay separable. Only --portal-*
+ * / derived --portal-tone-* values are used; no literal colors. Logical
+ * properties throughout; every transition is reduced-motion gated.
+ */
+
+.root {
+    composes: beveled from '../../theme/surfaces.module.css';
+    position: relative;
+    overflow: auto;
+    inline-size: 100%;
+    max-block-size: var(--portal-list-max, clamp(12rem, 60dvh, 40rem));
+    border: var(--portal-hud-edge-width) solid var(--portal-tone-border);
+    border-radius: var(--portal-bevel-3);
+    background-color: var(--portal-color-surface-0);
+    box-shadow: inset 0 0 var(--portal-space-4) var(--portal-tone-glow);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+}
+
+.root:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: calc(-1 * var(--portal-border-thickness-normal));
+}
+
+.root[data-enabled='disabled'] {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* The empty-state frame: no virtualization, just the centered placeholder inside
+ * the same beveled HUD edge. */
+.empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--portal-space-5);
+}
+
+/* The full-height spacer that gives the viewport its scrollbar. block-size is set
+ * inline to the total virtual height; only the windowed rows live inside. */
+.sizer {
+    position: relative;
+    inline-size: 100%;
+}
+
+/* Each windowed row is absolutely positioned and translated into place by an
+ * inline transform; block-size is set inline from rowHeight. min-block-size keeps
+ * a row at or above the 3rem touch floor. */
+.row {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline: 0;
+    display: flex;
+    align-items: center;
+    min-block-size: var(--portal-touch-target-min);
+    padding-inline: var(--portal-space-3);
+    border-block-end: var(--portal-border-thickness-thin) solid
+        var(--portal-color-border);
+    font-size: var(--portal-size-text-md);
+    line-height: var(--portal-line-height-normal);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .row {
+        transition:
+            background-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ui-fast) var(--portal-easing-standard);
+    }
+}
+
+/* Selected row: an angular toned scrim plus a SHARP (non-pill) inline-start
+ * accent rail drawn with ::before. Redundant with aria-selected; never a rounded
+ * pill or color alone. Text stays on --portal-color-text-0 for AA contrast. */
+.row[data-state='selected'] {
+    background: linear-gradient(
+        160deg,
+        var(--portal-tone-fill) 0%,
+        var(--portal-color-surface-0) 100%
+    );
+    box-shadow: inset 0 0 var(--portal-space-3) var(--portal-tone-glow);
+}
+
+/* Active cursor: a tone-edge inset ring distinct from the selected scrim, so the
+ * aria-activedescendant cursor and the selection are visually separable. Equal
+ * specificity to the selected rule above; ordered before the ::before rail so
+ * selector specificity never descends. */
+.row[data-active='true'] {
+    box-shadow: inset 0 0 0 var(--portal-border-thickness-thin)
+        var(--portal-tone-edge);
+}
+
+/* The sharp inline-start accent rail. A pseudo-element, so it carries the highest
+ * specificity in the row scope and is ordered last. */
+.row[data-state='selected']::before {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    inline-size: var(--portal-border-thickness-bold);
+    background-color: var(--portal-tone-accent);
+}
