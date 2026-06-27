@@ -1,0 +1,333 @@
+/*
+ * Drawer - an edge-docked side / bottom panel in the machined-HUD surface
+ * family. The panel composes the shared .beveled corner shape and the Tier-2
+ * static .metalEdge from surfaces.module.css (a raised / modal surface earns the
+ * metal edge but NOT the Tier-1 animated metalTrim ring - one large panel must
+ * not run an infinite sheen). Every value resolves from a --portal-* /
+ * --portal-tone-* token; there are zero color literals and zero authored
+ * fixed-pixel layout values - the dock-axis size is a JS-computed inline style.
+ * Logical properties throughout, so RTL flips inline-start / inline-end for free.
+ * Tone drives the HUD edge border, the glow, and the resize grip only - never
+ * AA-critical text, which sits on --portal-color-text-0. The overlay slide, the
+ * inline collapse reveal, and the handle glow are each reduced-motion gated.
+ */
+
+.backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: var(--portal-z-overlay);
+    background-color: color-mix(
+        in oklab,
+        var(--portal-color-bg-0) 72%,
+        transparent
+    );
+}
+
+/* The docked surface. The bevel corner shape and the brushed-metal edge are
+ * composed; this rule owns layout, the tone border, the HUD fill, and the tone
+ * glow. Exposed-edge bevel only - the docked edge meets the viewport flush. */
+.panel {
+    composes: beveled from '../../theme/surfaces.module.css';
+    composes: metalEdge from '../../theme/surfaces.module.css';
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--portal-bevel-3);
+    background: var(--portal-hud-fill);
+    box-shadow: 0 0 var(--portal-space-4) var(--portal-tone-glow);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+}
+
+/* Overlay mode: pinned to the edge on the overlay stacking layer. The dock-axis
+ * size comes from the inline style; the cross axis stretches to the viewport. */
+.panel[data-mode='overlay'] {
+    position: fixed;
+    z-index: var(--portal-z-overlay);
+    pointer-events: auto;
+}
+
+/* Inline mode: in-flow docked. The dock-axis size is the inline style; the cross
+ * axis fills its container (block for the side edges, inline for the bottom). The
+ * mode rules (one attribute) precede the edge rules (two attributes) so
+ * specificity never descends for the .panel subject. */
+.panel[data-mode='inline'] {
+    position: relative;
+}
+
+.panel[data-mode='overlay'][data-edge='inline-start'] {
+    inset-block: 0;
+    inset-inline-start: 0;
+    max-inline-size: 100dvw;
+}
+
+.panel[data-mode='overlay'][data-edge='inline-end'] {
+    inset-block: 0;
+    inset-inline-end: 0;
+    max-inline-size: 100dvw;
+}
+
+.panel[data-mode='overlay'][data-edge='block-end'] {
+    inset-inline: 0;
+    inset-block-end: 0;
+    max-block-size: 100dvh;
+}
+
+.panel[data-mode='inline'][data-edge='inline-start'],
+.panel[data-mode='inline'][data-edge='inline-end'] {
+    block-size: 100%;
+}
+
+.panel[data-mode='inline'][data-edge='block-end'] {
+    inline-size: 100%;
+}
+
+/* Header strip. */
+.header {
+    display: flex;
+    align-items: center;
+    gap: var(--portal-space-2);
+    min-block-size: var(--portal-touch-target-min);
+    padding-block: var(--portal-space-2);
+    padding-inline: var(--portal-space-4);
+    border-block-end: var(--portal-hud-edge-width) solid var(--portal-tone-border);
+}
+
+/* Layout-neutral heading wrapper: zero the default margins and carry the strip's
+ * flex row so the chevron and title align. */
+.heading {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    gap: var(--portal-space-2);
+    margin: 0;
+    font-size: var(--portal-size-text-md);
+}
+
+/* The caps title (Helicon's strong caps look) via the shared tracked-label
+ * pattern. The title is AA-critical visible text, so it uses the fixed AA-safe
+ * accent-highlight, NEVER the tone-accent seed (tone drives the border / glow /
+ * grip only); the decorative aria-hidden marker carries the tone accent instead. */
+.title {
+    composes: wideLabel from '../../theme/surfaces.module.css';
+    color: var(--portal-color-accent-highlight);
+    font-weight: var(--portal-weight-label-bold);
+    text-transform: uppercase;
+}
+
+/* Beveled HUD controls (collapse chevron + overlay close), both clearing the 3rem
+ * touch floor. */
+.chevron,
+.close {
+    composes: beveled from '../../theme/surfaces.module.css';
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    min-block-size: var(--portal-touch-target-min);
+    min-inline-size: var(--portal-touch-target-min);
+    border: var(--portal-hud-edge-width) solid var(--portal-tone-border);
+    border-radius: var(--portal-bevel-2);
+    background: transparent;
+    color: var(--portal-color-text-0);
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.close {
+    margin-inline-start: auto;
+}
+
+.chevron:disabled,
+.close:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.chevron:focus-visible,
+.close:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: var(--portal-space-1);
+}
+
+.chevron:active:not(:disabled),
+.close:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+/* The [>]/[v]/[x] accent-mono HUD marker. It sits on the dark panel surface (not
+ * a light metal header like Accordion's), so it uses the fixed AA-safe
+ * accent-highlight rather than the lower-contrast tone-accent seed - the
+ * addon-a11y axe gate checks this glyph even though it is aria-hidden. */
+.marker {
+    font-family: var(--portal-font-mono);
+    font-weight: var(--portal-weight-label-strong);
+    color: var(--portal-color-accent-highlight);
+}
+
+.body {
+    flex: 1 1 auto;
+    overflow: auto;
+    padding: var(--portal-space-4);
+    color: var(--portal-color-text-0);
+    font-size: var(--portal-size-text-md);
+    line-height: var(--portal-line-height-normal);
+}
+
+/* The inline collapse reveal: a grid-template-rows 0fr -> 1fr disclosure (no
+ * width / height transition), the dependency-free idiom Accordion uses. */
+.bodyReveal {
+    display: grid;
+    grid-template-rows: 0fr;
+    flex: 1 1 auto;
+    min-block-size: 0;
+}
+
+/* Clip layer: the overflow + zero min size that let the grid track drive the
+ * height, so a collapsed body is truly zero. */
+.bodyClip {
+    overflow: hidden;
+    min-block-size: 0;
+}
+
+.bodyReveal[data-state='expanded'] {
+    grid-template-rows: 1fr;
+}
+
+/* Resize grip on the exposed dock edge. The visible grip is a brushed-metal
+ * hairline; the hit area is padded to the 3rem touch floor on the drag axis.
+ * touch-action: none so the browser never steals the gesture. */
+.handle {
+    position: absolute;
+    box-sizing: border-box;
+    padding: 0;
+    border: 0;
+    margin: 0;
+    appearance: none;
+    background: var(--portal-gradient-metal);
+    font: inherit;
+    touch-action: none;
+}
+
+.handle[data-edge='inline-start'],
+.handle[data-edge='inline-end'] {
+    inset-block: 0;
+    inline-size: var(--portal-touch-target-min);
+    cursor: col-resize;
+}
+
+.handle[data-edge='inline-start'] {
+    inset-inline-end: 0;
+    border-inline-start: var(--portal-hud-edge-width) solid
+        var(--portal-tone-accent);
+}
+
+.handle[data-edge='inline-end'] {
+    inset-inline-start: 0;
+    border-inline-end: var(--portal-hud-edge-width) solid var(--portal-tone-accent);
+}
+
+.handle[data-edge='block-end'] {
+    inset-inline: 0;
+    inset-block-start: 0;
+    block-size: var(--portal-touch-target-min);
+    border-block-end: var(--portal-hud-edge-width) solid var(--portal-tone-accent);
+    cursor: row-resize;
+}
+
+.handle:hover,
+.handle:focus-visible {
+    box-shadow: 0 0 var(--portal-space-2) var(--portal-tone-glow);
+    outline: none;
+}
+
+.handle:focus-visible {
+    border-color: var(--portal-color-focus);
+}
+
+.handle[data-disabled] {
+    cursor: not-allowed;
+}
+
+/* Motion - all reduced-motion gated. The overlay slide is a transform/opacity
+ * entrance keyed off data-motion='full'; the collapse reveal transitions the grid
+ * track; the handle glow transitions box-shadow / border-color only. */
+@media (prefers-reduced-motion: no-preference) {
+    .panel[data-mode='overlay'][data-motion='full'][data-edge='inline-start'] {
+        animation: portal-drawer-in-inline-start var(--portal-duration-ui-slow)
+            var(--portal-easing-standard);
+    }
+
+    .panel[data-mode='overlay'][data-motion='full'][data-edge='inline-end'] {
+        animation: portal-drawer-in-inline-end var(--portal-duration-ui-slow)
+            var(--portal-easing-standard);
+    }
+
+    .panel[data-mode='overlay'][data-motion='full'][data-edge='block-end'] {
+        animation: portal-drawer-in-block-end var(--portal-duration-ui-slow)
+            var(--portal-easing-standard);
+    }
+
+    .backdrop[data-motion='full'] {
+        animation: portal-drawer-fade var(--portal-duration-ui-slow)
+            var(--portal-easing-standard);
+    }
+
+    .bodyReveal {
+        transition: grid-template-rows var(--portal-duration-ui-base)
+            var(--portal-easing-standard);
+    }
+
+    .handle {
+        transition:
+            box-shadow var(--portal-duration-ui-fast) var(--portal-easing-standard),
+            border-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard);
+    }
+}
+
+@keyframes portal-drawer-in-inline-start {
+    from {
+        opacity: 0;
+        transform: translateX(-100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes portal-drawer-in-inline-end {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes portal-drawer-in-block-end {
+    from {
+        opacity: 0;
+        transform: translateY(100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes portal-drawer-fade {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}

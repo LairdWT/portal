@@ -1,0 +1,312 @@
+/*
+ * Window - a portal-rendered, draggable, optionally resizable machined-HUD frame.
+ * It is the floating/modal sibling of Dialog: the backdrop and frame portal into
+ * the shared overlay root and read the --portal-z-overlay token (the frame adds a
+ * per-instance focus-order offset via the inline --portal-window-z var, never an
+ * inline z-index literal). The live position and size are JS-computed runtime
+ * values fed through inline custom properties (--portal-window-x/-y, inline/block
+ * size) - the only geometry the component owns, since a draggable surface's place
+ * and size are inherently dynamic; this file authors no layout px. Every value
+ * resolves from a --portal-* token or a derived --portal-tone-* var, and the
+ * machined edge / metal sheen come from the shared surfaces utilities (composed
+ * here and joined in the component), never local color/bevel literals. The corner
+ * identity is the beveled machined cut (corner-shape: bevel via .beveled), never
+ * rounded/squircle. Tone drives the frame edge, the title-bar glow/sheen, and the
+ * resize marks only; title and body text use --portal-color-text-* so an arbitrary
+ * tone never degrades AA contrast. Every grip/button clears the 3rem touch target.
+ * Motion is gated behind both the reduced-motion media query and the data-motion
+ * attribute; drag/resize themselves never animate.
+ */
+
+.backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: var(--portal-z-overlay);
+    background-color: color-mix(
+        in oklab,
+        var(--portal-color-bg-0) 72%,
+        transparent
+    );
+}
+
+.frame {
+    composes: beveled metalEdge from '../../theme/surfaces.module.css';
+    box-sizing: border-box;
+    position: fixed;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    z-index: calc(var(--portal-z-overlay) + var(--portal-window-z, 0));
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    max-inline-size: 100dvw;
+    max-block-size: 100dvh;
+    border-radius: var(--portal-bevel-3);
+    background: var(--portal-hud-fill);
+    box-shadow:
+        0 0 var(--portal-space-4) var(--portal-tone-glow),
+        0 var(--portal-space-2) var(--portal-space-6)
+            color-mix(in oklab, var(--portal-color-bg-0) 60%, transparent);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+    transform: translate(var(--portal-window-x, 0), var(--portal-window-y, 0));
+}
+
+.frame[data-modal='true'] {
+    box-shadow:
+        0 0 var(--portal-space-5) var(--portal-tone-glow-strong),
+        0 var(--portal-space-2) var(--portal-space-6)
+            color-mix(in oklab, var(--portal-color-bg-0) 70%, transparent);
+}
+
+.frame[data-state='maximized'] {
+    inset-block: var(--portal-space-4);
+    inset-inline: var(--portal-space-4);
+    inline-size: auto;
+    block-size: auto;
+    transform: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .frame[data-motion='full'] {
+        animation: portal-window-in var(--portal-duration-ui-base)
+            var(--portal-easing-standard);
+    }
+
+    .backdrop[data-motion='full'] {
+        animation: portal-window-fade var(--portal-duration-ui-base)
+            var(--portal-easing-standard);
+    }
+}
+
+@keyframes portal-window-in {
+    from {
+        opacity: 0;
+        transform: translate(var(--portal-window-x, 0), var(--portal-window-y, 0))
+            scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes portal-window-fade {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.titleBar {
+    composes: beveled from '../../theme/surfaces.module.css';
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: var(--portal-space-2);
+    min-block-size: var(--portal-touch-target-min);
+    padding-inline: var(--portal-space-2);
+    border-radius: var(--portal-bevel-3) var(--portal-bevel-3) 0 0;
+}
+
+.titleBar[data-front='true'] {
+    box-shadow: inset 0 0 var(--portal-space-3) var(--portal-tone-glow);
+}
+
+.moveGrip {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: var(--portal-touch-target-min);
+    min-block-size: var(--portal-touch-target-min);
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--portal-color-text-1);
+    cursor: move;
+    touch-action: none;
+}
+
+.moveGrip:focus-visible {
+    outline: var(--portal-border-thickness-thin) solid var(--portal-color-focus);
+    outline-offset: calc(-1 * var(--portal-border-thickness-thin));
+}
+
+.gripDots {
+    inline-size: var(--portal-space-2);
+    block-size: var(--portal-space-4);
+    background: repeating-linear-gradient(
+        to bottom,
+        var(--portal-tone-border) 0,
+        var(--portal-tone-border) var(--portal-border-thickness-thin),
+        transparent var(--portal-border-thickness-thin),
+        transparent var(--portal-space-2)
+    );
+}
+
+.leadingIcon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    color: var(--portal-color-text-1);
+}
+
+.title {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+    margin: 0;
+    overflow: hidden;
+    color: var(--portal-color-text-0);
+    font-size: var(--portal-size-text-lg);
+    font-weight: var(--portal-weight-label-strong);
+    line-height: var(--portal-line-height-tight);
+    letter-spacing: var(--portal-letter-spacing-wide);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.status {
+    flex: 0 0 auto;
+    color: var(--portal-color-text-1);
+    font-size: var(--portal-size-text-sm);
+    line-height: var(--portal-line-height-tight);
+}
+
+.actions {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: var(--portal-space-1);
+}
+
+.affordance {
+    composes: beveled from '../../theme/surfaces.module.css';
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: var(--portal-touch-target-min);
+    min-block-size: var(--portal-touch-target-min);
+    margin: 0;
+    padding: 0;
+    border: var(--portal-border-thickness-thin) solid transparent;
+    border-radius: var(--portal-bevel-2);
+    background: transparent;
+    color: var(--portal-color-text-0);
+    font-family: inherit;
+    font-size: var(--portal-size-text-md);
+    line-height: var(--portal-line-height-tight);
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.affordance:focus-visible {
+    outline: var(--portal-border-thickness-thin) solid var(--portal-color-focus);
+    outline-offset: calc(-1 * var(--portal-border-thickness-thin));
+}
+
+.affordance:active:not(:disabled) {
+    border-color: var(--portal-tone-border);
+    background: var(--portal-color-metal-0);
+    transform: scale(0.97);
+}
+
+.body {
+    composes: beveled from '../../theme/surfaces.module.css';
+    box-sizing: border-box;
+    min-block-size: 0;
+    padding-block: var(--portal-space-3);
+    padding-inline: var(--portal-space-4);
+    overflow: auto;
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    background: var(--portal-color-surface-0);
+    color: var(--portal-color-text-0);
+    font-size: var(--portal-size-text-md);
+    line-height: var(--portal-line-height-normal);
+}
+
+.resizeHandle {
+    composes: beveled from '../../theme/surfaces.module.css';
+    position: absolute;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    touch-action: none;
+}
+
+.resizeHandle::before {
+    content: '';
+    position: absolute;
+    inset: 35%;
+    background: var(--portal-tone-border);
+    opacity: 0.5;
+}
+
+.resizeHandle:focus-visible {
+    outline: var(--portal-border-thickness-thin) solid var(--portal-color-focus);
+    outline-offset: calc(-1 * var(--portal-border-thickness-thin));
+}
+
+.resizeHandle[data-edge='n'] {
+    inset-block-start: 0;
+    inset-inline: var(--portal-touch-target-min);
+    block-size: var(--portal-space-3);
+    cursor: ns-resize;
+}
+
+.resizeHandle[data-edge='s'] {
+    inset-block-end: 0;
+    inset-inline: var(--portal-touch-target-min);
+    block-size: var(--portal-space-3);
+    cursor: ns-resize;
+}
+
+.resizeHandle[data-edge='e'] {
+    inset-inline-end: 0;
+    inset-block: var(--portal-touch-target-min);
+    inline-size: var(--portal-space-3);
+    cursor: ew-resize;
+}
+
+.resizeHandle[data-edge='w'] {
+    inset-inline-start: 0;
+    inset-block: var(--portal-touch-target-min);
+    inline-size: var(--portal-space-3);
+    cursor: ew-resize;
+}
+
+.resizeHandle[data-edge='ne'] {
+    inset-block-start: 0;
+    inset-inline-end: 0;
+    inline-size: var(--portal-touch-target-min);
+    block-size: var(--portal-touch-target-min);
+    cursor: nesw-resize;
+}
+
+.resizeHandle[data-edge='nw'] {
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    inline-size: var(--portal-touch-target-min);
+    block-size: var(--portal-touch-target-min);
+    cursor: nwse-resize;
+}
+
+.resizeHandle[data-edge='se'] {
+    inset-block-end: 0;
+    inset-inline-end: 0;
+    inline-size: var(--portal-touch-target-min);
+    block-size: var(--portal-touch-target-min);
+    cursor: nwse-resize;
+}
+
+.resizeHandle[data-edge='sw'] {
+    inset-block-end: 0;
+    inset-inline-start: 0;
+    inline-size: var(--portal-touch-target-min);
+    block-size: var(--portal-touch-target-min);
+    cursor: nesw-resize;
+}

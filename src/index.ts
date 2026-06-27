@@ -250,6 +250,16 @@ export {
     type SecretPromptOptions,
 } from './ui/Dialog/Dialog.types';
 export { PromptDialog } from './ui/Dialog/PromptDialog';
+export { Drawer } from './ui/Drawer/Drawer';
+export {
+    type DrawerHeadingLevel,
+    type DrawerInlineProps,
+    type DrawerOverlayProps,
+    type DrawerProps,
+    type DrawerResize,
+    EDrawerEdge,
+    EDrawerMode,
+} from './ui/Drawer/Drawer.types';
 export { EmptyState } from './ui/EmptyState/EmptyState';
 export {
     EEmptyStateRole,
@@ -368,6 +378,11 @@ export {
     ESelectionState,
     type SelectableTileProps,
 } from './ui/SelectableTile/SelectableTile.types';
+export { SplitPane } from './ui/SplitPane/SplitPane';
+export {
+    ESplitOrientation,
+    type SplitPaneProps,
+} from './ui/SplitPane/SplitPane.types';
 export { StatPill } from './ui/StatPill/StatPill';
 export { type StatPillProps } from './ui/StatPill/StatPill.types';
 export { StatTile } from './ui/StatTile/StatTile';
@@ -417,3 +432,15 @@ export {
     type TreeNode,
     type TreeViewProps,
 } from './ui/TreeView/TreeView.types';
+export { Window } from './ui/Window/Window';
+export {
+    EWindowResizeEdge,
+    EWindowResizeMode,
+    EWindowState,
+    type WindowFloatingProps,
+    type WindowModalProps,
+    type WindowPoint,
+    type WindowProps,
+    type WindowRect,
+    type WindowSize,
+} from './ui/Window/Window.types';

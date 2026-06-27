@@ -1,0 +1,194 @@
+/*
+ * SplitPane. A two-pane resizable layout shell for the generic UI layer,
+ * mirroring Helicon's split_pane. The frame is a beveled machined-HUD surface
+ * (composes .beveled + .metalEdge from the shared surface utilities) holding two
+ * caller-owned pane regions split by a draggable role="separator" divider. The
+ * grid tracks are sized inline from the controlled fraction (the only non-token
+ * values, JS-computed, never authored px here); everything else resolves from a
+ * --portal-* token or the derived --portal-tone-* ramp - no literal colors, no
+ * authored fixed-pixel layout. Corners adopt the shared .beveled corner identity
+ * (corner-shape: bevel + a --portal-bevel-N radius fallback); no rounded/squircle
+ * radius appears. The accent reads only as the divider seam accent, the focus
+ * ring, and the tone glow; pane content stays on the dark surface for contrast.
+ *
+ * The visible divider seam is a thin machined rule (::before), but the separator
+ * element's cross-axis hit area meets the 3rem touch floor
+ * (--portal-touch-target-min) so a finger can grab it. The centered grab handle
+ * is a short beveled metal nub that earns the tone glow and the metal sheen only
+ * while focused or actively dragged. All motion is gated behind
+ * prefers-reduced-motion; the live drag is direct manipulation (the track size
+ * follows the pointer instantly and is never transitioned).
+ *
+ * .handle keeps an inline static metal background and a LOCAL sheen keyframe on
+ * its focused/active state rather than composing .metalTrim: metalTrim animates
+ * for the whole mounted lifetime, and the @keyframes name in surfaces.module.css
+ * is module-scoped (not referenceable here), so the sheen is replicated locally
+ * from the same shared --portal-* metal tokens and confined to focus/active.
+ */
+
+.frame {
+    composes: beveled metalEdge from '../../theme/surfaces.module.css';
+    display: grid;
+    inline-size: 100%;
+    min-block-size: var(--portal-touch-target-min);
+    block-size: 100%;
+
+    /* corner-shape: bevel (from .beveled) is a no-op without a non-zero radius;
+     * the radius drives the machined bevel size and is the rounded fallback where
+     * corner-shape is unsupported. Matches the Drawer shell (bevel-3). */
+    border-radius: var(--portal-bevel-3);
+    background-color: var(--portal-color-surface-0);
+    color: var(--portal-color-text-0);
+    overflow: hidden;
+}
+
+.pane {
+    min-inline-size: 0;
+    min-block-size: 0;
+    padding: var(--portal-space-3);
+    overflow: auto;
+}
+
+.divider {
+    position: relative;
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+
+    /* Mandatory so the browser cannot steal the gesture for scroll/zoom. */
+    touch-action: none;
+    user-select: none;
+}
+
+/* The thin machined seam drawn over the separator hit zone. Its thin axis and
+ * full-length axis are set per orientation below. */
+.divider::before {
+    content: '';
+    position: absolute;
+    background: var(--portal-gradient-metal);
+    pointer-events: none;
+}
+
+.handle {
+    composes: beveled from '../../theme/surfaces.module.css';
+    position: relative;
+    z-index: 1;
+    border: var(--portal-hud-edge-width) solid transparent;
+    border-radius: var(--portal-bevel-1);
+    background: var(--portal-gradient-metal);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .divider {
+        transition:
+            box-shadow var(--portal-duration-ui-fast) var(--portal-easing-standard),
+            border-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard);
+    }
+
+    .handle {
+        transition:
+            transform var(--portal-duration-ui-fast) var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ui-fast) var(--portal-easing-standard),
+            border-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard);
+    }
+}
+
+.divider:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: calc(-1 * var(--portal-border-thickness-normal));
+}
+
+.divider:hover,
+.divider[data-active='true'] {
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow);
+}
+
+/* The seam takes the tone accent when the divider is hovered or actively
+ * dragged, echoing Helicon's accent-on-active divider color. */
+.divider:hover::before,
+.divider[data-active='true']::before {
+    background: var(--portal-tone-accent);
+}
+
+.divider:focus-visible .handle,
+.divider[data-active='true'] .handle {
+    border-color: transparent;
+    background:
+        var(--portal-hud-fill) padding-box,
+        var(--portal-gradient-metal-ring) border-box;
+    box-shadow: 0 0 var(--portal-space-2) var(--portal-tone-glow-strong);
+}
+
+.divider[data-active='true'] .handle {
+    transform: scale(0.97);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .divider:focus-visible .handle,
+    .divider[data-active='true'] .handle {
+        animation: portal-split-sheen var(--portal-duration-metal-sheen) linear
+            infinite;
+    }
+}
+
+/* Local sheen keyframe: surfaces.module.css scopes its own keyframe name, so the
+ * registered --portal-metal-angle rotation is re-declared here. */
+@keyframes portal-split-sheen {
+    to {
+        --portal-metal-angle: 360deg;
+    }
+}
+
+.frame[data-orientation='horizontal'] {
+    grid-template-columns: var(--portal-split-primary) min-content var(
+            --portal-split-secondary
+        );
+}
+
+.frame[data-orientation='vertical'] {
+    grid-template-rows: var(--portal-split-primary) min-content var(
+            --portal-split-secondary
+        );
+}
+
+.frame[data-orientation='horizontal'] .divider {
+    min-inline-size: var(--portal-touch-target-min);
+    block-size: 100%;
+    cursor: col-resize;
+}
+
+.frame[data-orientation='vertical'] .divider {
+    min-block-size: var(--portal-touch-target-min);
+    inline-size: 100%;
+    cursor: row-resize;
+}
+
+.frame[data-orientation='horizontal'] .divider::before {
+    inline-size: var(--portal-border-thickness-bold);
+    block-size: 100%;
+}
+
+.frame[data-orientation='vertical'] .divider::before {
+    inline-size: 100%;
+    block-size: var(--portal-border-thickness-bold);
+}
+
+.frame[data-orientation='horizontal'] .handle {
+    inline-size: var(--portal-space-1);
+    block-size: var(--portal-space-5);
+}
+
+.frame[data-orientation='vertical'] .handle {
+    inline-size: var(--portal-space-5);
+    block-size: var(--portal-space-1);
+}
+
+.frame[data-enabled='disabled'] .divider {
+    cursor: default;
+    pointer-events: none;
+    opacity: 0.5;
+}
