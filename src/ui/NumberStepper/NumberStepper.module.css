@@ -13,11 +13,13 @@
  * contrast (tone is never a solid mid-tone fill behind text). All motion - the
  * ring sheen and the transitions - is gated behind prefers-reduced-motion.
  *
- * The camelCase surface utilities (.metalTrim/.wideLabel) are NOT composed: the
- * project stylelint value-keyword-case rule rejects a camelCase name inside
- * composes. Only the lowercase .beveled utility is composed (the established
- * codebase pattern); the ring, sheen, and tracked-label effects are reproduced
- * here from the same shared --portal-* tokens, matching BevelButton/ActionButton.
+ * .glyph composes the shared .wideLabel tracked-label utility. .key keeps an
+ * inline metal ring rather than composing .metalTrim: the key needs the
+ * brushed-metal FACE on the padding-box (not metalTrim's flat --portal-hud-fill),
+ * and overriding a composed utility's background is cascade-order fragile across
+ * bundlers, so the ring + face are declared inline from the same shared
+ * --portal-* metal tokens. The sheen reuses the registered --portal-metal-angle
+ * technique, matching BevelButton/ActionButton, and is reduced-motion gated.
  */
 
 .root {
@@ -109,15 +111,10 @@
 }
 
 .glyph {
+    composes: wideLabel from '../../theme/surfaces.module.css';
     display: inline-block;
-
-    /* The shared tracked-label treatment, reproduced from tokens: wide tracking
-     * with an equal end-margin trim re-centering the last tracked glyph. */
-    margin-inline-end: calc(-1 * var(--portal-letter-spacing-wide));
     font-family: var(--portal-font-mono);
     font-weight: var(--portal-weight-label-bold);
-    line-height: var(--portal-line-height-tight);
-    letter-spacing: var(--portal-letter-spacing-wide);
 }
 
 .value {

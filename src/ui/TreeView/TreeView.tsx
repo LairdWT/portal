@@ -457,7 +457,7 @@ export function TreeView({
                     data-state={rowState}
                     data-enabled={resolvedEnabled}
                     data-selected={isSelected ? 'true' : 'false'}
-                    tabIndex={isTabbable ? 0 : -1}
+                    tabIndex={!isDisabled && isTabbable ? 0 : -1}
                     aria-level={level}
                     aria-setsize={setSize}
                     aria-posinset={index + 1}

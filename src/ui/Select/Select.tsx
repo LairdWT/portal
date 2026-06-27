@@ -308,7 +308,13 @@ export function Select({
                 return;
             }
             default: {
-                if (key.length === 1 && key !== ' ') {
+                if (
+                    key.length === 1 &&
+                    key !== ' ' &&
+                    !event.ctrlKey &&
+                    !event.metaKey &&
+                    !event.altKey
+                ) {
                     event.preventDefault();
                     handleTypeAhead(key);
                 }

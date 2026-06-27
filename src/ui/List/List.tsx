@@ -243,6 +243,9 @@ export function List<Item>(props: ListProps<Item>): ReactElement {
     // handleRowActivate. Routing the selection-anchor ref access through a named
     // event handler keeps that ref access out of a render-created closure.
     function handleRowPointerDown(event: ReactPointerEvent<HTMLDivElement>): void {
+        if (event.button !== 0) {
+            return;
+        }
         const indexAttribute: string | undefined =
             event.currentTarget.dataset.index;
         if (indexAttribute === undefined) {
@@ -346,7 +349,10 @@ export function List<Item>(props: ListProps<Item>): ReactElement {
                 if (
                     getTypeAheadText !== undefined &&
                     event.key.length === 1 &&
-                    event.key !== ' '
+                    event.key !== ' ' &&
+                    !event.ctrlKey &&
+                    !event.metaKey &&
+                    !event.altKey
                 ) {
                     event.preventDefault();
                     handleTypeAhead(event.key);

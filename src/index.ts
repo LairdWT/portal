@@ -295,7 +295,10 @@ export {
 export { NumberStepper } from './ui/NumberStepper/NumberStepper';
 export { type NumberStepperProps } from './ui/NumberStepper/NumberStepper.types';
 export { Pagination } from './ui/Pagination/Pagination';
-export { type PaginationProps } from './ui/Pagination/Pagination.types';
+export {
+    EPaginationEdge,
+    type PaginationProps,
+} from './ui/Pagination/Pagination.types';
 export { Panel } from './ui/Panel/Panel';
 export {
     EPanelElevation,

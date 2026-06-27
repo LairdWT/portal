@@ -47,7 +47,9 @@
 .accentRule {
     inline-size: var(--portal-space-7);
     block-size: var(--portal-space-1);
-    border-radius: var(--portal-radius-pill);
+
+    /* A crisp rectangular machined bar (no rounded/pill radius), per the bevel
+     * visual-language directive - the rest of StatTile uses the angular HUD edge. */
     background: var(--portal-gradient-metal);
 }
 

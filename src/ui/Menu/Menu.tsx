@@ -223,10 +223,14 @@ function MenuList(props: MenuListProps): ReactElement {
         if (didAutoFocusRef.current) {
             return;
         }
-        didAutoFocusRef.current = true;
+        // Latch only when focus is actually taken: a hover mount (autoFocusFirst
+        // false) must stay un-latched so a later ArrowRight/Enter that flips
+        // autoFocusFirst true re-runs this effect and pulls focus into the
+        // fly-out, instead of being blocked by an already-set latch.
         if (!autoFocusFirst) {
             return;
         }
+        didAutoFocusRef.current = true;
         const first: number = firstFocusableIndex(items);
         if (first < 0) {
             return;

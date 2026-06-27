@@ -15,6 +15,7 @@ import {
 import { useReducedMotion } from '../../react/hooks/useReducedMotion';
 import { useResolvedEnabled } from '../../react/hooks/useResolvedEnabled';
 import {
+    OVERSCAN_DEFAULT,
     useVirtualWindow,
     type VirtualWindowState,
 } from '../../react/hooks/useVirtualWindow';
@@ -193,14 +194,19 @@ export function DataTable(props: DataTableProps): ReactElement {
         if (element === null) {
             return;
         }
-        const rowTop: number = activeCell.row * rowHeight;
+        // Body rows are absolutely positioned inside .body, which begins AFTER the
+        // sticky header group (min-block-size one row) in normal flow, so a row's
+        // true scroll-content top is one header-height past its index offset.
+        // Omitting that offset left a down-navigated row one header-height below
+        // the fold.
+        const headerHeight: number = rowHeight;
+        const rowTop: number = headerHeight + activeCell.row * rowHeight;
         const rowBottom: number = rowTop + rowHeight;
         const viewTop: number = element.scrollTop;
         const viewBottom: number = viewTop + element.clientHeight;
-        // The sticky header occupies one row of height at the top of the band, so
-        // a row is considered hidden until it clears the header.
-        if (rowTop < viewTop + rowHeight) {
-            element.scrollTop = rowTop - rowHeight;
+        // A row is considered hidden until it clears the sticky header overlay.
+        if (rowTop < viewTop + headerHeight) {
+            element.scrollTop = rowTop - headerHeight;
             return;
         }
         if (rowBottom > viewBottom) {
@@ -292,6 +298,9 @@ export function DataTable(props: DataTableProps): ReactElement {
     // event handler (the same shape as the grid's onKeyDown) keeps that ref access
     // out of a render-created closure.
     function handleBodyPointerDown(event: ReactPointerEvent<HTMLDivElement>): void {
+        if (event.button !== 0) {
+            return;
+        }
         const rowAttribute: string | undefined =
             event.currentTarget.dataset.rowIndex;
         if (rowAttribute === undefined) {
@@ -302,6 +311,10 @@ export function DataTable(props: DataTableProps): ReactElement {
             ctrlKey: event.ctrlKey,
             metaKey: event.metaKey,
         });
+        // Keep DOM focus on the grid container so the aria-activedescendant
+        // single-tab-stop contract holds after a pointer selection (a click can
+        // otherwise land real focus on a tabindex=-1 cell).
+        scrollRef.current?.focus();
     }
 
     function activateActiveCell(event: ReactKeyboardEvent<HTMLDivElement>): void {
@@ -326,10 +339,15 @@ export function DataTable(props: DataTableProps): ReactElement {
         if (isDisabled) {
             return;
         }
-        const pageStep: number = Math.max(
-            1,
-            virtualWindow.endIndex - virtualWindow.startIndex - 1,
-        );
+        // Page by the VISIBLE row count, not the rendered window: endIndex -
+        // startIndex includes the overscan band (up to 2 * overscan extra rows),
+        // so subtracting it back yields a one-viewport jump instead of an
+        // overscan-inflated overshoot.
+        const visibleRows: number =
+            virtualWindow.endIndex -
+            virtualWindow.startIndex -
+            2 * (overscan ?? OVERSCAN_DEFAULT);
+        const pageStep: number = Math.max(1, visibleRows - 1);
         switch (event.key) {
             case 'ArrowDown': {
                 event.preventDefault();
