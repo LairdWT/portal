@@ -1,0 +1,277 @@
+/*
+ * Shared frame and SVG element styling for the Chart primitive family. Every
+ * value resolves from a --portal-* token or the derived --portal-tone-* ramp -
+ * no literal color, no fixed-pixel layout, no viewport-stretch. The framed
+ * primitives (BarChart, StackedBar, RatioBar, RankedBars) wear the machined-HUD
+ * language: the beveled angular corner shape from surfaces.module.css, the HUD
+ * edge sized by --portal-hud-edge-width, the static --portal-tone-glow bloom,
+ * and a brushed-metal axis/divider accent (--portal-color-metal-2) - angular,
+ * never the rounded/squircle look. Bars, segments, and gauge fills are SHARP
+ * rects (no rx); only the decorative legend swatch and the frame carry the
+ * bevel. Charts are static by default, so they are trivially reduced-motion
+ * safe. Responsive value columns and gauge widths use @container queries and
+ * container units, not pixel thresholds.
+ */
+
+/* The machined-HUD chart frame. Composes the beveled angular corner; the bevel
+ * radius is the cut length under corner-shape: bevel. Sits on the neutral dark
+ * surface face so tone-accent bars stay legible, with a toned HUD edge + glow. */
+.frame {
+    composes: beveled from '../../theme/surfaces.module.css';
+    container-type: inline-size;
+    margin: 0;
+    padding-block: var(--portal-space-3);
+    padding-inline: var(--portal-space-4);
+    border: var(--portal-hud-edge-width) solid var(--portal-tone-border);
+    border-radius: var(--portal-bevel-3);
+    background-color: var(--portal-color-surface-0);
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+}
+
+/* The tracked caption above a chart. Mirrors the shared wide-label pattern
+ * (tight line-height + wide tracking) inline: the foundation's .wideLabel cannot
+ * be composed here because the repo's stylelint value-keyword-case rule rejects a
+ * camelCase composes value, so the same token-driven declarations are used. */
+.caption {
+    color: var(--portal-color-text-1);
+    font-size: var(--portal-size-text-sm);
+    line-height: var(--portal-line-height-tight);
+    letter-spacing: var(--portal-letter-spacing-wide);
+}
+
+/* BarChart - a column of sharp vertical bars over a brushed-metal baseline. */
+.barChart {
+    composes: frame;
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-2);
+}
+
+.chart {
+    display: block;
+    inline-size: 100%;
+    block-size: var(--portal-space-8);
+    border-block-end: var(--portal-border-thickness-thin) solid
+        var(--portal-color-metal-2);
+}
+
+.bar {
+    fill: var(--portal-tone-accent);
+    filter: drop-shadow(0 0 var(--portal-space-1) var(--portal-tone-glow));
+}
+
+/* StackedBar - left-to-right weighted slices with brushed-metal dividers. */
+.stacked {
+    composes: frame;
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-2);
+}
+
+.stackedTrack {
+    display: block;
+    inline-size: 100%;
+    block-size: var(--portal-space-3);
+}
+
+.segment {
+    fill: var(--portal-tone-accent);
+}
+
+.divider {
+    stroke: var(--portal-color-metal-2);
+    stroke-width: var(--portal-border-thickness-thin);
+    vector-effect: non-scaling-stroke;
+}
+
+/* RatioBar - a single recessed gauge track with a tone-accent fill. */
+.ratio {
+    composes: frame;
+    display: flex;
+    align-items: center;
+    gap: var(--portal-space-3);
+}
+
+.ratioLabel {
+    flex: 0 0 auto;
+    font-size: var(--portal-size-text-sm);
+    color: var(--portal-color-text-1);
+}
+
+.ratioTrack {
+    display: block;
+    flex: 1 1 auto;
+    min-inline-size: var(--portal-space-8);
+    block-size: var(--portal-space-2);
+}
+
+.ratioValue {
+    flex: 0 0 auto;
+    font-size: var(--portal-size-text-sm);
+    color: var(--portal-color-text-0);
+    font-variant-numeric: tabular-nums;
+}
+
+/* The recessed gauge channel and its tone fill, shared by RatioBar and the
+ * RankedBars rows - a HUD-bordered scrim with a glowing tone fill. */
+.gaugeTrack {
+    fill: var(--portal-color-surface-1);
+    stroke: var(--portal-color-border);
+    stroke-width: var(--portal-border-thickness-thin);
+    vector-effect: non-scaling-stroke;
+}
+
+.gaugeFill {
+    fill: var(--portal-tone-accent);
+    filter: drop-shadow(0 0 var(--portal-space-1) var(--portal-tone-glow));
+}
+
+/* RankedBars - top-to-bottom focusable gauge rows. */
+.rankRoot {
+    composes: frame;
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-1);
+}
+
+.rankRow {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--portal-space-3);
+    min-block-size: var(--portal-touch-target-min);
+    padding-block: var(--portal-space-1);
+    padding-inline: var(--portal-space-2);
+    border: 0;
+    border-radius: var(--portal-bevel-1);
+    background-color: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: start;
+    appearance: none;
+    cursor: default;
+}
+
+.rankRow:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: var(--portal-space-1);
+}
+
+.rankLabel {
+    flex: 0 0 auto;
+    min-inline-size: var(--portal-space-8);
+    font-size: var(--portal-size-text-sm);
+    color: var(--portal-color-text-1);
+}
+
+.gauge {
+    display: block;
+    flex: 0 0 auto;
+    inline-size: clamp(
+        var(--portal-space-8),
+        40cqi,
+        calc(4 * var(--portal-space-8))
+    );
+    block-size: var(--portal-space-2);
+}
+
+.rowValue {
+    flex: 0 0 auto;
+    font-size: var(--portal-size-text-sm);
+    color: var(--portal-color-text-0);
+    font-variant-numeric: tabular-nums;
+}
+
+/* LegendRow - a wrapping row of focusable swatch/label/value entries. Not
+ * framed: it sits inline beneath a chart, matching Helicon's inline legend. */
+.legendList {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--portal-space-3);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+}
+
+.legendItem {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--portal-space-2);
+    min-block-size: var(--portal-touch-target-min);
+    padding-block: var(--portal-space-1);
+    padding-inline: var(--portal-space-2);
+    border: 0;
+    border-radius: var(--portal-bevel-1);
+    background-color: transparent;
+    color: inherit;
+    font: inherit;
+    appearance: none;
+    cursor: default;
+}
+
+.legendItem:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: var(--portal-space-1);
+}
+
+/* A sharp (non-pill) machined swatch with the HUD edge and a tone fill. */
+.swatch {
+    composes: beveled from '../../theme/surfaces.module.css';
+    inline-size: var(--portal-space-3);
+    block-size: var(--portal-space-3);
+    border: var(--portal-hud-edge-width) solid var(--portal-tone-border);
+    border-radius: var(--portal-bevel-1);
+    background-color: var(--portal-tone-accent);
+}
+
+.legendLabel {
+    font-size: var(--portal-size-text-sm);
+    color: var(--portal-color-text-1);
+}
+
+.legendValue {
+    font-size: var(--portal-size-text-sm);
+    font-weight: var(--portal-weight-label-strong);
+    color: var(--portal-color-text-0);
+    font-variant-numeric: tabular-nums;
+}
+
+/* The framed empty-state placeholder: a dim, centered italic note. */
+.empty {
+    margin: 0;
+    padding-block: var(--portal-space-4);
+    color: var(--portal-color-text-1);
+    font-size: var(--portal-size-text-sm);
+    font-style: italic;
+    text-align: center;
+}
+
+/* The repo's per-component sr-only idiom (clip the node out of flow while it
+ * stays in the DOM and the accessibility tree), used for the data-table
+ * fallback. Copied from the SecretField/SelectableTile technique, not shared. */
+.visuallyHidden {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Helicon hides the trailing value column when the frame is narrow; the React
+ * idiom moves that pixel threshold to a container query on the chart frame. */
+@container (width < 16rem) {
+    .ratioValue {
+        display: none;
+    }
+}
+
+@container (width < 18rem) {
+    .rowValue {
+        display: none;
+    }
+}

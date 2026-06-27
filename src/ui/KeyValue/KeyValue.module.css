@@ -1,0 +1,107 @@
+/*
+ * KeyValue / PropertyGrid styling. A non-interactive, column-aligned inspector
+ * grid rendered as a semantic <dl>. The root carries the shared .toneScope so the
+ * derived --portal-tone-* vars resolve, composes the machined bevel corner shape
+ * from the shared surfaces utility, and draws a quiet static HUD edge (tone
+ * border + HUD fill + tight tone glow) from the --portal-hud-* tokens; each row
+ * carries its own .toneScope so a per-row tone resolves independently. The key
+ * column is a dim monospace HUD gutter with an angular tone-accent rail; the
+ * value column forwards arbitrary ReactNode content and honours the data-overflow
+ * wrap/truncate policy. Only --portal-* tokens and the derived --portal-tone-*
+ * vars are referenced - no literal colors and no fixed-pixel layout. The grid
+ * collapses to a stacked key-over-value layout at narrow container widths via a
+ * container query. The component is static (no pointer target, no motion), so the
+ * touch-target floor and reduced-motion gating are satisfied by absence - there
+ * is no animation, and no animated metal-ring trim (.metalTrim is reserved for
+ * interactive controls).
+ */
+
+.root {
+    composes: beveled from '../../theme/surfaces.module.css';
+
+    /* Component-private bound for the key column, composed from spacing tokens (no
+     * literal sizes); mirrors the --portal-bar-fill / --portal-progress-fill
+     * local-custom-property precedent. The 30% is a relative ratio, allowed.
+     * Floor --portal-space-8 (4rem) ~ Helicon KEY_COLUMN_MIN_WIDTH; cap
+     * space-8 * 3 (12rem) ~ KEY_COLUMN_MAX_WIDTH; 30% ~ KEY_COLUMN_WIDTH_RATIO. */
+    --portal-kv-key-column: clamp(
+        var(--portal-space-8),
+        30%,
+        calc(var(--portal-space-8) * 3)
+    );
+
+    container-type: inline-size;
+    padding-block: var(--portal-space-3);
+    padding-inline: var(--portal-space-4);
+    border: var(--portal-hud-edge-width) solid var(--portal-tone-border);
+    border-radius: var(--portal-bevel-3);
+    background-color: var(--portal-hud-fill);
+    box-shadow: 0 0 var(--portal-space-2) var(--portal-hud-glow);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+}
+
+/* The inner definition list stacks the rows; the box and tone live on .root. */
+.list {
+    display: grid;
+    gap: var(--portal-space-1);
+    margin: 0;
+}
+
+.row {
+    display: grid;
+    grid-template-columns:
+        minmax(min-content, var(--portal-kv-key-column))
+        minmax(0, 1fr);
+    align-items: baseline;
+    gap: var(--portal-space-2) var(--portal-space-4);
+    padding-block: var(--portal-space-1);
+}
+
+.key {
+    composes: beveled from '../../theme/surfaces.module.css';
+    min-inline-size: 0;
+    margin: 0;
+    padding-inline-start: var(--portal-space-2);
+    border-inline-start: var(--portal-border-thickness-thin) solid
+        var(--portal-tone-accent);
+    border-radius: var(--portal-bevel-1);
+    font-family: var(--portal-font-mono);
+    font-size: var(--portal-size-text-sm);
+    line-height: var(--portal-line-height-tight);
+    letter-spacing: var(--portal-letter-spacing-wide);
+    color: var(--portal-color-text-1);
+
+    /* Keys do not wrap mid-word in column mode (Helicon TextWrapMode::Extend). */
+    white-space: nowrap;
+}
+
+.value {
+    min-inline-size: 0;
+    margin: 0;
+    font-size: var(--portal-size-text-md);
+    line-height: var(--portal-line-height-normal);
+    color: var(--portal-color-text-0);
+    font-variant-numeric: tabular-nums;
+}
+
+.root[data-overflow='wrap'] .value {
+    overflow-wrap: anywhere;
+}
+
+.root[data-overflow='truncate'] .value {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+@container (width <= 20rem) {
+    .row {
+        grid-template-columns: 1fr;
+        gap: var(--portal-space-1);
+    }
+
+    .key {
+        white-space: normal;
+    }
+}

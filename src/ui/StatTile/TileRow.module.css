@@ -1,0 +1,24 @@
+/*
+ * TileRow. An equal-width responsive grid layout for a strip of StatTile
+ * children (Helicon tile_row / metric_row). It owns layout only - the consumer
+ * composes the tiles. With a fixed column count the tiles divide the width
+ * evenly; otherwise the grid auto-fits down to the --portal-stat-tile-min floor
+ * and wraps. Only --portal-* tokens are referenced - no literal colors or pixels
+ * and no fixed-pixel layout (the single length floor is a token).
+ */
+
+.row {
+    display: grid;
+    gap: var(--portal-space-4);
+}
+
+.row[data-columns='auto'] {
+    grid-template-columns: repeat(
+        auto-fit,
+        minmax(min(100%, var(--portal-stat-tile-min)), 1fr)
+    );
+}
+
+.row[data-columns='fixed'] {
+    grid-template-columns: repeat(var(--portal-tile-columns), 1fr);
+}

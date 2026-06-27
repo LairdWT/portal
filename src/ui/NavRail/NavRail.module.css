@@ -1,0 +1,140 @@
+/*
+ * NavRail. A controlled <nav> landmark presenting a vertical stack of real
+ * <button>/<a> navigation bands for the generic UI layer. The active band is
+ * conveyed by aria-current="page" plus the data-state attribute and an angular
+ * tone-accent leading bar - selection is never signalled by color alone. As a
+ * Tier 2 structural surface, the rail adopts the machined-HUD edge language: the
+ * shared lowercase .beveled corner identity is composed, and the thin HUD border
+ * + surface fill (the static beveled edge) is reproduced inline from --portal-*
+ * tokens - matching NumberStepper/Breadcrumb. The animated metal-ring trim
+ * (.metalTrim) is reserved for Tier 1 button controllers, so it is NOT used here,
+ * and the camelCase surface utilities are never placed in composes (the project
+ * stylelint value-keyword-case rule rejects a camelCase name there). The accent
+ * bar, fill scrim, and glow derive from the inherited tone ramp, so a consumer
+ * themes the active indicator by passing a tone color. Every value resolves from
+ * a --portal-* token: no literal color, no fixed-pixel layout. Each band keeps
+ * the minimum touch target and all motion is reduced-motion gated.
+ */
+
+.rail {
+    composes: beveled from '../../theme/surfaces.module.css';
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--portal-space-1);
+    inline-size: 100%;
+    min-inline-size: min(100%, 12rem);
+    padding: var(--portal-space-2);
+    border: var(--portal-hud-edge-width) solid var(--portal-color-border);
+    border-radius: var(--portal-bevel-3);
+    background-color: var(--portal-color-surface-0);
+}
+
+.item {
+    composes: beveled from '../../theme/surfaces.module.css';
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--portal-space-3);
+    min-block-size: var(--portal-touch-target-min);
+    padding-block: var(--portal-space-2);
+    padding-inline: var(--portal-space-3);
+    border: var(--portal-border-thickness-thin) solid transparent;
+    border-radius: var(--portal-bevel-2);
+    background-color: transparent;
+    color: var(--portal-color-text-1);
+    font-family: var(--portal-font-sans);
+    font-size: var(--portal-size-text-md);
+    line-height: var(--portal-line-height-normal);
+    text-align: start;
+    text-decoration: none;
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .item {
+        transition:
+            background-color var(--portal-duration-ui-base)
+                var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ui-base) var(--portal-easing-standard),
+            color var(--portal-duration-ui-base) var(--portal-easing-standard);
+    }
+}
+
+.item:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: var(--portal-space-1);
+    background-color: var(--portal-tone-fill);
+}
+
+.item:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/*
+ * Hover and press are decorative redundancy only: hover shows the same tone fill
+ * that focus-visible shows (never hover-only for meaning), and the press scale is
+ * an instant transform (not transitioned), so it is reduced-motion safe.
+ */
+.item:hover:not(:disabled) {
+    background-color: var(--portal-tone-fill);
+}
+
+.item:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.item[data-state='active'] {
+    border-color: var(--portal-tone-accent);
+    background: linear-gradient(
+        160deg,
+        var(--portal-tone-fill) 0%,
+        var(--portal-color-surface-0) 100%
+    );
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow-strong);
+    color: var(--portal-color-text-0);
+}
+
+/*
+ * The active indicator: an angular tone-accent bar pinned to the band's leading
+ * edge. It is a non-color-only redundancy alongside aria-current and the
+ * text-contrast scrim, not the sole signal of selection. It carries no
+ * border-radius - the machined left edge stays square.
+ */
+.item[data-state='active']::before {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    inline-size: var(--portal-border-thickness-bold);
+    background-color: var(--portal-tone-accent);
+}
+
+.icon {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    inline-size: var(--portal-space-5);
+    block-size: var(--portal-space-5);
+    color: inherit;
+}
+
+.label {
+    flex: 1 1 auto;
+    color: inherit;
+}
+
+.item[data-state='active'] .label {
+    font-weight: var(--portal-weight-label-strong);
+}
+
+.badge {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    margin-inline-start: auto;
+}

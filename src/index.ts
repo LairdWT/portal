@@ -175,6 +175,22 @@ export {
     type BreadcrumbProps,
     EBreadcrumbCrumbState,
 } from './ui/Breadcrumb/Breadcrumb.types';
+export { BarChart } from './ui/Chart/BarChart';
+export {
+    type BarChartProps,
+    type ChartLegendItem,
+    type ChartRankedEntry,
+    type ChartSegment,
+    EChartA11yDetail,
+    type LegendRowProps,
+    type RankedBarsProps,
+    type RatioBarProps,
+    type StackedBarProps,
+} from './ui/Chart/Chart.types';
+export { LegendRow } from './ui/Chart/LegendRow';
+export { RankedBars } from './ui/Chart/RankedBars';
+export { RatioBar } from './ui/Chart/RatioBar';
+export { StackedBar } from './ui/Chart/StackedBar';
 export { Chip } from './ui/Chip/Chip';
 export { type ChipProps, EChipState } from './ui/Chip/Chip.types';
 export { CTA } from './ui/CTA/CTA';
@@ -200,6 +216,18 @@ export {
     type EmptyStateHeadingLevel,
     type EmptyStateProps,
 } from './ui/EmptyState/EmptyState.types';
+export { KeyValue } from './ui/KeyValue/KeyValue';
+export {
+    EKeyValueOverflow,
+    type KeyValuePair,
+    type KeyValueProps,
+} from './ui/KeyValue/KeyValue.types';
+export { NavRail } from './ui/NavRail/NavRail';
+export {
+    ENavItemState,
+    type NavRailItem,
+    type NavRailProps,
+} from './ui/NavRail/NavRail.types';
 export { NumberStepper } from './ui/NumberStepper/NumberStepper';
 export { type NumberStepperProps } from './ui/NumberStepper/NumberStepper.types';
 export { Pagination } from './ui/Pagination/Pagination';
@@ -267,6 +295,15 @@ export {
 } from './ui/SelectableTile/SelectableTile.types';
 export { StatPill } from './ui/StatPill/StatPill';
 export { type StatPillProps } from './ui/StatPill/StatPill.types';
+export { StatTile } from './ui/StatTile/StatTile';
+export {
+    EStatTileEmphasis,
+    EStatTrend,
+    type StatDelta,
+    type StatTileProps,
+} from './ui/StatTile/StatTile.types';
+export { TileRow } from './ui/StatTile/TileRow';
+export { type TileRowProps } from './ui/StatTile/TileRow.types';
 export { StepTrack } from './ui/StepTrack/StepTrack';
 export {
     EStepState,

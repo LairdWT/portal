@@ -114,6 +114,11 @@
     /* Control sizing */
     --portal-size-pad: clamp(6rem, 24vw, 12rem);
 
+    /* Metric tile grid floor. The responsive auto-fit minimum tile width that
+     * TileRow wraps below; a rem layout floor, distinct from the bevel/metal
+     * visual tokens. */
+    --portal-stat-tile-min: 12rem;
+
     /* Auxiliary font sizes */
     --portal-size-font-tiny: 0.5rem;
     --portal-size-font-small: 1rem;

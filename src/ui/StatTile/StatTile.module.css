@@ -1,0 +1,116 @@
+/*
+ * StatTile. A large, non-interactive stacked metric readout for the generic UI
+ * layer - the value-led (Hero) and label-led (Metric) sibling of StatPill. The
+ * root carries the tone scope and composes the shared machined bevel corner from
+ * surfaces.module.css; the crisp HUD edge is a thin --portal-tone-border with an
+ * outer --portal-tone-glow, keyed brighter on the focal Hero tile. The focal
+ * value stays high-contrast text-0 (tone drives the edge, never the number) and
+ * uses --portal-font-mono with tabular-nums for the console/telemetry feel. The
+ * directional caret is decorative; the spoken trend word lives in the aria-label.
+ * Only --portal-* tokens and the derived --portal-tone-* vars are referenced - no
+ * literal colors or pixels, and no fixed-pixel layout. The Hero metal accent rule
+ * is static (no animated ring); motion is added only when motion is allowed.
+ */
+
+.root {
+    composes: beveled from '../../theme/surfaces.module.css';
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-2);
+    padding-block: var(--portal-space-4);
+    padding-inline: max(var(--portal-space-4), env(safe-area-inset-left))
+        max(var(--portal-space-4), env(safe-area-inset-right));
+    border: var(--portal-border-thickness-thin) solid var(--portal-tone-border);
+    border-radius: var(--portal-bevel-3);
+    background-color: var(--portal-tone-fill);
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+    line-height: var(--portal-line-height-tight);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .root {
+        transition:
+            border-color var(--portal-duration-ui-base)
+                var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ui-base) var(--portal-easing-standard);
+    }
+}
+
+.root[data-emphasis='hero'] {
+    box-shadow: 0 0 var(--portal-space-4) var(--portal-tone-glow-strong);
+}
+
+/* Static brushed-metal hero rule. Marks the hero number as a machined console
+   hero; rendered only on the Hero tile and never the animated metal ring. */
+.accentRule {
+    inline-size: var(--portal-space-7);
+    block-size: var(--portal-space-1);
+    border-radius: var(--portal-radius-pill);
+    background: var(--portal-gradient-metal);
+}
+
+.value {
+    font-family: var(--portal-font-mono);
+    font-weight: var(--portal-weight-label-bold);
+    font-variant-numeric: tabular-nums;
+    color: var(--portal-color-text-0);
+}
+
+.root[data-emphasis='hero'] .value {
+    font-size: var(--portal-size-font-medium);
+}
+
+.root[data-emphasis='metric'] .value {
+    font-size: var(--portal-size-text-lg);
+    font-weight: var(--portal-weight-label-strong);
+}
+
+.unit {
+    font-family: var(--portal-font-sans);
+    font-size: var(--portal-size-text-sm);
+    font-weight: var(--portal-weight-label-strong);
+    color: var(--portal-color-text-1);
+}
+
+.label {
+    font-size: var(--portal-size-text-sm);
+    letter-spacing: var(--portal-letter-spacing-wide);
+    color: var(--portal-color-text-1);
+}
+
+/* Metric emphasis is label-led: the label reads first, the value sits below. */
+.root[data-emphasis='metric'] .label {
+    order: -1;
+}
+
+.delta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--portal-space-1);
+    font-size: var(--portal-size-text-sm);
+}
+
+.caret {
+    inline-size: var(--portal-space-3);
+    block-size: var(--portal-space-3);
+    background-color: var(--portal-tone-accent);
+}
+
+.delta[data-trend='up'] .caret {
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+.delta[data-trend='down'] .caret {
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+}
+
+.delta[data-trend='flat'] .caret {
+    clip-path: polygon(0 40%, 100% 40%, 100% 60%, 0 60%);
+}
+
+.deltaValue {
+    font-variant-numeric: tabular-nums;
+    color: var(--portal-color-text-1);
+}
