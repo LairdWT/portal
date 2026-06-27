@@ -4,6 +4,22 @@ All notable changes to this project are documented in this file. The format is
 based on Keep a Changelog, and the project follows Semantic Versioning with the
 0.x caveat that, before 1.0, a minor version may carry a breaking change.
 
+## [0.10.1] - 2026-06-27
+
+Internal tooling only; no public API, component, or runtime behavior change.
+
+### Changed
+
+- Hardened the lint gate to enforce three TypeScript conventions the codebase
+  already followed by hand (all at zero findings): `explicit-module-boundary-types`
+  and `explicit-function-return-type` (return types on the public boundary and on
+  internal named functions / const arrows; inline contextually-typed callbacks
+  exempt), and `switch-exhaustiveness-check` (`considerDefaultExhaustiveForUnions`
+  true, so no-default union switches still require every member while meaningful
+  defaults are accepted). `CodingStandards.md` was broadened to match the gate.
+- Documented the invariant behind the three legitimate boundary type assertions
+  (two List bounded-index `undefined`-strips and the Tooltip child narrow).
+
 ## [0.10.0] - 2026-06-27
 
 This release restyles the generic-UI layer into the machined-HUD bevel language
