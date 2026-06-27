@@ -380,6 +380,9 @@ export function List<Item>(props: ListProps<Item>): ReactElement {
         return `${listId}-row-${key}`;
     }
 
+    // activeIndex, when non-negative, is clamped into [0, items.length - 1], so
+    // items[activeIndex] is provably in-bounds; the cast only strips the
+    // `| undefined` that noUncheckedIndexedAccess injects (satisfies cannot).
     const activeKey: string | undefined =
         isInteractive && activeIndex >= 0
             ? getItemKey(items[activeIndex] as Item, activeIndex)
@@ -388,6 +391,9 @@ export function List<Item>(props: ListProps<Item>): ReactElement {
         activeKey !== undefined ? rowDomId(activeKey) : undefined;
 
     function renderRow(index: number): ReactElement {
+        // renderRow is called only with in-bounds indices (the windowed
+        // startIndex..endIndex range and the clamped activeIndex), so the cast
+        // only strips noUncheckedIndexedAccess's `| undefined` on a valid index.
         const item: Item = items[index] as Item;
         const key: string = getItemKey(item, index);
         const selected: boolean = isInteractive && selectedSet.has(key);

@@ -42,6 +42,11 @@ export function Tooltip({
     closeDelayMs = 0,
     tone,
 }: TooltipProps): ReactElement {
+    // TooltipProps types `children` as a single ReactElement; the component's
+    // contract is that the child is a trigger element accepting the trigger props
+    // (aria-describedby et al.), so narrowing to ReactElement<TriggerProps> to
+    // read and clone those props is sound. The value is wider than the target, so
+    // `satisfies` cannot express this React children-typing boundary.
     const element: ReactElement<TriggerProps> =
         children as ReactElement<TriggerProps>;
     const childProps: TriggerProps = element.props;
