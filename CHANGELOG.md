@@ -4,6 +4,63 @@ All notable changes to this project are documented in this file. The format is
 based on Keep a Changelog, and the project follows Semantic Versioning with the
 0.x caveat that, before 1.0, a minor version may carry a breaking change.
 
+## [0.10.0] - 2026-06-27
+
+This release restyles the generic-UI layer into the machined-HUD bevel language
+of the game-input controllers and completes Helicon component-type parity for
+the P2 data-and-navigation tier (fourteen new component types).
+
+### Added
+
+- Bevel / HUD visual-language foundation. New shared tokens in `tokens.css`
+  (`--portal-corner-shape: bevel`, `--portal-bevel-1/2/3` aliasing the radius
+  scale, `--portal-hud-fill/-edge-width/-glow`, `--portal-weight-label-bold/
+-strong`) and a new `src/theme/surfaces.module.css` of composable utilities
+  (`.beveled`, `.metalTrim` animated ring + shared sheen keyframe, `.metalEdge`,
+  `.metalFace`, `.wideLabel`, `.pressScale`) that components adopt by `composes`
+  reference so no component re-invents a bevel or metal value.
+- `Breadcrumb`, `Pagination`, `NumberStepper`, `Rating` - navigation and input
+  primitives.
+- `NavRail`, `StatTile` (+ `TileRow`), `KeyValue`, and the `Chart` family
+  (`BarChart`, `StackedBar`, `RankedBars`, `RatioBar`, `LegendRow`) - density
+  and metric surfaces.
+- `TreeView` - a controlled, interface-forwarding `role=tree` with the APG
+  keyboard model; expansion is a controlled `ReadonlySet` driven by new pure
+  helpers in `src/ui/expansion.ts` (`toggleExpanded`, `setExpanded`,
+  `expandAll`, `collapseAll`).
+- `DataTable` - an always-virtualized `role=grid` with sortable headers, a
+  controlled none/single/multi selection model (Ctrl-toggle, Shift-range), and
+  a roving 2D `aria-activedescendant` cursor. Row windowing comes from a new
+  shared `useVirtualWindow` hook.
+- `Menu`, `MenuBar`, and `ContextMenu` - a Popover-based menu family with
+  submenus, checkable/radio items, separators, type-ahead, and full APG
+  keyboard. `EPopoverRole` gains a `Group` member for the menu surface frame.
+- `ColorPicker` - a controlled hex color editor (RGB/HSV/Hex modes, optional
+  alpha) over a dependency-free color-math core.
+- `Accordion` - a controlled APG disclosure list with a type-safe single/
+  multiple mode union, `inert` collapsed panels, and a reduced-motion-gated
+  grid-rows reveal.
+- `List` and `SearchableList` - a generic virtualized `List<Item>` (single/
+  multi selection, full keyboard with type-ahead) reusing `useVirtualWindow`,
+  and a master-detail `SearchableList<Item>` composed from `SearchBox`, the
+  inner `List`, and `EmptyState`.
+- `useVirtualWindow` - a shared, dependency-free vertical row-windowing hook
+  (fixed row height, overscan) exported for consumer use and reused by
+  `DataTable` and `List`.
+
+### Changed
+
+- VISIBLE restyle. The eighteen existing `src/ui` components are retrofitted
+  from the drifted rounded / squircle corners to the beveled machined-HUD edge
+  (`CTA`, `SelectableTile`, `SegmentedControl`, `Tabs`, `TextField`,
+  `SecretField`, `SearchBox`, `Select`, `Panel`, `ReadoutPanel`, `Dialog`,
+  `Popover`, `Badge`, `Chip`, `StatPill`, `StepTrack`, `Progress`, `Banner`;
+  `Tooltip`/`Toast` inherit by cascade). Decorative circular markers are kept.
+- Tone remains authoritative for borders, carets, and glows only; AA-critical
+  text stays on the contrast-safe text/accent tokens, never an arbitrary tone.
+- The stylelint config exempts the CSS-modules `composes` property from
+  `value-keyword-case` so the camelCase shared utilities compose cleanly.
+
 ## [0.9.0] - 2026-06-26
 
 ### Added
