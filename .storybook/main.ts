@@ -1,4 +1,35 @@
 import type { StorybookConfig } from '@storybook/react-vite';
+import type { InlineConfig, PluginOption } from 'vite';
+
+// The project vite config carries vite-plugin-dts (name 'vite:dts') for the
+// library type emit. With rollupTypes it invokes api-extractor against
+// ./dist/index.d.ts, which only exists after `pnpm build`. Storybook inherits
+// the project vite plugins, so a cold `build-storybook` (CI, no prior build)
+// would run that rollup and fail ("mainEntryPointFilePath ... does not exist").
+// The docs site ships no declarations, so strip the dts plugin from the
+// Storybook build entirely.
+const isDtsPlugin: (plugin: PluginOption) => boolean = (
+    plugin: PluginOption,
+): boolean =>
+    typeof plugin === 'object' &&
+    plugin !== null &&
+    'name' in plugin &&
+    plugin.name === 'vite:dts';
+
+const stripDtsPlugin: (plugins: PluginOption[]) => PluginOption[] = (
+    plugins: PluginOption[],
+): PluginOption[] =>
+    plugins.reduce<PluginOption[]>(
+        (kept: PluginOption[], plugin: PluginOption): PluginOption[] => {
+            if (Array.isArray(plugin)) {
+                kept.push(stripDtsPlugin(plugin));
+            } else if (!isDtsPlugin(plugin)) {
+                kept.push(plugin);
+            }
+            return kept;
+        },
+        [],
+    );
 
 const config: StorybookConfig = {
     stories: ['../src/**/*.mdx', '../src/**/*.stories.tsx'],
@@ -30,6 +61,12 @@ const config: StorybookConfig = {
     },
     docs: {
         defaultName: 'Docs',
+    },
+    viteFinal: (viteConfig: InlineConfig): InlineConfig => {
+        if (Array.isArray(viteConfig.plugins)) {
+            viteConfig.plugins = stripDtsPlugin(viteConfig.plugins);
+        }
+        return viteConfig;
     },
 };
 
