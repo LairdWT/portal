@@ -207,7 +207,7 @@ export function ToastProvider({
             if (duration <= 0) {
                 return;
             }
-            const startedAt: number = Date.now();
+            const startedAt: number = performance.now();
             const timerId: number = window.setTimeout((): void => {
                 dismiss(id);
             }, duration);
@@ -234,7 +234,7 @@ export function ToastProvider({
                     timersRef.current.set(id, {
                         timerId: null,
                         remaining: duration,
-                        startedAt: Date.now(),
+                        startedAt: performance.now(),
                     });
                 }
             } else {
@@ -260,7 +260,7 @@ export function ToastProvider({
             return;
         }
         pausedRef.current = true;
-        const now: number = Date.now();
+        const now: number = performance.now();
         timersRef.current.forEach((entry: TimerEntry, id: string): void => {
             if (entry.timerId !== null) {
                 window.clearTimeout(entry.timerId);
