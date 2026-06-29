@@ -26,22 +26,60 @@ export default defineConfig({
         reuseExistingServer: !process.env.CI,
         timeout: 180_000,
     },
+    // The 7 device/media projects run ONLY the two layout specs - keyboard /
+    // overlay / selection semantics do not vary by viewport, so the behavior specs
+    // are ignored here and confined to the two dedicated projects below (desktop +
+    // forced-colors), avoiding a 7x run-cost and flake multiplier.
     projects: [
-        { name: 'phone-portrait', use: { ...devices['Pixel 5'] } },
-        { name: 'phone-landscape', use: { ...devices['Pixel 5 landscape'] } },
-        { name: 'tablet-portrait', use: { ...devices['Galaxy Tab S4'] } },
+        {
+            name: 'phone-portrait',
+            use: { ...devices['Pixel 5'] },
+            testIgnore: '**/behavior/**',
+        },
+        {
+            name: 'phone-landscape',
+            use: { ...devices['Pixel 5 landscape'] },
+            testIgnore: '**/behavior/**',
+        },
+        {
+            name: 'tablet-portrait',
+            use: { ...devices['Galaxy Tab S4'] },
+            testIgnore: '**/behavior/**',
+        },
         {
             name: 'tablet-landscape',
             use: { ...devices['Galaxy Tab S4 landscape'] },
+            testIgnore: '**/behavior/**',
         },
-        { name: 'desktop-chrome', use: { ...devices['Desktop Chrome'] } },
+        {
+            name: 'desktop-chrome',
+            use: { ...devices['Desktop Chrome'] },
+            testIgnore: '**/behavior/**',
+        },
         {
             name: 'reduced-motion',
             use: { ...devices['Pixel 5'], reducedMotion: 'reduce' },
+            testIgnore: '**/behavior/**',
         },
         {
             name: 'forced-colors',
             use: { ...devices['Desktop Chrome'], forcedColors: 'active' },
+            testIgnore: '**/behavior/**',
+        },
+        // The behavior specs run once on a real desktop Chromium - the correct
+        // context for focus / Tab / portal / scroll semantics.
+        {
+            name: 'behavior',
+            use: { ...devices['Desktop Chrome'] },
+            testMatch: '**/behavior/**',
+        },
+        // A second behavior run under forced-colors proves the selected / active /
+        // focus states survive forced-colors (a real-browser-only check the axe
+        // story project cannot emulate).
+        {
+            name: 'behavior-forced-colors',
+            use: { ...devices['Desktop Chrome'], forcedColors: 'active' },
+            testMatch: '**/behavior/**',
         },
     ],
 });

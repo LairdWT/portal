@@ -7,6 +7,7 @@ import {
     type InputSignal,
 } from '@laird-wt/portal';
 
+import { FIXTURES } from './fixtures/registry';
 import { SecretFieldDemo } from './SecretFieldDemo';
 
 // Live readouts derived from the most recent signal of each value type. The
@@ -31,7 +32,11 @@ function magnitudeForSignal(signal: InputSignal): number {
     }
 }
 
-export function App(): ReactElement {
+// The default application tree (ControlSurface + SecretFieldDemo) rendered when
+// no `?fixture=` query selects a behavior fixture. Extracted from App so the
+// signal-handling hooks always run unconditionally (rules-of-hooks) while App
+// itself only branches on the query param.
+function DefaultApp(): ReactElement {
     const [readoutMap, setReadoutMap]: [
         ReadoutMap,
         (next: (previous: ReadoutMap) => ReadoutMap) => void,
@@ -73,4 +78,21 @@ export function App(): ReactElement {
             </section>
         </>
     );
+}
+
+// Query-param fixture router (zero new dependency): App reads `?fixture=<key>` and
+// renders the matching behavior fixture, falling through to the default app tree
+// for an absent or unknown key so the two existing layout specs keep passing. The
+// branch is hook-free (DefaultApp and each fixture own their own hooks), so the
+// conditional return never trips rules-of-hooks.
+export function App(): ReactElement {
+    const fixtureKey: string | null = new URLSearchParams(
+        window.location.search,
+    ).get('fixture');
+    const Fixture: (() => ReactElement) | undefined =
+        fixtureKey !== null ? FIXTURES[fixtureKey] : undefined;
+    if (Fixture !== undefined) {
+        return <Fixture />;
+    }
+    return <DefaultApp />;
 }

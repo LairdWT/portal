@@ -1,0 +1,298 @@
+// Consumer-install packaging smoke (zero new dependency: tsc + node only).
+//
+// Distinct from src/index.smoke.test.ts, which imports the four subpaths through
+// SOURCE inside vitest. This script packs the real tarball and resolves every
+// published subpath the way an INSTALLED consumer would, under BOTH a node16/ESM
+// resolver and a bundler resolver, then loads each entry at runtime under Node
+// ESM. It catches the ESM-only exports-map risk (exports carry only types+import,
+// no require/default) and any subpath .d.ts or asset that fails to resolve.
+//
+// It is self-contained: build -> pack -> install into throwaway consumers ->
+// tsc type-resolution -> node runtime-resolution. Scratch lives under the OS temp
+// dir; it is deleted on success and left (with its path printed) on failure for
+// diagnosis. Exits non-zero on any failure.
+
+import { spawnSync } from 'node:child_process';
+import {
+    existsSync,
+    mkdirSync,
+    mkdtempSync,
+    readdirSync,
+    readFileSync,
+    rmSync,
+    writeFileSync,
+} from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join, resolve } from 'node:path';
+import process from 'node:process';
+import { fileURLToPath } from 'node:url';
+
+const scriptDir = dirname(fileURLToPath(import.meta.url));
+const repoRoot = resolve(scriptDir, '..');
+const pkg = JSON.parse(readFileSync(join(repoRoot, 'package.json'), 'utf8'));
+const packageName = pkg.name;
+const tarballBase = `${packageName.replace('@', '').replace('/', '-')}-${pkg.version}.tgz`;
+
+// Runtime peers (installed so the ./r3f runtime import resolves) and their type
+// packages, pinned to the versions already in devDependencies so resolution
+// matches what the library was built and typechecked against.
+const RUNTIME_PEERS = [
+    'react',
+    'react-dom',
+    'animejs',
+    'three',
+    '@react-three/fiber',
+    '@react-three/drei',
+];
+const TYPE_PEERS = ['@types/react', '@types/react-dom', '@types/three'];
+
+// Each subpath resolved by both the type and the runtime checks. styles.css has
+// no types (it is an asset), so it is asserted at runtime only.
+const SUBPATHS = [
+    '@laird-wt/portal',
+    '@laird-wt/portal/theme',
+    '@laird-wt/portal/r3f',
+    '@laird-wt/portal/shaders',
+    '@laird-wt/portal/styles.css',
+];
+
+// `typesAdvisory` marks a resolver whose TYPE leg is reported but NOT fatal.
+// node16/nodenext TYPE resolution fails against the frozen 1.0 d.ts because the
+// emitted declarations use extensionless rollup re-exports (`export * from
+// './src/index'`) that node16 ESM rejects - a real packaging gap owned by the
+// Track-5 PK d.ts-extension work, OUT of scope for this Track-3 (no src/build
+// change). It is surfaced loudly as a KNOWN-GAP every run rather than hidden. The
+// node16 RUNTIME leg (which proves the ESM-only exports map actually loads under
+// Node ESM - the PK-3 "no require condition" risk) stays a hard gate, as do both
+// bundler legs.
+const RESOLVERS = [
+    {
+        name: 'node16',
+        moduleResolution: 'node16',
+        module: 'node16',
+        typesAdvisory: true,
+    },
+    {
+        name: 'bundler',
+        moduleResolution: 'bundler',
+        module: 'esnext',
+        typesAdvisory: false,
+    },
+];
+
+const failures = [];
+
+// Output helper routed through process.stdout (the eslint config gives this
+// Node script no browser/node globals, so `console` is intentionally avoided).
+function log(line) {
+    process.stdout.write(`${line}\n`);
+}
+
+function reportPass(label) {
+    log(`PASS  ${label}`);
+}
+
+function reportFail(label, detail) {
+    log(`FAIL  ${label}`);
+    if (detail.length > 0) {
+        log(detail);
+    }
+    failures.push(label);
+}
+
+// Run a shell command (pnpm resolves to a .cmd on Windows, so shell:true is
+// required). Returns the captured result so the caller can branch on status.
+function runShell(command, cwd) {
+    return spawnSync(command, {
+        cwd,
+        shell: true,
+        encoding: 'utf8',
+    });
+}
+
+function pinnedSpec(name) {
+    const version = pkg.devDependencies[name];
+    if (typeof version !== 'string') {
+        throw new Error(`Missing devDependency version for ${name}`);
+    }
+    return `${name}@${version}`;
+}
+
+function writeConsumerSources(consumerDir, resolver) {
+    writeFileSync(
+        join(consumerDir, 'package.json'),
+        `${JSON.stringify(
+            {
+                name: `portal-smoke-${resolver.name}`,
+                version: '0.0.0',
+                private: true,
+                type: 'module',
+            },
+            null,
+            4,
+        )}\n`,
+    );
+    // Import a real named symbol from each typed subpath so the resolver must load
+    // every subpath's .d.ts; styles.css is excluded here (no types) and checked at
+    // runtime instead.
+    writeFileSync(
+        join(consumerDir, 'consumer.ts'),
+        [
+            "import { CTA } from '@laird-wt/portal';",
+            "import { OrbBackdrop } from '@laird-wt/portal/r3f';",
+            "import { MAX_RIPPLES } from '@laird-wt/portal/shaders';",
+            "import { PORTAL_TOKENS } from '@laird-wt/portal/theme';",
+            '',
+            'export const used: readonly unknown[] = [',
+            '    CTA,',
+            '    OrbBackdrop,',
+            '    MAX_RIPPLES,',
+            '    PORTAL_TOKENS,',
+            '];',
+            '',
+        ].join('\n'),
+    );
+    writeFileSync(
+        join(consumerDir, 'tsconfig.json'),
+        `${JSON.stringify(
+            {
+                compilerOptions: {
+                    module: resolver.module,
+                    moduleResolution: resolver.moduleResolution,
+                    noEmit: true,
+                    strict: true,
+                    jsx: 'react-jsx',
+                    skipLibCheck: true,
+                    lib: ['ESNext', 'DOM'],
+                },
+                include: ['consumer.ts'],
+            },
+            null,
+            4,
+        )}\n`,
+    );
+}
+
+const RUNTIME_PROBE = [
+    "await import('@laird-wt/portal');",
+    "await import('@laird-wt/portal/theme');",
+    "await import('@laird-wt/portal/shaders');",
+    "await import('@laird-wt/portal/r3f');",
+    "const { existsSync: exists } = await import('node:fs');",
+    "const { fileURLToPath: toPath } = await import('node:url');",
+    "const url = import.meta.resolve('@laird-wt/portal/styles.css');",
+    "if (!exists(toPath(url))) { throw new Error('styles.css subpath unresolved'); }",
+].join('\n');
+
+function main() {
+    log(`Packaging smoke for ${packageName}@${pkg.version}`);
+    log(`Subpaths under test: ${SUBPATHS.join(', ')}`);
+
+    const build = runShell('pnpm build', repoRoot);
+    if (build.status !== 0) {
+        reportFail('build', `${build.stdout ?? ''}${build.stderr ?? ''}`);
+        finish(null);
+        return;
+    }
+    reportPass('build');
+
+    const scratch = mkdtempSync(join(tmpdir(), 'portal-smoke-'));
+    const pack = runShell(`pnpm pack --pack-destination "${scratch}"`, repoRoot);
+    if (pack.status !== 0) {
+        reportFail('pack', `${pack.stdout ?? ''}${pack.stderr ?? ''}`);
+        finish(scratch);
+        return;
+    }
+    const tgz = locateTarball(scratch);
+    if (tgz === null) {
+        reportFail('pack', `No .tgz produced in ${scratch}`);
+        finish(scratch);
+        return;
+    }
+    reportPass('pack');
+
+    const installSpecs = [
+        ...RUNTIME_PEERS.map(pinnedSpec),
+        ...TYPE_PEERS.map(pinnedSpec),
+    ].join(' ');
+
+    for (const resolver of RESOLVERS) {
+        const consumerDir = join(scratch, resolver.name);
+        mkdirSync(consumerDir, { recursive: true });
+        writeConsumerSources(consumerDir, resolver);
+
+        const install = runShell(
+            `pnpm add --ignore-workspace "${tgz}" ${installSpecs}`,
+            consumerDir,
+        );
+        if (install.status !== 0) {
+            reportFail(
+                `install (${resolver.name})`,
+                `${install.stdout ?? ''}${install.stderr ?? ''}`,
+            );
+            continue;
+        }
+        reportPass(`install (${resolver.name})`);
+
+        // TYPE resolution: a non-zero tsc exit means a subpath type entry did not
+        // resolve under this resolver.
+        const tscConfig = join(consumerDir, 'tsconfig.json');
+        const tsc = runShell(`pnpm exec tsc --noEmit -p "${tscConfig}"`, repoRoot);
+        if (tsc.status !== 0 && resolver.typesAdvisory) {
+            // Reported, not fatal: a frozen-artifact d.ts gap owned by Track-5 PK.
+            log(`KNOWN-GAP  types (${resolver.name}) [advisory, see Track-5 PK]`);
+            log(`${tsc.stdout ?? ''}${tsc.stderr ?? ''}`);
+        } else if (tsc.status !== 0) {
+            reportFail(
+                `types (${resolver.name})`,
+                `${tsc.stdout ?? ''}${tsc.stderr ?? ''}`,
+            );
+        } else {
+            reportPass(`types (${resolver.name})`);
+        }
+
+        // RUNTIME resolution: every subpath import must actually load, and the
+        // styles.css subpath must resolve to an existing file.
+        const runtime = spawnSync(
+            process.execPath,
+            ['--input-type=module', '-e', RUNTIME_PROBE],
+            { cwd: consumerDir, encoding: 'utf8' },
+        );
+        if (runtime.status !== 0) {
+            reportFail(
+                `runtime (${resolver.name})`,
+                `${runtime.stdout ?? ''}${runtime.stderr ?? ''}`,
+            );
+        } else {
+            reportPass(`runtime (${resolver.name})`);
+        }
+    }
+
+    finish(scratch);
+}
+
+function locateTarball(scratch) {
+    const direct = join(scratch, tarballBase);
+    if (existsSync(direct)) {
+        return direct;
+    }
+    const found = readdirSync(scratch).find((entry) => entry.endsWith('.tgz'));
+    return found === undefined ? null : join(scratch, found);
+}
+
+function finish(scratch) {
+    if (failures.length === 0) {
+        if (scratch !== null) {
+            rmSync(scratch, { recursive: true, force: true });
+        }
+        log('Packaging smoke PASSED');
+        process.exit(0);
+    }
+    log(`Packaging smoke FAILED (${failures.length}): ${failures.join(', ')}`);
+    if (scratch !== null) {
+        log(`Scratch left for diagnosis: ${scratch}`);
+    }
+    process.exit(1);
+}
+
+main();

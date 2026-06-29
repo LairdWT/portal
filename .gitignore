@@ -4,5 +4,6 @@ storybook-static
 coverage
 playwright-report
 test-results
+.smoke
 *.tsbuildinfo
 .DS_Store
