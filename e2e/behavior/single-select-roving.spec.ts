@@ -1,4 +1,10 @@
-import { expect, type Locator, type Page, test } from '@playwright/test';
+import {
+    expect,
+    type Locator,
+    type Page,
+    test,
+    type TestInfo,
+} from '@playwright/test';
 
 // Single-select roving / activation behavior. NET-NEW over the jsdom unit suite
 // (which already locks the onChange payload logic): this exercises REAL browser
@@ -180,4 +186,42 @@ test('Select opens as a combobox and selects via aria-activedescendant', async (
     await trigger.press('Escape');
     await expect(trigger).toHaveAttribute('aria-expanded', 'false');
     await expect(readout).toHaveText(committed);
+});
+
+const GENERATED_INDICATOR: string = '""';
+
+test('forced-colors: the selected tab exposes a non-color indicator box', async ({
+    page,
+}: { page: Page }, testInfo: TestInfo): Promise<void> => {
+    // Gate to the forced-colors project only. This proves the selected indicator
+    // survives as a STRUCTURAL cue once the OS strips author colors, so it must
+    // not run/assert under the plain desktop project (where colors are intact).
+    test.skip(
+        testInfo.project.name !== 'behavior-forced-colors',
+        'forced-colors indicator check runs only under forced-colors emulation',
+    );
+
+    await page.goto(FIXTURE_URL);
+
+    const overview: Locator = page.getByRole('tab', { name: 'Overview' });
+    const details: Locator = page.getByRole('tab', { name: 'Details' });
+
+    // Overview is the controlled selection on load; Details is not.
+    await expect(overview).toHaveAttribute('aria-selected', 'true');
+    await expect(details).toHaveAttribute('aria-selected', 'false');
+
+    // The selected tab generates a dedicated ::after rail (content: '') as a
+    // redundancy alongside aria-selected; the unselected tab generates none. The
+    // rail is a positional box, not a hue, so it remains a distinguishing cue
+    // when forced-colors overrides every author color (the same generated-marker
+    // pattern backs the RadioGroup dot and the SegmentedControl rail).
+    const selectedIndicator: string = await overview.evaluate(
+        (el: Element): string => window.getComputedStyle(el, '::after').content,
+    );
+    const unselectedIndicator: string = await details.evaluate(
+        (el: Element): string => window.getComputedStyle(el, '::after').content,
+    );
+
+    expect(selectedIndicator).toBe(GENERATED_INDICATOR);
+    expect(unselectedIndicator).not.toBe(GENERATED_INDICATOR);
 });

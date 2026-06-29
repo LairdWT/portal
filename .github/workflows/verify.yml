@@ -1,0 +1,34 @@
+name: Verify
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+    workflow_dispatch:
+
+permissions:
+    contents: read
+
+jobs:
+    verify:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+            - name: Install pnpm
+              uses: pnpm/action-setup@v4
+            - name: Set up Node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 22
+                  cache: pnpm
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+            # `pnpm verify` -> `pnpm test:run` runs vitest across BOTH the jsdom
+            # `unit` project and the `storybook` project; the storybook project
+            # uses @vitest/browser-playwright (real Chromium), so the browser must
+            # be installed before verify or test:run cannot launch it.
+            - name: Install Playwright Chromium
+              run: pnpm exec playwright install --with-deps chromium
+            - name: Run verify
+              run: pnpm verify
