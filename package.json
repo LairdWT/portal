@@ -54,7 +54,8 @@
         "format": "prettier . --write",
         "format:check": "prettier . --check",
         "test": "vitest",
-        "test:run": "vitest run",
+        "test:run": "vitest run --project unit",
+        "test:stories": "vitest run --project storybook",
         "test:coverage": "vitest run --coverage",
         "e2e": "playwright test",
         "e2e:behavior": "playwright test --project=behavior",
@@ -62,7 +63,7 @@
         "example:typecheck": "pnpm -C example exec tsc --noEmit",
         "storybook": "storybook dev -p 6006",
         "build-storybook": "storybook build",
-        "verify": "pnpm typecheck && pnpm lint && pnpm lint:css && pnpm format:check && pnpm test:run && pnpm build"
+        "verify": "pnpm typecheck && pnpm lint && pnpm lint:css && pnpm format:check && pnpm test:run && pnpm test:stories && pnpm build"
     },
     "peerDependencies": {
         "@react-three/drei": ">=9",

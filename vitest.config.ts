@@ -73,6 +73,17 @@ export default defineConfig({
         coverage: {
             provider: 'v8',
             reportsDirectory: './coverage',
+            include: ['src/**/*.{ts,tsx}'],
+            // Thresholds sit a few points below the measured numbers (stmts
+            // 87.5 / branch 79.5 / funcs 91.8 / lines 87.0) so the gate catches
+            // a real regression without tripping on routine churn. Enforced in
+            // CI (test:coverage), kept out of the fast inner-loop verify.
+            thresholds: {
+                statements: 83,
+                branches: 75,
+                functions: 88,
+                lines: 83,
+            },
         },
     },
 });

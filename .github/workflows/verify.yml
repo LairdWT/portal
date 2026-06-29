@@ -24,11 +24,15 @@ jobs:
                   cache: pnpm
             - name: Install dependencies
               run: pnpm install --frozen-lockfile
-            # `pnpm verify` -> `pnpm test:run` runs vitest across BOTH the jsdom
-            # `unit` project and the `storybook` project; the storybook project
-            # uses @vitest/browser-playwright (real Chromium), so the browser must
-            # be installed before verify or test:run cannot launch it.
+            # `pnpm verify` runs the jsdom `unit` project (`pnpm test:run`) and
+            # then the `storybook` project (`pnpm test:stories`, the axe a11y
+            # gate). The storybook project uses @vitest/browser-playwright (real
+            # Chromium), so the browser must be installed before verify runs.
             - name: Install Playwright Chromium
               run: pnpm exec playwright install --with-deps chromium
             - name: Run verify
               run: pnpm verify
+            # Coverage is gated in CI only (thresholds in vitest.config.ts), kept
+            # out of the fast inner-loop `verify` so local iteration stays quick.
+            - name: Coverage gate
+              run: pnpm test:coverage
