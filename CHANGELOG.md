@@ -4,9 +4,14 @@ All notable changes to this project are documented in this file. The format is
 based on Keep a Changelog, and the project follows Semantic Versioning with the
 0.x caveat that, before 1.0, a minor version may carry a breaking change.
 
-## [Unreleased]
+## [1.0.0] - 2026-06-29
 
-1.0 stabilization (in progress) plus the earlier deferred-backlog quality work.
+The first stable release. Following a 1.0-readiness audit, the public API is
+frozen: a set of pre-1.0 breaking corrections (below) make the surface
+internally consistent, and a compile-time freeze contract
+(`src/index.contract.test.ts`) plus a barrel export-name snapshot
+(`src/index.barrel.test.ts`) guard it. From here, 1.x follows semver - breaking
+changes will be major. Also folds in the deferred-backlog quality work.
 
 ### Breaking
 
@@ -68,6 +73,12 @@ surface is internally consistent. A compile-time freeze contract
 - Internal: the shared `.pressScale` surface utility's `scale()` factor moved
   from a literal to a `--portal-press-scale` token (mirrored in `PORTAL_TOKENS`),
   removing the last magic number from `surfaces.module.css`.
+- Packaging: the published tarball no longer includes the non-public example or
+  typecheck-only declarations (the example `.d.ts` and the stray `tsc` emit are
+  excluded from `dist`). The README import samples and the component catalogue
+  are corrected, the required `animejs` peer and the ESM-only resolver
+  requirement are documented, and the `./shaders` entry point is documented. A
+  package entry-point smoke test guards the `exports`-map subpaths.
 
 ## [0.12.0] - 2026-06-27
 
