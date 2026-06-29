@@ -2,9 +2,9 @@ import { render, screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import { ReadoutPanel } from './ReadoutPanel';
-import { type UiReadout } from './ReadoutPanel.types';
+import { type Readout } from './ReadoutPanel.types';
 
-const readouts: readonly UiReadout[] = [
+const readouts: readonly Readout[] = [
     { id: 'energy', label: 'Energy', value: 7 },
     { id: 'shield', label: 'Shield', value: 42 },
     { id: 'phase', label: 'Phase', value: 'combat' },
@@ -57,7 +57,7 @@ describe('ReadoutPanel', (): void => {
 
     it('applies a per-readout tone independently of the panel', (): void => {
         const rowTone: string = 'rgb(0, 128, 255)';
-        const tonedReadouts: readonly UiReadout[] = [
+        const tonedReadouts: readonly Readout[] = [
             { id: 'energy', label: 'Energy', value: 7, tone: rowTone },
             { id: 'shield', label: 'Shield', value: 42 },
         ];

@@ -14,18 +14,18 @@ import styles from './SegmentedControl.module.css';
 import {
     ESegmentState,
     type SegmentedControlProps,
-    type UiSegmentItem,
+    type SegmentItem,
 } from './SegmentedControl.types';
 
 // Resolves the index of the currently selected segment, falling back to the
 // first segment when the controlled value matches no item, so focus and roving
 // tabindex always have a valid target.
 function resolveSelectedIndex(
-    items: readonly UiSegmentItem[],
+    items: readonly SegmentItem[],
     value: string,
 ): number {
     const index: number = items.findIndex(
-        (item: UiSegmentItem): boolean => item.id === value,
+        (item: SegmentItem): boolean => item.id === value,
     );
     return index === -1 ? 0 : index;
 }
@@ -62,7 +62,7 @@ export function SegmentedControl({
             case EEnabledState.Disabled:
                 return;
             case EEnabledState.Enabled: {
-                const nextItem: UiSegmentItem | undefined = items[index];
+                const nextItem: SegmentItem | undefined = items[index];
                 if (nextItem === undefined) {
                     return;
                 }
@@ -129,7 +129,7 @@ export function SegmentedControl({
             {...(label !== undefined ? { 'aria-label': label } : {})}
             {...(labelledBy !== undefined ? { 'aria-labelledby': labelledBy } : {})}
         >
-            {items.map((item: UiSegmentItem, index: number): ReactElement => {
+            {items.map((item: SegmentItem, index: number): ReactElement => {
                 const isSelected: boolean = item.id === value;
                 const segmentState: ESegmentState = isSelected
                     ? ESegmentState.Selected

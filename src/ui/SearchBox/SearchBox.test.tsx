@@ -16,15 +16,15 @@ const FIELD_LABEL: string = 'Search cards';
 const CLEAR_LABEL: string = 'Clear search';
 
 // A controlled host so userEvent.type drives a real, updating value while still
-// exercising the onChange contract.
+// exercising the onValueChange contract.
 function ControlledHost(props: SearchBoxProps): ReturnType<typeof SearchBox> {
     const [value, setValue]: [string, Dispatch<SetStateAction<string>>] =
         useState<string>(props.value);
     function handleChange(next: string): void {
         setValue(next);
-        props.onChange?.(next);
+        props.onValueChange?.(next);
     }
-    return <SearchBox {...props} value={value} onChange={handleChange} />;
+    return <SearchBox {...props} value={value} onValueChange={handleChange} />;
 }
 
 describe('SearchBox', (): void => {
@@ -38,16 +38,22 @@ describe('SearchBox', (): void => {
         expect(input.tagName).toBe('INPUT');
     });
 
-    it('calls onChange with the typed string', async (): Promise<void> => {
-        const onChange: Mock<(value: string) => void> =
+    it('calls onValueChange with the typed string', async (): Promise<void> => {
+        const onValueChange: Mock<(value: string) => void> =
             vi.fn<(value: string) => void>();
         const user: UserEvent = userEvent.setup();
-        render(<ControlledHost label={FIELD_LABEL} value="" onChange={onChange} />);
+        render(
+            <ControlledHost
+                label={FIELD_LABEL}
+                value=""
+                onValueChange={onValueChange}
+            />,
+        );
 
         await user.type(screen.getByRole('searchbox'), 'orc');
 
-        expect(onChange).toHaveBeenCalledTimes(3);
-        expect(onChange).toHaveBeenLastCalledWith('orc');
+        expect(onValueChange).toHaveBeenCalledTimes(3);
+        expect(onValueChange).toHaveBeenLastCalledWith('orc');
     });
 
     it('forwards ariaControls onto the input aria-controls', (): void => {
@@ -107,14 +113,14 @@ describe('SearchBox', (): void => {
     });
 
     it('clears the value and exposes the clear label when filled', async (): Promise<void> => {
-        const onChange: Mock<(value: string) => void> =
+        const onValueChange: Mock<(value: string) => void> =
             vi.fn<(value: string) => void>();
         const user: UserEvent = userEvent.setup();
         render(
             <ControlledHost
                 label={FIELD_LABEL}
                 value="goblin"
-                onChange={onChange}
+                onValueChange={onValueChange}
             />,
         );
 
@@ -123,7 +129,7 @@ describe('SearchBox', (): void => {
         });
         await user.click(clear);
 
-        expect(onChange).toHaveBeenLastCalledWith('');
+        expect(onValueChange).toHaveBeenLastCalledWith('');
         expect(
             screen.queryByRole('button', { name: CLEAR_LABEL }),
         ).not.toBeInTheDocument();
@@ -159,7 +165,7 @@ describe('SearchBox', (): void => {
     });
 
     it('blocks editing and clearing when disabled', async (): Promise<void> => {
-        const onChange: Mock<(value: string) => void> =
+        const onValueChange: Mock<(value: string) => void> =
             vi.fn<(value: string) => void>();
         const user: UserEvent = userEvent.setup();
         render(
@@ -167,7 +173,7 @@ describe('SearchBox', (): void => {
                 label={FIELD_LABEL}
                 value="goblin"
                 enabled={EEnabledState.Disabled}
-                onChange={onChange}
+                onValueChange={onValueChange}
             />,
         );
 
@@ -175,13 +181,13 @@ describe('SearchBox', (): void => {
         expect(input).toBeDisabled();
 
         await user.type(input, 'x');
-        expect(onChange).not.toHaveBeenCalled();
+        expect(onValueChange).not.toHaveBeenCalled();
 
         const clear: HTMLElement = screen.getByRole('button', {
             name: CLEAR_LABEL,
         });
         expect(clear).toBeDisabled();
         await user.click(clear);
-        expect(onChange).not.toHaveBeenCalled();
+        expect(onValueChange).not.toHaveBeenCalled();
     });
 });

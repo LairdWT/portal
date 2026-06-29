@@ -21,7 +21,8 @@ export type EColorMode = (typeof EColorMode)[keyof typeof EColorMode];
 // `value` is the controlled color as a hex string - `#RRGGBB` when `alpha` is
 // false (default) and `#RRGGBBAA` when `alpha` is true. The component parses the
 // value defensively (an unparseable value renders opaque black) and re-serializes
-// the normalized uppercase hex on every edit through `onChange`. `alpha` enables
+// the normalized uppercase hex on every edit through `onValueChange`. `alpha`
+// enables
 // the alpha channel, the 8-digit hex, and the swatch transparency checker.
 // `defaultMode` is the initial editor mode (default Rgb); mode is local
 // presentation state and never alters the value. `label` is the group's
@@ -33,7 +34,7 @@ export type ColorPickerProps = Readonly<
     {
         label: string;
         value: string;
-        onChange?: (value: string) => void;
+        onValueChange?: (value: string) => void;
         alpha?: boolean;
         defaultMode?: EColorMode;
         id?: string;

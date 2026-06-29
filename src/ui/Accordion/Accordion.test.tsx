@@ -19,7 +19,7 @@ const ITEMS: readonly AccordionItem[] = [
 ];
 
 type SingleSpy = Mock<(id: string | null) => void>;
-type MultipleSpy = Mock<(ids: readonly string[]) => void>;
+type MultipleSpy = Mock<(ids: ReadonlySet<string>) => void>;
 
 function panelFor(name: string): HTMLElement {
     const header: HTMLElement = screen.getByRole('button', { name });
@@ -97,7 +97,7 @@ describe('Accordion', (): void => {
             <Accordion
                 mode={EAccordionMode.Multiple}
                 items={ITEMS}
-                expandedIds={['overview', 'diagnostics']}
+                expandedIds={new Set<string>(['overview', 'diagnostics'])}
                 onExpandedChange={vi.fn()}
             />,
         );
@@ -204,38 +204,42 @@ describe('Accordion', (): void => {
 
     it('multiple mode: clicking a collapsed header appends its id', async (): Promise<void> => {
         const onExpandedChange: MultipleSpy =
-            vi.fn<(ids: readonly string[]) => void>();
+            vi.fn<(ids: ReadonlySet<string>) => void>();
         const user: UserEvent = userEvent.setup();
         render(
             <Accordion
                 mode={EAccordionMode.Multiple}
                 items={ITEMS}
-                expandedIds={['overview']}
+                expandedIds={new Set<string>(['overview'])}
                 onExpandedChange={onExpandedChange}
             />,
         );
 
         await user.click(screen.getByRole('button', { name: 'Diagnostics' }));
 
-        expect(onExpandedChange).toHaveBeenCalledWith(['overview', 'diagnostics']);
+        expect(onExpandedChange).toHaveBeenCalledWith(
+            new Set<string>(['overview', 'diagnostics']),
+        );
     });
 
     it('multiple mode: clicking an expanded header removes its id', async (): Promise<void> => {
         const onExpandedChange: MultipleSpy =
-            vi.fn<(ids: readonly string[]) => void>();
+            vi.fn<(ids: ReadonlySet<string>) => void>();
         const user: UserEvent = userEvent.setup();
         render(
             <Accordion
                 mode={EAccordionMode.Multiple}
                 items={ITEMS}
-                expandedIds={['overview', 'diagnostics']}
+                expandedIds={new Set<string>(['overview', 'diagnostics'])}
                 onExpandedChange={onExpandedChange}
             />,
         );
 
         await user.click(screen.getByRole('button', { name: 'Overview' }));
 
-        expect(onExpandedChange).toHaveBeenCalledWith(['diagnostics']);
+        expect(onExpandedChange).toHaveBeenCalledWith(
+            new Set<string>(['diagnostics']),
+        );
     });
 
     it('moves focus across headers with Arrow, Home, and End keys', async (): Promise<void> => {

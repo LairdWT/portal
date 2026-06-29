@@ -10,10 +10,10 @@ import { useResolvedEnabled } from '../../react/hooks/useResolvedEnabled';
 import { type EEnabledState } from '../../state/state';
 import { EmptyState } from '../EmptyState/EmptyState';
 import { SearchBox } from '../SearchBox/SearchBox';
+import { ESelectionMode } from '../selectionMode';
 import { EUiStatus, toneProperties } from '../tone';
 import toneStyles from '../tone.module.css';
 import { List } from './List';
-import { EListSelectionMode } from './List.types';
 import styles from './SearchableList.module.css';
 import { type SearchableListProps } from './SearchableList.types';
 
@@ -80,12 +80,12 @@ export function SearchableList<Item>(
         return found ?? null;
     }, [items, selectedKey, getItemKey]);
 
-    const selectedKeys: readonly string[] =
-        selectedKey !== null ? [selectedKey] : [];
+    const selectedKeys: ReadonlySet<string> =
+        selectedKey !== null ? new Set<string>([selectedKey]) : new Set<string>();
 
     // Map the inner List's one-element selection back to the single-key contract.
-    function handleSelectionChange(keys: readonly string[]): void {
-        const next: string | undefined = keys[0];
+    function handleSelectionChange(keys: ReadonlySet<string>): void {
+        const next: string | undefined = keys.values().next().value;
         onSelectedKeyChange?.(next ?? null);
     }
 
@@ -116,7 +116,7 @@ export function SearchableList<Item>(
                 <SearchBox
                     label={searchLabel}
                     value={query}
-                    onChange={onQueryChange}
+                    onValueChange={onQueryChange}
                     ariaControls={listId}
                     {...(searchPlaceholder !== undefined
                         ? { placeholder: searchPlaceholder }
@@ -130,7 +130,7 @@ export function SearchableList<Item>(
                     items={filtered}
                     getItemKey={getItemKey}
                     renderItem={renderItem}
-                    selectionMode={EListSelectionMode.Single}
+                    selectionMode={ESelectionMode.Single}
                     selectedKeys={selectedKeys}
                     onSelectionChange={handleSelectionChange}
                     emptyContent={listEmptyContent}

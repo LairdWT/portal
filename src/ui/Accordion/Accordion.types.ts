@@ -73,12 +73,15 @@ export type AccordionSingleProps = Readonly<
 > &
     Toned;
 
-// Many-open member: the set of open ids as an ordered array.
+// Many-open member: the set of open ids as a ReadonlySet (unifying the controlled
+// "set of ids" contract with TreeView and the src/ui/expansion.ts helpers, which
+// already produce ReadonlySet). Every toggle emits a NEW set and never mutates the
+// prop.
 export type AccordionMultipleProps = Readonly<
     {
         mode: typeof EAccordionMode.Multiple;
-        expandedIds: readonly string[];
-        onExpandedChange: (ids: readonly string[]) => void;
+        expandedIds: ReadonlySet<string>;
+        onExpandedChange: (ids: ReadonlySet<string>) => void;
     } & AccordionSharedProps
 > &
     Toned;

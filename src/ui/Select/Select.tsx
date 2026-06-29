@@ -20,13 +20,13 @@ import { EPopoverPlacement, EPopoverRole } from '../Popover/Popover.types';
 import { EUiStatus, toneProperties } from '../tone';
 import toneStyles from '../tone.module.css';
 import styles from './Select.module.css';
-import { type SelectProps, type UiSelectOption } from './Select.types';
+import { type SelectOption, type SelectProps } from './Select.types';
 
 const TYPEAHEAD_RESET_MS: number = 500;
 
 // Type-ahead matches only plain-string labels; non-string ReactNode labels have
 // no searchable text and are simply skipped by the prefix match.
-function optionText(option: UiSelectOption): string {
+function optionText(option: SelectOption): string {
     return typeof option.label === 'string' ? option.label : '';
 }
 
@@ -34,13 +34,13 @@ function optionText(option: UiSelectOption): string {
 // at the first/last enabled option). Returns `from` when there is no further
 // enabled option in that direction.
 function nextEnabledIndex(
-    options: readonly UiSelectOption[],
+    options: readonly SelectOption[],
     from: number,
     direction: 1 | -1,
 ): number {
     let candidate: number = from + direction;
     while (candidate >= 0 && candidate < options.length) {
-        const option: UiSelectOption | undefined = options[candidate];
+        const option: SelectOption | undefined = options[candidate];
         if (option !== undefined && option.disabled !== true) {
             return candidate;
         }
@@ -49,9 +49,9 @@ function nextEnabledIndex(
     return from;
 }
 
-function firstEnabledIndex(options: readonly UiSelectOption[]): number {
+function firstEnabledIndex(options: readonly SelectOption[]): number {
     for (let index: number = 0; index < options.length; index += 1) {
-        const option: UiSelectOption | undefined = options[index];
+        const option: SelectOption | undefined = options[index];
         if (option !== undefined && option.disabled !== true) {
             return index;
         }
@@ -59,9 +59,9 @@ function firstEnabledIndex(options: readonly UiSelectOption[]): number {
     return -1;
 }
 
-function lastEnabledIndex(options: readonly UiSelectOption[]): number {
+function lastEnabledIndex(options: readonly SelectOption[]): number {
     for (let index: number = options.length - 1; index >= 0; index -= 1) {
-        const option: UiSelectOption | undefined = options[index];
+        const option: SelectOption | undefined = options[index];
         if (option !== undefined && option.disabled !== true) {
             return index;
         }
@@ -72,7 +72,7 @@ function lastEnabledIndex(options: readonly UiSelectOption[]): number {
 // First enabled option (after `fromIndex`, wrapping) whose text starts with the
 // type-ahead query, case-insensitively. Returns -1 when nothing matches.
 function findTypeAheadIndex(
-    options: readonly UiSelectOption[],
+    options: readonly SelectOption[],
     query: string,
     fromIndex: number,
 ): number {
@@ -83,7 +83,7 @@ function findTypeAheadIndex(
     const lower: string = query.toLowerCase();
     for (let offset: number = 1; offset <= count; offset += 1) {
         const index: number = (((fromIndex + offset) % count) + count) % count;
-        const option: UiSelectOption | undefined = options[index];
+        const option: SelectOption | undefined = options[index];
         if (option === undefined || option.disabled === true) {
             continue;
         }
@@ -134,11 +134,11 @@ export function Select({
     ] = useState<number | null>(null);
 
     const selectedIndex: number = options.findIndex(
-        (option: UiSelectOption): boolean => option.id === value,
+        (option: SelectOption): boolean => option.id === value,
     );
-    const selectedOption: UiSelectOption | undefined =
+    const selectedOption: SelectOption | undefined =
         selectedIndex >= 0 ? options[selectedIndex] : undefined;
-    const activeOption: UiSelectOption | undefined =
+    const activeOption: SelectOption | undefined =
         activeIndex >= 0 ? options[activeIndex] : undefined;
 
     const clearTypeaheadTimer: () => void = useCallback((): void => {
@@ -209,7 +209,7 @@ export function Select({
     }
 
     function selectIndex(index: number): void {
-        const option: UiSelectOption | undefined = options[index];
+        const option: SelectOption | undefined = options[index];
         if (option === undefined || option.disabled === true) {
             return;
         }
@@ -400,7 +400,7 @@ export function Select({
                 {...(tone !== undefined ? { tone } : {})}
             >
                 {options.map(
-                    (option: UiSelectOption, index: number): ReactElement => {
+                    (option: SelectOption, index: number): ReactElement => {
                         const isSelected: boolean = option.id === value;
                         const isActive: boolean = index === activeIndex;
                         return (

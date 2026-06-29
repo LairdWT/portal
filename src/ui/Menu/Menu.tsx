@@ -28,10 +28,10 @@ import styles from './Menu.module.css';
 import {
     EMenuNodeKind,
     EMenuOrientation,
+    type MenuNode,
     type MenuProps,
-    type UiMenuNode,
-    type UiMenuSeparatorNode,
-    type UiMenuSubmenuNode,
+    type MenuSeparatorNode,
+    type MenuSubmenuNode,
 } from './Menu.types';
 
 // Type-ahead buffer reset window, mirroring Select.
@@ -48,12 +48,12 @@ type OpenSubmenu = Readonly<{
     autoFocus: boolean;
 }>;
 
-function isSeparator(node: UiMenuNode): node is UiMenuSeparatorNode {
+function isSeparator(node: MenuNode): node is MenuSeparatorNode {
     return node.kind === EMenuNodeKind.Separator;
 }
 
 // A separator carries no disabled flag; every other kind has an optional one.
-function isNodeDisabled(node: UiMenuNode): boolean {
+function isNodeDisabled(node: MenuNode): boolean {
     if (node.kind === EMenuNodeKind.Separator) {
         return false;
     }
@@ -62,13 +62,13 @@ function isNodeDisabled(node: UiMenuNode): boolean {
 
 // A row participates in navigation only when it is neither a separator nor
 // disabled.
-function isFocusableNode(node: UiMenuNode): boolean {
+function isFocusableNode(node: MenuNode): boolean {
     return !isSeparator(node) && !isNodeDisabled(node);
 }
 
 // Type-ahead matches only plain-string labels; non-string ReactNode labels and
 // separators have no searchable text and are skipped by the prefix match.
-function nodeText(node: UiMenuNode): string {
+function nodeText(node: MenuNode): string {
     if (node.kind === EMenuNodeKind.Separator) {
         return '';
     }
@@ -77,7 +77,7 @@ function nodeText(node: UiMenuNode): string {
 
 // The ARIA role for a row, derived from its kind. Exhaustive over the kind union
 // (no default branch, so a new kind is a compile error rather than a silent gap).
-function roleForKind(kind: UiMenuNode['kind']): AriaRole {
+function roleForKind(kind: MenuNode['kind']): AriaRole {
     switch (kind) {
         case EMenuNodeKind.Action:
         case EMenuNodeKind.Submenu:
@@ -94,7 +94,7 @@ function roleForKind(kind: UiMenuNode['kind']): AriaRole {
 // The next focusable index in a direction WITH wrapping (a menu cursor wraps top
 // to bottom), skipping separators and disabled rows. Returns -1 for an empty set.
 function nextFocusableIndex(
-    items: readonly UiMenuNode[],
+    items: readonly MenuNode[],
     from: number,
     direction: 1 | -1,
 ): number {
@@ -104,7 +104,7 @@ function nextFocusableIndex(
     }
     for (let step: number = 1; step <= count; step += 1) {
         const index: number = (((from + direction * step) % count) + count) % count;
-        const node: UiMenuNode | undefined = items[index];
+        const node: MenuNode | undefined = items[index];
         if (node !== undefined && isFocusableNode(node)) {
             return index;
         }
@@ -112,9 +112,9 @@ function nextFocusableIndex(
     return from;
 }
 
-function firstFocusableIndex(items: readonly UiMenuNode[]): number {
+function firstFocusableIndex(items: readonly MenuNode[]): number {
     for (let index: number = 0; index < items.length; index += 1) {
-        const node: UiMenuNode | undefined = items[index];
+        const node: MenuNode | undefined = items[index];
         if (node !== undefined && isFocusableNode(node)) {
             return index;
         }
@@ -122,9 +122,9 @@ function firstFocusableIndex(items: readonly UiMenuNode[]): number {
     return -1;
 }
 
-function lastFocusableIndex(items: readonly UiMenuNode[]): number {
+function lastFocusableIndex(items: readonly MenuNode[]): number {
     for (let index: number = items.length - 1; index >= 0; index -= 1) {
-        const node: UiMenuNode | undefined = items[index];
+        const node: MenuNode | undefined = items[index];
         if (node !== undefined && isFocusableNode(node)) {
             return index;
         }
@@ -135,7 +135,7 @@ function lastFocusableIndex(items: readonly UiMenuNode[]): number {
 // First focusable row (after `fromIndex`, wrapping) whose text starts with the
 // type-ahead query, case-insensitively. Returns -1 when nothing matches.
 function findTypeAheadIndex(
-    items: readonly UiMenuNode[],
+    items: readonly MenuNode[],
     query: string,
     fromIndex: number,
 ): number {
@@ -146,7 +146,7 @@ function findTypeAheadIndex(
     const lower: string = query.toLowerCase();
     for (let offset: number = 1; offset <= count; offset += 1) {
         const index: number = (((fromIndex + offset) % count) + count) % count;
-        const node: UiMenuNode | undefined = items[index];
+        const node: MenuNode | undefined = items[index];
         if (node === undefined || !isFocusableNode(node)) {
             continue;
         }
@@ -163,7 +163,7 @@ function findTypeAheadIndex(
 // panel, so the single Popover dismissal treats the whole tree as "inside" while
 // the fixed box escapes the panel's overflow clip). Recurses for nesting.
 type MenuListProps = Readonly<{
-    items: readonly UiMenuNode[];
+    items: readonly MenuNode[];
     menuId?: string | undefined;
     label?: string | undefined;
     labelledBy?: string | undefined;
@@ -340,7 +340,7 @@ function MenuList(props: MenuListProps): ReactElement {
     }
 
     function openSubmenuAt(index: number, autoFocusChild: boolean): void {
-        const node: UiMenuNode | undefined = items[index];
+        const node: MenuNode | undefined = items[index];
         if (node?.kind !== EMenuNodeKind.Submenu || isNodeDisabled(node)) {
             return;
         }
@@ -360,7 +360,7 @@ function MenuList(props: MenuListProps): ReactElement {
     }
 
     function activate(index: number): void {
-        const node: UiMenuNode | undefined = items[index];
+        const node: MenuNode | undefined = items[index];
         if (node === undefined || isSeparator(node) || isNodeDisabled(node)) {
             return;
         }
@@ -417,7 +417,7 @@ function MenuList(props: MenuListProps): ReactElement {
                 return;
             }
             case 'ArrowRight': {
-                const node: UiMenuNode | undefined = items[activeIndex];
+                const node: MenuNode | undefined = items[activeIndex];
                 if (node?.kind === EMenuNodeKind.Submenu && !isNodeDisabled(node)) {
                     event.preventDefault();
                     openSubmenuAt(activeIndex, true);
@@ -470,7 +470,7 @@ function MenuList(props: MenuListProps): ReactElement {
     }
 
     function handleRowClick(index: number): void {
-        const node: UiMenuNode | undefined = items[index];
+        const node: MenuNode | undefined = items[index];
         if (node === undefined || isSeparator(node) || isNodeDisabled(node)) {
             return;
         }
@@ -507,7 +507,7 @@ function MenuList(props: MenuListProps): ReactElement {
     }
 
     function handleRowPointerEnter(index: number): void {
-        const node: UiMenuNode | undefined = items[index];
+        const node: MenuNode | undefined = items[index];
         if (node === undefined || isSeparator(node) || isNodeDisabled(node)) {
             return;
         }
@@ -531,7 +531,7 @@ function MenuList(props: MenuListProps): ReactElement {
         closeSubmenu(true);
     }
 
-    function renderRow(node: UiMenuNode, index: number): ReactElement {
+    function renderRow(node: MenuNode, index: number): ReactElement {
         if (isSeparator(node)) {
             return (
                 <div
@@ -602,9 +602,9 @@ function MenuList(props: MenuListProps): ReactElement {
         .filter((entry: string | undefined): entry is string => entry !== undefined)
         .join(' ');
 
-    const submenuNode: UiMenuNode | undefined =
+    const submenuNode: MenuNode | undefined =
         openSubmenu !== null ? items[openSubmenu.index] : undefined;
-    const openSubmenuNode: UiMenuSubmenuNode | undefined =
+    const openSubmenuNode: MenuSubmenuNode | undefined =
         submenuNode?.kind === EMenuNodeKind.Submenu ? submenuNode : undefined;
 
     const flyoutStyle: CSSProperties = {
@@ -670,7 +670,7 @@ function MenuList(props: MenuListProps): ReactElement {
 // accessible name). `surfaceKey` remounts the root list when a menubar switches
 // menus while the Popover stays open, so the new menu auto-focuses its first row.
 type MenuSurfaceProps = Readonly<{
-    items: readonly UiMenuNode[];
+    items: readonly MenuNode[];
     open: boolean;
     onOpenChange: (open: boolean) => void;
     onSelect: (id: string) => void;

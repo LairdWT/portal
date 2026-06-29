@@ -21,7 +21,7 @@ const CLEAR_LABEL: string = 'Clear search';
 export function SearchBox({
     label,
     value,
-    onChange,
+    onValueChange,
     onSubmit,
     id,
     ariaControls,
@@ -57,7 +57,7 @@ export function SearchBox({
         if (isDisabled) {
             return;
         }
-        onChange?.(event.currentTarget.value);
+        onValueChange?.(event.currentTarget.value);
     }
 
     function handleKeyDown(event: KeyboardEvent<HTMLInputElement>): void {
@@ -75,7 +75,7 @@ export function SearchBox({
         if (isDisabled) {
             return;
         }
-        onChange?.('');
+        onValueChange?.('');
         inputRef.current?.focus();
     }
 

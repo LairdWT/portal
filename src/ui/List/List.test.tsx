@@ -10,8 +10,8 @@ import {
 import { afterEach, describe, expect, it, type Mock, vi } from 'vitest';
 
 import { EEnabledState } from '../../state/state';
+import { ESelectionMode } from '../selectionMode';
 import { List } from './List';
-import { EListSelectionMode } from './List.types';
 
 const ITEMS: readonly string[] = [
     'Apple',
@@ -43,13 +43,13 @@ afterEach((): void => {
 
 type HarnessProps = Readonly<{
     items?: readonly string[];
-    selectionMode?: EListSelectionMode;
+    selectionMode?: ESelectionMode;
     enabled?: EEnabledState;
-    initialSelected?: readonly string[];
+    initialSelected?: ReadonlySet<string>;
     getTypeAheadText?: (item: string) => string;
     emptyContent?: ReactNode;
     tone?: string;
-    onSelectionChange?: (keys: readonly string[]) => void;
+    onSelectionChange?: (keys: ReadonlySet<string>) => void;
 }>;
 
 // Controlled harness owning the selection, mirroring the DataTable.test idiom: the
@@ -57,18 +57,18 @@ type HarnessProps = Readonly<{
 // while an optional spy observes the raw callback payload.
 function Harness(props: HarnessProps): ReactElement {
     const [selectedKeys, setSelectedKeys]: [
-        readonly string[],
-        Dispatch<SetStateAction<readonly string[]>>,
-    ] = useState<readonly string[]>(props.initialSelected ?? []);
+        ReadonlySet<string>,
+        Dispatch<SetStateAction<ReadonlySet<string>>>,
+    ] = useState<ReadonlySet<string>>(props.initialSelected ?? new Set<string>());
     return (
         <List<string>
             label="Fruit"
             items={props.items ?? ITEMS}
             getItemKey={itemKey}
             renderItem={renderRow}
-            selectionMode={props.selectionMode ?? EListSelectionMode.None}
+            selectionMode={props.selectionMode ?? ESelectionMode.None}
             selectedKeys={selectedKeys}
-            onSelectionChange={(keys: readonly string[]): void => {
+            onSelectionChange={(keys: ReadonlySet<string>): void => {
                 setSelectedKeys(keys);
                 props.onSelectionChange?.(keys);
             }}
@@ -84,13 +84,13 @@ function Harness(props: HarnessProps): ReactElement {
     );
 }
 
-function selectionSpy(): Mock<(keys: readonly string[]) => void> {
-    return vi.fn<(keys: readonly string[]) => void>();
+function selectionSpy(): Mock<(keys: ReadonlySet<string>) => void> {
+    return vi.fn<(keys: ReadonlySet<string>) => void>();
 }
 
-function lastSelection(spy: Mock<(keys: readonly string[]) => void>): string[] {
-    const calls: [readonly string[]][] = spy.mock.calls;
-    const last: [readonly string[]] | undefined = calls[calls.length - 1];
+function lastSelection(spy: Mock<(keys: ReadonlySet<string>) => void>): string[] {
+    const calls: [ReadonlySet<string>][] = spy.mock.calls;
+    const last: [ReadonlySet<string>] | undefined = calls[calls.length - 1];
     if (last === undefined) {
         throw new Error('expected onSelectionChange to have been called');
     }
@@ -138,7 +138,7 @@ describe('List', (): void => {
                     items={ITEMS}
                     getItemKey={itemKey}
                     renderItem={renderRow}
-                    selectionMode={EListSelectionMode.Single}
+                    selectionMode={ESelectionMode.Single}
                 />
             </div>,
         );
@@ -152,8 +152,8 @@ describe('List', (): void => {
     it('exposes a listbox with option rows and aria-selected in Single mode', (): void => {
         render(
             <Harness
-                selectionMode={EListSelectionMode.Single}
-                initialSelected={['Banana']}
+                selectionMode={ESelectionMode.Single}
+                initialSelected={new Set<string>(['Banana'])}
             />,
         );
 
@@ -169,12 +169,12 @@ describe('List', (): void => {
     });
 
     it('replaces the selection in Single mode on click', async (): Promise<void> => {
-        const onSelectionChange: Mock<(keys: readonly string[]) => void> =
+        const onSelectionChange: Mock<(keys: ReadonlySet<string>) => void> =
             selectionSpy();
         const user: UserEvent = userEvent.setup();
         render(
             <Harness
-                selectionMode={EListSelectionMode.Single}
+                selectionMode={ESelectionMode.Single}
                 onSelectionChange={onSelectionChange}
             />,
         );
@@ -195,12 +195,12 @@ describe('List', (): void => {
     });
 
     it('marks the listbox multi-selectable and toggles membership in Multiple mode', async (): Promise<void> => {
-        const onSelectionChange: Mock<(keys: readonly string[]) => void> =
+        const onSelectionChange: Mock<(keys: ReadonlySet<string>) => void> =
             selectionSpy();
         const user: UserEvent = userEvent.setup();
         render(
             <Harness
-                selectionMode={EListSelectionMode.Multiple}
+                selectionMode={ESelectionMode.Multi}
                 onSelectionChange={onSelectionChange}
             />,
         );
@@ -222,7 +222,7 @@ describe('List', (): void => {
 
     it('moves the activedescendant cursor with the arrow keys and Home/End', async (): Promise<void> => {
         const user: UserEvent = userEvent.setup();
-        render(<Harness selectionMode={EListSelectionMode.Single} />);
+        render(<Harness selectionMode={ESelectionMode.Single} />);
 
         const listbox: HTMLElement = screen.getByRole('listbox');
         listbox.focus();
@@ -245,12 +245,12 @@ describe('List', (): void => {
     });
 
     it('selects the active row on Enter and on Space', async (): Promise<void> => {
-        const onSelectionChange: Mock<(keys: readonly string[]) => void> =
+        const onSelectionChange: Mock<(keys: ReadonlySet<string>) => void> =
             selectionSpy();
         const user: UserEvent = userEvent.setup();
         render(
             <Harness
-                selectionMode={EListSelectionMode.Single}
+                selectionMode={ESelectionMode.Single}
                 onSelectionChange={onSelectionChange}
             />,
         );
@@ -268,12 +268,12 @@ describe('List', (): void => {
     });
 
     it('extends a contiguous range with Shift+ArrowDown in Multiple mode', async (): Promise<void> => {
-        const onSelectionChange: Mock<(keys: readonly string[]) => void> =
+        const onSelectionChange: Mock<(keys: ReadonlySet<string>) => void> =
             selectionSpy();
         const user: UserEvent = userEvent.setup();
         render(
             <Harness
-                selectionMode={EListSelectionMode.Multiple}
+                selectionMode={ESelectionMode.Multi}
                 onSelectionChange={onSelectionChange}
             />,
         );
@@ -297,7 +297,7 @@ describe('List', (): void => {
         const user: UserEvent = userEvent.setup();
         render(
             <Harness
-                selectionMode={EListSelectionMode.Single}
+                selectionMode={ESelectionMode.Single}
                 getTypeAheadText={itemKey}
             />,
         );
@@ -313,12 +313,12 @@ describe('List', (): void => {
     });
 
     it('is inert while disabled', async (): Promise<void> => {
-        const onSelectionChange: Mock<(keys: readonly string[]) => void> =
+        const onSelectionChange: Mock<(keys: ReadonlySet<string>) => void> =
             selectionSpy();
         const user: UserEvent = userEvent.setup();
         render(
             <Harness
-                selectionMode={EListSelectionMode.Single}
+                selectionMode={ESelectionMode.Single}
                 enabled={EEnabledState.Disabled}
                 onSelectionChange={onSelectionChange}
             />,
@@ -358,10 +358,7 @@ describe('List', (): void => {
         const largeItems: readonly string[] = makeRows(5000);
         const user: UserEvent = userEvent.setup();
         render(
-            <Harness
-                items={largeItems}
-                selectionMode={EListSelectionMode.Single}
-            />,
+            <Harness items={largeItems} selectionMode={ESelectionMode.Single} />,
         );
 
         const listbox: HTMLElement = screen.getByRole('listbox');
@@ -384,7 +381,7 @@ describe('List', (): void => {
                 items={ITEMS}
                 getItemKey={itemKey}
                 renderItem={renderRow}
-                selectionMode={EListSelectionMode.Single}
+                selectionMode={ESelectionMode.Single}
             />,
         );
 
@@ -399,7 +396,7 @@ describe('List', (): void => {
                 items={ITEMS}
                 getItemKey={itemKey}
                 renderItem={renderRow}
-                selectionMode={EListSelectionMode.None}
+                selectionMode={ESelectionMode.None}
             />,
         );
 
@@ -414,7 +411,7 @@ describe('List', (): void => {
                 items={[]}
                 getItemKey={itemKey}
                 renderItem={renderRow}
-                selectionMode={EListSelectionMode.Single}
+                selectionMode={ESelectionMode.Single}
             />,
         );
 
@@ -429,7 +426,7 @@ describe('List', (): void => {
                 items={ITEMS}
                 getItemKey={itemKey}
                 renderItem={renderRow}
-                selectionMode={EListSelectionMode.Single}
+                selectionMode={ESelectionMode.Single}
             />,
         );
 

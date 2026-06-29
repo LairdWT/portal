@@ -39,7 +39,7 @@ export type ERadioOrientation =
 // the controlled `value`). `label` is arbitrary renderable content. `disabled`
 // marks a single option inert: it renders with aria-disabled, takes the native
 // disabled attribute, and is SKIPPED by roving arrow/Home/End navigation.
-export type UiRadioItem = Readonly<{
+export type RadioItem = Readonly<{
     id: string;
     label: ReactNode;
     disabled?: boolean;
@@ -63,7 +63,7 @@ export type UiRadioItem = Readonly<{
 // through the shared tone scope and drives the selected marker ring/dot/glow
 // only - never the label text.
 export type RadioGroupProps = Readonly<{
-    items: readonly UiRadioItem[];
+    items: readonly RadioItem[];
     value: string;
     onChange?: (id: string) => void;
     enabled?: EEnabledState;

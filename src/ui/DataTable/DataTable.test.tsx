@@ -10,9 +10,9 @@ import {
 import { afterEach, describe, expect, it, type Mock, vi } from 'vitest';
 
 import { EEnabledState } from '../../state/state';
+import { ESelectionMode } from '../selectionMode';
 import { DataTable } from './DataTable';
 import {
-    ESelectionMode,
     ESortDirection,
     type TableCellContext,
     type TableColumn,

@@ -10,15 +10,15 @@ import { type ColorPickerProps } from './ColorPicker.types';
 const PICKER_LABEL: string = 'Brush color';
 
 // A controlled host so a real, updating value drives the children while still
-// exercising the onChange contract (the TextField test pattern).
+// exercising the onValueChange contract (the TextField test pattern).
 function ControlledHost(props: ColorPickerProps): ReturnType<typeof ColorPicker> {
     const [value, setValue]: [string, Dispatch<SetStateAction<string>>] =
         useState<string>(props.value);
     function handleChange(next: string): void {
         setValue(next);
-        props.onChange?.(next);
+        props.onValueChange?.(next);
     }
-    return <ColorPicker {...props} value={value} onChange={handleChange} />;
+    return <ColorPicker {...props} value={value} onValueChange={handleChange} />;
 }
 
 describe('ColorPicker', (): void => {
@@ -60,13 +60,13 @@ describe('ColorPicker', (): void => {
     });
 
     it('emits the new hex and updates the swatch when a channel changes', (): void => {
-        const onChange: Mock<(value: string) => void> =
+        const onValueChange: Mock<(value: string) => void> =
             vi.fn<(value: string) => void>();
         render(
             <ControlledHost
                 label={PICKER_LABEL}
                 value="#102030"
-                onChange={onChange}
+                onValueChange={onValueChange}
             />,
         );
 
@@ -74,7 +74,7 @@ describe('ColorPicker', (): void => {
             target: { value: '255' },
         });
 
-        expect(onChange).toHaveBeenLastCalledWith('#FF2030');
+        expect(onValueChange).toHaveBeenLastCalledWith('#FF2030');
         expect(screen.getByRole('img').getAttribute('aria-label')).toContain(
             '#FF2030',
         );
@@ -82,13 +82,13 @@ describe('ColorPicker', (): void => {
 
     it('switches to HSV mode and converts on a hue change', async (): Promise<void> => {
         const user: UserEvent = userEvent.setup();
-        const onChange: Mock<(value: string) => void> =
+        const onValueChange: Mock<(value: string) => void> =
             vi.fn<(value: string) => void>();
         render(
             <ControlledHost
                 label={PICKER_LABEL}
                 value="#FF0000"
-                onChange={onChange}
+                onValueChange={onValueChange}
             />,
         );
 
@@ -97,18 +97,18 @@ describe('ColorPicker', (): void => {
         expect(hue).toBeInTheDocument();
 
         fireEvent.change(hue, { target: { value: '120' } });
-        expect(onChange).toHaveBeenLastCalledWith('#00FF00');
+        expect(onValueChange).toHaveBeenLastCalledWith('#00FF00');
     });
 
     it('shows the canonical hex in Hex mode and normalizes valid input', async (): Promise<void> => {
         const user: UserEvent = userEvent.setup();
-        const onChange: Mock<(value: string) => void> =
+        const onValueChange: Mock<(value: string) => void> =
             vi.fn<(value: string) => void>();
         render(
             <ControlledHost
                 label={PICKER_LABEL}
                 value="#102030"
-                onChange={onChange}
+                onValueChange={onValueChange}
             />,
         );
 
@@ -118,18 +118,18 @@ describe('ColorPicker', (): void => {
 
         await user.clear(hex);
         await user.type(hex, 'abcdef');
-        expect(onChange).toHaveBeenLastCalledWith('#ABCDEF');
+        expect(onValueChange).toHaveBeenLastCalledWith('#ABCDEF');
     });
 
     it('rejects invalid hex safely without emitting and surfaces the error', async (): Promise<void> => {
         const user: UserEvent = userEvent.setup();
-        const onChange: Mock<(value: string) => void> =
+        const onValueChange: Mock<(value: string) => void> =
             vi.fn<(value: string) => void>();
         render(
             <ControlledHost
                 label={PICKER_LABEL}
                 value="#102030"
-                onChange={onChange}
+                onValueChange={onValueChange}
             />,
         );
 
@@ -148,7 +148,7 @@ describe('ColorPicker', (): void => {
             screen.getByText('Use only the digits 0-9 and A-F.'),
         ).toBeInTheDocument();
 
-        expect(onChange).not.toHaveBeenCalled();
+        expect(onValueChange).not.toHaveBeenCalled();
     });
 
     it('resets the hex field to the canonical value on blur', async (): Promise<void> => {
@@ -167,14 +167,14 @@ describe('ColorPicker', (): void => {
     });
 
     it('maps an alpha percent to the correct byte', (): void => {
-        const onChange: Mock<(value: string) => void> =
+        const onValueChange: Mock<(value: string) => void> =
             vi.fn<(value: string) => void>();
         render(
             <ControlledHost
                 label={PICKER_LABEL}
                 value="#FF0000FF"
                 alpha
-                onChange={onChange}
+                onValueChange={onValueChange}
             />,
         );
 
@@ -182,19 +182,19 @@ describe('ColorPicker', (): void => {
             target: { value: '50' },
         });
 
-        expect(onChange).toHaveBeenLastCalledWith('#FF000080');
+        expect(onValueChange).toHaveBeenLastCalledWith('#FF000080');
     });
 
     it('disables every child control when disabled', async (): Promise<void> => {
         const user: UserEvent = userEvent.setup();
-        const onChange: Mock<(value: string) => void> =
+        const onValueChange: Mock<(value: string) => void> =
             vi.fn<(value: string) => void>();
         render(
             <ColorPicker
                 label={PICKER_LABEL}
                 value="#102030"
                 enabled={EEnabledState.Disabled}
-                onChange={onChange}
+                onValueChange={onValueChange}
             />,
         );
 
@@ -202,7 +202,7 @@ describe('ColorPicker', (): void => {
         expect(screen.getByRole('radio', { name: 'RGB' })).toBeDisabled();
 
         await user.click(screen.getByRole('radio', { name: 'HSV' }));
-        expect(onChange).not.toHaveBeenCalled();
+        expect(onValueChange).not.toHaveBeenCalled();
         expect(screen.queryByLabelText('Hue')).not.toBeInTheDocument();
     });
 

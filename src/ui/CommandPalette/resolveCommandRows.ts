@@ -11,10 +11,10 @@
 
 import { EEnabledState } from '../../state/state';
 import {
+    type Command,
     type CommandRow,
     ECommandFilterMode,
     ECommandRowKind,
-    type UiCommand,
 } from './CommandPalette.types';
 import { type FuzzyMatch, fuzzyMatch } from './fuzzyMatch';
 
@@ -27,7 +27,7 @@ const ALIAS_MATCH_PENALTY: number = 1000;
 
 // A scored option awaiting sort + index assignment.
 type ScoredCommand = Readonly<{
-    command: UiCommand;
+    command: Command;
     score: number;
     ranges: readonly (readonly [number, number])[];
     order: number;
@@ -42,7 +42,7 @@ type MatchResult = Readonly<{
 // Helicon substring parity: case-insensitive label.contains || id.contains. The
 // label match also yields a highlight range; an id-only match ranks below every
 // label match and carries no label highlight.
-function matchSubstring(command: UiCommand, needle: string): MatchResult | null {
+function matchSubstring(command: Command, needle: string): MatchResult | null {
     const labelIndex: number = command.label.toLowerCase().indexOf(needle);
     if (labelIndex >= 0) {
         const range: readonly [number, number] = [
@@ -60,7 +60,7 @@ function matchSubstring(command: UiCommand, needle: string): MatchResult | null 
 // Fuzzy match: prefer a label match (with highlight ranges); otherwise include
 // the command through an id / keyword alias match (no label highlight, ranked
 // below every label match).
-function matchFuzzy(command: UiCommand, query: string): MatchResult | null {
+function matchFuzzy(command: Command, query: string): MatchResult | null {
     const labelMatch: FuzzyMatch | null = fuzzyMatch(query, command.label);
     if (labelMatch !== null) {
         return { score: labelMatch.score, ranges: labelMatch.ranges };
@@ -85,10 +85,10 @@ function matchFuzzy(command: UiCommand, query: string): MatchResult | null {
 // Build the grouped, empty-query row model: Recent (if any) then ungrouped then
 // grouped, each group introduced by a presentation header row.
 function buildGroupedRows(
-    commands: readonly UiCommand[],
+    commands: readonly Command[],
     recentCommandIds: readonly string[] | undefined,
 ): readonly CommandRow[] {
-    const byId: Map<string, UiCommand> = new Map<string, UiCommand>();
+    const byId: Map<string, Command> = new Map<string, Command>();
     for (const command of commands) {
         if (!byId.has(command.id)) {
             byId.set(command.id, command);
@@ -98,14 +98,14 @@ function buildGroupedRows(
     const rows: CommandRow[] = [];
     let index: number = 0;
     const usedRecent: Set<string> = new Set<string>();
-    const recents: UiCommand[] = [];
+    const recents: Command[] = [];
 
     if (recentCommandIds !== undefined) {
         for (const id of recentCommandIds) {
             if (usedRecent.has(id)) {
                 continue;
             }
-            const command: UiCommand | undefined = byId.get(id);
+            const command: Command | undefined = byId.get(id);
             if (command === undefined) {
                 continue;
             }
@@ -132,9 +132,9 @@ function buildGroupedRows(
         }
     }
 
-    const ungrouped: UiCommand[] = [];
+    const ungrouped: Command[] = [];
     const groupOrder: string[] = [];
-    const groups: Map<string, UiCommand[]> = new Map<string, UiCommand[]>();
+    const groups: Map<string, Command[]> = new Map<string, Command[]>();
     for (const command of commands) {
         if (usedRecent.has(command.id)) {
             continue;
@@ -143,7 +143,7 @@ function buildGroupedRows(
             ungrouped.push(command);
             continue;
         }
-        const existing: UiCommand[] | undefined = groups.get(command.group);
+        const existing: Command[] | undefined = groups.get(command.group);
         if (existing === undefined) {
             groups.set(command.group, [command]);
             groupOrder.push(command.group);
@@ -165,7 +165,7 @@ function buildGroupedRows(
     for (const groupLabel of groupOrder) {
         rows.push({ kind: ECommandRowKind.Header, index, groupLabel });
         index += 1;
-        const bucket: readonly UiCommand[] = groups.get(groupLabel) ?? [];
+        const bucket: readonly Command[] = groups.get(groupLabel) ?? [];
         for (const command of bucket) {
             rows.push({
                 kind: ECommandRowKind.Option,
@@ -181,7 +181,7 @@ function buildGroupedRows(
 }
 
 export function resolveCommandRows(
-    commands: readonly UiCommand[],
+    commands: readonly Command[],
     recentCommandIds: readonly string[] | undefined,
     query: string,
     filterMode: ECommandFilterMode,
@@ -235,6 +235,6 @@ export function resolveCommandRows(
 
 // A command is non-activatable when its per-command enabled state is Disabled.
 // Exposed so the component and the navigation cursor agree on which rows skip.
-export function isCommandDisabled(command: UiCommand): boolean {
+export function isCommandDisabled(command: Command): boolean {
     return command.enabled === EEnabledState.Disabled;
 }

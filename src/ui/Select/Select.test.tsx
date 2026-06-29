@@ -10,16 +10,16 @@ import { afterEach, describe, expect, it, type Mock, vi } from 'vitest';
 
 import { EEnabledState } from '../../state/state';
 import { Select } from './Select';
-import { type UiSelectOption } from './Select.types';
+import { type SelectOption } from './Select.types';
 
-const OPTIONS: readonly UiSelectOption[] = [
+const OPTIONS: readonly SelectOption[] = [
     { id: 'apple', label: 'Apple' },
     { id: 'banana', label: 'Banana' },
     { id: 'cherry', label: 'Cherry' },
     { id: 'date', label: 'Date' },
 ];
 
-const WITH_DISABLED: readonly UiSelectOption[] = [
+const WITH_DISABLED: readonly SelectOption[] = [
     { id: 'apple', label: 'Apple' },
     { id: 'banana', label: 'Banana', disabled: true },
     { id: 'cherry', label: 'Cherry' },
@@ -33,7 +33,7 @@ type HarnessProps = Readonly<{
     initialValue?: string | null;
     clearable?: boolean;
     enabled?: EEnabledState;
-    options?: readonly UiSelectOption[];
+    options?: readonly SelectOption[];
     onChange?: (id: string | null) => void;
 }>;
 

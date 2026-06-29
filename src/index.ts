@@ -238,11 +238,11 @@ export {
 } from './ui/ColorPicker/ColorPicker.types';
 export { CommandPalette } from './ui/CommandPalette/CommandPalette';
 export {
+    type Command,
     type CommandPaletteProps,
     type CommandRow,
     ECommandFilterMode,
     ECommandRowKind,
-    type UiCommand,
 } from './ui/CommandPalette/CommandPalette.types';
 export { type FuzzyMatch, fuzzyMatch } from './ui/CommandPalette/fuzzyMatch';
 export { CTA } from './ui/CTA/CTA';
@@ -256,7 +256,6 @@ export { DataTable } from './ui/DataTable/DataTable';
 export {
     type DataTableProps,
     EColumnAlign,
-    ESelectionMode,
     ESortDirection,
     type TableCellContext,
     type TableColumn,
@@ -303,7 +302,6 @@ export {
 export { List } from './ui/List/List';
 export {
     EListRowState,
-    EListSelectionMode,
     type ListProps,
     type ListRowRenderState,
 } from './ui/List/List.types';
@@ -321,15 +319,15 @@ export {
     type ContextMenuProps,
     EMenuNodeKind,
     EMenuOrientation,
+    type MenuActionNode,
+    type MenuBarMenu,
     type MenuBarProps,
+    type MenuCheckboxNode,
+    type MenuNode,
     type MenuProps,
-    type UiMenuActionNode,
-    type UiMenuBarMenu,
-    type UiMenuCheckboxNode,
-    type UiMenuNode,
-    type UiMenuRadioNode,
-    type UiMenuSeparatorNode,
-    type UiMenuSubmenuNode,
+    type MenuRadioNode,
+    type MenuSeparatorNode,
+    type MenuSubmenuNode,
 } from './ui/Menu/Menu.types';
 export { MenuBar } from './ui/Menu/MenuBar';
 export { NavRail } from './ui/NavRail/NavRail';
@@ -369,7 +367,7 @@ export {
     ERadioOrientation,
     ERadioState,
     type RadioGroupProps,
-    type UiRadioItem,
+    type RadioItem,
 } from './ui/RadioGroup/RadioGroup.types';
 export { Rating } from './ui/Rating/Rating';
 export {
@@ -380,8 +378,8 @@ export {
 } from './ui/Rating/Rating.types';
 export { ReadoutPanel } from './ui/ReadoutPanel/ReadoutPanel';
 export {
+    type Readout,
     type ReadoutPanelProps,
-    type UiReadout,
 } from './ui/ReadoutPanel/ReadoutPanel.types';
 export { Scanlines } from './ui/Scanlines/Scanlines';
 export {
@@ -410,15 +408,16 @@ export { SegmentedControl } from './ui/SegmentedControl/SegmentedControl';
 export {
     ESegmentState,
     type SegmentedControlProps,
-    type UiSegmentItem,
+    type SegmentItem,
 } from './ui/SegmentedControl/SegmentedControl.types';
 export { Select } from './ui/Select/Select';
-export { type SelectProps, type UiSelectOption } from './ui/Select/Select.types';
+export { type SelectOption, type SelectProps } from './ui/Select/Select.types';
 export { SelectableTile } from './ui/SelectableTile/SelectableTile';
 export {
     ESelectionState,
     type SelectableTileProps,
 } from './ui/SelectableTile/SelectableTile.types';
+export { ESelectionMode } from './ui/selectionMode';
 export { Skeleton } from './ui/Skeleton/Skeleton';
 export {
     ESkeletonAnimation,
@@ -451,11 +450,11 @@ export {
 export { StepTrack } from './ui/StepTrack/StepTrack';
 export {
     EStepState,
+    type Step,
     type StepTrackProps,
-    type UiStep,
 } from './ui/StepTrack/StepTrack.types';
 export { Tabs } from './ui/Tabs/Tabs';
-export { ETabState, type TabsProps, type UiTabItem } from './ui/Tabs/Tabs.types';
+export { ETabState, type TabItem, type TabsProps } from './ui/Tabs/Tabs.types';
 export { Text } from './ui/Text/Text';
 export {
     ETextRole,

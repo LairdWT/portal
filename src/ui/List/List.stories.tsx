@@ -8,9 +8,9 @@ import {
 } from 'react';
 
 import { EEnabledState } from '../../state/state';
+import { ESelectionMode } from '../selectionMode';
 import { EUiStatus } from '../tone';
 import { List } from './List';
-import { EListSelectionMode } from './List.types';
 
 // A flat (non-union) story args shape. ListProps mixes the AccessibleName XOR
 // union, which collapses Storybook's arg inference to `never`; the stories only
@@ -20,8 +20,8 @@ import { EListSelectionMode } from './List.types';
 type ListStoryArgs = Readonly<{
     items: readonly string[];
     label: string;
-    selectionMode?: EListSelectionMode;
-    selectedKeys?: readonly string[];
+    selectionMode?: ESelectionMode;
+    selectedKeys?: ReadonlySet<string>;
     enabled?: EEnabledState;
     status?: EUiStatus;
     tone?: string;
@@ -69,9 +69,9 @@ function renderRow(item: string): ReactNode {
 // it to app state uses.
 function ControlledList(args: ListStoryArgs): ReactElement {
     const [selectedKeys, setSelectedKeys]: [
-        readonly string[],
-        Dispatch<SetStateAction<readonly string[]>>,
-    ] = useState<readonly string[]>(args.selectedKeys ?? []);
+        ReadonlySet<string>,
+        Dispatch<SetStateAction<ReadonlySet<string>>>,
+    ] = useState<ReadonlySet<string>>(args.selectedKeys ?? new Set<string>());
     return (
         <List<string>
             {...args}
@@ -110,16 +110,16 @@ export const Default: Story = {};
 // Single selection: role="listbox", one selected option at a time.
 export const SingleSelect: Story = {
     args: {
-        selectionMode: EListSelectionMode.Single,
-        selectedKeys: ['Cherry'],
+        selectionMode: ESelectionMode.Single,
+        selectedKeys: new Set<string>(['Cherry']),
     },
 };
 
 // Multiple selection: aria-multiselectable, toggle plus Shift range.
 export const MultiSelect: Story = {
     args: {
-        selectionMode: EListSelectionMode.Multiple,
-        selectedKeys: ['Banana', 'Date'],
+        selectionMode: ESelectionMode.Multi,
+        selectedKeys: new Set<string>(['Banana', 'Date']),
     },
 };
 
@@ -127,8 +127,8 @@ export const MultiSelect: Story = {
 // glow while the row text stays on the contrast-safe foreground.
 export const Toned: Story = {
     args: {
-        selectionMode: EListSelectionMode.Single,
-        selectedKeys: ['Fig'],
+        selectionMode: ESelectionMode.Single,
+        selectedKeys: new Set<string>(['Fig']),
         tone: 'oklch(0.7 0.18 25)',
     },
 };
@@ -136,8 +136,8 @@ export const Toned: Story = {
 // A universal danger status swaps the tone seed, tinting the HUD frame edge.
 export const Status: Story = {
     args: {
-        selectionMode: EListSelectionMode.Single,
-        selectedKeys: ['Apple'],
+        selectionMode: ESelectionMode.Single,
+        selectedKeys: new Set<string>(['Apple']),
         status: EUiStatus.Danger,
     },
 };
@@ -147,8 +147,8 @@ export const Status: Story = {
 // scrollable region without keyboard access.
 export const Disabled: Story = {
     args: {
-        selectionMode: EListSelectionMode.Single,
-        selectedKeys: ['Grape'],
+        selectionMode: ESelectionMode.Single,
+        selectedKeys: new Set<string>(['Grape']),
         enabled: EEnabledState.Disabled,
         maxBlockSize: '32rem',
     },
@@ -166,7 +166,7 @@ export const LargeList: Story = {
     args: {
         label: 'Inventory',
         items: LARGE_ITEMS,
-        selectionMode: EListSelectionMode.Single,
+        selectionMode: ESelectionMode.Single,
         maxBlockSize: '24rem',
     },
 };
@@ -174,7 +174,7 @@ export const LargeList: Story = {
 // Type-ahead: printable keys move the active cursor to the next matching row.
 export const TypeAhead: Story = {
     args: {
-        selectionMode: EListSelectionMode.Single,
+        selectionMode: ESelectionMode.Single,
         getTypeAheadText: itemKey,
     },
 };
@@ -186,14 +186,14 @@ export const Composition: Story = {
             <ControlledList
                 label="Fruit"
                 items={FRUITS}
-                selectionMode={EListSelectionMode.Single}
-                selectedKeys={['Apple']}
+                selectionMode={ESelectionMode.Single}
+                selectedKeys={new Set<string>(['Apple'])}
                 maxBlockSize="18rem"
             />
             <ControlledList
                 label="Inventory"
                 items={LARGE_ITEMS}
-                selectionMode={EListSelectionMode.Single}
+                selectionMode={ESelectionMode.Single}
                 maxBlockSize="18rem"
             />
         </div>

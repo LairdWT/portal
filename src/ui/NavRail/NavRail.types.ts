@@ -43,7 +43,7 @@ export type NavRailItem = Readonly<{
 
 // Props for NavRail: a controlled, domain-agnostic vertical navigation rail.
 //
-// `items` is the ordered entry set; `active` is the controlled active id and
+// `items` is the ordered entry set; `value` is the controlled active id and
 // `onChange` reports the next id when a button item is activated (link items
 // navigate natively and do not call onChange). Arrow Up/Down move the roving
 // focus, Home/End jump to first/last, and Enter/Space activate the focused item
@@ -54,7 +54,7 @@ export type NavRailItem = Readonly<{
 // exactly one of `label` (aria-label) or `labelledBy` (aria-labelledby).
 export type NavRailProps = Readonly<{
     items: readonly NavRailItem[];
-    active: string;
+    value: string;
     onChange?: (id: string) => void;
     enabled?: EEnabledState;
 }> &

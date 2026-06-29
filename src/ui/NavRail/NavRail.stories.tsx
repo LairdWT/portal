@@ -19,7 +19,7 @@ import { type NavRailItem } from './NavRail.types';
 // meta and story typing sound while still feeding valid NavRail props.
 type NavRailStoryArgs = Readonly<{
     items: readonly NavRailItem[];
-    active: string;
+    value: string;
     label: string;
     enabled?: EEnabledState;
     tone?: string;
@@ -85,10 +85,10 @@ const MANY_ITEMS: readonly NavRailItem[] = [
 // wiring NavRail to app state uses. The rail is sized like a sidebar column.
 function ControlledNavRail(args: NavRailStoryArgs): ReactElement {
     const [active, setActive]: [string, Dispatch<SetStateAction<string>>] =
-        useState<string>(args.active);
+        useState<string>(args.value);
     return (
         <div style={{ inlineSize: '15rem' }}>
-            <NavRail {...args} active={active} onChange={setActive} />
+            <NavRail {...args} value={active} onChange={setActive} />
         </div>
     );
 }
@@ -97,7 +97,7 @@ function ControlledNavRail(args: NavRailStoryArgs): ReactElement {
 // pane as the active band changes.
 function NavRailComposition(args: NavRailStoryArgs): ReactElement {
     const [active, setActive]: [string, Dispatch<SetStateAction<string>>] =
-        useState<string>(args.active);
+        useState<string>(args.value);
     const activeItem: NavRailItem | undefined = args.items.find(
         (item: NavRailItem): boolean => item.id === active,
     );
@@ -111,7 +111,7 @@ function NavRailComposition(args: NavRailStoryArgs): ReactElement {
             }}
         >
             <div style={{ inlineSize: '14rem', flex: 'none' }}>
-                <NavRail {...args} active={active} onChange={setActive} />
+                <NavRail {...args} value={active} onChange={setActive} />
             </div>
             <Panel title="Active pane" headingLevel={2}>
                 <p style={{ margin: 0, color: 'var(--portal-color-text-1)' }}>
@@ -129,7 +129,7 @@ const meta: Meta<NavRailStoryArgs> = {
     component: NavRail,
     args: {
         items: ITEMS,
-        active: 'fleet',
+        value: 'fleet',
         label: 'Primary navigation',
     },
     render: (args: NavRailStoryArgs): ReactElement => (
@@ -153,12 +153,12 @@ export const WithIcons: Story = {
 };
 
 export const WithBadges: Story = {
-    args: { items: BADGE_ITEMS, active: 'inbox', label: 'Mail navigation' },
+    args: { items: BADGE_ITEMS, value: 'inbox', label: 'Mail navigation' },
 };
 
 // Items carrying an href render as <a> navigation links; one carries aria-current.
 export const LinkMode: Story = {
-    args: { items: LINK_ITEMS, active: 'docs', label: 'Docs navigation' },
+    args: { items: LINK_ITEMS, value: 'docs', label: 'Docs navigation' },
 };
 
 export const Disabled: Story = {
@@ -166,7 +166,7 @@ export const Disabled: Story = {
 };
 
 export const ManyItems: Story = {
-    args: { items: MANY_ITEMS, active: 'research', label: 'Sections' },
+    args: { items: MANY_ITEMS, value: 'research', label: 'Sections' },
 };
 
 export const Composition: Story = {

@@ -2,6 +2,7 @@ import { type ReactNode } from 'react';
 
 import { type EEnabledState } from '../../state/state';
 import { type AccessibleName } from '../accessibleName';
+import { type ESelectionMode } from '../selectionMode';
 import { type EUiStatus, type Toned } from '../tone';
 
 /*
@@ -36,21 +37,11 @@ import { type EUiStatus, type Toned } from '../tone';
  * pointer-click only).
  */
 
-// Selection model. None => presentational/navigation list (role="list" with
-// role="listitem" rows). Single/Multiple => role="listbox" with role="option"
-// rows and aria-selected (Multiple adds aria-multiselectable). Modeled as the
-// standard E-prefixed annotated const object - enums-as-language are banned.
-export const EListSelectionMode: {
-    readonly None: 'none';
-    readonly Single: 'single';
-    readonly Multiple: 'multiple';
-} = {
-    None: 'none',
-    Single: 'single',
-    Multiple: 'multiple',
-};
-export type EListSelectionMode =
-    (typeof EListSelectionMode)[keyof typeof EListSelectionMode];
+// Selection model (None / Single / Multi) is the shared ESelectionMode, imported
+// from ../selectionMode so List and DataTable use one canonical enum. None =>
+// presentational/navigation list (role="list" with role="listitem" rows).
+// Single/Multi => role="listbox" with role="option" rows and aria-selected (Multi
+// adds aria-multiselectable).
 
 // Per-row presentation state surfaced as the row data-state attribute the CSS
 // keys off (never color-only). Selected pairs with aria-selected; Idle is the
@@ -92,11 +83,13 @@ export type ListProps<Item> = Readonly<{
     // Extra rows rendered above/below the viewport window (windowing overscan).
     // Forwarded to useVirtualWindow; replaces Helicon's per-frame row cap.
     overscan?: number;
-    selectionMode?: EListSelectionMode; // default None
-    // Controlled selection (the Portal default; mirrors Tabs/Select). For Single,
-    // at most one key; for Multiple, any number; ignored when None.
-    selectedKeys?: readonly string[];
-    onSelectionChange?: (keys: readonly string[]) => void;
+    selectionMode?: ESelectionMode; // default None
+    // Controlled selection (the Portal default; mirrors DataTable). A set of row
+    // keys: for Single, at most one key; for Multi, any number; ignored when None.
+    // Membership/dedup is the correct model, so a ReadonlySet (not an array)
+    // unifies the contract with DataTable.
+    selectedKeys?: ReadonlySet<string>;
+    onSelectionChange?: (next: ReadonlySet<string>) => void;
     // Optional type-ahead source (plain text per item). When present, printable
     // keys move the active cursor to the next matching row (Select's pattern).
     getTypeAheadText?: (item: Item) => string;

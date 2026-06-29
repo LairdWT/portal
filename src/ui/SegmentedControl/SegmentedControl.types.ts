@@ -22,7 +22,7 @@ export type ESegmentState = (typeof ESegmentState)[keyof typeof ESegmentState];
 // selection identity (the value the component reports through onChange and
 // compares against the controlled `value`). `label` is arbitrary renderable
 // content.
-export type UiSegmentItem = Readonly<{
+export type SegmentItem = Readonly<{
     id: string;
     label: ReactNode;
 }>;
@@ -42,7 +42,7 @@ export type UiSegmentItem = Readonly<{
 // derives from it. `tone` flows through the shared tone scope and drives the
 // selected-segment indicator only.
 export type SegmentedControlProps = Readonly<{
-    items: readonly UiSegmentItem[];
+    items: readonly SegmentItem[];
     value: string;
     onChange?: (id: string) => void;
     enabled?: EEnabledState;

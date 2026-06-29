@@ -21,13 +21,13 @@ import {
 } from '../../react/hooks/useVirtualWindow';
 import { EEnabledState } from '../../state/state';
 import { EOverlayMotion } from '../overlayMotion';
+import { ESelectionMode } from '../selectionMode';
 import { EUiStatus, toneProperties } from '../tone';
 import toneStyles from '../tone.module.css';
 import styles from './DataTable.module.css';
 import {
     type DataTableProps,
     EColumnAlign,
-    ESelectionMode,
     ESortDirection,
     type TableColumn,
     type TableSort,

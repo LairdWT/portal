@@ -17,7 +17,7 @@ export type ESearchBoxState =
 
 // Props for the SearchBox: the generic, domain-agnostic search input of the UI
 // layer. It builds on the TextField pattern - a controlled field (`value` in,
-// `onChange` out with the parsed string, not the raw event) with an always
+// `onValueChange` out with the parsed string, not the raw event) with an always
 // rendered, programmatically associated <label> (`id` falls back to a generated
 // useId so a caller never has to invent one). The rendered <input type="search">
 // exposes the implicit `searchbox` role. A decorative search affordance leads the
@@ -33,7 +33,7 @@ export type SearchBoxProps = Readonly<
     {
         label: string;
         value: string;
-        onChange?: (value: string) => void;
+        onValueChange?: (value: string) => void;
         onSubmit?: (value: string) => void;
         id?: string;
         // Optional id of the element this search field controls, forwarded to the

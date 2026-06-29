@@ -2,9 +2,9 @@ import { render, screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import { StepTrack } from './StepTrack';
-import { EStepState, type UiStep } from './StepTrack.types';
+import { EStepState, type Step } from './StepTrack.types';
 
-const PHASES: readonly UiStep[] = [
+const PHASES: readonly Step[] = [
     { id: 'draw', label: 'Draw' },
     { id: 'main', label: 'Main' },
     { id: 'combat', label: 'Combat' },

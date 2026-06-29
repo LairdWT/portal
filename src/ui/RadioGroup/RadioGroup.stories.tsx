@@ -8,14 +8,14 @@ import {
 
 import { EEnabledState } from '../../state/state';
 import { RadioGroup } from './RadioGroup';
-import { ERadioOrientation, type UiRadioItem } from './RadioGroup.types';
+import { ERadioOrientation, type RadioItem } from './RadioGroup.types';
 
 // A single (non-union) story args shape. The component's own props are an XOR
 // union (AccessibleName), which collapses Storybook's arg inference to `never`;
 // the stories only ever exercise the `label` form, so a flat args type keeps the
 // meta and story typing sound while still feeding valid RadioGroup props.
 type RadioGroupStoryArgs = Readonly<{
-    items: readonly UiRadioItem[];
+    items: readonly RadioItem[];
     value: string;
     label: string;
     enabled?: EEnabledState;
@@ -23,19 +23,19 @@ type RadioGroupStoryArgs = Readonly<{
     tone?: string;
 }>;
 
-const ITEMS: readonly UiRadioItem[] = [
+const ITEMS: readonly RadioItem[] = [
     { id: 'day', label: 'Day' },
     { id: 'week', label: 'Week' },
     { id: 'month', label: 'Month' },
 ];
 
-const ITEMS_WITH_DISABLED: readonly UiRadioItem[] = [
+const ITEMS_WITH_DISABLED: readonly RadioItem[] = [
     { id: 'day', label: 'Day' },
     { id: 'week', label: 'Week', disabled: true },
     { id: 'month', label: 'Month' },
 ];
 
-const MANY_ITEMS: readonly UiRadioItem[] = [
+const MANY_ITEMS: readonly RadioItem[] = [
     { id: 'all', label: 'All' },
     { id: 'open', label: 'Open' },
     { id: 'pending', label: 'Pending' },

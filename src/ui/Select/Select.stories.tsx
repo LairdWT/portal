@@ -11,16 +11,16 @@ import {
 
 import { EEnabledState } from '../../state/state';
 import { Select } from './Select';
-import { type SelectProps, type UiSelectOption } from './Select.types';
+import { type SelectOption, type SelectProps } from './Select.types';
 
-const OPTIONS: readonly UiSelectOption[] = [
+const OPTIONS: readonly SelectOption[] = [
     { id: 'apple', label: 'Apple' },
     { id: 'banana', label: 'Banana' },
     { id: 'cherry', label: 'Cherry' },
     { id: 'date', label: 'Date' },
 ];
 
-const LONG_OPTIONS: readonly UiSelectOption[] = [
+const LONG_OPTIONS: readonly SelectOption[] = [
     { id: 'mercury', label: 'Mercury' },
     { id: 'venus', label: 'Venus' },
     { id: 'earth', label: 'Earth' },
@@ -31,7 +31,7 @@ const LONG_OPTIONS: readonly UiSelectOption[] = [
     { id: 'neptune', label: 'Neptune' },
 ];
 
-const DISABLED_OPTION: readonly UiSelectOption[] = [
+const DISABLED_OPTION: readonly SelectOption[] = [
     { id: 'apple', label: 'Apple' },
     { id: 'banana', label: 'Banana', disabled: true },
     { id: 'cherry', label: 'Cherry' },

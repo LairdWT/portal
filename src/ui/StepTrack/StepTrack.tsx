@@ -3,7 +3,7 @@ import { type ReactElement } from 'react';
 import { EUiStatus, toneProperties } from '../tone';
 import toneStyles from '../tone.module.css';
 import styles from './StepTrack.module.css';
-import { EStepState, type StepTrackProps, type UiStep } from './StepTrack.types';
+import { EStepState, type Step, type StepTrackProps } from './StepTrack.types';
 
 // Derive a step's position from its index relative to the current step's index.
 // When the current step is not found (currentIndex === -1) every step reads as
@@ -27,7 +27,7 @@ export function StepTrack({
     tone,
 }: StepTrackProps): ReactElement {
     const currentIndex: number = steps.findIndex(
-        (step: UiStep): boolean => step.id === currentId,
+        (step: Step): boolean => step.id === currentId,
     );
     const className: string = [toneStyles.toneScope, styles.track]
         .filter((entry: string | undefined): entry is string => entry !== undefined)
@@ -39,7 +39,7 @@ export function StepTrack({
             style={toneProperties(tone)}
             data-status={EUiStatus.None}
         >
-            {steps.map((step: UiStep, index: number): ReactElement => {
+            {steps.map((step: Step, index: number): ReactElement => {
                 const stepState: EStepState = resolveStepState(index, currentIndex);
                 const isCurrent: boolean = stepState === EStepState.Current;
                 return (

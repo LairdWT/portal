@@ -4,9 +4,9 @@ import { describe, expect, it, type Mock, vi } from 'vitest';
 
 import { EEnabledState } from '../../state/state';
 import { RadioGroup } from './RadioGroup';
-import { ERadioOrientation, type UiRadioItem } from './RadioGroup.types';
+import { ERadioOrientation, type RadioItem } from './RadioGroup.types';
 
-const ITEMS: readonly UiRadioItem[] = [
+const ITEMS: readonly RadioItem[] = [
     { id: 'day', label: 'Day' },
     { id: 'week', label: 'Week' },
     { id: 'month', label: 'Month' },
@@ -249,7 +249,7 @@ describe('RadioGroup', (): void => {
     it('marks a per-item disabled option and ignores clicks on it', async (): Promise<void> => {
         const onChange: Mock<(id: string) => void> = vi.fn<(id: string) => void>();
         const user: UserEvent = userEvent.setup();
-        const items: readonly UiRadioItem[] = [
+        const items: readonly RadioItem[] = [
             { id: 'day', label: 'Day' },
             { id: 'week', label: 'Week', disabled: true },
             { id: 'month', label: 'Month' },
@@ -274,7 +274,7 @@ describe('RadioGroup', (): void => {
     it('skips a disabled middle option during roving navigation', async (): Promise<void> => {
         const onChange: Mock<(id: string) => void> = vi.fn<(id: string) => void>();
         const user: UserEvent = userEvent.setup();
-        const items: readonly UiRadioItem[] = [
+        const items: readonly RadioItem[] = [
             { id: 'day', label: 'Day' },
             { id: 'week', label: 'Week', disabled: true },
             { id: 'month', label: 'Month' },
@@ -296,7 +296,7 @@ describe('RadioGroup', (): void => {
     });
 
     it('places the roving entry on the first enabled option when earlier options are disabled', (): void => {
-        const items: readonly UiRadioItem[] = [
+        const items: readonly RadioItem[] = [
             { id: 'day', label: 'Day', disabled: true },
             { id: 'week', label: 'Week' },
             { id: 'month', label: 'Month' },

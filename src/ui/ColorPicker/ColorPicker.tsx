@@ -11,7 +11,7 @@ import { Slider } from '../../components/Slider/Slider';
 import { useResolvedEnabled } from '../../react/hooks/useResolvedEnabled';
 import { type EEnabledState } from '../../state/state';
 import { SegmentedControl } from '../SegmentedControl/SegmentedControl';
-import { type UiSegmentItem } from '../SegmentedControl/SegmentedControl.types';
+import { type SegmentItem } from '../SegmentedControl/SegmentedControl.types';
 import { TextField } from '../TextField/TextField';
 import { EUiStatus, toneProperties } from '../tone';
 import toneStyles from '../tone.module.css';
@@ -41,7 +41,7 @@ const SWATCH_PROPERTY: string = '--portal-color-picker-swatch';
 
 // The fixed RGB/HSV/Hex mode set for the radiogroup. The ids are the EColorMode
 // values, so the reported id maps straight back through resolveMode.
-const MODE_ITEMS: readonly UiSegmentItem[] = [
+const MODE_ITEMS: readonly SegmentItem[] = [
     { id: EColorMode.Rgb, label: 'RGB' },
     { id: EColorMode.Hsv, label: 'HSV' },
     { id: EColorMode.Hex, label: 'Hex' },
@@ -86,7 +86,7 @@ function describeHexError(error: EColorParseError): string {
 export function ColorPicker({
     label,
     value,
-    onChange,
+    onValueChange,
     alpha,
     defaultMode,
     id,
@@ -140,7 +140,7 @@ export function ColorPicker({
     const swatchStyle: CSSProperties = { [SWATCH_PROPERTY]: canonicalHex };
 
     function emit(next: RgbaBytes): void {
-        onChange?.(formatHexColor(next, useAlpha));
+        onValueChange?.(formatHexColor(next, useAlpha));
     }
 
     function emitHsv(next: HsvColor): void {
@@ -195,7 +195,7 @@ export function ColorPicker({
         if (!result.ok) {
             return;
         }
-        onChange?.(formatHexColor(result.value, useAlpha));
+        onValueChange?.(formatHexColor(result.value, useAlpha));
     }
 
     // Blur bubbles from the field to the wrapper; resetting the draft re-syncs the

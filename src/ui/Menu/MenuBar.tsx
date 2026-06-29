@@ -19,20 +19,20 @@ import { MenuSurface } from './Menu';
 import styles from './Menu.module.css';
 import {
     EMenuOrientation,
+    type MenuBarMenu,
     type MenuBarProps,
-    type UiMenuBarMenu,
 } from './Menu.types';
 
 const TYPEAHEAD_RESET_MS: number = 500;
 
-function isBarItemDisabled(menu: UiMenuBarMenu, barDisabled: boolean): boolean {
+function isBarItemDisabled(menu: MenuBarMenu, barDisabled: boolean): boolean {
     return barDisabled || menu.disabled === true;
 }
 
 // Next enabled bar index in a direction WITH wrapping; returns `from` when no
 // other enabled entry exists.
 function nextEnabledBar(
-    menus: readonly UiMenuBarMenu[],
+    menus: readonly MenuBarMenu[],
     from: number,
     direction: 1 | -1,
     barDisabled: boolean,
@@ -43,7 +43,7 @@ function nextEnabledBar(
     }
     for (let step: number = 1; step <= count; step += 1) {
         const index: number = (((from + direction * step) % count) + count) % count;
-        const menu: UiMenuBarMenu | undefined = menus[index];
+        const menu: MenuBarMenu | undefined = menus[index];
         if (menu !== undefined && !isBarItemDisabled(menu, barDisabled)) {
             return index;
         }
@@ -52,11 +52,11 @@ function nextEnabledBar(
 }
 
 function firstEnabledBar(
-    menus: readonly UiMenuBarMenu[],
+    menus: readonly MenuBarMenu[],
     barDisabled: boolean,
 ): number {
     for (let index: number = 0; index < menus.length; index += 1) {
-        const menu: UiMenuBarMenu | undefined = menus[index];
+        const menu: MenuBarMenu | undefined = menus[index];
         if (menu !== undefined && !isBarItemDisabled(menu, barDisabled)) {
             return index;
         }
@@ -65,11 +65,11 @@ function firstEnabledBar(
 }
 
 function lastEnabledBar(
-    menus: readonly UiMenuBarMenu[],
+    menus: readonly MenuBarMenu[],
     barDisabled: boolean,
 ): number {
     for (let index: number = menus.length - 1; index >= 0; index -= 1) {
-        const menu: UiMenuBarMenu | undefined = menus[index];
+        const menu: MenuBarMenu | undefined = menus[index];
         if (menu !== undefined && !isBarItemDisabled(menu, barDisabled)) {
             return index;
         }
@@ -77,12 +77,12 @@ function lastEnabledBar(
     return -1;
 }
 
-function barLabelText(menu: UiMenuBarMenu): string {
+function barLabelText(menu: MenuBarMenu): string {
     return typeof menu.label === 'string' ? menu.label : '';
 }
 
 function findBarTypeAhead(
-    menus: readonly UiMenuBarMenu[],
+    menus: readonly MenuBarMenu[],
     query: string,
     fromIndex: number,
     barDisabled: boolean,
@@ -94,7 +94,7 @@ function findBarTypeAhead(
     const lower: string = query.toLowerCase();
     for (let offset: number = 1; offset <= count; offset += 1) {
         const index: number = (((fromIndex + offset) % count) + count) % count;
-        const menu: UiMenuBarMenu | undefined = menus[index];
+        const menu: MenuBarMenu | undefined = menus[index];
         if (menu === undefined || isBarItemDisabled(menu, barDisabled)) {
             continue;
         }
@@ -143,9 +143,9 @@ export function MenuBar(props: MenuBarProps): ReactElement {
     }, []);
 
     const activeMenuIndex: number = menus.findIndex(
-        (menu: UiMenuBarMenu): boolean => menu.id === openMenuId,
+        (menu: MenuBarMenu): boolean => menu.id === openMenuId,
     );
-    const activeMenu: UiMenuBarMenu | undefined =
+    const activeMenu: MenuBarMenu | undefined =
         activeMenuIndex >= 0 ? menus[activeMenuIndex] : undefined;
 
     function buttonId(menuId: string): string {
@@ -172,7 +172,7 @@ export function MenuBar(props: MenuBarProps): ReactElement {
     }
 
     function openMenuAt(index: number): void {
-        const menu: UiMenuBarMenu | undefined = menus[index];
+        const menu: MenuBarMenu | undefined = menus[index];
         if (menu === undefined || isBarItemDisabled(menu, barDisabled)) {
             return;
         }
@@ -264,7 +264,7 @@ export function MenuBar(props: MenuBarProps): ReactElement {
     }
 
     function handleButtonClick(index: number): void {
-        const menu: UiMenuBarMenu | undefined = menus[index];
+        const menu: MenuBarMenu | undefined = menus[index];
         if (menu === undefined || isBarItemDisabled(menu, barDisabled)) {
             return;
         }
@@ -300,7 +300,7 @@ export function MenuBar(props: MenuBarProps): ReactElement {
             {...(label !== undefined ? { 'aria-label': label } : {})}
             {...(labelledBy !== undefined ? { 'aria-labelledby': labelledBy } : {})}
         >
-            {menus.map((menu: UiMenuBarMenu, index: number): ReactElement => {
+            {menus.map((menu: MenuBarMenu, index: number): ReactElement => {
                 const isOpen: boolean = openMenuId === menu.id;
                 const itemDisabled: boolean = isBarItemDisabled(menu, barDisabled);
                 return (

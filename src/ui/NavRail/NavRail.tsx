@@ -25,13 +25,13 @@ import {
 // to the first item: an out-of-range active leaves every band unselected (Helicon
 // parity), so aria-current is omitted everywhere until the consumer supplies a
 // matching id.
-function resolveActiveIndex(items: readonly NavRailItem[], active: string): number {
-    return items.findIndex((item: NavRailItem): boolean => item.id === active);
+function resolveActiveIndex(items: readonly NavRailItem[], value: string): number {
+    return items.findIndex((item: NavRailItem): boolean => item.id === value);
 }
 
 export function NavRail({
     items,
-    active,
+    value,
     onChange,
     enabled,
     label,
@@ -40,7 +40,7 @@ export function NavRail({
 }: NavRailProps): ReactElement {
     const resolvedEnabled: EEnabledState = useResolvedEnabled(enabled);
     const isDisabled: boolean = resolvedEnabled === EEnabledState.Disabled;
-    const activeIndex: number = resolveActiveIndex(items, active);
+    const activeIndex: number = resolveActiveIndex(items, value);
     // The roving tab stop, decoupled from the active id because activation is
     // manual (arrows move focus only). It seeds to the active item, or the first
     // item when the active id matches nothing.
@@ -52,7 +52,7 @@ export function NavRail({
     const [previousActive, setPreviousActive]: [
         string,
         Dispatch<SetStateAction<string>>,
-    ] = useState<string>(active);
+    ] = useState<string>(value);
     // A fixed-index ref array: the ref callback writes refs.current[index] = el. An
     // effect keyed on items keeps the array length in sync so a shrinking item set
     // prunes the trailing refs.
@@ -65,8 +65,8 @@ export function NavRail({
 
     // Render-phase derived sync: when the controlled active id changes, follow it
     // with the roving tab stop (only when it matches an entry).
-    if (active !== previousActive) {
-        setPreviousActive(active);
+    if (value !== previousActive) {
+        setPreviousActive(value);
         if (activeIndex >= 0) {
             setFocusIndex(activeIndex);
         }
@@ -195,7 +195,7 @@ export function NavRail({
             {...(labelledBy !== undefined ? { 'aria-labelledby': labelledBy } : {})}
         >
             {items.map((item: NavRailItem, index: number): ReactElement => {
-                const isActive: boolean = item.id === active;
+                const isActive: boolean = item.id === value;
                 const itemState: ENavItemState = isActive
                     ? ENavItemState.Active
                     : ENavItemState.Idle;

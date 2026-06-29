@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { ReadoutPanel } from './ReadoutPanel';
-import { type UiReadout } from './ReadoutPanel.types';
+import { type Readout } from './ReadoutPanel.types';
 
-const baseReadouts: readonly UiReadout[] = [
+const baseReadouts: readonly Readout[] = [
     { id: 'energy', label: 'Energy', value: 7 },
     { id: 'shield', label: 'Shield', value: 42 },
     { id: 'hull', label: 'Hull', value: 100 },

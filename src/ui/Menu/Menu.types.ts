@@ -36,7 +36,7 @@ export type EMenuOrientation =
 // string); `shortcut` is a DISPLAY-ONLY hint string (Portal installs no global
 // accelerator - the app wires the real key handler); `icon` is an optional
 // leading ReactNode slot; `disabled` skips navigation and blocks activation.
-export type UiMenuActionNode = Readonly<{
+export type MenuActionNode = Readonly<{
     kind: typeof EMenuNodeKind.Action;
     id: string;
     label: ReactNode;
@@ -47,7 +47,7 @@ export type UiMenuActionNode = Readonly<{
 
 // A checkable item (role=menuitemcheckbox). `checked` is controlled by the
 // consumer; activation reports onSelect(id) and the consumer flips it.
-export type UiMenuCheckboxNode = Readonly<{
+export type MenuCheckboxNode = Readonly<{
     kind: typeof EMenuNodeKind.Checkbox;
     id: string;
     label: ReactNode;
@@ -58,7 +58,7 @@ export type UiMenuCheckboxNode = Readonly<{
 
 // A radio item (role=menuitemradio). `group` names the single-selection set; the
 // consumer enforces exclusivity in its model inside its onSelect handler.
-export type UiMenuRadioNode = Readonly<{
+export type MenuRadioNode = Readonly<{
     kind: typeof EMenuNodeKind.Radio;
     id: string;
     label: ReactNode;
@@ -70,33 +70,33 @@ export type UiMenuRadioNode = Readonly<{
 
 // A submenu parent (role=menuitem, aria-haspopup="menu", aria-expanded).
 // `items` is the recursive child set.
-export type UiMenuSubmenuNode = Readonly<{
+export type MenuSubmenuNode = Readonly<{
     kind: typeof EMenuNodeKind.Submenu;
     id: string;
     label: ReactNode;
-    items: readonly UiMenuNode[];
+    items: readonly MenuNode[];
     icon?: ReactNode;
     disabled?: boolean;
 }>;
 
 // A non-interactive separator (role=separator); skipped by all navigation.
-export type UiMenuSeparatorNode = Readonly<{
+export type MenuSeparatorNode = Readonly<{
     kind: typeof EMenuNodeKind.Separator;
     id: string;
 }>;
 
-export type UiMenuNode =
-    | UiMenuActionNode
-    | UiMenuCheckboxNode
-    | UiMenuRadioNode
-    | UiMenuSubmenuNode
-    | UiMenuSeparatorNode;
+export type MenuNode =
+    | MenuActionNode
+    | MenuCheckboxNode
+    | MenuRadioNode
+    | MenuSubmenuNode
+    | MenuSeparatorNode;
 
 // One top-level entry in a MenuBar.
-export type UiMenuBarMenu = Readonly<{
+export type MenuBarMenu = Readonly<{
     id: string;
     label: ReactNode;
-    items: readonly UiMenuNode[];
+    items: readonly MenuNode[];
     disabled?: boolean;
 }>;
 
@@ -106,7 +106,7 @@ export type UiMenuBarMenu = Readonly<{
 // `placement` is the preferred side (default Bottom). `enabled` resolves through
 // useResolvedEnabled; `tone` flows through the shared tone scope.
 export type MenuProps = Readonly<{
-    items: readonly UiMenuNode[];
+    items: readonly MenuNode[];
     open: boolean;
     onOpenChange: (open: boolean) => void;
     onSelect: (id: string) => void;
@@ -120,7 +120,7 @@ export type MenuProps = Readonly<{
 // MenuBar: a horizontal menubar of top-level menus, each opening a Menu. Owns
 // open state internally; reports onSelect(menuId, itemId).
 export type MenuBarProps = Readonly<{
-    menus: readonly UiMenuBarMenu[];
+    menus: readonly MenuBarMenu[];
     onSelect: (menuId: string, itemId: string) => void;
     enabled?: EEnabledState;
 }> &
@@ -130,7 +130,7 @@ export type MenuBarProps = Readonly<{
 // ContextMenu: wraps a trigger region; opens a Menu at the pointer on the
 // contextmenu event. `children` is the right-clickable region.
 export type ContextMenuProps = Readonly<{
-    items: readonly UiMenuNode[];
+    items: readonly MenuNode[];
     onSelect: (id: string) => void;
     children: ReactNode;
     enabled?: EEnabledState;

@@ -8,27 +8,27 @@ import {
 
 import { EEnabledState } from '../../state/state';
 import { SegmentedControl } from './SegmentedControl';
-import { type UiSegmentItem } from './SegmentedControl.types';
+import { type SegmentItem } from './SegmentedControl.types';
 
 // A single (non-union) story args shape. The component's own props are an XOR
 // union (AccessibleName), which collapses Storybook's arg inference to `never`;
 // the stories only ever exercise the `label` form, so a flat args type keeps the
 // meta and story typing sound while still feeding valid SegmentedControl props.
 type SegmentedControlStoryArgs = Readonly<{
-    items: readonly UiSegmentItem[];
+    items: readonly SegmentItem[];
     value: string;
     label: string;
     enabled?: EEnabledState;
     tone?: string;
 }>;
 
-const ITEMS: readonly UiSegmentItem[] = [
+const ITEMS: readonly SegmentItem[] = [
     { id: 'day', label: 'Day' },
     { id: 'week', label: 'Week' },
     { id: 'month', label: 'Month' },
 ];
 
-const MANY_ITEMS: readonly UiSegmentItem[] = [
+const MANY_ITEMS: readonly SegmentItem[] = [
     { id: 'all', label: 'All' },
     { id: 'open', label: 'Open' },
     { id: 'pending', label: 'Pending' },

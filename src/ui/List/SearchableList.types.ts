@@ -21,7 +21,7 @@ import { type ListRowRenderState } from './List.types';
  *
  * SearchableList is single-select by construction (the detail shows exactly one
  * item), so it does not expose a selectionMode; it drives the inner List with
- * EListSelectionMode.Single and maps selectedKey to/from a one-element selection.
+ * ESelectionMode.Single and maps selectedKey to/from a one-element selection.
  *
  * Empty-state split (parity with Helicon's EMPTY_ROWS_LABEL vs
  * EMPTY_MATCHES_LABEL): when items is empty the list shows emptyContent ("No

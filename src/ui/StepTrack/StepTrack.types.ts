@@ -21,7 +21,7 @@ export type EStepState = (typeof EStepState)[keyof typeof EStepState];
 
 // A single step in the track. `id` is an opaque string the consumer supplies and
 // matches against `currentId`; `label` is presentation content (string or node).
-export type UiStep = Readonly<{
+export type Step = Readonly<{
     id: string;
     label: ReactNode;
 }>;
@@ -37,7 +37,7 @@ export type UiStep = Readonly<{
 // enumerates a palette.
 export type StepTrackProps = Readonly<
     {
-        steps: readonly UiStep[];
+        steps: readonly Step[];
         currentId: string;
     } & Toned
 >;

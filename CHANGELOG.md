@@ -6,7 +6,34 @@ based on Keep a Changelog, and the project follows Semantic Versioning with the
 
 ## [Unreleased]
 
-Deferred-backlog quality work; no breaking changes.
+1.0 stabilization (in progress) plus the earlier deferred-backlog quality work.
+
+### Breaking
+
+Pre-1.0 public-API corrections, made now while they are cheap, so the 1.0
+surface is internally consistent. A compile-time freeze contract
+(`src/index.contract.test.ts`) and a barrel export-name snapshot
+(`src/index.barrel.test.ts`) now lock these decisions.
+
+- The controlled single-select prop is `value` everywhere: `NavRail` renamed
+  `active` -> `value` (matching RadioGroup/SegmentedControl/Tabs/Select).
+- The "set of ids" contract is `ReadonlySet<string>` everywhere: `List`
+  selection and `Accordion` (multiple) expansion move from `readonly string[]`
+  to `ReadonlySet<string>`, matching DataTable/TreeView. The two selection-mode
+  enums are collapsed into one canonical `ESelectionMode` (`'multi'` literal),
+  now exported from `./ui/selectionMode`; `EListSelectionMode` is removed.
+- Per-item types drop the inconsistent `Ui` prefix: `UiRadioItem` -> `RadioItem`,
+  `UiSegmentItem` -> `SegmentItem`, `UiSelectOption` -> `SelectOption`,
+  `UiStep` -> `Step`, `UiTabItem` -> `TabItem`, `UiCommand` -> `Command`,
+  `UiReadout` -> `Readout`, and the `UiMenu*Node` family -> `Menu*Node`.
+  (The `EUiStatus` enum is unchanged - its name is not the per-item prefix.)
+- `Tabs` now requires an accessible name (`AccessibleName`: `label` XOR
+  `labelledBy`) - a nameless tablist is a compile error - and emits a
+  deterministic per-tab `id` plus optional `controls` for the APG tab/tabpanel
+  relationship.
+- Value-string editors report through `onValueChange`: `SearchBox` and
+  `ColorPicker` renamed `onChange` -> `onValueChange` (matching
+  TextField/SecretField/PromptDialog).
 
 ### Fixed
 

@@ -3,7 +3,7 @@ import type { ReactElement } from 'react';
 import { toneProperties } from '../tone';
 import toneStyles from '../tone.module.css';
 import styles from './ReadoutPanel.module.css';
-import { type ReadoutPanelProps, type UiReadout } from './ReadoutPanel.types';
+import { type Readout, type ReadoutPanelProps } from './ReadoutPanel.types';
 
 export function ReadoutPanel({
     label,
@@ -26,7 +26,7 @@ export function ReadoutPanel({
         >
             <span className={styles.accent} aria-hidden="true" />
             <dl className={styles.list}>
-                {readouts.map((readout: UiReadout): ReactElement => {
+                {readouts.map((readout: Readout): ReactElement => {
                     const valueText: string = String(readout.value);
                     return (
                         <div

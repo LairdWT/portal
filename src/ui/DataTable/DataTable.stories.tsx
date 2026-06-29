@@ -9,11 +9,11 @@ import {
 } from 'react';
 
 import { EEnabledState } from '../../state/state';
+import { ESelectionMode } from '../selectionMode';
 import { DataTable } from './DataTable';
 import {
     type DataTableProps,
     EColumnAlign,
-    ESelectionMode,
     ESortDirection,
     type TableCellContext,
     type TableColumn,

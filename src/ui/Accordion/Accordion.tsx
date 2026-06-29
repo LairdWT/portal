@@ -10,6 +10,7 @@ import {
 
 import { useResolvedEnabled } from '../../react/hooks/useResolvedEnabled';
 import { EEnabledState } from '../../state/state';
+import { toggleExpanded } from '../expansion';
 import { EUiStatus, toneProperties } from '../tone';
 import toneStyles from '../tone.module.css';
 import styles from './Accordion.module.css';
@@ -29,7 +30,7 @@ function isExpanded(props: AccordionProps, id: string): boolean {
         case EAccordionMode.Single:
             return props.expandedId === id;
         case EAccordionMode.Multiple:
-            return props.expandedIds.includes(id);
+            return props.expandedIds.has(id);
     }
 }
 
@@ -100,16 +101,9 @@ export function Accordion(props: AccordionProps): ReactElement {
                 return;
             }
             case EAccordionMode.Multiple: {
-                const open: boolean = props.expandedIds.includes(id);
-                if (!open) {
-                    props.onExpandedChange([...props.expandedIds, id]);
-                    return;
-                }
-                props.onExpandedChange(
-                    props.expandedIds.filter(
-                        (entry: string): boolean => entry !== id,
-                    ),
-                );
+                // The shared expansion helper toggles membership and returns a NEW
+                // ReadonlySet, so the multi-open path never mutates the prop.
+                props.onExpandedChange(toggleExpanded(props.expandedIds, id));
                 return;
             }
         }

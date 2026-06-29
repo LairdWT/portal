@@ -2,6 +2,7 @@ import {
     type KeyboardEvent,
     type ReactElement,
     type RefObject,
+    useId,
     useRef,
 } from 'react';
 
@@ -10,14 +11,14 @@ import { EEnabledState } from '../../state/state';
 import { EUiStatus, toneProperties } from '../tone';
 import toneStyles from '../tone.module.css';
 import styles from './Tabs.module.css';
-import { ETabState, type TabsProps, type UiTabItem } from './Tabs.types';
+import { ETabState, type TabItem, type TabsProps } from './Tabs.types';
 
 // Resolves the index of the currently selected tab, falling back to the first
 // tab when the controlled value matches no item, so focus and roving tabindex
 // always have a valid target.
-function resolveSelectedIndex(items: readonly UiTabItem[], value: string): number {
+function resolveSelectedIndex(items: readonly TabItem[], value: string): number {
     const index: number = items.findIndex(
-        (item: UiTabItem): boolean => item.id === value,
+        (item: TabItem): boolean => item.id === value,
     );
     return index === -1 ? 0 : index;
 }
@@ -27,11 +28,17 @@ export function Tabs({
     value,
     onChange,
     enabled,
+    label,
+    labelledBy,
     tone,
 }: TabsProps): ReactElement {
     const resolvedEnabled: EEnabledState = useResolvedEnabled(enabled);
     const isDisabled: boolean = resolvedEnabled === EEnabledState.Disabled;
     const selectedIndex: number = resolveSelectedIndex(items, value);
+    // A per-instance base id seeds the deterministic per-tab DOM id, so a tabpanel
+    // can point its aria-labelledby back at the owning tab without colliding with a
+    // second Tabs instance on the page.
+    const baseId: string = useId();
     const tabRefs: RefObject<readonly (HTMLButtonElement | null)[]> = useRef<
         readonly (HTMLButtonElement | null)[]
     >([]);
@@ -44,7 +51,7 @@ export function Tabs({
             case EEnabledState.Disabled:
                 return;
             case EEnabledState.Enabled: {
-                const nextItem: UiTabItem | undefined = items[index];
+                const nextItem: TabItem | undefined = items[index];
                 if (nextItem === undefined) {
                     return;
                 }
@@ -106,15 +113,21 @@ export function Tabs({
             style={toneProperties(tone)}
             data-status={EUiStatus.None}
             data-enabled={resolvedEnabled}
+            {...(label !== undefined ? { 'aria-label': label } : {})}
+            {...(labelledBy !== undefined ? { 'aria-labelledby': labelledBy } : {})}
         >
-            {items.map((item: UiTabItem, index: number): ReactElement => {
+            {items.map((item: TabItem, index: number): ReactElement => {
                 const isSelected: boolean = item.id === value;
                 const tabState: ETabState = isSelected
                     ? ETabState.Selected
                     : ETabState.Idle;
+                // Deterministic per-tab id derived from item.id so the consumer's
+                // tabpanel can label itself from this tab (APG tab/tabpanel link).
+                const tabId: string = `${baseId}-tab-${item.id}`;
                 return (
                     <button
                         key={item.id}
+                        id={tabId}
                         ref={(element: HTMLButtonElement | null): void => {
                             const next: (HTMLButtonElement | null)[] = [
                                 ...tabRefs.current,
@@ -126,6 +139,9 @@ export function Tabs({
                         role="tab"
                         className={styles.tab}
                         aria-selected={isSelected}
+                        {...(item.controls !== undefined
+                            ? { 'aria-controls': item.controls }
+                            : {})}
                         tabIndex={index === selectedIndex ? 0 : -1}
                         disabled={isDisabled}
                         data-state={tabState}

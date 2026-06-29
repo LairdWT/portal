@@ -1,6 +1,7 @@
 import { type ReactNode } from 'react';
 
 import { type EEnabledState } from '../../state/state';
+import { type ESelectionMode } from '../selectionMode';
 import { type EUiStatus, type Toned } from '../tone';
 
 /*
@@ -62,20 +63,8 @@ export const ESortDirection: {
 };
 export type ESortDirection = (typeof ESortDirection)[keyof typeof ESortDirection];
 
-// Row selection model. None disables selection entirely (rows carry no
-// aria-selected and a pointer activation reports nothing). Single keeps at most
-// one selected key. Multi allows a set, with toggle (Ctrl/Meta) and a contiguous
-// range (Shift).
-export const ESelectionMode: {
-    readonly None: 'none';
-    readonly Single: 'single';
-    readonly Multi: 'multi';
-} = {
-    None: 'none',
-    Single: 'single',
-    Multi: 'multi',
-};
-export type ESelectionMode = (typeof ESelectionMode)[keyof typeof ESelectionMode];
+// Row selection model (None / Single / Multi) is the shared ESelectionMode,
+// imported from ../selectionMode so List and DataTable use one canonical enum.
 
 // One column. `key` is the opaque consumer identity used for sort addressing, the
 // cell-context column key, and the React key. `header` is arbitrary renderable

@@ -17,7 +17,7 @@ function ControlledColorPicker(
 ): ReturnType<typeof ColorPicker> {
     const [value, setValue]: [string, Dispatch<SetStateAction<string>>] =
         useState<string>(props.value);
-    return <ColorPicker {...props} value={value} onChange={setValue} />;
+    return <ColorPicker {...props} value={value} onValueChange={setValue} />;
 }
 
 const meta: Meta<typeof ColorPicker> = {

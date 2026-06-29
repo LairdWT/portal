@@ -4,9 +4,9 @@ import { describe, expect, it, type Mock, vi } from 'vitest';
 
 import { EEnabledState } from '../../state/state';
 import { SegmentedControl } from './SegmentedControl';
-import { type UiSegmentItem } from './SegmentedControl.types';
+import { type SegmentItem } from './SegmentedControl.types';
 
-const ITEMS: readonly UiSegmentItem[] = [
+const ITEMS: readonly SegmentItem[] = [
     { id: 'day', label: 'Day' },
     { id: 'week', label: 'Week' },
     { id: 'month', label: 'Month' },

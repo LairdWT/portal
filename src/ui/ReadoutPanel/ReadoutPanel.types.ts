@@ -5,7 +5,7 @@ import { type Toned } from '../tone';
 // stable identity of the row (labels may collide, ids may not). `tone` is an
 // optional opaque CSS color the consumer supplies so a single row can be toned
 // independently of the panel; the row never enumerates a palette.
-export type UiReadout = Readonly<{
+export type Readout = Readonly<{
     id: string;
     label: string;
     value: string | number;
@@ -20,6 +20,6 @@ export type UiReadout = Readonly<{
 export type ReadoutPanelProps = Readonly<
     {
         label: string;
-        readouts: readonly UiReadout[];
+        readouts: readonly Readout[];
     } & Toned
 >;

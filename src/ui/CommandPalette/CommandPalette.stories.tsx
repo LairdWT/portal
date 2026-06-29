@@ -10,14 +10,14 @@ import {
 import { EEnabledState } from '../../state/state';
 import { EUiStatus } from '../tone';
 import { CommandPalette } from './CommandPalette';
-import { ECommandFilterMode, type UiCommand } from './CommandPalette.types';
+import { type Command, ECommandFilterMode } from './CommandPalette.types';
 
 // A single (non-union) story args shape. CommandPalette's props are an XOR union
 // (AccessibleName), which collapses Storybook's arg inference to `never`; the
 // stories only ever exercise the `label` form, so a flat args type keeps the meta
 // and story typing sound while still feeding valid CommandPalette props.
 type CommandPaletteStoryArgs = Readonly<{
-    commands: readonly UiCommand[];
+    commands: readonly Command[];
     label: string;
     initialQuery?: string;
     recentCommandIds?: readonly string[];
@@ -38,7 +38,7 @@ const OPENER_STYLE: CSSProperties = {
     cursor: 'pointer',
 };
 
-const COMMANDS: readonly UiCommand[] = [
+const COMMANDS: readonly Command[] = [
     { id: 'file.new', label: 'New File', shortcut: 'Ctrl N', group: 'File' },
     { id: 'file.open', label: 'Open File', shortcut: 'Ctrl O', group: 'File' },
     { id: 'file.save', label: 'Save', shortcut: 'Ctrl S', group: 'File' },
@@ -66,7 +66,7 @@ const COMMANDS: readonly UiCommand[] = [
     },
 ];
 
-const DISABLED_COMMANDS: readonly UiCommand[] = [
+const DISABLED_COMMANDS: readonly Command[] = [
     { id: 'file.new', label: 'New File', shortcut: 'Ctrl N' },
     {
         id: 'file.save',
@@ -83,8 +83,8 @@ const DISABLED_COMMANDS: readonly UiCommand[] = [
     },
 ];
 
-function makeLargeCorpus(count: number): readonly UiCommand[] {
-    const out: UiCommand[] = [];
+function makeLargeCorpus(count: number): readonly Command[] {
+    const out: Command[] = [];
     for (let index: number = 0; index < count; index += 1) {
         out.push({
             id: `cmd.${String(index)}`,
@@ -94,7 +94,7 @@ function makeLargeCorpus(count: number): readonly UiCommand[] {
     return out;
 }
 
-const LARGE_CORPUS: readonly UiCommand[] = makeLargeCorpus(5000);
+const LARGE_CORPUS: readonly Command[] = makeLargeCorpus(5000);
 
 // A controlled wrapper the stories share: CommandPalette is controlled, so the
 // story owns `open` and `query`, primes `open: true` on mount (the live surface

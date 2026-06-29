@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { StepTrack } from './StepTrack';
-import { type UiStep } from './StepTrack.types';
+import { type Step } from './StepTrack.types';
 
-const PHASES: readonly UiStep[] = [
+const PHASES: readonly Step[] = [
     { id: 'draw', label: 'Draw' },
     { id: 'main', label: 'Main' },
     { id: 'combat', label: 'Combat' },

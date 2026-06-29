@@ -10,7 +10,7 @@ import { afterEach, describe, expect, it, type Mock, vi } from 'vitest';
 
 import { EEnabledState } from '../../state/state';
 import { CommandPalette } from './CommandPalette';
-import { ECommandFilterMode, type UiCommand } from './CommandPalette.types';
+import { type Command, ECommandFilterMode } from './CommandPalette.types';
 
 afterEach((): void => {
     document.body.innerHTML = '';
@@ -18,13 +18,13 @@ afterEach((): void => {
     document.body.style.paddingRight = '';
 });
 
-const FLAT_COMMANDS: readonly UiCommand[] = [
+const FLAT_COMMANDS: readonly Command[] = [
     { id: 'one', label: 'Alpha' },
     { id: 'two', label: 'Bravo' },
     { id: 'three', label: 'Charlie' },
 ];
 
-const RICH_COMMANDS: readonly UiCommand[] = [
+const RICH_COMMANDS: readonly Command[] = [
     { id: 'file.new', label: 'New File', shortcut: 'Ctrl N', group: 'File' },
     { id: 'file.open', label: 'Open File', group: 'File' },
     { id: 'file.save', label: 'Save', group: 'File' },
@@ -32,14 +32,14 @@ const RICH_COMMANDS: readonly UiCommand[] = [
     { id: 'view.zoom', label: 'Zoom In', group: 'View' },
 ];
 
-const DISABLED_COMMANDS: readonly UiCommand[] = [
+const DISABLED_COMMANDS: readonly Command[] = [
     { id: 'on-1', label: 'Enabled One' },
     { id: 'off-1', label: 'Disabled One', enabled: EEnabledState.Disabled },
     { id: 'on-2', label: 'Enabled Two' },
 ];
 
-function makeLargeCorpus(count: number): readonly UiCommand[] {
-    const out: UiCommand[] = [];
+function makeLargeCorpus(count: number): readonly Command[] {
+    const out: Command[] = [];
     for (let index: number = 0; index < count; index += 1) {
         out.push({ id: `cmd-${String(index)}`, label: `Command ${String(index)}` });
     }
@@ -49,7 +49,7 @@ function makeLargeCorpus(count: number): readonly UiCommand[] {
 type HarnessProps = Readonly<{
     initialOpen?: boolean;
     initialQuery?: string;
-    commands?: readonly UiCommand[];
+    commands?: readonly Command[];
     recentCommandIds?: readonly string[];
     filterMode?: ECommandFilterMode;
     enabled?: EEnabledState;

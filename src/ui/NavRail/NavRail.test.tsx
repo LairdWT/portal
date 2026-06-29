@@ -29,7 +29,7 @@ const NAV_LABEL: string = 'Primary navigation';
 
 describe('NavRail', (): void => {
     it('renders a navigation landmark with the accessible name', (): void => {
-        render(<NavRail items={ITEMS} active="fleet" label={NAV_LABEL} />);
+        render(<NavRail items={ITEMS} value="fleet" label={NAV_LABEL} />);
 
         expect(
             screen.getByRole('navigation', { name: NAV_LABEL }),
@@ -37,7 +37,7 @@ describe('NavRail', (): void => {
     });
 
     it('wires label to aria-label on the nav landmark', (): void => {
-        render(<NavRail items={ITEMS} active="fleet" label={NAV_LABEL} />);
+        render(<NavRail items={ITEMS} value="fleet" label={NAV_LABEL} />);
 
         expect(screen.getByRole('navigation')).toHaveAttribute(
             'aria-label',
@@ -49,7 +49,7 @@ describe('NavRail', (): void => {
         render(
             <>
                 <span id="rail-heading">Sections</span>
-                <NavRail items={ITEMS} active="fleet" labelledBy="rail-heading" />
+                <NavRail items={ITEMS} value="fleet" labelledBy="rail-heading" />
             </>,
         );
 
@@ -61,13 +61,13 @@ describe('NavRail', (): void => {
     });
 
     it('renders one interactive button per entry', (): void => {
-        render(<NavRail items={ITEMS} active="fleet" label={NAV_LABEL} />);
+        render(<NavRail items={ITEMS} value="fleet" label={NAV_LABEL} />);
 
         expect(screen.getAllByRole('button')).toHaveLength(ITEMS.length);
     });
 
     it('marks the active item with aria-current=page and no others', (): void => {
-        render(<NavRail items={ITEMS} active="fleet" label={NAV_LABEL} />);
+        render(<NavRail items={ITEMS} value="fleet" label={NAV_LABEL} />);
 
         expect(screen.getByRole('button', { name: 'Fleet' })).toHaveAttribute(
             'aria-current',
@@ -79,7 +79,7 @@ describe('NavRail', (): void => {
     });
 
     it('leaves every item unmarked when the active id matches no entry', (): void => {
-        render(<NavRail items={ITEMS} active="missing" label={NAV_LABEL} />);
+        render(<NavRail items={ITEMS} value="missing" label={NAV_LABEL} />);
 
         expect(
             screen.queryByRole('button', { current: 'page' }),
@@ -87,7 +87,7 @@ describe('NavRail', (): void => {
     });
 
     it('applies a vertical roving tabindex with the active item focusable', (): void => {
-        render(<NavRail items={ITEMS} active="fleet" label={NAV_LABEL} />);
+        render(<NavRail items={ITEMS} value="fleet" label={NAV_LABEL} />);
 
         expect(screen.getByRole('button', { name: 'Fleet' })).toHaveAttribute(
             'tabindex',
@@ -104,7 +104,7 @@ describe('NavRail', (): void => {
     });
 
     it('falls back the roving tab stop to the first item when active matches nothing', (): void => {
-        render(<NavRail items={ITEMS} active="missing" label={NAV_LABEL} />);
+        render(<NavRail items={ITEMS} value="missing" label={NAV_LABEL} />);
 
         expect(screen.getByRole('button', { name: 'Overview' })).toHaveAttribute(
             'tabindex',
@@ -113,7 +113,7 @@ describe('NavRail', (): void => {
     });
 
     it('reflects selection through the data-state attribute', (): void => {
-        render(<NavRail items={ITEMS} active="fleet" label={NAV_LABEL} />);
+        render(<NavRail items={ITEMS} value="fleet" label={NAV_LABEL} />);
 
         expect(screen.getByRole('button', { name: 'Fleet' })).toHaveAttribute(
             'data-state',
@@ -131,7 +131,7 @@ describe('NavRail', (): void => {
         render(
             <NavRail
                 items={ITEMS}
-                active="overview"
+                value="overview"
                 label={NAV_LABEL}
                 onChange={onChange}
             />,
@@ -146,7 +146,7 @@ describe('NavRail', (): void => {
 
     it('wraps focus to the last item on ArrowUp from the first', async (): Promise<void> => {
         const user: UserEvent = userEvent.setup();
-        render(<NavRail items={ITEMS} active="overview" label={NAV_LABEL} />);
+        render(<NavRail items={ITEMS} value="overview" label={NAV_LABEL} />);
 
         screen.getByRole('button', { name: 'Overview' }).focus();
         await user.keyboard('{ArrowUp}');
@@ -160,7 +160,7 @@ describe('NavRail', (): void => {
         render(
             <NavRail
                 items={ITEMS}
-                active="fleet"
+                value="fleet"
                 label={NAV_LABEL}
                 onChange={onChange}
             />,
@@ -182,7 +182,7 @@ describe('NavRail', (): void => {
         render(
             <NavRail
                 items={ITEMS}
-                active="fleet"
+                value="fleet"
                 label={NAV_LABEL}
                 onChange={onChange}
             />,
@@ -200,7 +200,7 @@ describe('NavRail', (): void => {
         render(
             <NavRail
                 items={ITEMS}
-                active="fleet"
+                value="fleet"
                 label={NAV_LABEL}
                 onChange={onChange}
             />,
@@ -218,7 +218,7 @@ describe('NavRail', (): void => {
         render(
             <NavRail
                 items={ITEMS}
-                active="overview"
+                value="overview"
                 label={NAV_LABEL}
                 onChange={onChange}
             />,
@@ -236,7 +236,7 @@ describe('NavRail', (): void => {
         render(
             <NavRail
                 items={LINK_ITEMS}
-                active="docs"
+                value="docs"
                 label={NAV_LABEL}
                 onChange={onChange}
             />,
@@ -256,7 +256,7 @@ describe('NavRail', (): void => {
         render(
             <NavRail
                 items={ITEMS}
-                active="fleet"
+                value="fleet"
                 label={NAV_LABEL}
                 onChange={onChange}
                 enabled={EEnabledState.Disabled}
@@ -276,7 +276,7 @@ describe('NavRail', (): void => {
     it('applies the tone seed custom property to the nav root', (): void => {
         const tone: string = 'rgb(255, 0, 0)';
         render(
-            <NavRail items={ITEMS} active="fleet" label={NAV_LABEL} tone={tone} />,
+            <NavRail items={ITEMS} value="fleet" label={NAV_LABEL} tone={tone} />,
         );
 
         const nav: HTMLElement = screen.getByRole('navigation', {
@@ -287,7 +287,7 @@ describe('NavRail', (): void => {
 
     it('moves the roving tab stop to follow a controlled active change', (): void => {
         const view: RenderResult = render(
-            <NavRail items={ITEMS} active="overview" label={NAV_LABEL} />,
+            <NavRail items={ITEMS} value="overview" label={NAV_LABEL} />,
         );
 
         expect(screen.getByRole('button', { name: 'Overview' })).toHaveAttribute(
@@ -295,9 +295,7 @@ describe('NavRail', (): void => {
             '0',
         );
 
-        view.rerender(
-            <NavRail items={ITEMS} active="research" label={NAV_LABEL} />,
-        );
+        view.rerender(<NavRail items={ITEMS} value="research" label={NAV_LABEL} />);
 
         expect(screen.getByRole('button', { name: 'Research' })).toHaveAttribute(
             'tabindex',
@@ -310,7 +308,7 @@ describe('NavRail', (): void => {
     });
 
     it('renders the bare nav landmark with no buttons for an empty item set', (): void => {
-        render(<NavRail items={[]} active="none" label={NAV_LABEL} />);
+        render(<NavRail items={[]} value="none" label={NAV_LABEL} />);
 
         const nav: HTMLElement = screen.getByRole('navigation', {
             name: NAV_LABEL,
@@ -327,7 +325,7 @@ describe('NavRail', (): void => {
                 icon: <span data-testid="rail-icon">icon</span>,
             },
         ];
-        render(<NavRail items={iconItems} active="overview" label={NAV_LABEL} />);
+        render(<NavRail items={iconItems} value="overview" label={NAV_LABEL} />);
 
         const icon: HTMLElement = screen.getByTestId('rail-icon');
         const wrapper: HTMLElement | null = icon.parentElement;
@@ -343,7 +341,7 @@ describe('NavRail', (): void => {
                 badge: <span data-testid="rail-badge">3</span>,
             },
         ];
-        render(<NavRail items={badgeItems} active="fleet" label={NAV_LABEL} />);
+        render(<NavRail items={badgeItems} value="fleet" label={NAV_LABEL} />);
 
         const badge: HTMLElement = screen.getByTestId('rail-badge');
         expect(badge).toBeInTheDocument();
@@ -354,7 +352,7 @@ describe('NavRail', (): void => {
         render(
             <NavRail
                 items={LINK_ITEMS}
-                active="docs"
+                value="docs"
                 label={NAV_LABEL}
                 enabled={EEnabledState.Disabled}
             />,
@@ -373,7 +371,7 @@ describe('NavRail', (): void => {
         render(
             <NavRail
                 items={LINK_ITEMS}
-                active="docs"
+                value="docs"
                 label={NAV_LABEL}
                 onChange={onChange}
             />,

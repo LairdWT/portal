@@ -10,13 +10,13 @@ import {
 
 import { ContextMenu } from './ContextMenu';
 import { Menu } from './Menu';
-import { EMenuNodeKind, type UiMenuBarMenu, type UiMenuNode } from './Menu.types';
+import { EMenuNodeKind, type MenuBarMenu, type MenuNode } from './Menu.types';
 import { MenuBar } from './MenuBar';
 
 // The shared editor menu used by the dropdown and context-menu stories: actions
 // with shortcuts, a checkable item, an exclusive radio group, a disabled action,
 // nested separators, and a submenu (itself nesting a submenu).
-function buildItems(wrap: boolean, view: string): readonly UiMenuNode[] {
+function buildItems(wrap: boolean, view: string): readonly MenuNode[] {
     return [
         { kind: EMenuNodeKind.Action, id: 'cut', label: 'Cut', shortcut: 'Ctrl+X' },
         {
@@ -98,7 +98,7 @@ function buildItems(wrap: boolean, view: string): readonly UiMenuNode[] {
 // Shared checkable state used by the menu wrappers, so activating a checkbox or
 // radio flips it the way a consumer wires onSelect to app state.
 function useMenuModel(): Readonly<{
-    items: readonly UiMenuNode[];
+    items: readonly MenuNode[];
     onSelect: (id: string) => void;
 }> {
     const [wrap, setWrap]: [boolean, Dispatch<SetStateAction<boolean>>] =
@@ -149,7 +149,7 @@ function ControlledMenu(): ReactElement {
     );
 }
 
-const BAR_MENUS: readonly UiMenuBarMenu[] = [
+const BAR_MENUS: readonly MenuBarMenu[] = [
     {
         id: 'file',
         label: 'File',

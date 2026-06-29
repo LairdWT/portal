@@ -15,19 +15,16 @@ import {
     ERadioOrientation,
     ERadioState,
     type RadioGroupProps,
-    type UiRadioItem,
+    type RadioItem,
 } from './RadioGroup.types';
 
 // Resolves the index of the currently selected option, falling back to the
 // first option when the controlled value matches no item, so focus and roving
 // tabindex always have a valid target. The fallback may point at a disabled
 // item; resolveRovingIndex corrects that for the actual focus entry point.
-function resolveSelectedIndex(
-    items: readonly UiRadioItem[],
-    value: string,
-): number {
+function resolveSelectedIndex(items: readonly RadioItem[], value: string): number {
     const index: number = items.findIndex(
-        (item: UiRadioItem): boolean => item.id === value,
+        (item: RadioItem): boolean => item.id === value,
     );
     return index === -1 ? 0 : index;
 }
@@ -37,15 +34,15 @@ function resolveSelectedIndex(
 // the first enabled item; otherwise the selected index (all-disabled degenerate
 // case). Negative-first guard style.
 function resolveRovingIndex(
-    items: readonly UiRadioItem[],
+    items: readonly RadioItem[],
     selectedIndex: number,
 ): number {
-    const selected: UiRadioItem | undefined = items[selectedIndex];
+    const selected: RadioItem | undefined = items[selectedIndex];
     if (selected !== undefined && selected.disabled !== true) {
         return selectedIndex;
     }
     const firstEnabled: number = items.findIndex(
-        (item: UiRadioItem): boolean => item.disabled !== true,
+        (item: RadioItem): boolean => item.disabled !== true,
     );
     return firstEnabled === -1 ? selectedIndex : firstEnabled;
 }
@@ -56,7 +53,7 @@ function resolveRovingIndex(
 // as findNextEnabledIndex(items, count - 1, 1) (first hop lands on index 0) and
 // End as findNextEnabledIndex(items, 0, -1) (first hop lands on the last index).
 function findNextEnabledIndex(
-    items: readonly UiRadioItem[],
+    items: readonly RadioItem[],
     from: number,
     step: number,
 ): number {
@@ -67,7 +64,7 @@ function findNextEnabledIndex(
     let index: number = from;
     for (let hop: number = 0; hop < count; hop = hop + 1) {
         index = (index + step + count) % count;
-        const candidate: UiRadioItem | undefined = items[index];
+        const candidate: RadioItem | undefined = items[index];
         if (candidate !== undefined && candidate.disabled !== true) {
             return index;
         }
@@ -110,7 +107,7 @@ export function RadioGroup({
         if (resolvedEnabled === EEnabledState.Disabled) {
             return;
         }
-        const nextItem: UiRadioItem | undefined = items[index];
+        const nextItem: RadioItem | undefined = items[index];
         if (nextItem === undefined) {
             return;
         }
@@ -175,7 +172,7 @@ export function RadioGroup({
             {...(label !== undefined ? { 'aria-label': label } : {})}
             {...(labelledBy !== undefined ? { 'aria-labelledby': labelledBy } : {})}
         >
-            {items.map((item: UiRadioItem, index: number): ReactElement => {
+            {items.map((item: RadioItem, index: number): ReactElement => {
                 const isSelected: boolean = item.id === value;
                 const radioState: ERadioState = isSelected
                     ? ERadioState.Selected

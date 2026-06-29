@@ -13,10 +13,10 @@ import { afterEach, describe, expect, it, type Mock, vi } from 'vitest';
 import { EEnabledState } from '../../state/state';
 import { ContextMenu } from './ContextMenu';
 import { Menu } from './Menu';
-import { EMenuNodeKind, type UiMenuBarMenu, type UiMenuNode } from './Menu.types';
+import { EMenuNodeKind, type MenuBarMenu, type MenuNode } from './Menu.types';
 import { MenuBar } from './MenuBar';
 
-const ITEMS: readonly UiMenuNode[] = [
+const ITEMS: readonly MenuNode[] = [
     { kind: EMenuNodeKind.Action, id: 'new', label: 'New' },
     { kind: EMenuNodeKind.Action, id: 'open', label: 'Open' },
     { kind: EMenuNodeKind.Separator, id: 'sep-1' },
@@ -47,7 +47,7 @@ const ITEMS: readonly UiMenuNode[] = [
     },
 ];
 
-const BAR_MENUS: readonly UiMenuBarMenu[] = [
+const BAR_MENUS: readonly MenuBarMenu[] = [
     {
         id: 'file',
         label: 'File',
@@ -71,7 +71,7 @@ const BAR_MENUS: readonly UiMenuBarMenu[] = [
     },
 ];
 
-const CONTEXT_ITEMS: readonly UiMenuNode[] = [
+const CONTEXT_ITEMS: readonly MenuNode[] = [
     { kind: EMenuNodeKind.Action, id: 'edit', label: 'Edit' },
     { kind: EMenuNodeKind.Action, id: 'remove', label: 'Remove' },
 ];
@@ -81,7 +81,7 @@ afterEach((): void => {
 });
 
 type MenuHarnessProps = Readonly<{
-    items?: readonly UiMenuNode[];
+    items?: readonly MenuNode[];
     enabled?: EEnabledState;
     onSelect?: (id: string) => void;
 }>;

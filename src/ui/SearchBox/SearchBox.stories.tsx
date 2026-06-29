@@ -15,7 +15,7 @@ import { type SearchBoxProps } from './SearchBox.types';
 function ControlledSearchBox(props: SearchBoxProps): ReturnType<typeof SearchBox> {
     const [value, setValue]: [string, Dispatch<SetStateAction<string>>] =
         useState<string>(props.value);
-    return <SearchBox {...props} value={value} onChange={setValue} />;
+    return <SearchBox {...props} value={value} onValueChange={setValue} />;
 }
 
 const meta: Meta<typeof SearchBox> = {

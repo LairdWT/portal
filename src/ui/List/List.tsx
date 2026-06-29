@@ -24,13 +24,14 @@ import {
 } from '../../react/hooks/useVirtualWindow';
 import { EEnabledState } from '../../state/state';
 import { EmptyState } from '../EmptyState/EmptyState';
+import { toggleExpanded } from '../expansion';
 import { EOverlayMotion } from '../overlayMotion';
+import { ESelectionMode } from '../selectionMode';
 import { EUiStatus, toneProperties } from '../tone';
 import toneStyles from '../tone.module.css';
 import styles from './List.module.css';
 import {
     EListRowState,
-    EListSelectionMode,
     type ListProps,
     type ListRowRenderState,
 } from './List.types';
@@ -50,7 +51,7 @@ const MAX_BLOCK_PROPERTY: string = '--portal-list-max';
 
 // Shared frozen empty selection so the absent-selection path does not allocate a
 // Set per render.
-const EMPTY_KEYS: readonly string[] = [];
+const EMPTY_SET: ReadonlySet<string> = new Set<string>();
 
 // The pointer / keyboard modifier snapshot a selection activation reads.
 type SelectionModifiers = Readonly<{
@@ -94,7 +95,7 @@ export function List<Item>(props: ListProps<Item>): ReactElement {
         renderItem,
         rowHeight = ROW_HEIGHT_DEFAULT,
         overscan,
-        selectionMode = EListSelectionMode.None,
+        selectionMode = ESelectionMode.None,
         selectedKeys,
         onSelectionChange,
         getTypeAheadText,
@@ -128,7 +129,7 @@ export function List<Item>(props: ListProps<Item>): ReactElement {
         Dispatch<SetStateAction<number>>,
     ] = useState<number>(0);
 
-    const isInteractive: boolean = selectionMode !== EListSelectionMode.None;
+    const isInteractive: boolean = selectionMode !== ESelectionMode.None;
     const isEmpty: boolean = items.length === 0;
     const lastIndex: number = items.length - 1;
     const activeIndex: number = isEmpty
@@ -137,7 +138,7 @@ export function List<Item>(props: ListProps<Item>): ReactElement {
     const resolvedRowHeight: number = rowHeight;
 
     const selectedSet: ReadonlySet<string> = useMemo(
-        (): ReadonlySet<string> => new Set<string>(selectedKeys ?? EMPTY_KEYS),
+        (): ReadonlySet<string> => selectedKeys ?? EMPTY_SET,
         [selectedKeys],
     );
 
@@ -185,37 +186,26 @@ export function List<Item>(props: ListProps<Item>): ReactElement {
         }
     }, [activeIndex, resolvedRowHeight]);
 
-    function rangeKeys(anchor: number, focus: number): readonly string[] {
+    // Builds the contiguous key set between two row indices (inclusive). Returns a
+    // ReadonlySet so the controlled selection contract is Set-shaped end to end.
+    function rangeKeys(anchor: number, focus: number): ReadonlySet<string> {
         const start: number = Math.min(anchor, focus);
         const end: number = Math.max(anchor, focus);
-        const keys: string[] = [];
+        const keys: Set<string> = new Set<string>();
         for (let index: number = start; index <= end; index += 1) {
             const item: Item | undefined = items[index];
             if (item !== undefined) {
-                keys.push(getItemKey(item, index));
+                keys.add(getItemKey(item, index));
             }
         }
         return keys;
-    }
-
-    function toggleKey(
-        current: ReadonlySet<string>,
-        key: string,
-    ): readonly string[] {
-        const next: Set<string> = new Set<string>(current);
-        if (next.has(key)) {
-            next.delete(key);
-        } else {
-            next.add(key);
-        }
-        return [...next];
     }
 
     function handleRowActivate(index: number, modifiers: SelectionModifiers): void {
         if (isDisabled) {
             return;
         }
-        if (selectionMode === EListSelectionMode.None) {
+        if (selectionMode === ESelectionMode.None) {
             return;
         }
         const item: Item | undefined = items[index];
@@ -223,8 +213,8 @@ export function List<Item>(props: ListProps<Item>): ReactElement {
             return;
         }
         const key: string = getItemKey(item, index);
-        if (selectionMode === EListSelectionMode.Single) {
-            onSelectionChange?.([key]);
+        if (selectionMode === ESelectionMode.Single) {
+            onSelectionChange?.(new Set<string>([key]));
             rangeAnchorRef.current = index;
             setRawActiveIndex(index);
             return;
@@ -233,7 +223,9 @@ export function List<Item>(props: ListProps<Item>): ReactElement {
         if (modifiers.shiftKey && anchor !== null) {
             onSelectionChange?.(rangeKeys(anchor, index));
         } else {
-            onSelectionChange?.(toggleKey(selectedSet, key));
+            // The shared expansion helper computes the next membership Set for a
+            // toggle and returns a ReadonlySet, so List selection reuses it.
+            onSelectionChange?.(toggleExpanded(selectedSet, key));
             rangeAnchorRef.current = index;
         }
         setRawActiveIndex(index);
@@ -264,7 +256,7 @@ export function List<Item>(props: ListProps<Item>): ReactElement {
             return;
         }
         const clamped: number = Math.min(Math.max(nextIndex, 0), lastIndex);
-        if (extend && selectionMode === EListSelectionMode.Multiple) {
+        if (extend && selectionMode === ESelectionMode.Multi) {
             const anchor: number = rangeAnchorRef.current ?? activeIndex;
             rangeAnchorRef.current = anchor;
             onSelectionChange?.(rangeKeys(anchor, clamped));
@@ -273,7 +265,7 @@ export function List<Item>(props: ListProps<Item>): ReactElement {
     }
 
     function activateActive(modifiers: SelectionModifiers): void {
-        if (selectionMode === EListSelectionMode.None) {
+        if (selectionMode === ESelectionMode.None) {
             return;
         }
         if (activeIndex < 0) {
@@ -406,7 +398,7 @@ export function List<Item>(props: ListProps<Item>): ReactElement {
             blockSize: `${String(resolvedRowHeight)}px`,
         };
 
-        if (selectionMode === EListSelectionMode.None) {
+        if (selectionMode === ESelectionMode.None) {
             return (
                 <div
                     key={key}
@@ -521,7 +513,7 @@ export function List<Item>(props: ListProps<Item>): ReactElement {
                 ? { 'aria-activedescendant': activeDescendantId }
                 : {})}
             aria-multiselectable={
-                selectionMode === EListSelectionMode.Multiple ? true : undefined
+                selectionMode === ESelectionMode.Multi ? true : undefined
             }
             aria-disabled={isDisabled ? true : undefined}
             tabIndex={isDisabled ? -1 : 0}

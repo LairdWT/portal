@@ -98,9 +98,9 @@ function SingleControlled(args: AccordionStoryArgs): ReactElement {
 // Many-open controlled wrapper: owns the open id set.
 function MultipleControlled(args: AccordionStoryArgs): ReactElement {
     const [expandedIds, setExpandedIds]: [
-        readonly string[],
-        Dispatch<SetStateAction<readonly string[]>>,
-    ] = useState<readonly string[]>(args.initialExpanded);
+        ReadonlySet<string>,
+        Dispatch<SetStateAction<ReadonlySet<string>>>,
+    ] = useState<ReadonlySet<string>>(new Set<string>(args.initialExpanded));
     return (
         <Accordion
             mode={EAccordionMode.Multiple}

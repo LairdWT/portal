@@ -50,7 +50,7 @@ export type ECommandRowKind =
 // description are decorative/secondary (never the accessible name). enabled is
 // the per-command enablement enum; a disabled command renders but is not
 // activatable, matching add_enabled(false, ...).
-export type UiCommand = Readonly<{
+export type Command = Readonly<{
     id: string;
     label: string;
     keywords?: readonly string[];
@@ -74,7 +74,7 @@ export type CommandRow =
     | Readonly<{
           kind: typeof ECommandRowKind.Option;
           index: number;
-          command: UiCommand;
+          command: Command;
           matchRanges: readonly (readonly [number, number])[];
       }>;
 
@@ -88,7 +88,7 @@ export type CommandPaletteProps = Readonly<{
     // Dismissal request (Escape, backdrop pointer). The host flips `open`.
     onClose: () => void;
     // The full command corpus (caller-owned; the palette owns no registry).
-    commands: readonly UiCommand[];
+    commands: readonly Command[];
     // Controlled filter buffer (Helicon's caller-owned state.query).
     query: string;
     onQueryChange: (query: string) => void;
