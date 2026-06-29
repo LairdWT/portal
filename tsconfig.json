@@ -31,13 +31,11 @@
         "noUnusedParameters": true,
         "erasableSyntaxOnly": true,
         "noFallthroughCasesInSwitch": true,
-        "noImplicitAny": true,
+        "noImplicitOverride": true,
         "noImplicitReturns": true,
         "noUncheckedIndexedAccess": true,
         "noUncheckedSideEffectImports": true,
-        "exactOptionalPropertyTypes": true,
-        "strictFunctionTypes": true,
-        "strictNullChecks": true
+        "exactOptionalPropertyTypes": true
     },
     "include": ["src", "global.d.ts"],
     "exclude": [],

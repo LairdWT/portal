@@ -77,7 +77,7 @@ export default tseslint.config(
             ],
             '@typescript-eslint/no-explicit-any': 'error',
             '@typescript-eslint/no-inferrable-types': 'off',
-            '@typescript-eslint/prefer-readonly': 'warn',
+            '@typescript-eslint/prefer-readonly': 'error',
             '@typescript-eslint/typedef': [
                 'error',
                 {
