@@ -1,0 +1,95 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Guides/Entry Points" />
+
+# Entry Points
+
+Portal publishes a small, explicit set of ESM subpaths. Each is a contract: a
+consumer imports only what an entry exports, and nothing is leaked across
+entries. The map below is grounded in the `exports` field of `package.json`.
+
+| Subpath                       | Purpose                                            |
+| ----------------------------- | -------------------------------------------------- |
+| `@laird-wt/portal`            | Components, React hooks, and the input core.       |
+| `@laird-wt/portal/styles.css` | The stylesheet; import once at the app entry.      |
+| `@laird-wt/portal/theme`      | `PORTAL_TOKENS` value and the `PortalTokens` type. |
+| `@laird-wt/portal/r3f`        | Optional React Three Fiber surface.                |
+| `@laird-wt/portal/shaders`    | Dependency-light shader core.                      |
+
+## `.` - the main entry
+
+The root entry exports the component library, the React hooks, and the input
+core. The input core includes `createRegistry`, the emit hooks (for example
+`useEmitBinding`), `toWireInput`, and `TimeProviderContext`.
+
+```tsx
+import {
+    CTA,
+    createRegistry,
+    toWireInput,
+    TimeProviderContext,
+} from '@laird-wt/portal';
+```
+
+## `./styles.css` - the stylesheet
+
+A side-effecting import that declares the `--portal-*` tokens. Import it exactly
+once, at your application entry.
+
+```tsx
+import '@laird-wt/portal/styles.css';
+```
+
+## `./theme` - design tokens
+
+The typed token mirror: the `PORTAL_TOKENS` value plus the `PortalTokens` type.
+
+```tsx
+import { PORTAL_TOKENS, type PortalTokens } from '@laird-wt/portal/theme';
+```
+
+## `./r3f` - React Three Fiber surface
+
+The optional 3D surface: `OrbBackdrop`, `ShaderSurface`, and `isWebGlAvailable`. It
+requires the optional 3D peers (`three`, `@react-three/fiber`,
+`@react-three/drei`) and must be mounted inside a `<Canvas>`. There is no
+`ControllerSurface` export; use `OrbBackdrop` or `ShaderSurface`.
+
+```tsx
+import { Canvas } from '@react-three/fiber';
+import { OrbBackdrop, isWebGlAvailable } from '@laird-wt/portal/r3f';
+import type { ReactElement } from 'react';
+
+export function Backdrop(): ReactElement | null {
+    if (!isWebGlAvailable()) {
+        return null;
+    }
+
+    return (
+        <Canvas>
+            <OrbBackdrop />
+        </Canvas>
+    );
+}
+```
+
+## `./shaders` - shader core
+
+The dependency-light shader core that sits behind the R3F surface, for consumers
+wiring their own renderer: `rippleGridShader`, `createRippleField`,
+`MAX_RIPPLES`, and the `ShaderDescriptor` contract.
+
+```tsx
+import {
+    createRippleField,
+    MAX_RIPPLES,
+    rippleGridShader,
+    type ShaderDescriptor,
+} from '@laird-wt/portal/shaders';
+```
+
+## ESM and module resolution
+
+Every entry is ESM-only; CJS `require` is unsupported. Set your TypeScript
+`moduleResolution` to `bundler`, `node16`, or `nodenext` so the subpath types
+resolve.

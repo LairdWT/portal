@@ -8,8 +8,14 @@
 
 import type { CSSProperties } from 'react';
 
-// The per-instance tone prop, mixed into a component's own props.
 export type Toned = Readonly<{
+    /**
+     * The per-instance tone, mixed into a component's own props: an OPAQUE CSS
+     * color string (hex, `oklch(...)`, `rgb(...)`, or a `var()` reference). The
+     * component applies it to the inherited `--portal-tone` custom property and
+     * `tone.module.css` derives the accent/border/glow/fill ramp from it.
+     * Portal never enumerates a palette - domain meaning is bound consumer-side.
+     */
     tone?: string | undefined;
 }>;
 

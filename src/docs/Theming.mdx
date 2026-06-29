@@ -1,0 +1,90 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Guides/Theming" />
+
+# Theming
+
+Portal is themed entirely through CSS custom properties and a per-instance tone
+contract. There is no JavaScript theme provider to configure: you override
+tokens in CSS, and components read them.
+
+## The token model
+
+Every design token is a CSS custom property namespaced `--portal-*`. Importing
+`@laird-wt/portal/styles.css` declares the defaults on `:root`. To retheme,
+override the tokens on `:root` or on any container element; the change cascades
+to every Portal component inside that scope.
+
+```css
+:root {
+    --portal-color-accent: oklch(0.7 0.18 250);
+    --portal-radius-md: 0.5rem;
+}
+```
+
+## Programmatic tokens
+
+For code that needs to reference the same tokens (for example feeding an R3F
+material the exact color the DOM uses), import the typed mirror:
+
+```tsx
+import { PORTAL_TOKENS, type PortalTokens } from '@laird-wt/portal/theme';
+
+const accent: string = PORTAL_TOKENS.color.accent; // 'var(--portal-color-accent)'
+```
+
+Each `PORTAL_TOKENS` value is a `var()` reference, not a raw literal, so a
+single CSS override updates both the DOM and any surface that reads the token.
+`tokens.css` remains the single source of truth for the actual values.
+
+## The tone contract
+
+`tone` is a single OPAQUE CSS color string - a hex value, an `oklch(...)`, an
+`rgb(...)`, or a `var()` reference. A component applies the supplied tone to the
+`--portal-tone` custom property, and `tone.module.css` derives the full
+accent/border/glow/fill ramp from it. Portal never enumerates a palette, so the
+domain meaning of a tone (faction, severity, brand) is bound consumer-side.
+
+```tsx
+import { CTA } from '@laird-wt/portal';
+
+<CTA tone="var(--faction-crimson)">Engage</CTA>;
+```
+
+For renderer or Unity bridging, `PORTAL_TONE` is the typed mirror of the
+derived `--portal-tone-*` properties, so a 3D material can read the same
+resolved tone values the DOM uses:
+
+```tsx
+import { PORTAL_TONE } from '@laird-wt/portal';
+
+const accent: string = PORTAL_TONE.accent; // 'var(--portal-tone-accent)'
+```
+
+## Status precedence
+
+`EUiStatus` (`none`, `danger`, `success`) is a universal, non-domain status. A
+component maps a resolved status to a `data-status` attribute on the tone scope,
+which selects the matching `--portal-*` status token. A resolved status is
+AUTHORITATIVE over an inline `--portal-tone` seed on the same element: when both
+are present, the status-resolved tone wins over the inline tone seed.
+
+```tsx
+import { EUiStatus } from '@laird-wt/portal';
+
+const status: EUiStatus = EUiStatus.Danger;
+```
+
+The live proof of this rule is the `UI/TonePrecedence` story, which runs in a
+real browser and locks the equalities (status-resolved tone equals the status
+token, and differs from the raw inline tone). The concrete resolved `rgb`
+values are browser-computed and intentionally not reproduced here.
+
+## Sizing and motion
+
+- Sizing tokens use `clamp()` with min/max bounds and intrinsic units so
+  components scale fluidly.
+- Layout honors safe-area insets.
+- Interactive controls keep a `3rem` minimum touch target.
+- Motion honors `prefers-reduced-motion`: when a user requests reduced motion,
+  the entrance and change presets stand down.

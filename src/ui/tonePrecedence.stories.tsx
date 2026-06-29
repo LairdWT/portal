@@ -71,6 +71,9 @@ async function assertStatusAuthoritative(
 
 const meta: Meta = {
     title: 'UI/TonePrecedence',
+    // Non-visual measurement probes, not a public component; no Docs page is
+    // meaningful here, so opt this file out of the global autodocs tag.
+    tags: ['!autodocs'],
     parameters: {
         // Measurement probes carry no human-readable content and no contrast
         // target; the axe color-contrast gate has nothing meaningful to assert

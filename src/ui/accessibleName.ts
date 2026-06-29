@@ -9,5 +9,20 @@
 // compile and supplying both is rejected - so no DEV-only runtime guard is
 // needed. A component mixes this into its own props the way tone.ts mixes Toned.
 export type AccessibleName =
-    | { readonly label: string; readonly labelledBy?: undefined }
-    | { readonly labelledBy: string; readonly label?: undefined };
+    | {
+          /**
+           * Inline accessible name wired to `aria-label`. Supply EXACTLY ONE of
+           * `label` or `labelledBy`, never both.
+           */
+          readonly label: string;
+          readonly labelledBy?: undefined;
+      }
+    | {
+          /**
+           * Id of visible text elsewhere in the DOM that names this control,
+           * wired to `aria-labelledby`. Supply EXACTLY ONE of `label` or
+           * `labelledBy`, never both.
+           */
+          readonly labelledBy: string;
+          readonly label?: undefined;
+      };

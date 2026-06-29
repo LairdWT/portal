@@ -1,0 +1,70 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Guides/Getting Started" />
+
+# Getting Started
+
+Portal (`@laird-wt/portal`) is a React 19 component library paired with a
+decoupled input core and an optional React Three Fiber (R3F) surface. It is
+domain-agnostic: it ships no game types and binds no palette, so the meaning of
+a tone or a status is supplied entirely by the consumer. The package is
+ESM-only.
+
+## Install
+
+Add the package and its required peers:
+
+```sh
+pnpm add @laird-wt/portal react react-dom animejs
+```
+
+`react`, `react-dom`, and `animejs` are hard peer dependencies. `animejs` backs
+the motion presets exported from the root entry (for example `riseIn` and
+`pulse`), so it is required even if you never call a motion hook directly. Only
+the 3D peers are optional, as declared by `peerDependenciesMeta` in
+`package.json`.
+
+Optional 3D peers, needed only if you use the `@laird-wt/portal/r3f` surface:
+
+```sh
+pnpm add three @react-three/fiber @react-three/drei
+```
+
+## ESM-only
+
+Portal publishes ECMAScript modules only; there is no CommonJS build and
+`require('@laird-wt/portal')` is unsupported. Consume it from a bundler or from
+Node's native ESM loader. Set your TypeScript `moduleResolution` to `bundler`,
+`node16`, or `nodenext` so the export subpaths (`./theme`, `./r3f`,
+`./shaders`) resolve their types.
+
+## Minimal usage
+
+Import the stylesheet once at your application entry (it is a side-effecting
+import that declares the `--portal-*` tokens), then render a component:
+
+```tsx
+import '@laird-wt/portal/styles.css';
+import { CTA } from '@laird-wt/portal';
+import type { ReactElement } from 'react';
+
+export function Example(): ReactElement {
+    return (
+        <CTA tone="oklch(0.62 0.2 25)" onClick={() => console.log('go')}>
+            Launch
+        </CTA>
+    );
+}
+```
+
+The `styles.css` import is required exactly once per app; every component reads
+the tokens it declares.
+
+## Where to go next
+
+- [Theming](?path=/docs/guides-theming--docs): the `--portal-*` token system,
+  the `tone` contract, and status precedence.
+- [Entry Points](?path=/docs/guides-entry-points--docs): the published ESM
+  subpath map and what each entry exports.
+- The `UI/*` component sections in the sidebar, each with an auto-generated
+  Docs page and prop table.

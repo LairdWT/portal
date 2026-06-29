@@ -5,6 +5,8 @@ import { UnityBindingExample } from './UnityBindingExample';
 const meta: Meta<typeof UnityBindingExample> = {
     title: 'Patterns/Unity Binding',
     component: UnityBindingExample,
+    // Example wiring, not a public component; opt out of the auto Docs page.
+    tags: ['!autodocs'],
 };
 
 export default meta;

@@ -40,6 +40,7 @@ const withPortalSurface: Decorator = (
 );
 
 const preview: Preview = {
+    tags: ['autodocs'],
     decorators: [withPortalSurface],
     parameters: {
         layout: 'centered',
@@ -47,6 +48,24 @@ const preview: Preview = {
             matchers: {
                 color: /(background|color)$/i,
                 date: /Date$/i,
+            },
+        },
+        options: {
+            // Lead with the authored guides, then the component sections in a
+            // deliberate order; everything else sorts after.
+            storySort: {
+                order: [
+                    'Guides',
+                    ['Getting Started', 'Theming', 'Entry Points'],
+                    'UI',
+                    'Controls',
+                    'Composites',
+                    'Components',
+                    'Patterns',
+                    'R3F',
+                    'Display',
+                    '*',
+                ],
             },
         },
 
