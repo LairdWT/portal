@@ -15,7 +15,7 @@
         "moduleDetection": "force",
         "declaration": true,
         "emitDeclarationOnly": true,
-        "outDir": "./dist/types-node",
+        "outDir": "./node_modules/.tmp/types-node",
         "jsx": "react-jsx",
 
         /* Linting and strictness */

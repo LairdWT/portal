@@ -14,7 +14,7 @@ entries. The map below is grounded in the `exports` field of `package.json`.
 | `@laird-wt/portal/styles.css` | The stylesheet; import once at the app entry.      |
 | `@laird-wt/portal/theme`      | `PORTAL_TOKENS` value and the `PortalTokens` type. |
 | `@laird-wt/portal/r3f`        | Optional React Three Fiber surface.                |
-| `@laird-wt/portal/shaders`    | Dependency-light shader core.                      |
+| `@laird-wt/portal/shaders`    | Shader core (requires the `three` peer).           |
 
 ## `.` - the main entry
 
@@ -75,9 +75,11 @@ export function Backdrop(): ReactElement | null {
 
 ## `./shaders` - shader core
 
-The dependency-light shader core that sits behind the R3F surface, for consumers
-wiring their own renderer: `rippleGridShader`, `createRippleField`,
-`MAX_RIPPLES`, and the `ShaderDescriptor` contract.
+The shader core that sits behind the R3F surface, for consumers wiring their own
+renderer: `rippleGridShader`, `createRippleField`, `MAX_RIPPLES`, and the
+`ShaderDescriptor` contract. It imports `three` (for `Color` and the `IUniform`
+type), so `three` is a required peer here too - but it does not pull in the
+`@react-three/fiber`/`@react-three/drei` stack that `./r3f` needs.
 
 ```tsx
 import {

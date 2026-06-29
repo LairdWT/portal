@@ -45,6 +45,7 @@
     "scripts": {
         "dev": "storybook dev -p 6006",
         "build": "vite build",
+        "prepack": "pnpm build",
         "typecheck": "tsc -b --pretty",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",

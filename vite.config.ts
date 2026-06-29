@@ -34,6 +34,13 @@ export default defineConfig({
             // type resolution rejects (TS2305). All four subpath types then
             // resolve under node16, nodenext, and bundler. See
             // C:/dev/temp/portal-1.0-stabilization/residual-a-node16-dts-plan.md.
+            // NOTE: the api-extractor engine bundled by vite-plugin-dts is older
+            // than this repo's TypeScript, so the dts rollup prints a non-fatal
+            // "newer than the bundled compiler engine" advisory (once per lib
+            // entry). The emitted .d.ts is proven correct and is gated by the
+            // type legs of `pnpm smoke:pack`; no api-extractor release supports
+            // TS 6 yet. Revisit (and drop this note) once api-extractor ships a
+            // TS6-capable engine.
             rollupTypes: true,
             insertTypesEntry: true,
             include: ['src'],

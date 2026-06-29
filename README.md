@@ -36,11 +36,14 @@ the package root, so it is required even if you do not use the 3D surface:
 pnpm add react react-dom animejs
 ```
 
-The React Three Fiber surface is optional. Install the 3D peers only when
-you import from `portal/r3f`:
+The shader core depends on `three` (it imports `Color` and the `IUniform`
+type), so `three` is a required peer whenever you import either `portal/shaders`
+or `portal/r3f`. The `@react-three/fiber` and `@react-three/drei` peers are
+needed only for the `portal/r3f` surface:
 
 ```sh
-pnpm add three @react-three/fiber @react-three/drei
+pnpm add three
+pnpm add @react-three/fiber @react-three/drei
 ```
 
 Portal is ESM-only. Use a bundler (Vite, webpack, Rollup, esbuild) or Node with
@@ -115,10 +118,11 @@ Portal ships several ESM subpath exports:
 - `@laird-wt/portal/styles.css` - the stylesheet; import once at your entry.
 - `@laird-wt/portal/theme` - `PORTAL_TOKENS` and the `PortalTokens` type.
 - `@laird-wt/portal/r3f` - the optional React Three Fiber surface
-  (`OrbBackdrop`, `ShaderSurface`, `webglSupport`); requires the 3D peers.
-- `@laird-wt/portal/shaders` - the dependency-light shader core behind the R3F
-  surface (`rippleGridShader`, `createRippleField`, and the `ShaderDescriptor`
-  contract) for consumers wiring their own renderer.
+  (`OrbBackdrop`, `ShaderSurface`, `isWebGlAvailable`); requires the 3D peers.
+- `@laird-wt/portal/shaders` - the shader core behind the R3F surface
+  (`rippleGridShader`, `createRippleField`, and the `ShaderDescriptor` contract)
+  for consumers wiring their own renderer. It needs only the `three` peer, not
+  the full `@react-three/fiber`/`@react-three/drei` stack.
 
 ## Input and Unity binding
 
