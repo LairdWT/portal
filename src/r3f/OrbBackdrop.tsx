@@ -2,11 +2,14 @@ import { MeshDistortMaterial } from '@react-three/drei';
 import { Canvas, type RootState, useFrame } from '@react-three/fiber';
 import {
     type ComponentRef,
+    type Dispatch,
     type PointerEvent,
     type ReactElement,
     type RefObject,
+    type SetStateAction,
     useMemo,
     useRef,
+    useState,
 } from 'react';
 import { type Mesh, PerspectiveCamera, type ShaderMaterial } from 'three';
 
@@ -14,6 +17,7 @@ import { useReducedMotion } from '../react/hooks/useReducedMotion';
 import type { ShaderDescriptor, ShaderUniforms } from '../shaders/shaderContract';
 import styles from './OrbBackdrop.module.css';
 import type { OrbBackdropProps } from './OrbBackdrop.types';
+import { SCENE_DEVICE_PIXEL_RATIO_RANGE } from './sceneConfig';
 import { isWebGlAvailable } from './webglSupport';
 
 // Concrete mirror of --portal-color-accent-highlight; three needs a real colour,
@@ -175,10 +179,15 @@ export function OrbBackdrop<TState>({
         y: 0,
         energy: 0,
     });
+    // WebGL support is static per page, so probe it once via a lazy initializer
+    // instead of creating a throwaway context on every render. Reduced motion
+    // stays reactive (handled by useReducedMotion) because it can change live.
+    const [webglAvailable]: [boolean, Dispatch<SetStateAction<boolean>>] =
+        useState<boolean>(isWebGlAvailable);
 
     // Reduced motion (or no WebGL) degrades to a static token-styled panel; the
     // animation loop never starts.
-    if (prefersReducedMotion || !isWebGlAvailable()) {
+    if (prefersReducedMotion || !webglAvailable) {
         return (
             <div
                 className={composeClassName(styles.backdrop ?? '', className)}
@@ -226,7 +235,7 @@ export function OrbBackdrop<TState>({
         >
             <Canvas
                 className={styles.canvas}
-                dpr={[1, 1.5]}
+                dpr={[...SCENE_DEVICE_PIXEL_RATIO_RANGE]}
                 camera={{ position: [0, 0, 6], fov: 45 }}
                 gl={{ antialias: true, powerPreference: 'high-performance' }}
             >

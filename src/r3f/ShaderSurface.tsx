@@ -1,15 +1,19 @@
 import { Canvas, type RootState, useFrame } from '@react-three/fiber';
 import {
+    type Dispatch,
     type PointerEvent,
     type ReactElement,
     type RefObject,
+    type SetStateAction,
     useMemo,
     useRef,
+    useState,
 } from 'react';
 import type { ShaderMaterial } from 'three';
 
 import { useReducedMotion } from '../react/hooks/useReducedMotion';
 import type { ShaderDescriptor, ShaderUniforms } from '../shaders/shaderContract';
+import { SCENE_DEVICE_PIXEL_RATIO_RANGE } from './sceneConfig';
 import styles from './ShaderSurface.module.css';
 import type { ShaderSurfaceProps } from './ShaderSurface.types';
 import { isWebGlAvailable } from './webglSupport';
@@ -93,10 +97,15 @@ export function ShaderSurface<TState>({
         [shader, state],
     );
     const timeRef: RefObject<number> = useRef<number>(0);
+    // WebGL support is static per page, so probe it once via a lazy initializer
+    // instead of creating a throwaway context on every render. Reduced motion
+    // stays reactive (handled by useReducedMotion) because it can change live.
+    const [webglAvailable]: [boolean, Dispatch<SetStateAction<boolean>>] =
+        useState<boolean>(isWebGlAvailable);
 
     // Reduced motion (or no WebGL) degrades to a static token-styled panel; the
     // animation loop never starts.
-    if (prefersReducedMotion || !isWebGlAvailable()) {
+    if (prefersReducedMotion || !webglAvailable) {
         return (
             <div
                 className={composeClassName(styles.surface ?? '', className)}
@@ -141,7 +150,7 @@ export function ShaderSurface<TState>({
         >
             <Canvas
                 className={styles.canvas}
-                dpr={[1, 2]}
+                dpr={[...SCENE_DEVICE_PIXEL_RATIO_RANGE]}
                 camera={{ position: [0, 0, 6], fov: 45 }}
                 gl={{ antialias: true, powerPreference: 'high-performance' }}
             >
