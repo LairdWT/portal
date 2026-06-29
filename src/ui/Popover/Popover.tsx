@@ -49,6 +49,8 @@ export function Popover({
     restoreFocus = true,
     initialFocusRef,
     tone,
+    onPanelPointerEnter,
+    onPanelPointerLeave,
 }: PopoverProps): ReactElement {
     const panelRef: RefObject<HTMLDivElement | null> =
         useRef<HTMLDivElement | null>(null);
@@ -260,6 +262,12 @@ export function Popover({
                       {...(label !== undefined ? { 'aria-label': label } : {})}
                       {...(labelledBy !== undefined
                           ? { 'aria-labelledby': labelledBy }
+                          : {})}
+                      {...(onPanelPointerEnter !== undefined
+                          ? { onPointerEnter: onPanelPointerEnter }
+                          : {})}
+                      {...(onPanelPointerLeave !== undefined
+                          ? { onPointerLeave: onPanelPointerLeave }
                           : {})}
                   >
                       {children}

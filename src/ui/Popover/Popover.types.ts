@@ -60,7 +60,11 @@ export type EPopoverRole = (typeof EPopoverRole)[keyof typeof EPopoverRole];
 // while trapping. `tone` flows through the shared tone scope. `id` is applied to
 // the panel element so a consumer can wire an ARIA relationship to it (for
 // example a trigger's aria-describedby or a combobox's aria-controls); it is
-// purely additive.
+// purely additive. `onPanelPointerEnter` / `onPanelPointerLeave` are an optional
+// hover bridge forwarded onto the panel element so a hover-opened overlay (the
+// Tooltip) can keep itself open while the pointer is over the panel - the WCAG
+// 1.4.13 "hoverable" requirement; omit them and the panel behaves exactly as
+// before.
 type PopoverBaseProps = Readonly<{
     open: boolean;
     onClose?: () => void;
@@ -74,6 +78,13 @@ type PopoverBaseProps = Readonly<{
     trapFocus?: boolean;
     restoreFocus?: boolean;
     initialFocusRef?: RefObject<HTMLElement | null>;
+    // Optional pointer-enter/leave bridge for the floating panel. Forwarded onto
+    // the panel element so an overlay that opens on hover (the Tooltip) can keep
+    // itself open while the pointer is over the panel - the WCAG 1.4.13
+    // "hoverable" requirement. Purely additive: omit them and the panel behaves
+    // exactly as before.
+    onPanelPointerEnter?: () => void;
+    onPanelPointerLeave?: () => void;
 }> &
     Toned;
 

@@ -2,11 +2,11 @@ import { expect, type Locator, type Page, test } from '@playwright/test';
 
 // Tooltip WCAG 1.4.13 (Content on Hover or Focus). NET-NEW: pointer-geometry hover
 // bridging cannot be measured in jsdom at all (Tooltip has only non-geometric unit
-// coverage); a real browser is the only place 1.4.13 can be verified. The
-// appear-on-hover/focus, focus/blur, and Escape-dismiss assertions run today; the
-// HOVERABLE assertion (pointer can move onto the panel without it vanishing) is
-// test.fixme because the Tooltip hover-bridge is Track-6 P2 and Tooltip.tsx is out
-// of scope here. Driven through the ?fixture=tooltip harness.
+// coverage); a real browser is the only place 1.4.13 can be verified. All four
+// 1.4.13 assertions run here - appear-on-hover, appear-on-focus/hide-on-blur,
+// Escape-dismiss, and the HOVERABLE assertion (the pointer can move onto the panel
+// without it vanishing), backed by the Tooltip panel hover-bridge. Driven through
+// the ?fixture=tooltip harness.
 
 const FIXTURE_URL: string = '/?fixture=tooltip';
 
@@ -64,11 +64,7 @@ test('Escape dismisses the tooltip', async ({
     await expect(page.getByRole('tooltip')).toBeHidden();
 });
 
-// GATED (Track-6 P2): today the wrapper span's onPointerLeave closes the tooltip
-// before the pointer reaches the portaled panel (Tooltip.tsx closeDelayMs = 0 and
-// no pointer-enter bridge on the panel). Enabling this requires the Track-6
-// hover-bridge in Tooltip.tsx, which is out of scope for this Track-3 work.
-test.fixme('the tooltip stays open while the pointer is over the panel (WCAG 1.4.13 hoverable)', async ({
+test('the tooltip stays open while the pointer is over the panel (WCAG 1.4.13 hoverable)', async ({
     page,
 }: {
     page: Page;

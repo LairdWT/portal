@@ -16,6 +16,13 @@ import { EPopoverPlacement, EPopoverRole } from '../Popover/Popover.types';
 import styles from './Tooltip.module.css';
 import { type TooltipProps } from './Tooltip.types';
 
+// Small grace period before a pointer-out hides the tooltip. It must outlast the
+// pointer's transit across the Popover offset gap (Popover default offset 8px) so
+// the pointer can reach the panel and the panel's pointer-enter bridge can cancel
+// the close - the WCAG 1.4.13 "hoverable" requirement. Keyboard blur uses the
+// same path; the short delay is imperceptible there.
+const HOVER_BRIDGE_CLOSE_DELAY_MS: number = 120;
+
 // The only trigger prop the Tooltip reads: an existing describedby token list to
 // merge with the tooltip id. The pointer/focus handlers live on a wrapper span
 // (so the consumer's element keeps its own handlers untouched), and cloneElement
@@ -39,7 +46,7 @@ export function Tooltip({
     title,
     placement = EPopoverPlacement.Top,
     openDelayMs = 0,
-    closeDelayMs = 0,
+    closeDelayMs = HOVER_BRIDGE_CLOSE_DELAY_MS,
     tone,
 }: TooltipProps): ReactElement {
     // TooltipProps types `children` as a single ReactElement; the component's
@@ -101,6 +108,14 @@ export function Tooltip({
         setOpen(false);
     }
 
+    // Pointer entered the portaled panel: cancel any close scheduled by the
+    // trigger's pointer-leave so the panel stays reachable (WCAG 1.4.13). open is
+    // already true here; setOpen(true) is idempotent and defensive.
+    function handlePanelPointerEnter(): void {
+        clearTimers();
+        setOpen(true);
+    }
+
     const describedBy: string | undefined = open
         ? joinIds(childProps['aria-describedby'], tooltipId)
         : childProps['aria-describedby'];
@@ -132,6 +147,8 @@ export function Tooltip({
             placement={placement}
             trapFocus={false}
             restoreFocus={false}
+            onPanelPointerEnter={handlePanelPointerEnter}
+            onPanelPointerLeave={scheduleClose}
             {...(tone !== undefined ? { tone } : {})}
         >
             <div className={styles.tooltip}>

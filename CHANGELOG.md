@@ -53,6 +53,18 @@ surface is internally consistent. A compile-time freeze contract
   now read an intermediate `--portal-tone-resolved` seed that the `[data-status]`
   selector overrides and that the inline tone cannot reach, so status wins while
   plain tone is unchanged. A browser-project precedence-lock test guards it.
+- Published types now resolve under `moduleResolution: node16` and `nodenext`,
+  not only `bundler`. The declaration rollup previously emitted extensionless
+  relative re-exports that the node16/nodenext ESM type resolver rejects (TS2305,
+  "no exported member"), so consumers on those resolvers saw no types - despite
+  the README and Entry Points guide listing them as supported. Each entry point
+  is now bundled into a self-contained declaration file. A consumer-install
+  packaging smoke (`pnpm smoke:pack`) resolves every subpath under node16 and
+  bundler resolvers as a hard gate.
+- `Tooltip` now satisfies WCAG 1.4.13 (Content on Hover or Focus): the tooltip
+  stays open while the pointer moves onto its panel, instead of closing before
+  the content can be reached. A real-browser e2e test asserts the hoverable
+  behavior across the default and forced-colors profiles.
 
 ### Added
 
