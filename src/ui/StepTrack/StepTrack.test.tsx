@@ -2,9 +2,14 @@ import { render, screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import { StepTrack } from './StepTrack';
-import { EStepState, type Step } from './StepTrack.types';
+import { EStepState } from './StepTrack.types';
 
-const PHASES: readonly Step[] = [
+// Each phase carries a string label (a subtype of Step's ReactNode label) so the
+// visible-text assertions can compare against the literal without restringifying
+// a node.
+type StringStep = Readonly<{ id: string; label: string }>;
+
+const PHASES: readonly StringStep[] = [
     { id: 'draw', label: 'Draw' },
     { id: 'main', label: 'Main' },
     { id: 'combat', label: 'Combat' },
@@ -29,10 +34,14 @@ describe('StepTrack', (): void => {
         render(<StepTrack steps={PHASES} currentId="draw" />);
 
         const items: readonly HTMLElement[] = screen.getAllByRole('listitem');
-        const labels: readonly string[] = items.map(
-            (item: HTMLElement): string => item.textContent,
-        );
-        expect(labels).toEqual(['Draw', 'Main', 'Combat', 'End']);
+        expect(items).toHaveLength(PHASES.length);
+        // Each list item carries its visible label in DOM order; the trailing
+        // visually-hidden status word is asserted separately, so order is checked
+        // through the per-step visible label rather than the full textContent.
+        PHASES.forEach((phase: StringStep, index: number): void => {
+            const item: HTMLElement = items[index] ?? document.body;
+            expect(within(item).getByText(phase.label)).toBeInTheDocument();
+        });
     });
 
     it('marks the current step with aria-current="step"', (): void => {
@@ -79,6 +88,28 @@ describe('StepTrack', (): void => {
         expect(combat).toHaveAttribute('data-state', EStepState.Future);
         expect(end).toHaveAttribute('data-state', EStepState.Future);
         expect(combat).not.toHaveAttribute('aria-current');
+    });
+
+    it('exposes a visually-hidden status word per step so state is not color-only', (): void => {
+        render(<StepTrack steps={PHASES} currentId="combat" />);
+
+        // Past, current, and future steps each carry their own announced word, so
+        // the progress state survives without the tone color (WCAG 1.4.1).
+        const draw: HTMLElement | null = findStepItem('Draw');
+        const combat: HTMLElement | null = findStepItem('Combat');
+        const end: HTMLElement | null = findStepItem('End');
+        expect(draw).not.toBeNull();
+        expect(combat).not.toBeNull();
+        expect(end).not.toBeNull();
+        expect(
+            within(draw ?? document.body).getByText('completed'),
+        ).toBeInTheDocument();
+        expect(
+            within(combat ?? document.body).getByText('current'),
+        ).toBeInTheDocument();
+        expect(
+            within(end ?? document.body).getByText('not started'),
+        ).toBeInTheDocument();
     });
 
     it('applies the tone style to the root list', (): void => {

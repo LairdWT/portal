@@ -58,7 +58,9 @@ export type ERatingMarkState =
 //   - `max` is the total mark count (default 5, clamped to a floor of 1).
 //   - `value` is the filled count: an integer in 0..max (0 = unrated); clamped for
 //     display (mirrors Helicon `value.min(max)`).
-//   - `onChange` reports the new one-based filled count.
+//   - `onChange` (optional) reports the new one-based filled count; a controlled
+//     `value` with no `onChange` is a legitimate read-only display, matching the
+//     RadioGroup/SegmentedControl/Tabs/NavRail roving-select family.
 //   - `enabled` is resolved through useResolvedEnabled; each mark's native
 //     disabled attribute derives from it.
 //   - `allowClear` makes activating the currently-selected mark (or arrowing below
@@ -75,7 +77,7 @@ export type RatingInteractiveProps = Readonly<{
     readOnly?: false;
     max?: number;
     value: number;
-    onChange: (next: number) => void;
+    onChange?: (next: number) => void;
     enabled?: EEnabledState;
     allowClear?: boolean;
     renderMark?: (state: ERatingMarkState, index: number) => ReactNode;

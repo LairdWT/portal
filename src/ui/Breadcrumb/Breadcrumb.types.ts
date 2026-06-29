@@ -39,7 +39,10 @@ export type BreadcrumbItem = Readonly<{
 // location and is rendered inert with aria-current="page". `onNavigate` is the
 // aggregate callback (Helicon's Some(index) shape) fired with the activated
 // node id and index; a per-item onNavigate, when present, fires first. `label`
-// is the nav landmark accessible name (default "Breadcrumb"). `maxVisible`
+// is the nav landmark accessible name (default "Breadcrumb"); `labelledBy` is the
+// optional escape hatch that points the landmark at visible text elsewhere
+// (-> aria-labelledby, taking precedence over `label`), matching sibling
+// Pagination which exposes both. `maxVisible`
 // opts into middle-collapse when the trail is longer than it (>= 2 to keep the
 // root and tail); `overflowLabel` overrides the collapsed control's name.
 // `status` routes the universal danger/success seed through the tone scope;
@@ -50,6 +53,7 @@ export type BreadcrumbProps = Readonly<
         items: readonly BreadcrumbItem[];
         onNavigate?: (id: string, index: number) => void;
         label?: string;
+        labelledBy?: string;
         maxVisible?: number;
         overflowLabel?: string;
         status?: EUiStatus;

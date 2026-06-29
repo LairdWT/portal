@@ -86,8 +86,12 @@ export type WindowPoint = Readonly<{ x: number; y: number }>;
 
 // Shared, mode-independent fields.
 type WindowSharedProps = {
-    // Controlled visibility (mirrors Dialog open/onClose). The owner clears open
-    // in response to a dismissal request reported through onOpenChange(false).
+    // Controlled visibility. Window deliberately uses onOpenChange(boolean), NOT
+    // Dialog's onClose(void): the overlay dismissal contract is that a surface
+    // which only ever REQUESTS dismissal (Dialog/Drawer/Popover/CommandPalette)
+    // exposes onClose, while a surface that DRIVES open in both directions
+    // (Window, Menu) exposes onOpenChange and reports both opening and the
+    // dismissal request through onOpenChange(false).
     open: boolean;
     onOpenChange: (open: boolean) => void;
     // Title text; the accessible name (aria-labelledby -> the title element).

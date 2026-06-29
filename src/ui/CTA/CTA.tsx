@@ -6,8 +6,8 @@ import { EUiStatus, toneProperties } from '../tone';
 import toneStyles from '../tone.module.css';
 import styles from './CTA.module.css';
 import {
+    type CtaButtonType,
     type CTAProps,
-    type ECtaButtonType,
     ECtaSize,
     ECtaVariant,
 } from './CTA.types';
@@ -25,7 +25,7 @@ export function CTA({
 }: CTAProps): ReactElement {
     const resolvedEnabled: EEnabledState = useResolvedEnabled(enabled);
     const isDisabled: boolean = resolvedEnabled === EEnabledState.Disabled;
-    const buttonType: ECtaButtonType = type;
+    const buttonType: CtaButtonType = type;
 
     function handleClick(): void {
         switch (resolvedEnabled) {

@@ -162,6 +162,24 @@ describe('DataTable', (): void => {
         ).toBeInTheDocument();
     });
 
+    it('names the grid through labelledBy when a visible caption is referenced', (): void => {
+        render(
+            <>
+                <h2 id="people-caption">People</h2>
+                <DataTable
+                    labelledBy="people-caption"
+                    columns={COLUMNS}
+                    rowCount={3}
+                    renderCell={renderCell}
+                />
+            </>,
+        );
+
+        const grid: HTMLElement = screen.getByRole('grid', { name: 'People' });
+        expect(grid).toHaveAttribute('aria-labelledby', 'people-caption');
+        expect(grid).not.toHaveAttribute('aria-label');
+    });
+
     it('exposes data-motion full when motion is not reduced', (): void => {
         render(<Harness />);
 

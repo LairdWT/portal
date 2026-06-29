@@ -52,6 +52,25 @@ describe('Breadcrumb', (): void => {
         ).toBeInTheDocument();
     });
 
+    it('names the landmark through labelledBy, taking precedence over the default label', (): void => {
+        render(
+            <>
+                <h2 id="trail-heading">Folder trail</h2>
+                <Breadcrumb
+                    items={ITEMS}
+                    onNavigate={vi.fn<NavigateHandler>()}
+                    labelledBy="trail-heading"
+                />
+            </>,
+        );
+
+        const nav: HTMLElement = screen.getByRole('navigation', {
+            name: 'Folder trail',
+        });
+        expect(nav).toHaveAttribute('aria-labelledby', 'trail-heading');
+        expect(nav).not.toHaveAttribute('aria-label');
+    });
+
     it('renders the last crumb as the inert current node', (): void => {
         render(<Breadcrumb items={ITEMS} onNavigate={vi.fn<NavigateHandler>()} />);
 

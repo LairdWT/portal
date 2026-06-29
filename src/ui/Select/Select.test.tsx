@@ -68,6 +68,21 @@ describe('Select', (): void => {
         expect(trigger).toHaveAttribute('aria-expanded', 'false');
     });
 
+    it('renders a controlled value with no onChange as a read-only display', async (): Promise<void> => {
+        // onChange is optional: a controlled value with no handler is a legitimate
+        // read-only display, and activating an option must not throw.
+        const user: UserEvent = userEvent.setup();
+        render(<Select label="Fruit" options={OPTIONS} value="banana" />);
+
+        const trigger: HTMLElement = screen.getByRole('combobox');
+        expect(trigger).toHaveTextContent('Banana');
+
+        await user.click(trigger);
+        await user.click(screen.getByRole('option', { name: 'Cherry' }));
+        // The value is owned by the (absent) consumer, so it stays put.
+        expect(screen.getByRole('combobox')).toHaveTextContent('Banana');
+    });
+
     it('opens a listbox of options on click', async (): Promise<void> => {
         const user: UserEvent = userEvent.setup();
         render(<Harness />);

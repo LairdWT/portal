@@ -8,7 +8,8 @@ import { Rating } from './Rating';
 import { type ERatingMarkState } from './Rating.types';
 
 // Rating is controlled; tests that do not assert the report pass this inert
-// handler so the required onChange prop is satisfied.
+// handler as an explicit (now-optional) onChange so the controlled value is held
+// steady without exercising the read-only-display path covered separately.
 function noop(): void {
     // Intentionally empty: the controlled value is not advanced in these cases.
 }
@@ -35,6 +36,24 @@ describe('Rating', (): void => {
             ).toBeInTheDocument();
             expect(
                 screen.getByRole('radio', { name: '1 of 5' }),
+            ).toBeInTheDocument();
+        });
+
+        it('renders an interactive value with no onChange as a read-only display', async (): Promise<void> => {
+            // onChange is optional: a controlled value with no handler is a
+            // legitimate read-only display, and activating a mark must not throw.
+            const user: UserEvent = userEvent.setup();
+            render(<Rating value={3} max={5} label="Rating" />);
+
+            const group: HTMLElement = screen.getByRole('radiogroup', {
+                name: 'Rating',
+            });
+            expect(group).toBeInTheDocument();
+
+            await user.click(screen.getByRole('radio', { name: '5 of 5' }));
+            // The value is consumer-owned and stays put with no handler wired.
+            expect(
+                screen.getByRole('radio', { name: '3 of 5', checked: true }),
             ).toBeInTheDocument();
         });
 

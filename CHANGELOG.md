@@ -34,9 +34,13 @@ surface is internally consistent. A compile-time freeze contract
 - Value-string editors report through `onValueChange`: `SearchBox` and
   `ColorPicker` renamed `onChange` -> `onValueChange` (matching
   TextField/SecretField/PromptDialog).
+- `ECtaButtonType` renamed to `CtaButtonType` - it is a bare string-union type
+  and the `E` prefix is reserved for const-object enums.
 
 ### Fixed
 
+- `StepTrack` no longer conveys step state by color alone: each step carries a
+  visually-hidden status word (completed / current / not started) (WCAG 1.4.1).
 - Tone layer: a universal `data-status` (danger/success) is now authoritative
   over an inline `--portal-tone` seed. Previously a component given BOTH a tone
   and a danger/success status rendered the tone (an inline custom property beats
@@ -51,9 +55,16 @@ surface is internally consistent. A compile-time freeze contract
   it filters, via new optional, additive props: `id` on `List` (applied to its
   list/listbox root) and `ariaControls` on `SearchBox` (forwarded to the input).
   Existing `List`/`SearchBox` consumers are unaffected.
+- `DataTable` and `Breadcrumb` accept `labelledBy` (the shared `AccessibleName`
+  arm), so they can be named by a visible caption or heading without an inline
+  `label`. A backward-compatible widening; existing `label` callers are
+  unaffected.
 
 ### Changed
 
+- `Select` and interactive `Rating` make `onChange` optional, matching the other
+  controlled families (a controlled value with no `onChange` is a valid
+  read-only display).
 - Internal: the shared `.pressScale` surface utility's `scale()` factor moved
   from a literal to a `--portal-press-scale` token (mirrored in `PORTAL_TOKENS`),
   removing the last magic number from `surfaces.module.css`.

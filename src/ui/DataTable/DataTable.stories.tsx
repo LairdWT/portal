@@ -148,7 +148,13 @@ function largeCell(context: TableCellContext): ReactNode {
     return `S${String(context.rowIndex % 3)}`;
 }
 
-const meta: Meta<typeof DataTable> = {
+// DataTableProps now carries the AccessibleName XOR union (label | labelledBy).
+// Storybook collapses a union-args Meta to `never`, so the stories are typed
+// against the label arm (the labelledBy story uses render, not args), the same
+// way List types itself against a concrete story-args shape.
+type DataTableStoryArgs = Extract<DataTableProps, { label: string }>;
+
+const meta: Meta<DataTableStoryArgs> = {
     title: 'UI/DataTable',
     component: DataTable,
     args: {
@@ -157,12 +163,14 @@ const meta: Meta<typeof DataTable> = {
         rowCount: PEOPLE.length,
         renderCell: staticPeopleCell,
     },
-    render: (args: DataTableProps): ReactElement => <ControlledTable {...args} />,
+    render: (args: DataTableStoryArgs): ReactElement => (
+        <ControlledTable {...args} />
+    ),
 };
 
 export default meta;
 
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<DataTableStoryArgs>;
 
 // Basic sortable table: click a sortable header to cycle ascending -> descending
 // and watch the rows reorder.
@@ -204,6 +212,29 @@ export const LargeVirtualized: Story = {
         selectionMode: ESelectionMode.Multi,
         maxBodyBlockSize: '24rem',
     },
+};
+
+// Named by a visible caption through `labelledBy` instead of an inline label.
+// aria-labelledby points the grid at the heading id (the AccessibleName XOR arm
+// List already uses), so a grid can be captioned without duplicating the name.
+export const LabelledByCaption: Story = {
+    render: (): ReactElement => (
+        <div
+            style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 'var(--portal-space-2)',
+            }}
+        >
+            <h2 id="datatable-story-caption">Crew roster</h2>
+            <ControlledTable
+                labelledBy="datatable-story-caption"
+                columns={PEOPLE_COLUMNS}
+                rowCount={PEOPLE.length}
+                renderCell={staticPeopleCell}
+            />
+        </div>
+    ),
 };
 
 // Disabled: the whole grid is inert (single tab stop drops out, no sort or

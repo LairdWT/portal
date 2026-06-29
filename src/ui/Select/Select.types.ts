@@ -16,8 +16,10 @@ export type SelectOption = Readonly<{
 
 // Props for the Select: a single-select listbox-popup combobox covering Helicon's
 // combo_control and filter_row combo. The control is controlled - `value` is the
-// selected option id or null when empty, and `onChange` reports the next id (or
-// null only when `clearable`). DOM focus stays on the trigger; the open listbox
+// selected option id or null when empty, and `onChange` (optional) reports the
+// next id (or null only when `clearable`); a controlled `value` with no
+// `onChange` is a legitimate read-only display, matching the roving-select
+// family. DOM focus stays on the trigger; the open listbox
 // is navigated with aria-activedescendant. `id` falls back to a generated useId.
 // `placeholder` shows when nothing is selected; an empty `options` list renders a
 // disabled trigger. `enabled` is resolved through useResolvedEnabled. `clearable`
@@ -27,7 +29,7 @@ export type SelectProps = Readonly<{
     label: string;
     options: readonly SelectOption[];
     value: string | null;
-    onChange: (id: string | null) => void;
+    onChange?: (id: string | null) => void;
     id?: string;
     placeholder?: string;
     enabled?: EEnabledState;

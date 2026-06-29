@@ -247,8 +247,8 @@ export {
 export { type FuzzyMatch, fuzzyMatch } from './ui/CommandPalette/fuzzyMatch';
 export { CTA } from './ui/CTA/CTA';
 export {
+    type CtaButtonType,
     type CTAProps,
-    type ECtaButtonType,
     ECtaSize,
     ECtaVariant,
 } from './ui/CTA/CTA.types';

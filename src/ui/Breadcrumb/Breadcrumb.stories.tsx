@@ -92,6 +92,24 @@ export const Overflow: Story = {
     args: { items: LONG_ITEMS, maxVisible: 4 },
 };
 
+// The landmark named by a visible heading through `labelledBy` instead of the
+// default inline label. aria-labelledby points at the heading id and takes
+// precedence, so no aria-label is emitted (mirrors sibling Pagination).
+export const LabelledBy: Story = {
+    render: (): ReactElement => (
+        <div
+            style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 'var(--portal-space-2)',
+            }}
+        >
+            <h2 id="breadcrumb-story-heading">Reports navigation</h2>
+            <BreadcrumbStory items={ITEMS} labelledBy="breadcrumb-story-heading" />
+        </div>
+    ),
+};
+
 // Breadcrumbs of varying depth to show density and wrap behavior. Each landmark
 // carries a distinct accessible name so the navigation landmarks stay unique.
 export const Composition: Story = {

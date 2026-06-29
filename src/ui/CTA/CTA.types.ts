@@ -35,8 +35,10 @@ export const ECtaSize: {
 export type ECtaSize = (typeof ECtaSize)[keyof typeof ECtaSize];
 
 // The native button type forwarded to the rendered element. Defaults to
-// 'button' so the control never submits an enclosing form unless asked.
-export type ECtaButtonType = 'button' | 'submit' | 'reset';
+// 'button' so the control never submits an enclosing form unless asked. A bare
+// string union (it mirrors the native button type attribute), so it carries no
+// E-prefix - that prefix is reserved for annotated const-object enums.
+export type CtaButtonType = 'button' | 'submit' | 'reset';
 
 // Props for the CTA: the generic, domain-agnostic click button. This is the
 // click primitive, separate from ActionButton/BevelButton (which emit input
@@ -54,6 +56,6 @@ export type CTAProps = Readonly<
         enabled?: EEnabledState;
         status?: EUiStatus;
         onClick?: () => void;
-        type?: ECtaButtonType;
+        type?: CtaButtonType;
     } & Toned
 >;

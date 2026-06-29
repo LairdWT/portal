@@ -213,14 +213,14 @@ export function Select({
         if (option === undefined || option.disabled === true) {
             return;
         }
-        onChange(option.id);
+        onChange?.(option.id);
         setOpen(false);
         clearBuffer();
         triggerRef.current?.focus();
     }
 
     function handleClear(): void {
-        onChange(null);
+        onChange?.(null);
         triggerRef.current?.focus();
     }
 

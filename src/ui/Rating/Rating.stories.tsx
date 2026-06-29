@@ -71,6 +71,15 @@ export const Disabled: Story = {
     args: { enabled: EEnabledState.Disabled },
 };
 
+// onChange is optional on the interactive member too: a controlled `value` with
+// no handler is a legitimate read-only display that still renders the radiogroup
+// (distinct from the readOnly role="img" member below). The value never advances.
+export const InteractiveReadOnlyValue: Story = {
+    render: (args: RatingStoryArgs): ReactElement => (
+        <Rating max={args.max} value={args.value} label={args.label} />
+    ),
+};
+
 // Readonly is a non-interactive role="img"; its render bypasses the controlled
 // wrapper since there is no onChange.
 export const Readonly: Story = {

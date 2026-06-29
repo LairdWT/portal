@@ -1,6 +1,7 @@
 import { type ReactNode } from 'react';
 
 import { type EEnabledState } from '../../state/state';
+import { type AccessibleName } from '../accessibleName';
 import { type ESelectionMode } from '../selectionMode';
 import { type EUiStatus, type Toned } from '../tone';
 
@@ -96,8 +97,6 @@ export type TableCellContext = Readonly<{
 }>;
 
 export type DataTableProps = Readonly<{
-    // Accessible name for the grid (required; an unnamed grid trips axe).
-    label: string;
     columns: readonly TableColumn[];
     rowCount: number;
     // The interface-forwarding core: the table forwards every visible
@@ -129,4 +128,8 @@ export type DataTableProps = Readonly<{
     enabled?: EEnabledState;
     status?: EUiStatus;
 }> &
+    // Accessible name for the grid (required; an unnamed grid trips axe). The
+    // shared XOR union so the grid can be named inline (`label` -> aria-label) or
+    // point at a visible caption (`labelledBy` -> aria-labelledby), matching List.
+    AccessibleName &
     Toned;

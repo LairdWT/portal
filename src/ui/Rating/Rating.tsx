@@ -133,7 +133,7 @@ function InteractiveRating({
                 const next: number = shouldClear ? 0 : count;
                 const focusIndex: number = Math.max(next - 1, 0);
                 markRefs.current[focusIndex]?.focus();
-                onChange(next);
+                onChange?.(next);
                 return;
             }
         }

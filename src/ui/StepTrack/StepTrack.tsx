@@ -21,6 +21,21 @@ function resolveStepState(index: number, currentIndex: number): EStepState {
     return EStepState.Future;
 }
 
+// The visually-hidden status word announced per step so the past/current/future
+// position is not conveyed by the tone color alone (WCAG 1.4.1). aria-current on
+// the current step already exposes "current" to AT, but the past/future split is
+// otherwise color-only, so every step carries its own word.
+function resolveStatusWord(stepState: EStepState): string {
+    switch (stepState) {
+        case EStepState.Past:
+            return 'completed';
+        case EStepState.Current:
+            return 'current';
+        case EStepState.Future:
+            return 'not started';
+    }
+}
+
 export function StepTrack({
     steps,
     currentId,
@@ -42,6 +57,7 @@ export function StepTrack({
             {steps.map((step: Step, index: number): ReactElement => {
                 const stepState: EStepState = resolveStepState(index, currentIndex);
                 const isCurrent: boolean = stepState === EStepState.Current;
+                const statusWord: string = resolveStatusWord(stepState);
                 return (
                     <li
                         key={step.id}
@@ -53,6 +69,7 @@ export function StepTrack({
                             <span className={styles.dot} />
                         </span>
                         <span className={styles.label}>{step.label}</span>
+                        <span className={styles.statusText}>{statusWord}</span>
                     </li>
                 );
             })}

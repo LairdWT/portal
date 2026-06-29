@@ -85,6 +85,7 @@ export function Breadcrumb({
     items,
     onNavigate,
     label,
+    labelledBy,
     maxVisible,
     overflowLabel,
     status,
@@ -119,6 +120,15 @@ export function Breadcrumb({
         .join(' ');
     const navLabel: string = label ?? DEFAULT_LABEL;
     const navStatus: EUiStatus = status ?? EUiStatus.None;
+    // labelledBy, when supplied, points the landmark at visible text and takes
+    // precedence: aria-labelledby wins and the defaulted aria-label is dropped so
+    // the two naming sources never both apply.
+    const navNameProps: Readonly<
+        { 'aria-labelledby': string } | { 'aria-label': string }
+    > =
+        labelledBy !== undefined
+            ? { 'aria-labelledby': labelledBy }
+            : { 'aria-label': navLabel };
 
     // Negative-first guard: an empty trail renders the landmark with an empty
     // list and short-circuits all overflow/selection math (Helicon renders an
@@ -130,7 +140,7 @@ export function Breadcrumb({
                 style={toneProperties(tone)}
                 data-status={navStatus}
                 data-enabled={resolvedEnabled}
-                aria-label={navLabel}
+                {...navNameProps}
             >
                 <ol className={styles.list} />
             </nav>
@@ -261,7 +271,7 @@ export function Breadcrumb({
             style={toneProperties(tone)}
             data-status={navStatus}
             data-enabled={resolvedEnabled}
-            aria-label={navLabel}
+            {...navNameProps}
         >
             <ol className={styles.list}>
                 {slots.map(

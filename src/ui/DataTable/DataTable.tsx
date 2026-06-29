@@ -133,7 +133,6 @@ function rangeSelection(
 
 export function DataTable(props: DataTableProps): ReactElement {
     const {
-        label,
         columns,
         rowCount,
         renderCell,
@@ -151,6 +150,11 @@ export function DataTable(props: DataTableProps): ReactElement {
         status = EUiStatus.None,
         tone,
     }: DataTableProps = props;
+    // AccessibleName is an XOR union (label OR labelledBy), so the active arm is
+    // read off the prop bag the same way List does rather than destructured.
+    const label: string | undefined = 'label' in props ? props.label : undefined;
+    const labelledBy: string | undefined =
+        'labelledBy' in props ? props.labelledBy : undefined;
 
     const resolvedEnabled: EEnabledState = useResolvedEnabled(enabled);
     const isDisabled: boolean = resolvedEnabled === EEnabledState.Disabled;
@@ -489,7 +493,8 @@ export function DataTable(props: DataTableProps): ReactElement {
             role="grid"
             className={className}
             style={rootStyle}
-            aria-label={label}
+            {...(label !== undefined ? { 'aria-label': label } : {})}
+            {...(labelledBy !== undefined ? { 'aria-labelledby': labelledBy } : {})}
             aria-rowcount={rowCount + 1}
             aria-colcount={columns.length}
             aria-disabled={isDisabled ? true : undefined}

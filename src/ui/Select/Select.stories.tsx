@@ -104,6 +104,14 @@ export const DisabledOption: Story = {
     args: { options: DISABLED_OPTION, value: 'apple' },
 };
 
+// onChange is optional: a controlled value with no handler is a legitimate
+// read-only display. The trigger shows the selected label and never advances.
+export const ReadOnlyValue: Story = {
+    render: (): ReactElement => (
+        <Select label="Fruit" options={OPTIONS} value="cherry" />
+    ),
+};
+
 export const Toned: Story = {
     args: { tone: 'oklch(0.7 0.18 25)' },
 };
