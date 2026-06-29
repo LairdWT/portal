@@ -28,10 +28,12 @@ https://lairdwt.github.io/portal/
 pnpm add @laird-wt/portal
 ```
 
-React and React DOM are required peer dependencies (version 18 or newer):
+React, React DOM, and Anime.js are required peer dependencies (React 18 or
+newer, Anime.js 4 or newer). Anime.js powers the motion presets exported from
+the package root, so it is required even if you do not use the 3D surface:
 
 ```sh
-pnpm add react react-dom
+pnpm add react react-dom animejs
 ```
 
 The React Three Fiber surface is optional. Install the 3D peers only when
@@ -41,25 +43,41 @@ you import from `portal/r3f`:
 pnpm add three @react-three/fiber @react-three/drei
 ```
 
+Portal is ESM-only. Use a bundler (Vite, webpack, Rollup, esbuild) or Node with
+ESM enabled, and a TypeScript `moduleResolution` of `bundler`, `node16`, or
+`nodenext` so the `exports` subpaths (`./theme`, `./r3f`, `./shaders`) resolve.
+
 ## Usage
 
 Import components from the package root and load the stylesheet once at your
 application entry point:
 
 ```tsx
-import '@laird-wt/portal/styles.css';
+import { type ReactElement } from 'react';
 
 import { CTA } from '@laird-wt/portal';
+import '@laird-wt/portal/styles.css';
 
-export function Example(): JSX.Element {
+export function Example(): ReactElement {
     return <CTA onClick={() => undefined}>Press</CTA>;
 }
 ```
 
-The optional 3D surface lives behind a separate entry point:
+The optional 3D surface lives behind a separate entry point. Mount it inside a
+React Three Fiber `<Canvas>` (the 3D peers above must be installed):
 
 ```tsx
-import { ControllerSurface } from '@laird-wt/portal/r3f';
+import { Canvas } from '@react-three/fiber';
+
+import { OrbBackdrop } from '@laird-wt/portal/r3f';
+
+export function Backdrop(): ReactElement {
+    return (
+        <Canvas>
+            <OrbBackdrop />
+        </Canvas>
+    );
+}
 ```
 
 ## Theming
@@ -71,22 +89,36 @@ Portal exposes design tokens as CSS custom properties namespaced with the
 ```css
 :root {
     --portal-color-accent: #3da9fc;
-    --portal-radius-control: 0.75rem;
+    --portal-radius-md: 0.75rem;
     --portal-touch-target-min: 3rem;
 }
 ```
 
-The theme entry point exports the token names and default values for
-programmatic use:
+The theme entry point exports the token names (as `var()` references) for
+programmatic use - for example to feed a React Three Fiber material the same
+color the DOM uses:
 
 ```ts
-import { portalTokens } from '@laird-wt/portal/theme';
+import { PORTAL_TOKENS, type PortalTokens } from '@laird-wt/portal/theme';
 ```
 
 Sizing uses `clamp`, `min`, `max`, and intrinsic units rather than fixed
 pixels or viewport-stretch units. Layout is safe-area aware through the
 `env(safe-area-inset-*)` values, touch targets meet the 3rem minimum, and
 motion respects the user `prefers-reduced-motion` setting.
+
+## Entry points
+
+Portal ships several ESM subpath exports:
+
+- `@laird-wt/portal` - the component library and React hooks.
+- `@laird-wt/portal/styles.css` - the stylesheet; import once at your entry.
+- `@laird-wt/portal/theme` - `PORTAL_TOKENS` and the `PortalTokens` type.
+- `@laird-wt/portal/r3f` - the optional React Three Fiber surface
+  (`OrbBackdrop`, `ShaderSurface`, `webglSupport`); requires the 3D peers.
+- `@laird-wt/portal/shaders` - the dependency-light shader core behind the R3F
+  surface (`rippleGridShader`, `createRippleField`, and the `ShaderDescriptor`
+  contract) for consumers wiring their own renderer.
 
 ## Input and Unity binding
 
@@ -137,11 +169,25 @@ profile, a custom `TimeProvider`, and the wire codec together.
 
 ## Generic UI components
 
-A domain-agnostic UI layer for click and selection surfaces, separate from the
-game-input controllers above: `CTA` (click button), `Panel`, `SelectableTile`,
-`StatPill`, `Tabs`, `StepTrack`, `ReadoutPanel`, and `TextField`. These emit
-plain callbacks (`onClick`, `onSelect`, `onChange`) and never the input-signal
-contract, so they suit any React UI, not only game input.
+A domain-agnostic UI layer, separate from the game-input controllers above. It
+emits plain value and selection callbacks and never the input-signal contract,
+so it suits any React UI, not only game input. It spans, among others:
+
+- Inputs and forms: `CTA`, `TextField`, `SecretField`, `SearchBox`, `Select`,
+  `Checkbox`, `RadioGroup`, `SegmentedControl`, `NumberStepper`, `Rating`,
+  `ColorPicker`, `Toggle`.
+- Data and navigation: `List` / `SearchableList`, `DataTable`, `TreeView`,
+  `Accordion`, `Tabs`, `Breadcrumb`, `Pagination`, `NavRail`,
+  `Menu` / `MenuBar` / `ContextMenu`, `CommandPalette`.
+- Surfaces and overlays: `Panel`, `ReadoutPanel`, `Section`, `Dialog`,
+  `Drawer`, `Popover`, `Tooltip`, `Toast`, `Window`, `SplitPane`.
+- Display and feedback: `Text`, `Badge`, `Chip`, `StatPill`, `StatTile`,
+  `KeyValue`, the `Chart` family, `Progress`, `Banner`, `Avatar`, `Skeleton`,
+  `EmptyState`, `Marquee`, `Scanlines`, `StepTrack`, `TitleBar`, `StatusFooter`,
+  `SelectableTile`.
+
+See the live Storybook (linked above) for the full, current catalogue with
+interactive examples.
 
 Colour comes from one opaque `tone` prop rather than a fixed palette. A
 component sets `--portal-tone` from it and derives its accent, border, glow, and

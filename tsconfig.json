@@ -16,11 +16,14 @@
         "isolatedModules": true,
         "jsx": "react-jsx",
 
-        /* Emit: vite-plugin-dts produces the declarations; tsc -b stays type-only */
+        /* Emit: vite-plugin-dts produces the PUBLISHED declarations under dist/.
+         * tsc -b is type-checking only; its declaration emit goes to a throwaway
+         * dir OUTSIDE dist so a stray typecheck after build never ships a second,
+         * unreferenced copy of the .d.ts into the published tarball. */
         "declaration": true,
         "declarationMap": false,
         "emitDeclarationOnly": true,
-        "outDir": "./dist/types",
+        "outDir": "./node_modules/.tmp/types",
 
         /* Linting and strictness */
         "strict": true,
