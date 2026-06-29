@@ -172,9 +172,18 @@ export function useVirtualWindow(
         }
         const over: number = overscan ?? OVERSCAN_DEFAULT;
         const first: number = Math.floor(metrics.scrollTop / rowHeight);
-        const visibleCount: number = Math.ceil(metrics.viewportHeight / rowHeight);
         const startIndex: number = Math.max(0, first - over);
-        const endIndex: number = Math.min(rowCount, first + visibleCount + over);
+        // Base the end on the exposed pixel band (scrollTop + viewportHeight),
+        // not floor(scrollTop) + ceil(viewportHeight). At a fractional scrollTop
+        // the floor+ceil form undercounts by one row and leaves a sub-row blank
+        // strip at the viewport bottom; ceil of the band edge keeps the
+        // partially scrolled bottom row in the window. Identical at aligned
+        // offsets (scrollTop a multiple of rowHeight).
+        const endIndex: number = Math.min(
+            rowCount,
+            Math.ceil((metrics.scrollTop + metrics.viewportHeight) / rowHeight) +
+                over,
+        );
         return {
             startIndex,
             endIndex,

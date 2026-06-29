@@ -197,6 +197,33 @@ describe('useVirtualWindow', (): void => {
         expect(view.result.current.offsetStart).toBe((100 - OVERSCAN_DEFAULT) * 48);
     });
 
+    it('keeps the partially scrolled bottom row at a fractional scroll offset', (): void => {
+        const harness: ScrollHarness = createScrollHarness(480);
+        const view: RenderHookResult<VirtualWindowState, VirtualWindowOptions> =
+            renderWindow({
+                rowCount: 1000,
+                rowHeight: 48,
+                overscan: 0,
+                scrollRef: { current: harness.element },
+            });
+
+        act((): void => {
+            harness.setScrollTop(24);
+            harness.element.dispatchEvent(new Event('scroll'));
+        });
+        act((): void => {
+            flushRaf();
+        });
+
+        // scrollTop 24 + viewport 480 = 504px exposed, so row 10 (480-528px) is
+        // partially visible. With overscan 0 the band is rows [0, 11). The old
+        // floor(24/48) + ceil(480/48) base computed endIndex 10 and dropped this
+        // row, leaving a ~24px blank strip at the viewport bottom; ceil of the
+        // exposed band edge keeps it in the window.
+        expect(view.result.current.startIndex).toBe(0);
+        expect(view.result.current.endIndex).toBe(11);
+    });
+
     it('clamps the window to the list bounds at the end', (): void => {
         const harness: ScrollHarness = createScrollHarness(480);
         const view: RenderHookResult<VirtualWindowState, VirtualWindowOptions> =
