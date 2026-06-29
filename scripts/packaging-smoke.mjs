@@ -56,21 +56,17 @@ const SUBPATHS = [
     '@laird-wt/portal/styles.css',
 ];
 
-// `typesAdvisory` marks a resolver whose TYPE leg is reported but NOT fatal.
-// node16/nodenext TYPE resolution fails against the frozen 1.0 d.ts because the
-// emitted declarations use extensionless rollup re-exports (`export * from
-// './src/index'`) that node16 ESM rejects - a real packaging gap owned by the
-// Track-5 PK d.ts-extension work, OUT of scope for this Track-3 (no src/build
-// change). It is surfaced loudly as a KNOWN-GAP every run rather than hidden. The
-// node16 RUNTIME leg (which proves the ESM-only exports map actually loads under
-// Node ESM - the PK-3 "no require condition" risk) stays a hard gate, as do both
-// bundler legs.
+// Every TYPE leg is a hard gate. The published .d.ts are rolled per entry by
+// vite-plugin-dts (rollupTypes), so they are self-contained with no relative
+// specifiers and resolve cleanly under node16/nodenext as well as bundler. A
+// non-zero tsc exit on any resolver fails the smoke (Residual A fix). The
+// node16 RUNTIME leg still proves the ESM-only exports map loads under Node ESM.
 const RESOLVERS = [
     {
         name: 'node16',
         moduleResolution: 'node16',
         module: 'node16',
-        typesAdvisory: true,
+        typesAdvisory: false,
     },
     {
         name: 'bundler',
@@ -238,11 +234,7 @@ function main() {
         // resolve under this resolver.
         const tscConfig = join(consumerDir, 'tsconfig.json');
         const tsc = runShell(`pnpm exec tsc --noEmit -p "${tscConfig}"`, repoRoot);
-        if (tsc.status !== 0 && resolver.typesAdvisory) {
-            // Reported, not fatal: a frozen-artifact d.ts gap owned by Track-5 PK.
-            log(`KNOWN-GAP  types (${resolver.name}) [advisory, see Track-5 PK]`);
-            log(`${tsc.stdout ?? ''}${tsc.stderr ?? ''}`);
-        } else if (tsc.status !== 0) {
+        if (tsc.status !== 0) {
             reportFail(
                 `types (${resolver.name})`,
                 `${tsc.stdout ?? ''}${tsc.stderr ?? ''}`,

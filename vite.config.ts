@@ -28,6 +28,13 @@ export default defineConfig({
     plugins: [
         react(),
         dts({
+            // rollupTypes bundles each lib entry into a single self-contained
+            // .d.ts via api-extractor (a vite-plugin-dts dependency), removing
+            // the extensionless relative re-exports that node16/nodenext ESM
+            // type resolution rejects (TS2305). All four subpath types then
+            // resolve under node16, nodenext, and bundler. See
+            // C:/dev/temp/portal-1.0-stabilization/residual-a-node16-dts-plan.md.
+            rollupTypes: true,
             insertTypesEntry: true,
             include: ['src'],
             exclude: [
