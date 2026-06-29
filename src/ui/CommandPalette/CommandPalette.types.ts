@@ -83,32 +83,54 @@ export type CommandRow =
 // navigation. AccessibleName (XOR label | labelledBy) is REQUIRED - the modal
 // dialog and the combobox input both need an accessible name.
 export type CommandPaletteProps = Readonly<{
-    // Controlled visibility (mirrors Helicon CommandPaletteState.open).
+    /**
+     * Controlled visibility (mirrors Helicon CommandPaletteState.open).
+     */
     open: boolean;
-    // Dismissal request (Escape, backdrop pointer). The host flips `open`.
+    /**
+     * Dismissal request (Escape, backdrop pointer). The host flips `open`.
+     */
     onClose: () => void;
-    // The full command corpus (caller-owned; the palette owns no registry).
+    /**
+     * The full command corpus (caller-owned; the palette owns no registry).
+     */
     commands: readonly Command[];
-    // Controlled filter buffer (Helicon's caller-owned state.query).
+    /**
+     * Controlled filter buffer (Helicon's caller-owned state.query).
+     */
     query: string;
     onQueryChange: (query: string) => void;
-    // Activation. Reports the chosen command id (Helicon response.selected). The
-    // host runs the command and flips `open` to false.
+    /**
+     * Activation. Reports the chosen command id (Helicon response.selected). The
+     * host runs the command and flips `open` to false.
+     */
     onSelect: (commandId: string) => void;
-    // Ids surfaced as a "Recent" group when the query is empty (additive; omit
-    // for none). Order is most-recent-first.
+    /**
+     * Ids surfaced as a "Recent" group when the query is empty (additive; omit
+     * for none). Order is most-recent-first.
+     */
     recentCommandIds?: readonly string[];
-    // Match strategy; default Fuzzy. Substring = strict Helicon parity.
+    /**
+     * Match strategy; default Fuzzy. Substring = strict Helicon parity.
+     */
     filterMode?: ECommandFilterMode;
-    // Fixed result row height in CSS px for windowing; defaults to the
-    // 3rem-equivalent (48) so a row clears --portal-touch-target-min.
+    /**
+     * Fixed result row height in CSS px for windowing; defaults to the
+     * 3rem-equivalent (48) so a row clears --portal-touch-target-min.
+     */
     rowHeight?: number;
     overscan?: number;
-    // Placeholder for the combobox input (Helicon SEARCH_FILTER_HINT analog).
+    /**
+     * Placeholder for the combobox input (Helicon SEARCH_FILTER_HINT analog).
+     */
     placeholder?: string;
-    // Content when the corpus is empty (default EmptyState "No commands.").
+    /**
+     * Content when the corpus is empty (default EmptyState "No commands.").
+     */
     emptyContent?: ReactNode;
-    // Content when commands exist but none match.
+    /**
+     * Content when commands exist but none match.
+     */
     noMatchesContent?: ReactNode;
     enabled?: EEnabledState; // gates the whole palette
     status?: EUiStatus; // default EUiStatus.None

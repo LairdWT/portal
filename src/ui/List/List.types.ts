@@ -67,42 +67,60 @@ export type ListRowRenderState = Readonly<{
 
 export type ListProps<Item> = Readonly<{
     items: readonly Item[];
-    // Stable identity per item: the React key AND the selection key. Mirrors the
-    // need for a stable selection identity in Helicon's caller-owned model so a
-    // selected row survives a consumer re-sort or the row recycling that
-    // virtualization performs.
+    /**
+     * Stable identity per item: the React key AND the selection key. Mirrors the
+     * need for a stable selection identity in Helicon's caller-owned model so a
+     * selected row survives a consumer re-sort or the row recycling that
+     * virtualization performs.
+     */
     getItemKey: (item: Item, index: number) => string;
-    // Interface-forwarding row renderer. The List owns no item shape; it forwards
-    // every visible (item, state) to this closure and renders whatever it returns.
+    /**
+     * Interface-forwarding row renderer. The List owns no item shape; it forwards
+     * every visible (item, state) to this closure and renders whatever it returns.
+     */
     renderItem: (item: Item, state: ListRowRenderState) => ReactNode;
-    // Fixed row height in CSS pixels, required by fixed-height windowing
-    // (Helicon VirtualListConfig.row_height). Defaults to the 3rem-equivalent
-    // (48), so a selectable row also clears the --portal-touch-target-min floor;
-    // Helicon's sub-floor defaults are intentionally not carried across.
+    /**
+     * Fixed row height in CSS pixels, required by fixed-height windowing
+     * (Helicon VirtualListConfig.row_height). Defaults to the 3rem-equivalent
+     * (48), so a selectable row also clears the --portal-touch-target-min floor;
+     * Helicon's sub-floor defaults are intentionally not carried across.
+     */
     rowHeight?: number;
-    // Extra rows rendered above/below the viewport window (windowing overscan).
-    // Forwarded to useVirtualWindow; replaces Helicon's per-frame row cap.
+    /**
+     * Extra rows rendered above/below the viewport window (windowing overscan).
+     * Forwarded to useVirtualWindow; replaces Helicon's per-frame row cap.
+     */
     overscan?: number;
     selectionMode?: ESelectionMode; // default None
-    // Controlled selection (the Portal default; mirrors DataTable). A set of row
-    // keys: for Single, at most one key; for Multi, any number; ignored when None.
-    // Membership/dedup is the correct model, so a ReadonlySet (not an array)
-    // unifies the contract with DataTable.
+    /**
+     * Controlled selection (the Portal default; mirrors DataTable). A set of row
+     * keys: for Single, at most one key; for Multi, any number; ignored when None.
+     * Membership/dedup is the correct model, so a ReadonlySet (not an array)
+     * unifies the contract with DataTable.
+     */
     selectedKeys?: ReadonlySet<string>;
     onSelectionChange?: (next: ReadonlySet<string>) => void;
-    // Optional type-ahead source (plain text per item). When present, printable
-    // keys move the active cursor to the next matching row (Select's pattern).
+    /**
+     * Optional type-ahead source (plain text per item). When present, printable
+     * keys move the active cursor to the next matching row (Select's pattern).
+     */
     getTypeAheadText?: (item: Item) => string;
     enabled?: EEnabledState;
     status?: EUiStatus; // default EUiStatus.None
-    // Content when items is empty. Defaults to an EmptyState "No rows.".
+    /**
+     * Content when items is empty. Defaults to an EmptyState "No rows.".
+     */
     emptyContent?: ReactNode;
-    // Bounded block size of the scroll viewport (a CSS length / clamp expression,
-    // not a literal px). A token-based clamp default applies when omitted.
+    /**
+     * Bounded block size of the scroll viewport (a CSS length / clamp expression,
+     * not a literal px). A token-based clamp default applies when omitted.
+     */
     maxBlockSize?: string;
-    // Optional explicit DOM id applied to the list/listbox root element so an
-    // external control can reference it (e.g. a search field's aria-controls).
-    // Distinct from the internal id used for row ids.
+    /**
+     * Optional explicit DOM id applied to the list/listbox root element so an
+     * external control can reference it (e.g. a search field's aria-controls).
+     * Distinct from the internal id used for row ids.
+     */
     id?: string;
 }> &
     AccessibleName &

@@ -49,17 +49,25 @@ export type EScanlineFlicker =
 // overlay, never a wrapper - wrapping would force pointer-events:none onto real
 // content). For Contained, place it as the last child of a position:relative host.
 export type ScanlinesProps = Readonly<{
-    // Where the overlay paints. Default EScanlineExtent.Contained.
+    /**
+     * Where the overlay paints. Default EScanlineExtent.Contained.
+     */
     extent?: EScanlineExtent;
-    // Optional CRT shimmer. Default EScanlineFlicker.None (static).
+    /**
+     * Optional CRT shimmer. Default EScanlineFlicker.None (static).
+     */
     flicker?: EScanlineFlicker;
-    // Vertical pitch as a CSS length (Helicon pitch_pixels; default token 3px).
-    // A CSS length string, NOT a raw number, so it stays unit-explicit. Omitting
-    // it falls through to the --portal-scanline-pitch token default.
+    /**
+     * Vertical pitch as a CSS length (Helicon pitch_pixels; default token 3px).
+     * A CSS length string, NOT a raw number, so it stays unit-explicit. Omitting
+     * it falls through to the --portal-scanline-pitch token default.
+     */
     pitch?: string;
-    // Per-line layer opacity in [0, 1] (Helicon alpha; default token ~0.06). Kept
-    // low so underlying text stays AA-legible. Omitting it falls through to the
-    // --portal-scanline-alpha token default.
+    /**
+     * Per-line layer opacity in [0, 1] (Helicon alpha; default token ~0.06). Kept
+     * low so underlying text stays AA-legible. Omitting it falls through to the
+     * --portal-scanline-alpha token default.
+     */
     opacity?: number;
 }> &
     Toned;

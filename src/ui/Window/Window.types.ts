@@ -86,41 +86,55 @@ export type WindowPoint = Readonly<{ x: number; y: number }>;
 
 // Shared, mode-independent fields.
 type WindowSharedProps = {
-    // Controlled visibility. Window deliberately uses onOpenChange(boolean), NOT
-    // Dialog's onClose(void): the overlay dismissal contract is that a surface
-    // which only ever REQUESTS dismissal (Dialog/Drawer/Popover/CommandPalette)
-    // exposes onClose, while a surface that DRIVES open in both directions
-    // (Window, Menu) exposes onOpenChange and reports both opening and the
-    // dismissal request through onOpenChange(false).
+    /**
+     * Controlled visibility. Window deliberately uses onOpenChange(boolean), NOT
+     * Dialog's onClose(void): the overlay dismissal contract is that a surface
+     * which only ever REQUESTS dismissal (Dialog/Drawer/Popover/CommandPalette)
+     * exposes onClose, while a surface that DRIVES open in both directions
+     * (Window, Menu) exposes onOpenChange and reports both opening and the
+     * dismissal request through onOpenChange(false).
+     */
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    // Title text; the accessible name (aria-labelledby -> the title element).
-    // Required, so a nameless window is a compile error - same posture as Dialog.
+    /**
+     * Title text; the accessible name (aria-labelledby -> the title element).
+     * Required, so a nameless window is a compile error - same posture as Dialog.
+     */
     title: string;
     children: ReactNode;
-    // Title-bar slots (the generalized Helicon title_bar): a leading decorative
-    // mark, a secondary status string, and a host-supplied action cluster.
+    /**
+     * Title-bar slots (the generalized Helicon title_bar): a leading decorative
+     * mark, a secondary status string, and a host-supplied action cluster.
+     */
     leadingIcon?: ReactNode;
     statusText?: string;
     titleBarActions?: ReactNode;
-    // Seed geometry (Helicon default_pos / default_size). Uncontrolled by
-    // default; internal state owns live position/size after first paint.
+    /**
+     * Seed geometry (Helicon default_pos / default_size). Uncontrolled by
+     * default; internal state owns live position/size after first paint.
+     */
     defaultPosition?: WindowPoint;
     defaultSize?: WindowSize;
     minSize?: WindowSize;
-    // OPTIONAL fully-controlled geometry override + committed reports. When
-    // position/size are supplied the window is controlled on that axis; onMove /
-    // onResize report committed (drag-end / resize-end) values regardless.
+    /**
+     * OPTIONAL fully-controlled geometry override + committed reports. When
+     * position/size are supplied the window is controlled on that axis; onMove /
+     * onResize report committed (drag-end / resize-end) values regardless.
+     */
     position?: WindowPoint;
     size?: WindowSize;
     onMove?: (point: WindowPoint) => void;
     onResize?: (size: WindowSize) => void;
     resize?: EWindowResizeMode;
-    // Affordance opt-ins. Close is always present (open is controlled).
+    /**
+     * Affordance opt-ins. Close is always present (open is controlled).
+     */
     minimizable?: boolean;
     maximizable?: boolean;
-    // Controlled window state (minimize/maximize) + report. Uncontrolled when
-    // omitted (internal EWindowState, defaults Normal).
+    /**
+     * Controlled window state (minimize/maximize) + report. Uncontrolled when
+     * omitted (internal EWindowState, defaults Normal).
+     */
     windowState?: EWindowState;
     onWindowStateChange?: (state: EWindowState) => void;
     status?: EUiStatus;

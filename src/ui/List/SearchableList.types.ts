@@ -33,17 +33,25 @@ export type SearchableListProps<Item> = Readonly<{
     items: readonly Item[];
     getItemKey: (item: Item, index: number) => string;
     renderItem: (item: Item, state: ListRowRenderState) => ReactNode;
-    // The string filtered against, case-insensitive contains. Mirrors Helicon
-    // searchable_split row_label.
+    /**
+     * The string filtered against, case-insensitive contains. Mirrors Helicon
+     * searchable_split row_label.
+     */
     getFilterText: (item: Item) => string;
-    // Controlled filter buffer (Helicon's caller-owned filter: &mut String).
+    /**
+     * Controlled filter buffer (Helicon's caller-owned filter: &mut String).
+     */
     query: string;
     onQueryChange: (query: string) => void;
-    // Single-select identity that drives the detail column.
+    /**
+     * Single-select identity that drives the detail column.
+     */
     selectedKey?: string | null;
     onSelectedKeyChange?: (key: string | null) => void;
-    // Optional detail column (master-detail). Omit for a plain filtered list. The
-    // selected item (or null when nothing is selected) is forwarded here.
+    /**
+     * Optional detail column (master-detail). Omit for a plain filtered list. The
+     * selected item (or null when nothing is selected) is forwarded here.
+     */
     renderDetail?: (item: Item | null) => ReactNode;
     rowHeight?: number;
     overscan?: number;

@@ -78,11 +78,13 @@ type PopoverBaseProps = Readonly<{
     trapFocus?: boolean;
     restoreFocus?: boolean;
     initialFocusRef?: RefObject<HTMLElement | null>;
-    // Optional pointer-enter/leave bridge for the floating panel. Forwarded onto
-    // the panel element so an overlay that opens on hover (the Tooltip) can keep
-    // itself open while the pointer is over the panel - the WCAG 1.4.13
-    // "hoverable" requirement. Purely additive: omit them and the panel behaves
-    // exactly as before.
+    /**
+     * Optional pointer-enter/leave bridge for the floating panel. Forwarded onto
+     * the panel element so an overlay that opens on hover (the Tooltip) can keep
+     * itself open while the pointer is over the panel - the WCAG 1.4.13
+     * "hoverable" requirement. Purely additive: omit them and the panel behaves
+     * exactly as before.
+     */
     onPanelPointerEnter?: () => void;
     onPanelPointerLeave?: () => void;
 }> &

@@ -36,38 +36,60 @@ export type EStepDirection = (typeof EStepDirection)[keyof typeof EStepDirection
 // the universal status flow through the shared tone scope.
 export type NumberStepperProps = Readonly<
     {
-        // Accessible name for the spinbutton (wired to aria-label). Required: the
-        // spinbutton is a named role. Mirrors Progress/Slider, not the
-        // AccessibleName XOR (the control renders no visible label of its own).
+        /**
+         * Accessible name for the spinbutton (wired to aria-label). Required: the
+         * spinbutton is a named role. Mirrors Progress/Slider, not the
+         * AccessibleName XOR (the control renders no visible label of its own).
+         */
         label: string;
-        // Controlled current value. The displayed value is clamped into [min,max]
-        // for render and aria-valuenow; the prop itself is never mutated.
+        /**
+         * Controlled current value. The displayed value is clamped into [min,max]
+         * for render and aria-valuenow; the prop itself is never mutated.
+         */
         value: number;
-        // Reports the next CLAMPED value. Omitted -> read-only stepper.
+        /**
+         * Reports the next CLAMPED value. Omitted -> read-only stepper.
+         */
         onChange?: (value: number) => void;
-        // Inclusive bounds. Optional; default to the safe-integer range so the
-        // saturating clamp matches Helicon's i64 saturating intent. aria-valuemin
-        // / aria-valuemax are emitted ONLY when the caller passes a finite bound.
+        /**
+         * Inclusive bounds. Optional; default to the safe-integer range so the
+         * saturating clamp matches Helicon's i64 saturating intent. aria-valuemin
+         * / aria-valuemax are emitted ONLY when the caller passes a finite bound.
+         */
         min?: number;
         max?: number;
-        // Per-click / Arrow delta. A non-positive value is coerced to 1 (Helicon
-        // MINIMUM_STEP).
+        /**
+         * Per-click / Arrow delta. A non-positive value is coerced to 1 (Helicon
+         * MINIMUM_STEP).
+         */
         step?: number;
-        // PageUp / PageDown delta. Defaults to the normalized step times 10.
+        /**
+         * PageUp / PageDown delta. Defaults to the normalized step times 10.
+         */
         pageStep?: number;
-        // Enabled state enum, resolved through useResolvedEnabled.
+        /**
+         * Enabled state enum, resolved through useResolvedEnabled.
+         */
         enabled?: EEnabledState;
-        // Universal status routed through the tone scope (data-status). Defaults
-        // to EUiStatus.None. Mirrors Progress/StatPill.
+        /**
+         * Universal status routed through the tone scope (data-status). Defaults
+         * to EUiStatus.None. Mirrors Progress/StatPill.
+         */
         status?: EUiStatus;
-        // Optional formatting for the value text and aria-valuetext (units,
-        // locale). Defaults to String(displayedValue).
+        /**
+         * Optional formatting for the value text and aria-valuetext (units,
+         * locale). Defaults to String(displayedValue).
+         */
         formatValue?: (value: number) => string;
-        // Accessible names for the step keys. Default to descriptive strings
-        // derived from `label` ("Decrease <label>" / "Increase <label>").
+        /**
+         * Accessible names for the step keys. Default to descriptive strings
+         * derived from `label` ("Decrease <label>" / "Increase <label>").
+         */
         decrementLabel?: string;
         incrementLabel?: string;
-        // Optional explicit id for the spinbutton element (falls back to useId).
+        /**
+         * Optional explicit id for the spinbutton element (falls back to useId).
+         */
         id?: string;
     } & Toned
 >;

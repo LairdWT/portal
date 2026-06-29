@@ -99,31 +99,47 @@ export type TableCellContext = Readonly<{
 export type DataTableProps = Readonly<{
     columns: readonly TableColumn[];
     rowCount: number;
-    // The interface-forwarding core: the table forwards every visible
-    // (row, column) to this closure and renders whatever it returns.
+    /**
+     * The interface-forwarding core: the table forwards every visible
+     * (row, column) to this closure and renders whatever it returns.
+     */
     renderCell: (context: TableCellContext) => ReactNode;
-    // Stable row key by index (default String(rowIndex)). Selection is keyed on
-    // this so it survives a consumer re-sort or the row recycling that
-    // virtualization performs.
+    /**
+     * Stable row key by index (default String(rowIndex)). Selection is keyed on
+     * this so it survives a consumer re-sort or the row recycling that
+     * virtualization performs.
+     */
     getRowKey?: (rowIndex: number) => string;
-    // Controlled sort. The consumer re-sorts its data on onSortChange and passes
-    // the new sort back.
+    /**
+     * Controlled sort. The consumer re-sorts its data on onSortChange and passes
+     * the new sort back.
+     */
     sort?: TableSort | null;
     onSortChange?: (next: TableSort) => void;
-    // Controlled selection (a set of row keys). selectionMode defaults to None.
+    /**
+     * Controlled selection (a set of row keys). selectionMode defaults to None.
+     */
     selectionMode?: ESelectionMode;
     selectedKeys?: ReadonlySet<string>;
     onSelectionChange?: (next: ReadonlySet<string>) => void;
-    // Fixed virtualization row height in px (default 48, matching the 3rem touch
-    // target so a selectable row clears the touch floor). Must be uniform.
+    /**
+     * Fixed virtualization row height in px (default 48, matching the 3rem touch
+     * target so a selectable row clears the touch floor). Must be uniform.
+     */
     rowHeight?: number;
-    // Extra rows rendered above and below the visible band; forwarded to
-    // useVirtualWindow.
+    /**
+     * Extra rows rendered above and below the visible band; forwarded to
+     * useVirtualWindow.
+     */
     overscan?: number;
-    // Maximum visible body height before the body scrolls. A raw CSS length /
-    // clamp expression; a token default applies when omitted.
+    /**
+     * Maximum visible body height before the body scrolls. A raw CSS length /
+     * clamp expression; a token default applies when omitted.
+     */
     maxBodyBlockSize?: string;
-    // Empty-state content shown when rowCount === 0.
+    /**
+     * Empty-state content shown when rowCount === 0.
+     */
     emptyContent?: ReactNode;
     enabled?: EEnabledState;
     status?: EUiStatus;

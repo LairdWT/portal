@@ -42,38 +42,56 @@ export type ESplitOrientation =
 // forbid.
 export type SplitPaneProps = Readonly<
     {
-        // Which way the panes stack / the divider runs. Default Horizontal.
+        /**
+         * Which way the panes stack / the divider runs. Default Horizontal.
+         */
         orientation?: ESplitOrientation;
-        // The PRIMARY (inline-start / block-start) pane's share of the main
-        // axis, 0..1. Controlled (Helicon's caller-owned fraction). Clamped to
-        // [minFraction, maxFraction] for render, ARIA, and the track sizing; the
-        // prop itself is never written back - the control only EMITS clamped
-        // values, matching NumberStepper.
+        /**
+         * The PRIMARY (inline-start / block-start) pane's share of the main
+         * axis, 0..1. Controlled (Helicon's caller-owned fraction). Clamped to
+         * [minFraction, maxFraction] for render, ARIA, and the track sizing; the
+         * prop itself is never written back - the control only EMITS clamped
+         * values, matching NumberStepper.
+         */
         fraction: number;
-        // Reports the next CLAMPED fraction on drag or keyboard resize.
+        /**
+         * Reports the next CLAMPED fraction on drag or keyboard resize.
+         */
         onFractionChange: (fraction: number) => void;
-        // Fraction bounds. Defaults 0.1 / 0.9 EXACTLY mirror Helicon
-        // MIN_FRACTION / MAX_FRACTION.
+        /**
+         * Fraction bounds. Defaults 0.1 / 0.9 EXACTLY mirror Helicon
+         * MIN_FRACTION / MAX_FRACTION.
+         */
         minFraction?: number;
         maxFraction?: number;
-        // Optional absolute per-pane minimums as CSS length/token strings (e.g.
-        // 'var(--portal-space-8)'). Intersected with the fraction clamp through
-        // an inline minmax() track so a pane never collapses below a usable size
-        // on a small container. Passed through to CSS, never parsed in JS.
+        /**
+         * Optional absolute per-pane minimums as CSS length/token strings (e.g.
+         * 'var(--portal-space-8)'). Intersected with the fraction clamp through
+         * an inline minmax() track so a pane never collapses below a usable size
+         * on a small container. Passed through to CSS, never parsed in JS.
+         */
         minPrimarySize?: string;
         minSecondarySize?: string;
-        // Keyboard step per Arrow press, in fraction units. Default 0.02 (2%);
-        // PageUp/PageDown use 10x. Mirrors a slider's stepped resize.
+        /**
+         * Keyboard step per Arrow press, in fraction units. Default 0.02 (2%);
+         * PageUp/PageDown use 10x. Mirrors a slider's stepped resize.
+         */
         keyboardStep?: number;
-        // Interface-forwarded pane bodies. SplitPane owns no pane content.
+        /**
+         * Interface-forwarded pane bodies. SplitPane owns no pane content.
+         */
         primary: ReactNode;
         secondary: ReactNode;
-        // Enabled state enum, resolved through useResolvedEnabled. A disabled
-        // splitter renders both panes but the divider is non-interactive and out
-        // of the tab order.
+        /**
+         * Enabled state enum, resolved through useResolvedEnabled. A disabled
+         * splitter renders both panes but the divider is non-interactive and out
+         * of the tab order.
+         */
         enabled?: EEnabledState;
-        // Universal status routed through the tone scope (data-status). Defaults
-        // to EUiStatus.None.
+        /**
+         * Universal status routed through the tone scope (data-status). Defaults
+         * to EUiStatus.None.
+         */
         status?: EUiStatus;
     } & AccessibleName
 > &

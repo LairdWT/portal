@@ -58,25 +58,35 @@ export type EMarqueePlayState =
 // - Toned drives the strip border/glow and edge-fade only, NEVER AA-critical
 //   text (the text stays --portal-color-text-0 on the dark HUD surface).
 export type MarqueeProps = Readonly<{
-    // Interface-forwarded scrolling content. Marquee owns no text/data; it
-    // duplicates this subtree for the seamless loop (the clone is aria-hidden).
+    /**
+     * Interface-forwarded scrolling content. Marquee owns no text/data; it
+     * duplicates this subtree for the seamless loop (the clone is aria-hidden).
+     */
     children: ReactNode;
-    // Constant scroll speed in CSS px/second (Helicon DEFAULT_SPEED = 60).
-    // Clamped to >= 0; 0 => no motion (renders static). Default 60.
+    /**
+     * Constant scroll speed in CSS px/second (Helicon DEFAULT_SPEED = 60).
+     * Clamped to >= 0; 0 => no motion (renders static). Default 60.
+     */
     speed?: number;
-    // Inline gap between the end of the content and its next repeat (Helicon
-    // DEFAULT_GAP). A token-valued CSS length, NOT a literal px. Default
-    // var(--portal-space-6).
+    /**
+     * Inline gap between the end of the content and its next repeat (Helicon
+     * DEFAULT_GAP). A token-valued CSS length, NOT a literal px. Default
+     * var(--portal-space-6).
+     */
     gap?: string;
     direction?: EMarqueeDirection; // default Start (right-to-left in LTR)
     pauseOnHover?: boolean; // default true (Helicon parity)
     pauseOnFocus?: boolean; // default true (a11y add; focus-within)
-    // Initial play state for the persistent pause control (uncontrolled).
-    // Default true (Running). Reduced motion forces a non-animated static strip
-    // regardless of this value.
+    /**
+     * Initial play state for the persistent pause control (uncontrolled).
+     * Default true (Running). Reduced motion forces a non-animated static strip
+     * regardless of this value.
+     */
     autoPlay?: boolean;
-    // Optional observer of the internal play-state toggle (NOT a controlled
-    // value). Lets a consumer mirror the state if it wants.
+    /**
+     * Optional observer of the internal play-state toggle (NOT a controlled
+     * value). Lets a consumer mirror the state if it wants.
+     */
     onPlayStateChange?: (state: EMarqueePlayState) => void;
     pauseLabel?: string; // pause-button accessible name, default 'Pause ticker'
     resumeLabel?: string; // resume-button accessible name, default 'Resume ticker'

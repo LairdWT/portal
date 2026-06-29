@@ -36,8 +36,10 @@ export type SearchBoxProps = Readonly<
         onValueChange?: (value: string) => void;
         onSubmit?: (value: string) => void;
         id?: string;
-        // Optional id of the element this search field controls, forwarded to the
-        // input's aria-controls (e.g. the List a SearchableList filters).
+        /**
+         * Optional id of the element this search field controls, forwarded to the
+         * input's aria-controls (e.g. the List a SearchableList filters).
+         */
         ariaControls?: string;
         placeholder?: string;
         enabled?: EEnabledState;
