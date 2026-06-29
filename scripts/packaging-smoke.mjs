@@ -1,3 +1,4 @@
+// @ts-check
 // Consumer-install packaging smoke (zero new dependency: tsc + node only).
 //
 // Distinct from src/index.smoke.test.ts, which imports the four subpaths through
@@ -56,6 +57,17 @@ const SUBPATHS = [
     '@laird-wt/portal/styles.css',
 ];
 
+// One resolver leg: a node16/ESM or bundler module-resolution mode under which
+// every published subpath's type and runtime entry must resolve.
+/**
+ * @typedef {Readonly<{
+ *     name: string;
+ *     moduleResolution: string;
+ *     module: string;
+ *     typesAdvisory: boolean;
+ * }>} ResolverConfig
+ */
+
 // Every TYPE leg is a hard gate. The published .d.ts are rolled per entry by
 // vite-plugin-dts (rollupTypes), so they are self-contained with no relative
 // specifiers and resolve cleanly under node16/nodenext as well as bundler. A
@@ -76,18 +88,32 @@ const RESOLVERS = [
     },
 ];
 
+/** @type {string[]} */
 const failures = [];
 
 // Output helper routed through process.stdout (the eslint config gives this
 // Node script no browser/node globals, so `console` is intentionally avoided).
+/**
+ * @param {string} line
+ * @returns {void}
+ */
 function log(line) {
     process.stdout.write(`${line}\n`);
 }
 
+/**
+ * @param {string} label
+ * @returns {void}
+ */
 function reportPass(label) {
     log(`PASS  ${label}`);
 }
 
+/**
+ * @param {string} label
+ * @param {string} detail
+ * @returns {void}
+ */
 function reportFail(label, detail) {
     log(`FAIL  ${label}`);
     if (detail.length > 0) {
@@ -98,6 +124,11 @@ function reportFail(label, detail) {
 
 // Run a shell command (pnpm resolves to a .cmd on Windows, so shell:true is
 // required). Returns the captured result so the caller can branch on status.
+/**
+ * @param {string} command
+ * @param {string} cwd
+ * @returns {import('node:child_process').SpawnSyncReturns<string>}
+ */
 function runShell(command, cwd) {
     return spawnSync(command, {
         cwd,
@@ -106,6 +137,10 @@ function runShell(command, cwd) {
     });
 }
 
+/**
+ * @param {string} name
+ * @returns {string}
+ */
 function pinnedSpec(name) {
     const version = pkg.devDependencies[name];
     if (typeof version !== 'string') {
@@ -114,6 +149,11 @@ function pinnedSpec(name) {
     return `${name}@${version}`;
 }
 
+/**
+ * @param {string} consumerDir
+ * @param {ResolverConfig} resolver
+ * @returns {void}
+ */
 function writeConsumerSources(consumerDir, resolver) {
     writeFileSync(
         join(consumerDir, 'package.json'),
@@ -180,6 +220,9 @@ const RUNTIME_PROBE = [
     "if (!exists(toPath(url))) { throw new Error('styles.css subpath unresolved'); }",
 ].join('\n');
 
+/**
+ * @returns {void}
+ */
 function main() {
     log(`Packaging smoke for ${packageName}@${pkg.version}`);
     log(`Subpaths under test: ${SUBPATHS.join(', ')}`);
@@ -263,6 +306,10 @@ function main() {
     finish(scratch);
 }
 
+/**
+ * @param {string} scratch
+ * @returns {string | null}
+ */
 function locateTarball(scratch) {
     const direct = join(scratch, tarballBase);
     if (existsSync(direct)) {
@@ -272,6 +319,10 @@ function locateTarball(scratch) {
     return found === undefined ? null : join(scratch, found);
 }
 
+/**
+ * @param {string | null} scratch
+ * @returns {void}
+ */
 function finish(scratch) {
     if (failures.length === 0) {
         if (scratch !== null) {

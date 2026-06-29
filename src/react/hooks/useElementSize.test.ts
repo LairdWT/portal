@@ -15,7 +15,7 @@ type ResizeObserverInit = ResizeObserverCallback;
 class MockResizeObserver {
     public static instances: MockResizeObserver[] = [];
     public readonly callback: ResizeObserverCallback;
-    public observed: Element[] = [];
+    public readonly observed: Element[] = [];
     public disconnected: boolean = false;
 
     public constructor(callback: ResizeObserverInit) {
