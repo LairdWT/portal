@@ -201,6 +201,10 @@
 
 .affordance {
     composes: beveled from '../../theme/surfaces.module.css';
+
+    /* Shared glyph size for all three controls (1.25rem). */
+    --window-glyph-size: calc(var(--portal-space-4) + var(--portal-space-1));
+
     position: relative;
     display: inline-flex;
     flex: 0 0 auto;
@@ -216,9 +220,10 @@
     padding: 0;
 
     /* All three title-bar controls (minimize, maximize, close) share one subtle
-     * beveled box so the close no longer reads as an oversized outlier. */
+     * beveled box (a light bevel-1 chamfer) so the close no longer reads as an
+     * oversized outlier. */
     border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
-    border-radius: var(--portal-bevel-2);
+    border-radius: var(--portal-bevel-1);
     background: transparent;
     color: var(--portal-color-text-0);
     font-family: inherit;
@@ -257,14 +262,14 @@
  * a drawn cross (two bars). All token-drawn so the controls read as one set, not
  * ASCII glyphs of differing weights. */
 .minimizeGlyph {
-    inline-size: var(--portal-space-5);
+    inline-size: var(--window-glyph-size);
     block-size: var(--portal-border-thickness-thin);
     background-color: var(--portal-color-text-0);
 }
 
 .maximizeGlyph {
-    inline-size: var(--portal-space-5);
-    block-size: var(--portal-space-5);
+    inline-size: var(--window-glyph-size);
+    block-size: var(--window-glyph-size);
     border: var(--portal-border-thickness-thin) solid var(--portal-color-text-0);
 }
 
@@ -272,8 +277,8 @@
  * well inside the affordance box so it reads as a compact close control. */
 .closeGlyph {
     position: relative;
-    inline-size: var(--portal-space-5);
-    block-size: var(--portal-space-5);
+    inline-size: var(--window-glyph-size);
+    block-size: var(--window-glyph-size);
 }
 
 .closeGlyph::before,
