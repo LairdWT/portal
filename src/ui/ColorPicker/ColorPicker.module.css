@@ -121,3 +121,19 @@
     display: flex;
     flex-direction: column;
 }
+
+.colorSpaceTag {
+    composes: beveled from '../../theme/surfaces.module.css';
+    align-self: flex-end;
+    margin-block-start: var(--portal-space-1);
+    padding-inline: var(--portal-space-2);
+    padding-block: var(--portal-space-1);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-bevel-1); /* paired non-zero radius for beveled */
+    background-color: var(--portal-color-surface-1);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-mono);
+    font-size: var(--portal-size-text-sm);
+    font-weight: var(--portal-weight-label-strong);
+    letter-spacing: var(--portal-letter-spacing-wide);
+}

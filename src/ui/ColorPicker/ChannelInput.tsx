@@ -20,6 +20,7 @@ import { type ChannelParseResult, parseChannelInput } from './colorMath';
 // writes through the SAME channel handler the slider calls.
 export type ChannelInputProps = Readonly<{
     label: string; // accessible name, e.g. "Red value"
+    tag?: string; // optional decorative on-screen channel chip (aria-hidden)
     value: number; // canonical channel value (parent-owned)
     min: number;
     max: number;
@@ -29,6 +30,7 @@ export type ChannelInputProps = Readonly<{
 
 export function ChannelInput({
     label,
+    tag,
     value,
     min,
     max,
@@ -66,6 +68,11 @@ export function ChannelInput({
 
     return (
         <label className={styles.field} htmlFor={generatedId}>
+            {tag !== undefined ? (
+                <span className={styles.tag} aria-hidden="true">
+                    {tag}
+                </span>
+            ) : null}
             <span className={styles.srOnly}>{label}</span>
             <input
                 id={generatedId}

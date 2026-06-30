@@ -213,6 +213,7 @@ export function ColorPicker({
     function renderChannelRow(
         sliderNode: ReactElement,
         inputLabel: string,
+        inputTag: string,
         inputValue: number,
         inputMin: number,
         inputMax: number,
@@ -224,6 +225,7 @@ export function ColorPicker({
                 {channelInputs === true ? (
                     <ChannelInput
                         label={inputLabel}
+                        tag={inputTag}
                         value={inputValue}
                         min={inputMin}
                         max={inputMax}
@@ -252,6 +254,7 @@ export function ColorPicker({
                                 formatValueText={formatByte}
                             />,
                             'Red value',
+                            'R',
                             rgba.r,
                             0,
                             OPAQUE_BYTE,
@@ -269,6 +272,7 @@ export function ColorPicker({
                                 formatValueText={formatByte}
                             />,
                             'Green value',
+                            'G',
                             rgba.g,
                             0,
                             OPAQUE_BYTE,
@@ -286,6 +290,7 @@ export function ColorPicker({
                                 formatValueText={formatByte}
                             />,
                             'Blue value',
+                            'B',
                             rgba.b,
                             0,
                             OPAQUE_BYTE,
@@ -304,6 +309,7 @@ export function ColorPicker({
                                       formatValueText={formatPercent}
                                   />,
                                   'Alpha value',
+                                  'A',
                                   alphaPercent,
                                   0,
                                   PERCENT_MAX,
@@ -327,6 +333,7 @@ export function ColorPicker({
                                 formatValueText={formatDegrees}
                             />,
                             'Hue value',
+                            'H',
                             hsv.h,
                             0,
                             HUE_MAX,
@@ -344,6 +351,7 @@ export function ColorPicker({
                                 formatValueText={formatPercent}
                             />,
                             'Saturation value',
+                            'S',
                             hsv.s,
                             0,
                             PERCENT_MAX,
@@ -361,6 +369,7 @@ export function ColorPicker({
                                 formatValueText={formatPercent}
                             />,
                             'Value value',
+                            'V',
                             hsv.v,
                             0,
                             PERCENT_MAX,
@@ -379,6 +388,7 @@ export function ColorPicker({
                                       formatValueText={formatPercent}
                                   />,
                                   'Alpha value',
+                                  'A',
                                   alphaPercent,
                                   0,
                                   PERCENT_MAX,
@@ -398,6 +408,9 @@ export function ColorPicker({
                             tone={tone}
                             {...(hexError !== undefined ? { error: hexError } : {})}
                         />
+                        <span className={styles.colorSpaceTag} aria-hidden="true">
+                            sRGB
+                        </span>
                     </div>
                 );
         }

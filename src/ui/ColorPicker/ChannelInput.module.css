@@ -12,6 +12,25 @@
     display: flex;
     flex: 0 0 auto;
     align-items: center;
+    gap: var(--portal-space-2);
+}
+
+.tag {
+    composes: beveled from '../../theme/surfaces.module.css';
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    min-inline-size: var(--portal-space-5);
+    padding-inline: var(--portal-space-2);
+    padding-block: var(--portal-space-1);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-bevel-1); /* paired non-zero radius for beveled */
+    background-color: var(--portal-color-surface-1);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-mono);
+    font-size: var(--portal-size-text-sm);
+    font-weight: var(--portal-weight-label-strong);
 }
 
 .input {
