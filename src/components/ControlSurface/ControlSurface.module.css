@@ -124,10 +124,9 @@
     grid-template-areas: 'movement center actions';
     align-items: end;
     gap: clamp(var(--portal-space-2), 2vmin, var(--portal-space-4));
-    padding: var(--portal-space-5);
+    padding: var(--portal-space-4);
     border-radius: calc(var(--portal-bevel-3) - var(--portal-hud-edge-width));
     background-color: var(--portal-color-surface-0);
-    overflow: clip;
 }
 
 .movement {
@@ -152,8 +151,8 @@
      * minimum), so the cluster sizes to the deck corner rather than stretching. */
     --control-action-size: clamp(
         var(--portal-touch-target-min),
-        14vmin,
-        calc(var(--portal-touch-target-max) * 1.5)
+        12vmin,
+        calc(var(--portal-touch-target-max) * 1.2)
     );
 
     /* Scale the action-button glyph with the button so the label tracks the

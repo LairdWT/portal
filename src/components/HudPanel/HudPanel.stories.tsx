@@ -6,6 +6,7 @@ import { type HudReadout } from './HudPanel.types';
 const meta: Meta<typeof HudPanel> = {
     title: 'Components/HudPanel',
     component: HudPanel,
+    parameters: { layout: 'fullscreen' },
     args: {
         label: 'Status readouts',
     },
