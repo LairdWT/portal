@@ -1,13 +1,12 @@
 .panel {
+    composes: beveled metalEdge from '../../theme/surfaces.module.css';
     container-type: inline-size;
     display: flex;
     flex-direction: column;
     gap: var(--portal-space-3);
     padding-block: var(--portal-space-3);
     padding-inline: var(--portal-space-4);
-    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
-    border-radius: var(--portal-radius-md);
-    background-color: var(--portal-color-surface-0);
+    border-radius: var(--portal-bevel-3);
     color: var(--portal-color-text-0);
     font-family: var(--portal-font-sans);
     inline-size: 100%;

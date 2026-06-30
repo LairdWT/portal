@@ -67,51 +67,24 @@
 /* FRONT parallax layer. Translates from the host-inherited offset at the larger
  * multiplier so it leads the BACK layer for depth, mirroring ControllerPad. */
 .thumb {
+    composes: beveled metalTrim from '../../theme/surfaces.module.css';
+    composes: toneScope from '../../ui/tone.module.css';
     position: absolute;
-    inset-block-start: 50%;
-    inset-inline-start: 50%;
-    inline-size: 60%;
+    inset-block-start: calc(50% + var(--portal-pad-y, 0) * 45%);
+    inset-inline-start: calc(50% + var(--portal-pad-x, 0) * 45%);
+    inline-size: var(--portal-space-4);
+    block-size: var(--portal-space-4);
     aspect-ratio: 1;
-    border-radius: 50%;
-    background: radial-gradient(
-        circle at 50%,
-        var(--portal-color-accent) 25%,
-        var(--portal-color-accent-highlight) 55%,
-        var(--portal-color-accent) 70%,
-        var(--portal-color-accent-shadow) 100%
-    );
-    transform: translate(
-        calc(-50% + var(--portal-pad-x, 0) * 40%),
-        calc(-50% + var(--portal-pad-y, 0) * 40%)
-    );
-    transition: transform var(--portal-duration-frame-base)
-        var(--portal-easing-standard);
+    border-radius: var(--portal-bevel-1);
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 var(--portal-space-2) var(--portal-tone-glow);
     pointer-events: none;
 }
 
 /* BACK parallax layer. Larger and translated at the smaller multiplier so it
  * trails the FRONT layer. */
 .thumbShadow {
-    position: absolute;
-    inset-block-start: 50%;
-    inset-inline-start: 50%;
-    inline-size: 70%;
-    aspect-ratio: 1;
-    border-radius: 50%;
-    background: radial-gradient(
-        circle at 50%,
-        var(--portal-color-accent-shadow),
-        var(--portal-color-accent-shadow) 60%,
-        var(--portal-color-accent-shadow-edge) 98%,
-        var(--portal-color-accent) 100%
-    );
-    transform: translate(
-        calc(-50% + var(--portal-pad-x, 0) * 20%),
-        calc(-50% + var(--portal-pad-y, 0) * 20%)
-    );
-    transition: transform var(--portal-duration-frame-base)
-        var(--portal-easing-standard);
-    pointer-events: none;
+    display: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

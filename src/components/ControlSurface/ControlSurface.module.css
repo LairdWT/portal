@@ -94,11 +94,12 @@
  * control surface.
  */
 .deck {
+    composes: beveled from '../../theme/surfaces.module.css';
     position: relative;
     z-index: 1;
     margin-block-start: auto;
     padding: var(--portal-border-thickness-thin);
-    border-radius: var(--portal-radius-lg);
+    border-radius: var(--portal-bevel-3);
     background: var(--portal-gradient-metal-ring);
 }
 
@@ -116,15 +117,14 @@
 }
 
 .deckInner {
+    composes: beveled from '../../theme/surfaces.module.css';
     display: grid;
     grid-template-columns: auto 1fr auto;
     grid-template-areas: 'movement center actions';
     align-items: end;
     gap: clamp(var(--portal-space-2), 2vmin, var(--portal-space-4));
     padding: var(--portal-space-4);
-    border-radius: calc(
-        var(--portal-radius-lg) - var(--portal-border-thickness-thin)
-    );
+    border-radius: calc(var(--portal-bevel-3) - var(--portal-hud-edge-width));
     background-color: var(--portal-color-surface-0);
 }
 

@@ -1,4 +1,6 @@
 .slider {
+    composes: toneScope from '../../ui/tone.module.css';
+
     --portal-slider-fill: 0;
     --portal-slider-thumb-size: calc(var(--portal-touch-target-min) * 0.85);
     --portal-slider-track-thickness: var(--portal-space-2);
@@ -42,24 +44,27 @@
 
 .input::-webkit-slider-runnable-track {
     block-size: var(--portal-slider-track-thickness);
-    border-radius: var(--portal-radius-pill);
+    border-radius: var(--portal-bevel-1);
+    corner-shape: var(--portal-corner-shape);
     background: linear-gradient(
         to right,
-        var(--portal-color-accent) calc(var(--portal-slider-fill) * 100%),
+        var(--portal-tone-accent) calc(var(--portal-slider-fill) * 100%),
         var(--portal-color-surface-1) calc(var(--portal-slider-fill) * 100%)
     );
 }
 
 .input::-moz-range-track {
     block-size: var(--portal-slider-track-thickness);
-    border-radius: var(--portal-radius-pill);
+    border-radius: var(--portal-bevel-1);
+    corner-shape: var(--portal-corner-shape);
     background: var(--portal-color-surface-1);
 }
 
 .input::-moz-range-progress {
     block-size: var(--portal-slider-track-thickness);
-    border-radius: var(--portal-radius-pill);
-    background: var(--portal-color-accent);
+    border-radius: var(--portal-bevel-1);
+    corner-shape: var(--portal-corner-shape);
+    background: var(--portal-tone-accent);
 }
 
 .input::-webkit-slider-thumb {
@@ -68,28 +73,24 @@
     margin-block-start: calc(
         (var(--portal-slider-track-thickness) - var(--portal-slider-thumb-size)) / 2
     );
-    border-radius: var(--portal-radius-pill);
-    background: radial-gradient(
-        circle at 50%,
-        var(--portal-color-accent) 25%,
-        var(--portal-color-accent-highlight) 55%,
-        var(--portal-color-accent) 70%,
-        var(--portal-color-accent-shadow) 100%
-    );
+    border-radius: var(--portal-bevel-1);
+    corner-shape: var(--portal-corner-shape);
+    border: var(--portal-hud-edge-width) solid transparent;
+    background:
+        linear-gradient(var(--portal-hud-fill), var(--portal-hud-fill)) padding-box,
+        var(--portal-gradient-metal) border-box;
     appearance: none;
 }
 
 .input::-moz-range-thumb {
     inline-size: var(--portal-slider-thumb-size);
     block-size: var(--portal-slider-thumb-size);
-    border-radius: var(--portal-radius-pill);
-    background: radial-gradient(
-        circle at 50%,
-        var(--portal-color-accent) 25%,
-        var(--portal-color-accent-highlight) 55%,
-        var(--portal-color-accent) 70%,
-        var(--portal-color-accent-shadow) 100%
-    );
+    border-radius: var(--portal-bevel-1);
+    corner-shape: var(--portal-corner-shape);
+    border: var(--portal-hud-edge-width) solid transparent;
+    background:
+        linear-gradient(var(--portal-hud-fill), var(--portal-hud-fill)) padding-box,
+        var(--portal-gradient-metal) border-box;
 }
 
 .input:focus-visible {

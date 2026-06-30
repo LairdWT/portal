@@ -6,6 +6,8 @@
  */
 
 .toggle {
+    composes: toneScope from '../../ui/tone.module.css';
+
     --toggle-track-inline-size: calc(var(--portal-touch-target-min) * 1.5);
     --toggle-knob-inset: var(--portal-space-1);
 
@@ -36,13 +38,12 @@
 }
 
 .track {
+    composes: beveled metalEdge from '../../theme/surfaces.module.css';
     position: relative;
     flex: none;
     inline-size: var(--toggle-track-inline-size);
     block-size: var(--portal-touch-target-min);
-    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
-    border-radius: var(--portal-radius-pill);
-    background-color: var(--portal-color-surface-0);
+    border-radius: var(--portal-bevel-2);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -53,11 +54,16 @@
 }
 
 .toggle[data-checked='checked'] .track {
-    border-color: var(--portal-color-border-accent);
-    background-color: var(--portal-color-accent);
+    border-color: transparent;
+    background-image:
+        linear-gradient(var(--portal-tone-fill), var(--portal-tone-fill))
+            padding-box,
+        var(--portal-gradient-metal) border-box;
+    box-shadow: 0 0 var(--portal-space-2) var(--portal-tone-glow);
 }
 
 .knob {
+    composes: beveled from '../../theme/surfaces.module.css';
     position: absolute;
     inset-block-start: 50%;
     inset-inline-start: var(--toggle-knob-inset);
@@ -66,14 +72,8 @@
             var(--portal-border-thickness-thin) * 2
     );
     aspect-ratio: 1;
-    border-radius: 50%;
-    background: radial-gradient(
-        circle at 50%,
-        var(--portal-color-accent) 25%,
-        var(--portal-color-accent-highlight) 55%,
-        var(--portal-color-accent) 70%,
-        var(--portal-color-accent-shadow) 100%
-    );
+    border-radius: var(--portal-bevel-1);
+    background: var(--portal-gradient-metal);
     transform: translateY(-50%);
 }
 
@@ -89,7 +89,7 @@
         var(--toggle-track-inline-size) - 55% - var(--toggle-knob-inset) -
             var(--portal-border-thickness-thin)
     );
-    background-color: var(--portal-color-bg-0);
+    background: var(--portal-color-metal-4);
 }
 
 .label {
