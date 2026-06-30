@@ -137,7 +137,7 @@
      * timing reuses the slow UI affordance duration. Per-instance overrides come
      * from the component's pitch/opacity props as inline custom properties. */
     --portal-scanline-pitch: 3px; /* Helicon DEFAULT_PITCH_PIXELS = 3.0 */
-    --portal-scanline-alpha: 0.06; /* Helicon DEFAULT_ALPHA 16/255 ~= 0.063 */
+    --portal-scanline-alpha: 0.12; /* raised for visibility while staying AA-safe: ~0.33 duty cycle keeps effective overlay ~0.04 */
     --portal-scanline-flicker-duration: var(--portal-duration-ui-slow);
 
     /* Skeleton loading placeholder (decorative). A neutral low-contrast fill and

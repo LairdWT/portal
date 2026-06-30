@@ -18,6 +18,16 @@ const COLOR_BACKGROUND: string = '#07080d';
 const COLOR_GRID: string = '#5f6dac';
 const COLOR_ACCENT: string = '#92a1e4';
 
+const AUTO_RIPPLE_INTERVAL_SECONDS: number = 1.1;
+const idleClocks: WeakMap<RippleField, { nextSpawnAt: number }> = new WeakMap<
+    RippleField,
+    { nextSpawnAt: number }
+>();
+function pseudoRandom(step: number): number {
+    const value: number = Math.sin(step * 12.9898) * 43758.5453;
+    return value - Math.floor(value);
+}
+
 function createRippleGridUniforms(state: RippleField): ShaderUniforms {
     return {
         uTime: { value: 0 },
@@ -34,7 +44,7 @@ function createRippleGridUniforms(state: RippleField): ShaderUniforms {
 // in place by spawn, so the same Float32Array references stay bound.
 function updateRippleGrid(
     uniforms: ShaderUniforms,
-    _state: RippleField,
+    state: RippleField,
     context: ShaderFrameContext,
 ): void {
     const uniformTime: IUniform | undefined = uniforms.uTime;
@@ -44,6 +54,22 @@ function updateRippleGrid(
     }
     uniformTime.value = context.elapsedSeconds;
     uniformAspect.value = context.aspectRatio;
+    let clock: { nextSpawnAt: number } | undefined = idleClocks.get(state);
+    if (clock === undefined) {
+        clock = { nextSpawnAt: 0 };
+        idleClocks.set(state, clock);
+    }
+    if (context.elapsedSeconds >= clock.nextSpawnAt) {
+        const step: number = Math.round(
+            context.elapsedSeconds / AUTO_RIPPLE_INTERVAL_SECONDS,
+        );
+        state.spawn({
+            originU: pseudoRandom(step),
+            originV: pseudoRandom(step + 97),
+            timeSeconds: context.elapsedSeconds,
+        });
+        clock.nextSpawnAt = context.elapsedSeconds + AUTO_RIPPLE_INTERVAL_SECONDS;
+    }
 }
 
 function spawnRipple(sample: ShaderPointerSample, state: RippleField): void {
