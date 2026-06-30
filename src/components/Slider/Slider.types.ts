@@ -1,4 +1,4 @@
-import type { InputDescriptor, InputSignal } from '../../input/InputContract';
+import type { InputDescriptor, InputSignal } from '../../input';
 import type { EEnabledState } from '../../state/state';
 
 // Public props for the Slider scalar control.

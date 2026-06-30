@@ -19,22 +19,25 @@ export type ControlSurfaceReadout = Readonly<{
 //
 // Composition model:
 //   - Supply a slot (backgroundSlot / hudSlot / extrasSlot / movementSlot /
-//     primarySlot / secondarySlot / tertiarySlot / quaternarySlot) to render
+//     primarySlot / secondarySlot / tertiarySlot / quaternarySlot / startSlot /
+//     selectSlot) to render
 //     your own node in that region. A consumer-supplied control owns its own
 //     InputDescriptor and onSignal wiring; ControlSurface renders it verbatim
 //     and forwards nothing to it. Supply exactly one node per action slot: each
 //     action slot occupies a single grid cell.
 //   - Omit a slot to fall back to the zero-config default preset control for
 //     that region (HudPanel / Joystick / four ActionButtons labelled A, B, X,
-//     Y). The default controls receive the shell-level `onSignal` sink and
-//     descriptors whose ids are namespaced by `instanceId` so two un-configured
-//     ControlSurface instances never emit colliding signal ids.
+//     Y / start and select BevelButtons). The default controls receive the
+//     shell-level `onSignal` sink and descriptors whose ids are namespaced by
+//     `instanceId` so two un-configured ControlSurface instances never emit
+//     colliding signal ids.
 //   - `backgroundSlot` and `extrasSlot` have no default; omit them for the plain
 //     solid surface and no extras strip. ControlSurface itself imports no 3D
 //     stack, so a backdrop such as a ShaderSurface is supplied by the consumer.
 //
 // `instanceId` namespaces the default preset descriptor ids as
-// `${instanceId}.move`, `.primary`, `.secondary`, `.tertiary`, `.quaternary`.
+// `${instanceId}.move`, `.primary`, `.secondary`, `.tertiary`, `.quaternary`,
+// `.start`, `.select`.
 // When omitted it defaults to a stable React useId() value, so the default
 // preset is collision-safe with no configuration. The `*Label`, `readouts`, and
 // `onSignal` props apply only to the default preset controls and are ignored for
