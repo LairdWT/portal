@@ -201,11 +201,17 @@
 
 .affordance {
     composes: beveled from '../../theme/surfaces.module.css';
+    position: relative;
     display: inline-flex;
+    flex: 0 0 auto;
     align-items: center;
     justify-content: center;
-    min-inline-size: var(--portal-touch-target-min);
-    min-block-size: var(--portal-touch-target-min);
+
+    /* A compact 2rem visible box (smaller than the 3rem title-bar height, so the
+     * controls sit with breathing room) carrying a larger glyph. The 3rem touch
+     * target is preserved by the transparent ::after hit extender below. */
+    inline-size: var(--portal-space-6);
+    block-size: var(--portal-space-6);
     margin: 0;
     padding: 0;
 
@@ -220,6 +226,16 @@
     line-height: var(--portal-line-height-tight);
     cursor: pointer;
     touch-action: manipulation;
+}
+
+/* Extend the clickable area to the 3rem touch floor over the title bar's full
+ * height without enlarging the visible 2rem box. Block axis only, so adjacent
+ * controls never overlap each other's hit area. */
+.affordance::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    inset-block: calc((var(--portal-space-6) - var(--portal-touch-target-min)) / 2);
 }
 
 .affordance:focus-visible {
@@ -241,14 +257,14 @@
  * a drawn cross (two bars). All token-drawn so the controls read as one set, not
  * ASCII glyphs of differing weights. */
 .minimizeGlyph {
-    inline-size: var(--portal-space-4);
+    inline-size: var(--portal-space-5);
     block-size: var(--portal-border-thickness-thin);
     background-color: var(--portal-color-text-0);
 }
 
 .maximizeGlyph {
-    inline-size: var(--portal-space-4);
-    block-size: var(--portal-space-4);
+    inline-size: var(--portal-space-5);
+    block-size: var(--portal-space-5);
     border: var(--portal-border-thickness-thin) solid var(--portal-color-text-0);
 }
 
@@ -256,8 +272,8 @@
  * well inside the affordance box so it reads as a compact close control. */
 .closeGlyph {
     position: relative;
-    inline-size: var(--portal-space-4);
-    block-size: var(--portal-space-4);
+    inline-size: var(--portal-space-5);
+    block-size: var(--portal-space-5);
 }
 
 .closeGlyph::before,
