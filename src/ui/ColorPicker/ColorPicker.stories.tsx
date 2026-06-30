@@ -33,7 +33,7 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+export const Default: Story = { args: { channelInputs: true } };
 
 // Alpha on: the 8-digit hex, the alpha channel slider, and the swatch
 // transparency checker behind a semi-transparent fill.
