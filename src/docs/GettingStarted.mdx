@@ -30,6 +30,12 @@ Optional 3D peers, needed only if you use the `@laird-wt/portal/r3f` surface:
 pnpm add three @react-three/fiber @react-three/drei
 ```
 
+`three` alone is also the peer for the `@laird-wt/portal/shaders` entry (the
+shader core imports it); `@react-three/fiber` and `@react-three/drei` are
+needed only for the `./r3f` surface. See
+[Entry Points](?path=/docs/guides-entry-points--docs) for the per-entry peer
+rules.
+
 ## ESM-only
 
 Portal publishes ECMAScript modules only; there is no CommonJS build and
@@ -60,11 +66,30 @@ export function Example(): ReactElement {
 The `styles.css` import is required exactly once per app; every component reads
 the tokens it declares.
 
+## Game-input controllers
+
+The `Controls/*` components (`ActionButton`, `BevelButton`, `DPad`,
+`Joystick`, `Thumbpad`) emit input signals over a descriptor rather than a
+plain click. As of 1.1.0 the pointer/press controllers (`ActionButton`,
+`BevelButton`, `DPad`) accept an additive, optional `primaryButtonOnly`
+prop: when `true`, a non-primary mouse button (right or middle) no longer
+starts a press or gesture. It defaults to `false`, so the emitted input
+signals and existing behavior are unchanged unless you opt in.
+
+```tsx
+import { ActionButton } from '@laird-wt/portal';
+
+<ActionButton descriptor={fireDescriptor} primaryButtonOnly />;
+```
+
 ## Where to go next
 
 - [Theming](?path=/docs/guides-theming--docs): the `--portal-*` token system,
   the `tone` contract, and status precedence.
 - [Entry Points](?path=/docs/guides-entry-points--docs): the published ESM
   subpath map and what each entry exports.
-- The `UI/*` component sections in the sidebar, each with an auto-generated
-  Docs page and prop table.
+- The component sidebar sections, each with an auto-generated Docs page and
+  prop table: `UI/*` (the generic component library), `Controls/*` and
+  `Composites/*` (the game-input controllers and `ControlSurface`),
+  `Display/*` and `Components/*` (HUD surfaces), and `R3F/*` (the optional
+  React Three Fiber surface).

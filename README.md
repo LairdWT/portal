@@ -216,3 +216,10 @@ rather than per control.
   build.
 - `pnpm storybook` starts Storybook for component review.
 - `pnpm build` produces the library bundle in `dist`.
+
+## Example app
+
+A runnable Vite demo lives in `example/`. Run `pnpm -C example dev` to start it
+locally (it renders `ControlSurface` with behavior fixtures selectable via a
+`?fixture=` query), and `pnpm example:typecheck` to typecheck the demo against
+the workspace package.
