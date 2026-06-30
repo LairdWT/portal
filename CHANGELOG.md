@@ -4,6 +4,67 @@ All notable changes to this project are documented in this file. The format is
 based on Keep a Changelog, and the project follows Semantic Versioning with the
 0.x caveat that, before 1.0, a minor version may carry a breaking change.
 
+## [1.2.0] - 2026-06-30
+
+Additive features plus a large visual-consistency pass over the component
+library, driven by owner review. No breaking changes; the frozen public API is
+unchanged except for new additive optional props.
+
+### Added
+
+- `ColorPicker` gains an opt-in `channelInputs` prop. When set, each channel
+  slider renders an adjacent number-only input that shows the value and edits it
+  through the same controlled contract, each tagged with its channel letter
+  (R/G/B/H/S/V/A). Hex mode now also accepts 3- and 4-digit shorthand
+  (`#RGB`/`#RGBA`) and shows an `sRGB` color-space denotation. Defaults to
+  `false`, so existing markup and tests are unchanged.
+- `Window` gains an optional `frame` prop (`'highlight'` default, `'metal'`)
+  selecting the frame outline treatment; the default is a normal highlight
+  outline rather than the brushed-metal edge.
+
+### Fixed
+
+- HUD surfaces that placed a color in a non-final `background` layer (the shared
+  `.metalEdge`/`.metalTrim` utilities, `Breadcrumb`, `SplitPane`, the `Drawer`
+  overlay, `CommandPalette`) computed to transparent on spec-compliant browsers;
+  they now paint opaque.
+- Full-bleed components (`TitleBar`, `SearchableList`, `KeyValue`, `Chart`,
+  `List`, `HudPanel`) no longer collapse to a vertical sliver in their Storybook
+  stories (the stories opt into `layout: 'fullscreen'`).
+- The R3F WebGL probe (`isWebGlAvailable`) leaked a GL context and cached its
+  result, latching `OrbBackdrop` and `ShaderSurface` to their static fallback;
+  the probe now releases its context. The ripple-grid shader also spawns gentle
+  ambient ripples at idle so the effect is visible without pointer input.
+- `DataTable` starts with no cell selected (was the unselectable header), uses a
+  subtle highlight header instead of an over-bright fill, bevels its selection
+  rings, and draws an equilateral sort caret.
+- Focus outlines thinned to the 2px ring (`SearchBox`, `SecretField`, `Dialog`,
+  `CTA`, `Accordion`, `DataTable`) so a focus ring no longer overlaps its label.
+- Game-input controllers restyled to the machined-HUD language and corrected:
+  `Slider` finger-groove thumb (smaller, de-metalled), `Toggle` metallic knob +
+  toned track, `Thumbpad` filled triangle marker, `DPad` smaller with directional
+  triangles, `HudPanel` square bars, `ControlSurface` containment and bevels.
+- Visual refinements across `Rating`, `Checkbox`, `Menu`, `Marquee`, `Avatar`,
+  `StatPill`, `StatTile`, `ReadoutPanel`, `NavRail`, `Section`, `Select`,
+  `SplitPane`, `StepTrack`, `Chart`, `Popover`, and the tone-precedence story.
+- `Window` controls reworked: the whole title bar is a drag region, resize grips
+  no longer steal the close button's clicks, the corner resize boxes are gone,
+  and the controls are compact boxes with drawn glyphs.
+- The `Drawer` resize grip (a stray metal bar) was removed; free two-axis resize
+  remains the `Window` component's role.
+- Unified every close, dismiss, disclosure, and stepper control behind shared
+  token-drawn glyph utilities (`.crossGlyph`, `.chevronGlyph`, `.minusGlyph`,
+  `.plusGlyph`) and a `.compactControl` button, replacing the remaining ASCII
+  `[x]`/`[v]`/`[+]`/`[-]` markers so the controls read identically everywhere.
+
+### Docs
+
+- The `UnityBindingExample` surfaces the press, held, and released phases with a
+  richer wire-payload readout.
+- Getting Started names the full sidebar taxonomy and the `primaryButtonOnly`
+  opt-in and clarifies that `three` is also the `./shaders` peer; the README
+  gains an example-app pointer and a refreshed hero image.
+
 ## [1.1.0] - 2026-06-30
 
 Additive features, fixes, and tooling hardening on top of the 1.0.0 freeze. No
