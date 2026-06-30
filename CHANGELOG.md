@@ -4,6 +4,48 @@ All notable changes to this project are documented in this file. The format is
 based on Keep a Changelog, and the project follows Semantic Versioning with the
 0.x caveat that, before 1.0, a minor version may carry a breaking change.
 
+## [1.1.0] - 2026-06-30
+
+Additive features, fixes, and tooling hardening on top of the 1.0.0 freeze. No
+breaking changes; the frozen public API is unchanged and a guard contract keeps
+it so.
+
+### Added
+
+- The game-input controllers gain an opt-in `primaryButtonOnly` prop
+  (`ActionButton`, `BevelButton`, `DPad`, and the underlying pointer/press
+  hooks). When set, a non-primary mouse button (right/middle) no longer starts a
+  gesture or press, matching the existing drag behavior. It defaults to `false`,
+  so existing behavior - and the emitted input signals - are unchanged.
+- Storybook now ships an autodocs site with auto-generated prop tables plus
+  three guides (Getting Started, Theming, Entry Points).
+
+### Fixed
+
+- Virtualized `List`/`DataTable` no longer drop the bottom partially-visible row
+  at a fractional scroll offset (a blank strip up to one row tall while
+  scrolling).
+- `Rating` with `allowClear` no longer clears the value when a clamping keyboard
+  key (ArrowRight/ArrowUp/End at the maximum, or Home at 1) re-selects the
+  current value; clearing stays on direct re-activation or arrowing below 1.
+- Entrance animations (`useEntranceOnReady`) no longer stay hidden when their
+  timeline is rebuilt while already visible - e.g. after the OS reduce-motion
+  setting is toggled off, or a preset changes, mid-mount.
+- Toast auto-dismiss timing now uses a monotonic clock, so a system-clock step
+  during a hover/focus pause can no longer dismiss a toast early or late.
+
+### Changed
+
+- Documentation accuracy: `three` is documented as a required peer for both
+  `./r3f` and `./shaders` (the shader core imports it), and the README names the
+  real `isWebGlAvailable` export.
+- Tooling/CI hardening (no consumer-facing API change): extended real-browser
+  e2e behavior coverage and a consumer-install packaging smoke; CI now gates
+  `pnpm verify` (the freeze contract, type-check, lint, and the Storybook axe
+  pass) plus a coverage threshold; the packaging-smoke script is type-checked;
+  and the declaration-rollup's cosmetic TypeScript-version advisory is silenced
+  so the build output is clean.
+
 ## [1.0.0] - 2026-06-29
 
 The first stable release. Following a 1.0-readiness audit, the public API is
