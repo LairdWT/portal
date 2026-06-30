@@ -73,11 +73,14 @@
     inset-block-start: calc(50% + var(--portal-pad-y, 0) * 45%);
     inset-inline-start: calc(50% + var(--portal-pad-x, 0) * 45%);
     inline-size: var(--portal-space-5);
-    block-size: var(--portal-space-5);
-    aspect-ratio: 1;
-    border-radius: var(--portal-radius-pill);
+    block-size: calc(var(--portal-space-5) * var(--portal-ratio-equilateral));
+
+    /* A filled equilateral triangle marker (apex up) at the tracked location,
+     * not a joystick knob. drop-shadow (not box-shadow) so the glow follows the
+     * clipped triangle rather than its bounding box. */
+    clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
     transform: translate(-50%, -50%);
-    box-shadow: 0 0 var(--portal-space-2) var(--portal-tone-glow);
+    filter: drop-shadow(0 0 var(--portal-space-2) var(--portal-tone-glow));
     pointer-events: none;
 }
 

@@ -2,7 +2,7 @@
     composes: toneScope from '../../ui/tone.module.css';
 
     --portal-slider-fill: 0;
-    --portal-slider-thumb-size: calc(var(--portal-touch-target-min) * 0.85);
+    --portal-slider-thumb-size: calc(var(--portal-touch-target-min) * 0.5);
     --portal-slider-track-thickness: var(--portal-space-2);
 
     display: flex;

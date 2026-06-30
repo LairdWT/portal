@@ -56,8 +56,8 @@
 }
 
 .toggle[data-checked='checked'] .track {
-    border-color: var(--portal-color-accent-highlight);
-    background: var(--portal-gradient-button-face);
+    border-color: var(--portal-tone-accent);
+    background-color: var(--portal-tone-fill);
     box-shadow: 0 0 var(--portal-space-2) var(--portal-tone-glow);
 }
 
@@ -76,7 +76,7 @@
     );
     aspect-ratio: 1;
     border-radius: var(--portal-bevel-1);
-    background: var(--portal-gradient-button-face);
+    background: var(--portal-gradient-metal);
     transform: translateY(-50%);
 }
 
@@ -92,7 +92,7 @@
         var(--toggle-track-inline-size) - 55% - var(--toggle-knob-inset) -
             var(--portal-border-thickness-thin)
     );
-    background: var(--portal-color-accent-highlight);
+    background: var(--portal-color-metal-4);
 }
 
 .label {
