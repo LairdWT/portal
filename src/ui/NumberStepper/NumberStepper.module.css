@@ -13,7 +13,8 @@
  * contrast (tone is never a solid mid-tone fill behind text). All motion - the
  * ring sheen and the transitions - is gated behind prefers-reduced-motion.
  *
- * .glyph composes the shared .wideLabel tracked-label utility. .key keeps an
+ * .minusGlyph/.plusGlyph compose the shared token-drawn +/- glyph utilities
+ * (currentColor marks on a decorative aria-hidden span). .key keeps an
  * inline metal ring rather than composing .metalTrim: the key needs the
  * brushed-metal FACE on the padding-box (not metalTrim's flat --portal-hud-fill),
  * and overriding a composed utility's background is cascade-order fragile across
@@ -110,11 +111,12 @@
     color: var(--portal-color-text-0);
 }
 
-.glyph {
-    composes: wideLabel from '../../theme/surfaces.module.css';
-    display: inline-block;
-    font-family: var(--portal-font-mono);
-    font-weight: var(--portal-weight-label-bold);
+.minusGlyph {
+    composes: minusGlyph from '../../theme/surfaces.module.css';
+}
+
+.plusGlyph {
+    composes: plusGlyph from '../../theme/surfaces.module.css';
 }
 
 .value {

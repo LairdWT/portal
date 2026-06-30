@@ -199,9 +199,11 @@ export function Marquee({
                     disabled={isDisabled}
                     onClick={togglePlay}
                 >
-                    <span className={styles.marker} aria-hidden="true">
-                        {paused ? '[>]' : '[||]'}
-                    </span>
+                    <span
+                        className={styles.controlGlyph}
+                        data-paused={paused ? 'true' : 'false'}
+                        aria-hidden="true"
+                    />
                     <span className={styles.controlLabel}>
                         {paused ? resumeLabel : pauseLabel}
                     </span>

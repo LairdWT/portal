@@ -157,14 +157,18 @@
     transform: scale(0.97);
 }
 
-/* The [>]/[v]/[x] accent-mono HUD marker. It sits on the dark panel surface (not
- * a light metal header like Accordion's), so it uses the fixed AA-safe
- * accent-highlight rather than the lower-contrast tone-accent seed - the
- * addon-a11y axe gate checks this glyph even though it is aria-hidden. */
-.marker {
-    font-family: var(--portal-font-mono);
-    font-weight: var(--portal-weight-label-strong);
+/* Token-drawn disclosure chevron. The shared .chevronGlyph points DOWN by
+ * default (rotate(45deg)) for the expanded state; the collapsed toggle
+ * (aria-expanded='false') rotates it to point RIGHT via the token override. The
+ * glyph draws in currentColor, so it pins the fixed AA-safe accent-highlight (the
+ * addon-a11y axe gate checks this decorative glyph even though it is aria-hidden). */
+.markerGlyph {
+    composes: chevronGlyph from '../../theme/surfaces.module.css';
     color: var(--portal-color-accent-highlight);
+}
+
+.chevron[aria-expanded='false'] .markerGlyph {
+    --portal-chevron-rotate: -45deg;
 }
 
 .body {

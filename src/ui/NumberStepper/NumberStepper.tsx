@@ -178,9 +178,7 @@ export function NumberStepper({
                     requestStep(EStepDirection.Decrement, stepAmount, true);
                 }}
             >
-                <span className={styles.glyph} aria-hidden="true">
-                    [-]
-                </span>
+                <span className={styles.minusGlyph} aria-hidden="true" />
             </button>
 
             <div
@@ -214,9 +212,7 @@ export function NumberStepper({
                     requestStep(EStepDirection.Increment, stepAmount, true);
                 }}
             >
-                <span className={styles.glyph} aria-hidden="true">
-                    [+]
-                </span>
+                <span className={styles.plusGlyph} aria-hidden="true" />
             </button>
         </div>
     );

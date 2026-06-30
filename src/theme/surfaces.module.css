@@ -161,3 +161,50 @@
 .crossGlyph::after {
     transform: translateY(-50%) rotate(-45deg);
 }
+
+/* Token-drawn disclosure chevron (a corner of two borders on currentColor).
+ * Points down by default (expanded); rotate via --portal-chevron-rotate (e.g.
+ * -45deg for a collapsed/right state). Shared by Accordion, Drawer and any
+ * disclosure toggle so none falls back to an ASCII '[v]'/'[>]'. */
+.chevronGlyph {
+    inline-size: var(--portal-space-2);
+    block-size: var(--portal-space-2);
+    border-inline-end: var(--portal-border-thickness-thin) solid currentcolor;
+    border-block-end: var(--portal-border-thickness-thin) solid currentcolor;
+    transform: rotate(var(--portal-chevron-rotate, 45deg));
+}
+
+/* Token-drawn minus and plus marks (NumberStepper and any +/- control), on
+ * currentColor so the button's text color drives them. */
+.minusGlyph {
+    inline-size: var(--portal-space-3);
+    block-size: var(--portal-border-thickness-thin);
+    background-color: currentcolor;
+}
+
+.plusGlyph {
+    position: relative;
+    inline-size: var(--portal-space-3);
+    block-size: var(--portal-space-3);
+}
+
+.plusGlyph::before,
+.plusGlyph::after {
+    content: '';
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    background-color: currentcolor;
+}
+
+.plusGlyph::before {
+    inline-size: 100%;
+    block-size: var(--portal-border-thickness-thin);
+    transform: translate(-50%, -50%);
+}
+
+.plusGlyph::after {
+    inline-size: var(--portal-border-thickness-thin);
+    block-size: 100%;
+    transform: translate(-50%, -50%);
+}

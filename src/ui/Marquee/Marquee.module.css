@@ -110,9 +110,44 @@
     transform: scale(0.97);
 }
 
-.marker {
+/* Local token-drawn play/pause glyph on a decorative aria-hidden span. The
+ * button's accessible name still comes from the visible .controlLabel text.
+ * Pause = two vertical bars (default/playing); Play = a right-pointing triangle
+ * (when paused). currentColor only, sized from --portal-space tokens. */
+.controlGlyph {
+    position: relative;
+    inline-size: var(--portal-space-3);
+    block-size: var(--portal-space-3);
     color: var(--portal-tone-accent);
-    font-family: var(--portal-font-mono);
+}
+
+.controlGlyph::before,
+.controlGlyph::after {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    inline-size: var(--portal-border-thickness-thin);
+    background-color: currentcolor;
+}
+
+.controlGlyph::before {
+    inset-inline-start: 30%;
+}
+
+.controlGlyph::after {
+    inset-inline-end: 30%;
+}
+
+.controlGlyph[data-paused='true']::before {
+    inset: 0;
+    inline-size: 100%;
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+    background-color: currentcolor;
+    transform: none;
+}
+
+.controlGlyph[data-paused='true']::after {
+    content: none;
 }
 
 .controlLabel {

@@ -60,13 +60,20 @@
     touch-action: manipulation;
 }
 
-/* Accent mono disclosure marker echoing Helicon's [-]/[+]. aria-hidden in the
- * TSX, so its tone color carries no accessible-name or contrast obligation. */
+/* Token-drawn disclosure chevron (shared .chevronGlyph). aria-hidden in the TSX,
+ * so it carries no accessible-name obligation. It draws on currentColor, so it
+ * inherits the header's --portal-color-text-0 (AA-safe), not a tone color. The
+ * default rotate(45deg) points the chevron DOWN for the expanded row; the
+ * collapsed rule below rotates it to point RIGHT. */
 .marker {
+    composes: chevronGlyph from '../../theme/surfaces.module.css';
     flex: none;
-    font-family: var(--portal-font-mono);
-    font-weight: var(--portal-weight-label-strong);
-    color: var(--portal-tone-accent);
+}
+
+/* Collapsed row: rotate the chevron to point RIGHT (the shared glyph's
+ * --portal-chevron-rotate hook). Expanded stays at the default DOWN. */
+.header[data-state='collapsed'] .marker {
+    --portal-chevron-rotate: -45deg;
 }
 
 .title {
@@ -113,6 +120,11 @@
 
     .panel {
         transition: grid-template-rows var(--portal-duration-ui-base)
+            var(--portal-easing-standard);
+    }
+
+    .marker {
+        transition: transform var(--portal-duration-ui-base)
             var(--portal-easing-standard);
     }
 }

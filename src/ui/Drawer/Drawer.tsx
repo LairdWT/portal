@@ -460,9 +460,7 @@ function InlineDrawer(props: DrawerInlineProps): ReactElement {
             data-enabled={resolvedEnabled}
             onClick={handleToggle}
         >
-            <span className={styles.marker} aria-hidden="true">
-                {collapsed ? '[>]' : '[v]'}
-            </span>
+            <span className={styles.markerGlyph} aria-hidden="true" />
         </button>
     ) : null;
 

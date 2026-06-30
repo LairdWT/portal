@@ -197,12 +197,10 @@ describe('Drawer inline mode', (): void => {
             name: 'Toggle inspector',
         });
         expect(chevron).toHaveAttribute('aria-expanded', 'true');
-        expect(chevron).toHaveTextContent('[v]');
 
         await user.click(chevron);
         expect(onCollapsedChange).toHaveBeenCalledWith(true);
         expect(chevron).toHaveAttribute('aria-expanded', 'false');
-        expect(chevron).toHaveTextContent('[>]');
     });
 
     it('marks the collapsed body inert and the expanded body not', async (): Promise<void> => {

@@ -199,9 +199,7 @@ export function Accordion(props: AccordionProps): ReactElement {
                         onClick={handleHeaderClick}
                         onKeyDown={handleHeaderKeyDown}
                     >
-                        <span className={styles.marker} aria-hidden="true">
-                            {expanded ? '[-]' : '[+]'}
-                        </span>
+                        <span className={styles.marker} aria-hidden="true" />
                         <span className={styles.title}>{item.title}</span>
                     </button>
                 );
