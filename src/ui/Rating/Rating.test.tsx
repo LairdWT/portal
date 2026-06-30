@@ -233,6 +233,94 @@ describe('Rating', (): void => {
             expect(onChange).toHaveBeenLastCalledWith(0);
         });
 
+        it('keeps the value at max on ArrowRight with allowClear (no nav toggle-clear)', async (): Promise<void> => {
+            // Clamped navigation routes through select with the clamped value; with
+            // allowClear set, value=max focus on the last mark, ArrowRight clamps to
+            // max again. That must COMMIT max, never toggle-clear to 0 (the contract
+            // restricts clearing to direct re-activation or arrowing below 1).
+            const onChange: Mock<(next: number) => void> =
+                vi.fn<(next: number) => void>();
+            const user: UserEvent = userEvent.setup();
+            render(
+                <Rating
+                    value={5}
+                    max={5}
+                    label="Rating"
+                    allowClear
+                    onChange={onChange}
+                />,
+            );
+
+            focusMark(screen.getByRole('radio', { name: '5 of 5' }));
+            await user.keyboard('{ArrowRight}');
+
+            expect(onChange).toHaveBeenLastCalledWith(5);
+            expect(onChange).not.toHaveBeenCalledWith(0);
+        });
+
+        it('keeps the value at max on ArrowUp with allowClear (no nav toggle-clear)', async (): Promise<void> => {
+            const onChange: Mock<(next: number) => void> =
+                vi.fn<(next: number) => void>();
+            const user: UserEvent = userEvent.setup();
+            render(
+                <Rating
+                    value={5}
+                    max={5}
+                    label="Rating"
+                    allowClear
+                    onChange={onChange}
+                />,
+            );
+
+            focusMark(screen.getByRole('radio', { name: '5 of 5' }));
+            await user.keyboard('{ArrowUp}');
+
+            expect(onChange).toHaveBeenLastCalledWith(5);
+            expect(onChange).not.toHaveBeenCalledWith(0);
+        });
+
+        it('keeps the value at max on End with allowClear (no nav toggle-clear)', async (): Promise<void> => {
+            const onChange: Mock<(next: number) => void> =
+                vi.fn<(next: number) => void>();
+            const user: UserEvent = userEvent.setup();
+            render(
+                <Rating
+                    value={5}
+                    max={5}
+                    label="Rating"
+                    allowClear
+                    onChange={onChange}
+                />,
+            );
+
+            focusMark(screen.getByRole('radio', { name: '5 of 5' }));
+            await user.keyboard('{End}');
+
+            expect(onChange).toHaveBeenLastCalledWith(5);
+            expect(onChange).not.toHaveBeenCalledWith(0);
+        });
+
+        it('keeps the value at 1 on Home with allowClear (no nav toggle-clear)', async (): Promise<void> => {
+            const onChange: Mock<(next: number) => void> =
+                vi.fn<(next: number) => void>();
+            const user: UserEvent = userEvent.setup();
+            render(
+                <Rating
+                    value={1}
+                    max={5}
+                    label="Rating"
+                    allowClear
+                    onChange={onChange}
+                />,
+            );
+
+            focusMark(screen.getByRole('radio', { name: '1 of 5' }));
+            await user.keyboard('{Home}');
+
+            expect(onChange).toHaveBeenLastCalledWith(1);
+            expect(onChange).not.toHaveBeenCalledWith(0);
+        });
+
         it('jumps to the first and last mark on Home and End', async (): Promise<void> => {
             const onChange: Mock<(next: number) => void> =
                 vi.fn<(next: number) => void>();

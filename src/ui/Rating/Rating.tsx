@@ -123,13 +123,22 @@ function InteractiveRating({
         markRefs.current.length = maxCount;
     }, [maxCount]);
 
-    function select(count: number): void {
+    // `allowToggleClear` is TRUE only on the direct-activation paths (click,
+    // Enter, Space): re-activating the committed mark with allowClear reports 0.
+    // Keyboard navigation (Arrow/Home/End) passes FALSE so a clamped value that
+    // lands back on the committed count commits that value rather than wiping it -
+    // the documented contract restricts toggle-clear to direct re-activation
+    // (arrowing BELOW 1 still clears through the count===0 branch below).
+    function select(count: number, allowToggleClear: boolean): void {
         switch (resolvedEnabled) {
             case EEnabledState.Disabled:
                 return;
             case EEnabledState.Enabled: {
                 const shouldClear: boolean =
-                    allowClear === true && count !== 0 && count === committedCount;
+                    allowToggleClear &&
+                    allowClear === true &&
+                    count !== 0 &&
+                    count === committedCount;
                 const next: number = shouldClear ? 0 : count;
                 const focusIndex: number = Math.max(next - 1, 0);
                 markRefs.current[focusIndex]?.focus();
@@ -154,30 +163,30 @@ function InteractiveRating({
             case 'ArrowRight':
             case 'ArrowUp': {
                 event.preventDefault();
-                select(Math.min(focusedCount + 1, maxCount));
+                select(Math.min(focusedCount + 1, maxCount), false);
                 return;
             }
             case 'ArrowLeft':
             case 'ArrowDown': {
                 event.preventDefault();
                 const floor: number = allowClear === true ? 0 : 1;
-                select(Math.max(focusedCount - 1, floor));
+                select(Math.max(focusedCount - 1, floor), false);
                 return;
             }
             case 'Home': {
                 event.preventDefault();
-                select(1);
+                select(1, false);
                 return;
             }
             case 'End': {
                 event.preventDefault();
-                select(maxCount);
+                select(maxCount, false);
                 return;
             }
             case 'Enter':
             case ' ': {
                 event.preventDefault();
-                select(focusedCount);
+                select(focusedCount, true);
                 return;
             }
             default:
@@ -241,7 +250,7 @@ function InteractiveRating({
                         data-state={state}
                         data-enabled={resolvedEnabled}
                         onClick={(): void => {
-                            select(count);
+                            select(count, true);
                         }}
                         onKeyDown={(
                             event: KeyboardEvent<HTMLButtonElement>,
