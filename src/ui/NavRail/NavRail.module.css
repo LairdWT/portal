@@ -40,6 +40,7 @@
     padding-block: var(--portal-space-2);
     padding-inline: var(--portal-space-3);
     border: var(--portal-border-thickness-thin) solid transparent;
+    border-inline-start-width: var(--portal-border-thickness-bold);
     border-radius: var(--portal-bevel-2);
     background-color: transparent;
     color: var(--portal-color-text-1);
@@ -96,21 +97,6 @@
     );
     box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow-strong);
     color: var(--portal-color-text-0);
-}
-
-/*
- * The active indicator: an angular tone-accent bar pinned to the band's leading
- * edge. It is a non-color-only redundancy alongside aria-current and the
- * text-contrast scrim, not the sole signal of selection. It carries no
- * border-radius - the machined left edge stays square.
- */
-.item[data-state='active']::before {
-    content: '';
-    position: absolute;
-    inset-block: 0;
-    inset-inline-start: 0;
-    inline-size: var(--portal-border-thickness-bold);
-    background-color: var(--portal-tone-accent);
 }
 
 .icon {

@@ -1,3 +1,11 @@
+/*
+ * Drawer is intentionally an EDGE-DOCKED panel: it resizes only along its dock
+ * axis (a single role=slider grip), and its cross axis is pinned to the
+ * viewport. Free two-axis resize from any edge or corner is a different
+ * contract, served by the Window component (8 edge/corner handles, role=dialog,
+ * keyboard resize) - reach for Window when a floating, freely-resizable panel is
+ * wanted rather than growing Drawer's docked contract.
+ */
 import {
     type CSSProperties,
     type Dispatch,

@@ -84,6 +84,12 @@
     outline-offset: calc(-1 * var(--portal-border-thickness-normal));
 }
 
+/* Pointer hover highlight: reuses the roving-active fill token. Declared after
+ * :focus-visible to keep selector specificity in descending order. */
+.item:not([aria-disabled='true']):hover {
+    background-color: var(--portal-tone-fill);
+}
+
 /* Reserved leading slot for the checkable shape. Always present so labels align
  * whether or not a row is checkable. */
 .indicator {

@@ -10,8 +10,8 @@
     display: inline-flex;
     align-items: center;
     gap: var(--portal-space-2);
-    padding-block: var(--portal-space-1);
-    padding-inline: var(--portal-space-3);
+    padding-block: var(--portal-space-2);
+    padding-inline: var(--portal-space-4);
     border: var(--portal-border-thickness-thin) solid var(--portal-tone-border);
     border-radius: var(--portal-bevel-1);
     background-color: var(--portal-tone-fill);
@@ -26,6 +26,12 @@
     block-size: var(--portal-space-3);
     border-radius: var(--portal-radius-pill);
     background-color: var(--portal-tone-accent);
+}
+
+.divider {
+    align-self: stretch;
+    inline-size: var(--portal-hud-edge-width);
+    background: var(--portal-gradient-metal);
 }
 
 .label {

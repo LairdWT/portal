@@ -35,14 +35,14 @@
     cursor: not-allowed;
 }
 
-/* The sticky milled console strip. The metal-ring trim (and its gated sheen) is
- * inherited from surfaces.module.css; the padding-box fill is the solid HUD
- * surface, so body rows scroll cleanly under it. */
+/* The sticky console strip. A solid highlight fill carries the header, with a
+ * HUD edge along its block-end so body rows scroll cleanly under it. */
 .headerGroup {
-    composes: metalTrim from '../../theme/surfaces.module.css';
     position: sticky;
     inset-block-start: 0;
     z-index: var(--portal-z-overlay);
+    background-color: var(--portal-color-accent-highlight);
+    border-block-end: var(--portal-hud-edge-width) solid var(--portal-tone-border);
 }
 
 .headerRow {
@@ -64,11 +64,11 @@
     block-size: 100%;
     border-radius: var(--portal-bevel-1);
 
-    /* The brightened accent rather than --portal-tone-accent: a column header is
-     * AA-critical text, and an arbitrary tone (or the default accent) cannot
-     * guarantee 4.5:1 on the dark surface, so tone drives the carets/edges while
-     * the header label stays on a contrast-safe accent (the Select precedent). */
-    color: var(--portal-color-accent-highlight);
+    /* The header strip is now the light highlight fill, so the label sits on the
+     * darkest background token for a contrast-safe AA read; an arbitrary tone (or
+     * the default accent) cannot guarantee 4.5:1, so tone stays on the carets and
+     * edges while the label stays on --portal-color-bg-0 (the Select precedent). */
+    color: var(--portal-color-bg-0);
     font-size: var(--portal-size-text-sm);
     font-weight: var(--portal-weight-label-bold);
     letter-spacing: var(--portal-letter-spacing-wide);

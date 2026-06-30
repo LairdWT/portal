@@ -96,7 +96,7 @@
 
 .caret {
     inline-size: var(--portal-space-3);
-    block-size: var(--portal-space-3);
+    block-size: calc(var(--portal-space-3) * 0.866);
     background-color: var(--portal-tone-accent);
 }
 

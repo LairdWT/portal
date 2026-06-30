@@ -25,6 +25,7 @@ export function StatPill({
         >
             <span className={styles.accent} aria-hidden="true" />
             <span className={styles.label}>{label}</span>
+            <span className={styles.divider} aria-hidden="true" />
             <span className={styles.value}>{valueText}</span>
         </span>
     );

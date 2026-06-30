@@ -168,13 +168,13 @@
 }
 
 .frame[data-orientation='horizontal'] .divider::before {
-    inline-size: var(--portal-border-thickness-bold);
+    inline-size: var(--portal-hud-edge-width);
     block-size: 100%;
 }
 
 .frame[data-orientation='vertical'] .divider::before {
     inline-size: 100%;
-    block-size: var(--portal-border-thickness-bold);
+    block-size: var(--portal-hud-edge-width);
 }
 
 .frame[data-orientation='horizontal'] .handle {

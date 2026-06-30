@@ -29,9 +29,10 @@
 
 .accent {
     flex: none;
-    inline-size: var(--portal-space-1);
+    inline-size: var(--portal-border-thickness-bold);
     block-size: var(--portal-size-text-lg);
-    border-radius: var(--portal-radius-pill);
+    border-radius: var(--portal-bevel-1);
+    corner-shape: var(--portal-corner-shape);
     background-color: var(--portal-tone-accent);
 }
 

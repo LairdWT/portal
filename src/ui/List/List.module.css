@@ -61,7 +61,7 @@
     display: flex;
     align-items: center;
     min-block-size: var(--portal-touch-target-min);
-    padding-inline: var(--portal-space-3);
+    padding-inline: var(--portal-space-5) var(--portal-space-3);
     border-block-end: var(--portal-border-thickness-thin) solid
         var(--portal-color-border);
     font-size: var(--portal-size-text-md);

@@ -8,6 +8,12 @@
  * pointer-events are released on the empty viewport area and re-enabled per card,
  * so the corner gutter never blocks the page beneath. Only --portal-* tokens and
  * derived --portal-tone-* vars are used; no literal colors.
+ *
+ * Bevel note: the card composes Banner, which pairs corner-shape: bevel with a
+ * non-zero border-radius. Where a browser has not yet shipped corner-shape the
+ * radius is the intentional progressive-enhancement fallback (rounded corners);
+ * the machined bevel appears automatically once corner-shape is supported. This
+ * is by design - no clip-path fallback (it would cut the metal edge and glows).
  */
 
 .viewport {
