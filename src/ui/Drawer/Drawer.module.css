@@ -33,7 +33,6 @@
     display: flex;
     flex-direction: column;
     border-radius: var(--portal-bevel-3);
-    background: var(--portal-hud-fill);
     box-shadow: 0 0 var(--portal-space-4) var(--portal-tone-glow);
     color: var(--portal-color-text-0);
     font-family: var(--portal-font-sans);
@@ -204,9 +203,15 @@
     border: 0;
     margin: 0;
     appearance: none;
-    background: var(--portal-gradient-metal);
+    background: transparent;
     font: inherit;
     touch-action: none;
+}
+
+.handle::before {
+    content: '';
+    position: absolute;
+    background: var(--portal-gradient-metal);
 }
 
 .handle[data-edge='inline-start'],
@@ -218,12 +223,24 @@
 
 .handle[data-edge='inline-start'] {
     inset-inline-end: 0;
+}
+
+.handle[data-edge='inline-start']::before {
+    inset-block: 0;
+    inset-inline-end: 0;
+    inline-size: var(--portal-hud-edge-width);
     border-inline-start: var(--portal-hud-edge-width) solid
         var(--portal-tone-accent);
 }
 
 .handle[data-edge='inline-end'] {
     inset-inline-start: 0;
+}
+
+.handle[data-edge='inline-end']::before {
+    inset-block: 0;
+    inset-inline-start: 0;
+    inline-size: var(--portal-hud-edge-width);
     border-inline-end: var(--portal-hud-edge-width) solid var(--portal-tone-accent);
 }
 
@@ -231,8 +248,14 @@
     inset-inline: 0;
     inset-block-start: 0;
     block-size: var(--portal-touch-target-min);
-    border-block-end: var(--portal-hud-edge-width) solid var(--portal-tone-accent);
     cursor: row-resize;
+}
+
+.handle[data-edge='block-end']::before {
+    inset-inline: 0;
+    inset-block-start: 0;
+    block-size: var(--portal-hud-edge-width);
+    border-block-end: var(--portal-hud-edge-width) solid var(--portal-tone-accent);
 }
 
 .handle:hover,
@@ -241,7 +264,7 @@
     outline: none;
 }
 
-.handle:focus-visible {
+.handle:focus-visible::before {
     border-color: var(--portal-color-focus);
 }
 

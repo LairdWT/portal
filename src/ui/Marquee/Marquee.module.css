@@ -20,7 +20,7 @@
 }
 
 .viewport {
-    composes: beveled metalEdge from '../../theme/surfaces.module.css';
+    composes: beveled from '../../theme/surfaces.module.css';
     position: relative;
     display: flex;
     flex: 1 1 auto;
@@ -29,8 +29,9 @@
     min-block-size: var(--portal-touch-target-min);
     padding-inline: var(--portal-space-3);
     overflow: hidden;
+    border: var(--portal-border-thickness-thin) solid var(--portal-tone-border);
     border-radius: var(--portal-bevel-3);
-    box-shadow: 0 0 var(--portal-space-2) var(--portal-hud-glow);
+    box-shadow: 0 0 var(--portal-space-2) var(--portal-tone-glow);
     color: var(--portal-color-text-0);
     font-family: var(--portal-font-mono);
 }

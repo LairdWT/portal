@@ -39,8 +39,7 @@
  * .beveled utility and the static brushed-metal ring from .metalEdge; this rule
  * owns only layout, typography, and the bevel-radius fallback. */
 .header {
-    composes: beveled from '../../theme/surfaces.module.css';
-    composes: metalEdge from '../../theme/surfaces.module.css';
+    composes: beveled metalEdge from '../../theme/surfaces.module.css';
     display: inline-flex;
     align-items: center;
     gap: var(--portal-space-2);
@@ -96,6 +95,7 @@
     padding-block: var(--portal-space-3);
     padding-inline: var(--portal-space-4);
     border-radius: var(--portal-bevel-2);
+    border: var(--portal-border-thickness-thin) solid var(--portal-tone-border);
     background-color: var(--portal-color-surface-1);
     box-shadow: inset 0 0 var(--portal-space-3) var(--portal-hud-glow);
     color: var(--portal-color-text-1);
@@ -122,17 +122,12 @@
  * marker, never glow alone. */
 .header[data-state='expanded'] {
     box-shadow:
-        0 0 0 var(--portal-border-thickness-normal) var(--portal-tone-accent),
+        0 0 0 var(--portal-border-thickness-thin) var(--portal-tone-accent),
         0 0 var(--portal-space-3) var(--portal-tone-glow-strong);
 }
 
 .panel[data-state='expanded'] {
     grid-template-rows: 1fr;
-}
-
-.header:focus-visible {
-    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
-    outline-offset: var(--portal-space-1);
 }
 
 .header:disabled {

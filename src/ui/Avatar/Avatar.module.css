@@ -103,8 +103,8 @@
 
 .presence {
     position: absolute;
-    inset-block-end: 0;
-    inset-inline-end: 0;
+    inset-block-end: calc(var(--portal-avatar-box) * 0.08);
+    inset-inline-end: calc(var(--portal-avatar-box) * 0.08);
 }
 
 .dot {

@@ -28,23 +28,16 @@
     font-weight: 700;
     line-height: var(--portal-line-height-tight);
     letter-spacing: var(--portal-letter-spacing-wide);
-    text-align: center;
     cursor: pointer;
     user-select: none;
 }
 
 .content {
+    composes: wideLabel from '../../theme/surfaces.module.css';
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: var(--portal-space-2);
-
-    /* letter-spacing (inherited from .cta) adds a trailing gap after the last
-     * glyph; without trimming an equal end margin the centred content sits left
-     * of centre by half the letter-spacing. The fix lives on a flex wrapper so an
-     * icon plus text gap is preserved. Mirrors the ActionButton/BevelButton
-     * label fix. */
-    margin-inline-end: calc(-1 * var(--portal-letter-spacing-wide));
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -57,11 +50,6 @@
             color var(--portal-duration-ui-fast) var(--portal-easing-standard),
             box-shadow var(--portal-duration-ui-fast) var(--portal-easing-standard);
     }
-}
-
-.cta:focus-visible {
-    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
-    outline-offset: var(--portal-border-thickness-normal);
 }
 
 /* Size scales padding and text; the touch minimum is preserved by the root. */

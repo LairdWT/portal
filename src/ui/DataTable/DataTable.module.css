@@ -26,8 +26,8 @@
 }
 
 .root:focus-visible {
-    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
-    outline-offset: calc(-1 * var(--portal-border-thickness-normal));
+    outline: var(--portal-border-thickness-thin) solid var(--portal-color-focus);
+    outline-offset: calc(-1 * var(--portal-border-thickness-thin));
 }
 
 .root[data-enabled='disabled'] {
@@ -57,10 +57,12 @@
 /* Bold HUD column label, echoing the BevelButton key face and Helicon's strong
  * mono accent header. data-align drives the justification. */
 .columnheader {
+    composes: beveled from '../../theme/surfaces.module.css';
     display: flex;
     align-items: center;
     min-inline-size: 0;
     block-size: 100%;
+    border-radius: var(--portal-bevel-1);
 
     /* The brightened accent rather than --portal-tone-accent: a column header is
      * AA-critical text, and an arbitrary tone (or the default accent) cannot
@@ -235,11 +237,13 @@
 }
 
 .cell {
+    composes: beveled from '../../theme/surfaces.module.css';
     overflow: hidden;
     min-inline-size: 0;
     block-size: 100%;
     display: flex;
     align-items: center;
+    border-radius: var(--portal-bevel-1);
     padding-inline: var(--portal-space-3);
     color: var(--portal-color-text-0);
     font-size: var(--portal-size-text-md);

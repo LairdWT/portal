@@ -60,9 +60,8 @@
 .box {
     composes: beveled from '../../theme/surfaces.module.css';
     flex: 0 0 auto;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    display: grid;
+    place-items: center;
     inline-size: var(--portal-space-5);
     block-size: var(--portal-space-5);
     border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
@@ -70,6 +69,13 @@
     background-color: transparent;
     color: var(--portal-tone-on);
     overflow: hidden;
+}
+
+/* Both markers occupy the same centered grid cell so the hidden one adds no
+ * sibling width. */
+.check,
+.dash {
+    grid-area: 1 / 1;
 }
 
 /* The SVG checkmark - hidden by default, revealed when the input is checked. */

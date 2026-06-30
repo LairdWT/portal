@@ -93,15 +93,14 @@
 }
 
 /*
- * The committed leading pip earns the machined "set" weight: the brushed-metal
- * ring trim over the accent face, the same border-box conic ring the controllers
- * use. The sheen rotation is gated behind prefers-reduced-motion below.
+ * The committed leading pip earns the "set" weight: a solid tone-accent face
+ * with a tone-accent rim and a strong tone glow, so the most-selected mark reads
+ * as the bright highlight rather than the inactive empty color.
  */
 .pip[data-active='true'] {
-    border: var(--portal-hud-edge-width) solid transparent;
-    background:
-        var(--portal-tone-accent) padding-box,
-        var(--portal-gradient-metal-ring) border-box;
+    border-color: var(--portal-tone-accent);
+    background-color: var(--portal-tone-accent);
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow-strong);
 }
 
 /* Partial (readonly half-step): an empty pip with a tone-accent overlay clipped
@@ -131,16 +130,5 @@
             border-color var(--portal-duration-ui-base)
                 var(--portal-easing-standard),
             box-shadow var(--portal-duration-ui-base) var(--portal-easing-standard);
-    }
-
-    .pip[data-active='true'] {
-        animation: portal-rating-sheen var(--portal-duration-metal-sheen) linear
-            infinite;
-    }
-}
-
-@keyframes portal-rating-sheen {
-    to {
-        --portal-metal-angle: 360deg;
     }
 }

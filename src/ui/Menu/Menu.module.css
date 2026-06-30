@@ -49,7 +49,8 @@
     gap: var(--portal-space-2);
     min-block-size: var(--portal-touch-target-min);
     padding-block: var(--portal-space-1);
-    padding-inline: var(--portal-space-2);
+    padding-inline: var(--portal-space-2)
+        calc(var(--portal-space-2) + var(--portal-space-3) + var(--portal-space-2));
     border-radius: var(--portal-bevel-1);
     color: var(--portal-color-text-0);
     font-size: var(--portal-size-text-md);
