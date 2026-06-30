@@ -75,7 +75,7 @@
     inset-inline-start: 50%;
     inset-block-start: 50%;
     inline-size: var(--dpad-glyph-size);
-    block-size: calc(var(--dpad-glyph-size) * 0.866); /* sqrt(3)/2 -> equilateral */
+    block-size: calc(var(--dpad-glyph-size) * var(--portal-ratio-equilateral));
     background-color: var(--portal-color-text-0);
     clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
     transform: translate(-50%, -50%) rotate(var(--dpad-glyph-rotate, 0deg));

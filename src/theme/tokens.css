@@ -118,6 +118,11 @@
      * scale() factor consumed by surfaces.module.css .pressScale. */
     --portal-press-scale: 0.97;
 
+    /* Equilateral-triangle height ratio (sqrt(3)/2). A token-drawn triangle of
+     * base b is equilateral when its height is b * this ratio. Shared by every
+     * directional/trend caret (StatTile, DataTable sort, DPad arms). */
+    --portal-ratio-equilateral: 0.866;
+
     /* Metric tile grid floor. The responsive auto-fit minimum tile width that
      * TileRow wraps below; a rem layout floor, distinct from the bevel/metal
      * visual tokens. */

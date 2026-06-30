@@ -169,13 +169,21 @@
     }
 }
 
+/* Equilateral: the base is 2 * space-1 (the two inline borders), so the height
+ * is base * the equilateral ratio = space-1 * 2 * --portal-ratio-equilateral. */
 .columnheader[aria-sort='ascending'] .sortCaret {
-    border-block-end: var(--portal-space-1) solid var(--portal-tone-accent);
+    border-block-end: calc(
+            var(--portal-space-1) * 2 * var(--portal-ratio-equilateral)
+        )
+        solid var(--portal-tone-accent);
     opacity: 1;
 }
 
 .columnheader[aria-sort='descending'] .sortCaret {
-    border-block-start: var(--portal-space-1) solid var(--portal-tone-accent);
+    border-block-start: calc(
+            var(--portal-space-1) * 2 * var(--portal-ratio-equilateral)
+        )
+        solid var(--portal-tone-accent);
     opacity: 1;
 }
 
