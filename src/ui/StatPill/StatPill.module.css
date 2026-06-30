@@ -24,7 +24,8 @@
 .accent {
     inline-size: var(--portal-space-1);
     block-size: var(--portal-space-3);
-    border-radius: var(--portal-radius-pill);
+    border-radius: var(--portal-bevel-1);
+    corner-shape: var(--portal-corner-shape);
     background-color: var(--portal-tone-accent);
 }
 

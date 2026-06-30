@@ -25,7 +25,8 @@ type PopoverStoryArgs = Readonly<{
 const TRIGGER_STYLE: CSSProperties = {
     minBlockSize: 'var(--portal-touch-target-min)',
     paddingInline: 'var(--portal-space-4)',
-    borderRadius: 'var(--portal-radius-md)',
+    borderRadius: 'var(--portal-bevel-2)',
+    ...({ cornerShape: 'bevel' } as CSSProperties),
     border: 'var(--portal-border-thickness-thin) solid var(--portal-color-border)',
     background: 'var(--portal-color-surface-0)',
     color: 'var(--portal-color-text-0)',

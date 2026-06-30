@@ -25,6 +25,11 @@ import toneStyles from './tone.module.css';
 // (incorrectly) derived from the inline tone would differ from the status probe.
 const TONE_INLINE: string = 'oklch(0.62 0.2 25)';
 
+// Success-story-local inline tone: a green distinct from var(--portal-color-success)
+// so the success row reads all-green while the play() assertion colorA !== colorC
+// still holds (clearly different lightness/chroma after the tone-border color-mix).
+const SUCCESS_TONE_INLINE: string = 'oklch(0.78 0.16 150)';
+
 // Fixed box so the border actually renders and getComputedStyle returns its color.
 const PROBE_BOX: CSSProperties = {
     width: '3rem',
@@ -128,7 +133,7 @@ export const SuccessPrecedence: Story = {
                 data-testid="success-probe-a"
                 className={toneStyles.toneScope}
                 data-status={EUiStatus.Success}
-                style={probeStyle(TONE_INLINE)}
+                style={probeStyle(SUCCESS_TONE_INLINE)}
             />
             <div
                 data-testid="success-probe-b"
@@ -139,7 +144,7 @@ export const SuccessPrecedence: Story = {
             <div
                 data-testid="success-probe-c"
                 className={toneStyles.toneScope}
-                style={probeStyle(TONE_INLINE)}
+                style={probeStyle(SUCCESS_TONE_INLINE)}
             />
         </div>
     ),

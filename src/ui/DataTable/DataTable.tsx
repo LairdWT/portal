@@ -67,6 +67,11 @@ type ActiveCell = Readonly<{
     col: number;
 }>;
 
+// The cursor the first key press establishes when no cell has been visited yet:
+// the header's first column. Keeps post-interaction navigation byte-identical to
+// the prior header-seeded cursor.
+const HEADER_ORIGIN: ActiveCell = { row: HEADER_ROW, col: 0 };
+
 function defaultRowKey(rowIndex: number): string {
     return String(rowIndex);
 }
@@ -172,16 +177,17 @@ export function DataTable(props: DataTableProps): ReactElement {
     });
 
     const [activeCell, setActiveCell]: [
-        ActiveCell,
-        Dispatch<SetStateAction<ActiveCell>>,
-    ] = useState<ActiveCell>({ row: HEADER_ROW, col: 0 });
+        ActiveCell | null,
+        Dispatch<SetStateAction<ActiveCell | null>>,
+    ] = useState<ActiveCell | null>(null);
 
     const hasColumns: boolean = columns.length > 0;
     const lastColumn: number = columns.length - 1;
     const lastRow: number = rowCount - 1;
-    const activeColumn: number = hasColumns
-        ? Math.min(Math.max(activeCell.col, 0), lastColumn)
-        : 0;
+    const activeColumn: number =
+        hasColumns && activeCell !== null
+            ? Math.min(Math.max(activeCell.col, 0), lastColumn)
+            : 0;
     const motion: EOverlayMotion = reducedMotion
         ? EOverlayMotion.Reduced
         : EOverlayMotion.Full;
@@ -191,6 +197,9 @@ export function DataTable(props: DataTableProps): ReactElement {
     // window; the force-include below covers the one-frame gap meanwhile. No
     // listeners are attached, so the effect needs no cleanup.
     useLayoutEffect((): void => {
+        if (activeCell === null) {
+            return;
+        }
         if (activeCell.row < 0) {
             return;
         }
@@ -216,7 +225,7 @@ export function DataTable(props: DataTableProps): ReactElement {
         if (rowBottom > viewBottom) {
             element.scrollTop = rowBottom - element.clientHeight;
         }
-    }, [activeCell.row, rowHeight]);
+    }, [activeCell, rowHeight]);
 
     const className: string = [toneStyles.toneScope, styles.root]
         .filter((entry: string | undefined): entry is string => entry !== undefined)
@@ -238,7 +247,8 @@ export function DataTable(props: DataTableProps): ReactElement {
             : {}),
     };
 
-    const activeDescendantId: string = cellId(gridId, activeCell.row, activeColumn);
+    const activeDescendantId: string =
+        activeCell !== null ? cellId(gridId, activeCell.row, activeColumn) : '';
 
     function moveActive(nextRow: number, nextCol: number): void {
         const clampedRow: number = Math.min(
@@ -292,7 +302,10 @@ export function DataTable(props: DataTableProps): ReactElement {
 
         onSelectionChange?.(next);
         setActiveCell(
-            (prev: ActiveCell): ActiveCell => ({ row: rowIndex, col: prev.col }),
+            (prev: ActiveCell | null): ActiveCell => ({
+                row: rowIndex,
+                col: prev?.col ?? activeColumn,
+            }),
         );
     }
 
@@ -322,7 +335,8 @@ export function DataTable(props: DataTableProps): ReactElement {
     }
 
     function activateActiveCell(event: ReactKeyboardEvent<HTMLDivElement>): void {
-        if (activeCell.row === HEADER_ROW) {
+        const current: ActiveCell = activeCell ?? HEADER_ORIGIN;
+        if (current.row === HEADER_ROW) {
             const column: TableColumn | undefined = columns[activeColumn];
             if (column?.sortable === true) {
                 handleSort(column.key);
@@ -332,7 +346,7 @@ export function DataTable(props: DataTableProps): ReactElement {
         if (selectionMode === ESelectionMode.None) {
             return;
         }
-        handleRowActivate(activeCell.row, {
+        handleRowActivate(current.row, {
             shiftKey: event.shiftKey,
             ctrlKey: event.ctrlKey,
             metaKey: event.metaKey,
@@ -343,6 +357,9 @@ export function DataTable(props: DataTableProps): ReactElement {
         if (isDisabled) {
             return;
         }
+        // The first key press with no visited cell establishes the cursor at the
+        // header origin, exactly the seed the prior header-seeded state used.
+        const current: ActiveCell = activeCell ?? HEADER_ORIGIN;
         // Page by the VISIBLE row count, not the rendered window: endIndex -
         // startIndex includes the overscan band (up to 2 * overscan extra rows),
         // so subtracting it back yields a one-viewport jump instead of an
@@ -355,22 +372,22 @@ export function DataTable(props: DataTableProps): ReactElement {
         switch (event.key) {
             case 'ArrowDown': {
                 event.preventDefault();
-                moveActive(activeCell.row + 1, activeCell.col);
+                moveActive(current.row + 1, current.col);
                 return;
             }
             case 'ArrowUp': {
                 event.preventDefault();
-                moveActive(activeCell.row - 1, activeCell.col);
+                moveActive(current.row - 1, current.col);
                 return;
             }
             case 'ArrowRight': {
                 event.preventDefault();
-                moveActive(activeCell.row, activeCell.col + 1);
+                moveActive(current.row, current.col + 1);
                 return;
             }
             case 'ArrowLeft': {
                 event.preventDefault();
-                moveActive(activeCell.row, activeCell.col - 1);
+                moveActive(current.row, current.col - 1);
                 return;
             }
             case 'Home': {
@@ -379,7 +396,7 @@ export function DataTable(props: DataTableProps): ReactElement {
                     moveActive(HEADER_ROW, 0);
                     return;
                 }
-                moveActive(activeCell.row, 0);
+                moveActive(current.row, 0);
                 return;
             }
             case 'End': {
@@ -388,17 +405,17 @@ export function DataTable(props: DataTableProps): ReactElement {
                     moveActive(lastRow, lastColumn);
                     return;
                 }
-                moveActive(activeCell.row, lastColumn);
+                moveActive(current.row, lastColumn);
                 return;
             }
             case 'PageDown': {
                 event.preventDefault();
-                moveActive(activeCell.row + pageStep, activeCell.col);
+                moveActive(current.row + pageStep, current.col);
                 return;
             }
             case 'PageUp': {
                 event.preventDefault();
-                moveActive(activeCell.row - pageStep, activeCell.col);
+                moveActive(current.row - pageStep, current.col);
                 return;
             }
             case 'Enter': {
@@ -445,6 +462,7 @@ export function DataTable(props: DataTableProps): ReactElement {
                         const align: EColumnAlign =
                             column.align ?? EColumnAlign.Start;
                         const isActive: boolean =
+                            activeCell !== null &&
                             activeCell.row === rowIndex &&
                             activeColumn === columnIndex;
                         return (
@@ -483,6 +501,7 @@ export function DataTable(props: DataTableProps): ReactElement {
     // Guarantee the active body row's element exists for aria-activedescendant
     // even when it has scrolled out of the rendered window.
     const activeOutsideWindow: boolean =
+        activeCell !== null &&
         activeCell.row >= 0 &&
         (activeCell.row < virtualWindow.startIndex ||
             activeCell.row >= virtualWindow.endIndex);
@@ -501,7 +520,9 @@ export function DataTable(props: DataTableProps): ReactElement {
             aria-multiselectable={
                 selectionMode === ESelectionMode.Multi ? true : undefined
             }
-            {...(hasColumns ? { 'aria-activedescendant': activeDescendantId } : {})}
+            {...(hasColumns && activeCell !== null
+                ? { 'aria-activedescendant': activeDescendantId }
+                : {})}
             tabIndex={isDisabled ? -1 : 0}
             data-status={status}
             data-enabled={resolvedEnabled}
@@ -518,6 +539,7 @@ export function DataTable(props: DataTableProps): ReactElement {
                             const align: EColumnAlign =
                                 column.align ?? EColumnAlign.Start;
                             const isActive: boolean =
+                                activeCell !== null &&
                                 activeCell.row === HEADER_ROW &&
                                 activeColumn === columnIndex;
                             const ariaSort: ESortDirection | 'none' =
@@ -588,7 +610,9 @@ export function DataTable(props: DataTableProps): ReactElement {
                     style={{ blockSize: `${String(virtualWindow.totalSize)}px` }}
                 >
                     {windowRows}
-                    {activeOutsideWindow ? renderBodyRow(activeCell.row) : null}
+                    {activeOutsideWindow && activeCell !== null
+                        ? renderBodyRow(activeCell.row)
+                        : null}
                 </div>
             )}
         </div>

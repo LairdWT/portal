@@ -102,16 +102,12 @@
     outline-offset: calc(-1 * var(--portal-border-thickness-normal));
 }
 
-.divider:hover,
-.divider[data-active='true'] {
-    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow);
-}
-
 /* The seam takes the tone accent when the divider is hovered or actively
  * dragged, echoing Helicon's accent-on-active divider color. */
 .divider:hover::before,
 .divider[data-active='true']::before {
     background: var(--portal-tone-accent);
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow);
 }
 
 .divider:focus-visible .handle,

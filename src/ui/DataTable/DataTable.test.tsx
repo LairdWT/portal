@@ -309,12 +309,9 @@ describe('DataTable', (): void => {
         const grid: HTMLElement = screen.getByRole('grid');
         grid.focus();
 
-        // Initial cursor: the header's first column.
-        expect(activeInfo(grid)).toEqual({
-            role: 'columnheader',
-            col: '1',
-            rowIndex: '1',
-        });
+        // Initial cursor: nothing highlighted and no aria-activedescendant until
+        // the first navigation key establishes the roving cursor.
+        expect(grid.getAttribute('aria-activedescendant')).toBeNull();
 
         await user.keyboard('{ArrowRight}');
         expect(activeInfo(grid)).toEqual({

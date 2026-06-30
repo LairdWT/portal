@@ -211,3 +211,7 @@
     opacity: 0.5;
     cursor: not-allowed;
 }
+
+.option:not([data-disabled='true']):hover {
+    background-color: var(--portal-tone-fill);
+}

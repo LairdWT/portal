@@ -76,11 +76,7 @@
 
 .step[data-state='current'] .marker {
     border-color: var(--portal-tone-accent);
-    background: radial-gradient(
-        circle at 50% 35%,
-        var(--portal-tone-edge) 0%,
-        var(--portal-color-surface-0) 100%
-    );
+    background-color: var(--portal-tone-fill);
 }
 
 .step[data-state='current'] .dot {
