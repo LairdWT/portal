@@ -13,7 +13,8 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-// Press the control: each press and release emits a typed signal stamped by the
-// injected clock, narrowed to the wire payload Unity would receive, while the
-// registry resolves the input id to its action.
+// Press the control: the example surfaces press, held, and released phases. Each
+// press, held, and release emits a typed signal stamped by the injected clock,
+// narrowed to the wire payload Unity would receive, while the registry resolves
+// the input id to its action.
 export const Default: Story = {};

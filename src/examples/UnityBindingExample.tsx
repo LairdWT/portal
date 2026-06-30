@@ -11,6 +11,7 @@ import {
     type RefObject,
     type SetStateAction,
     useCallback,
+    useEffect,
     useMemo,
     useRef,
     useState,
@@ -22,6 +23,7 @@ import { BevelButton } from '../components/BevelButton/BevelButton';
 import {
     type BindingResolution,
     createRegistry,
+    EInputInteraction,
     EInputValueType,
     type FInputWirePayload,
     type IInputBindingRegistry,
@@ -113,19 +115,71 @@ export function UnityBindingExample(): ReactElement {
         return tickRef.current;
     }, []);
 
-    const [lastPayload, setLastPayload]: [
-        FInputWirePayload | null,
-        Dispatch<SetStateAction<FInputWirePayload | null>>,
-    ] = useState<FInputWirePayload | null>(null);
+    const [history, setHistory]: [
+        readonly FInputWirePayload[],
+        Dispatch<SetStateAction<readonly FInputWirePayload[]>>,
+    ] = useState<readonly FInputWirePayload[]>([]);
 
     const resolution: BindingResolution = useInputBinding(registry, 'fire');
 
     const handleSignal: (signal: InputSignal) => void = useCallback(
         (signal: InputSignal): void => {
-            setLastPayload(toWireInput(signal));
+            setHistory((prev: readonly FInputWirePayload[]) =>
+                [toWireInput(signal), ...prev].slice(0, 8),
+            );
         },
         [],
     );
+
+    // Held is demonstrated example-locally: nothing emits Held on the wire today,
+    // so a press that outlives the threshold synthesizes a Held payload through
+    // the same signal sink. No wire semantics change.
+    const HOLD_THRESHOLD_MS: number = 500;
+    const holdTimerRef: RefObject<number | null> = useRef<number | null>(null);
+
+    const emitHeld: (descriptor: InputDescriptor) => void = useCallback(
+        (descriptor: InputDescriptor): void => {
+            handleSignal({
+                descriptor,
+                value: { valueType: EInputValueType.Digital, pressed: true },
+                interaction: EInputInteraction.Held,
+                timeStampMs: timeProvider(),
+            });
+        },
+        [handleSignal, timeProvider],
+    );
+
+    const startHold: (descriptor: InputDescriptor) => void = useCallback(
+        (descriptor: InputDescriptor): void => {
+            if (holdTimerRef.current !== null) {
+                window.clearTimeout(holdTimerRef.current);
+                holdTimerRef.current = null;
+            }
+            holdTimerRef.current = window.setTimeout((): void => {
+                holdTimerRef.current = null;
+                emitHeld(descriptor);
+            }, HOLD_THRESHOLD_MS);
+        },
+        [emitHeld],
+    );
+
+    const clearHold: () => void = useCallback((): void => {
+        if (holdTimerRef.current === null) {
+            return;
+        }
+        window.clearTimeout(holdTimerRef.current);
+        holdTimerRef.current = null;
+    }, []);
+
+    useEffect((): (() => void) => {
+        return (): void => {
+            if (holdTimerRef.current === null) {
+                return;
+            }
+            window.clearTimeout(holdTimerRef.current);
+            holdTimerRef.current = null;
+        };
+    }, []);
 
     return (
         <div style={layoutStyle}>
@@ -134,7 +188,14 @@ export function UnityBindingExample(): ReactElement {
                 <code>{resolution.actionId ?? '(unbound)'}</code>.
             </p>
             <TimeProviderContext.Provider value={timeProvider}>
-                <BevelButton descriptor={fireDescriptor} onSignal={handleSignal}>
+                <BevelButton
+                    descriptor={fireDescriptor}
+                    onSignal={handleSignal}
+                    onPress={(): void => {
+                        startHold(fireDescriptor);
+                    }}
+                    onRelease={clearHold}
+                >
                     Fire
                 </BevelButton>
                 <div style={buttonGridStyle}>
@@ -146,15 +207,24 @@ export function UnityBindingExample(): ReactElement {
                                 bevelCorners={face.bevelCorners}
                                 descriptor={face.descriptor}
                                 onSignal={handleSignal}
+                                onPress={(): void => {
+                                    startHold(face.descriptor);
+                                }}
+                                onRelease={clearHold}
                             />
                         ),
                     )}
                 </div>
             </TimeProviderContext.Provider>
             <pre>
-                {lastPayload === null
+                {history.length === 0
                     ? 'Press a control to emit a wire payload.'
-                    : JSON.stringify(lastPayload, null, 2)}
+                    : history
+                          .map(
+                              (payload: FInputWirePayload): string =>
+                                  `${payload.interaction} @ ${String(payload.timeStampMs)}`,
+                          )
+                          .join('\n')}
             </pre>
         </div>
     );
