@@ -52,23 +52,70 @@ function parseHexPair(body: string, index: number): number {
     return parseInt(body.slice(index, index + 2), 16);
 }
 
+// Expand 3/4-digit hex shorthand into its full-length form by doubling each
+// nibble ('F' -> 'FF', 'abc' -> 'aabbcc', 'abcd' -> 'aabbccdd'). Caller guarantees
+// the body is already digit-validated, so this is a pure character double.
+function expandShorthand(body: string): string {
+    let expanded: string = '';
+    for (const digit of body) {
+        expanded += digit + digit;
+    }
+    return expanded;
+}
+
 // Parse a hex color string into channel bytes. Strips one optional leading '#'
-// (Helicon strips COLOR_HEX_PREFIX), then accepts length 6 (RRGGBB, alpha
-// defaults to opaque) or length 8 (RRGGBBAA). Shorthand #RGB / #RGBA is rejected
-// to match Helicon (6/8 only). Total: never throws.
+// (Helicon strips COLOR_HEX_PREFIX), then accepts length 3 (RGB shorthand),
+// 4 (RGBA shorthand), 6 (RRGGBB, alpha defaults to opaque) or 8 (RRGGBBAA). The
+// 3/4-digit shorthand is nibble-doubled to its 6/8 form before pairing, so the
+// existing 6/8 behavior and HEX_PATTERN validation are unchanged. Total: never
+// throws.
 export function parseHexColor(text: string): ColorParseResult {
-    const body: string = text.startsWith('#') ? text.slice(1) : text;
-    if (body.length !== 6 && body.length !== 8) {
+    const raw: string = text.startsWith('#') ? text.slice(1) : text;
+    if (
+        raw.length !== 3 &&
+        raw.length !== 4 &&
+        raw.length !== 6 &&
+        raw.length !== 8
+    ) {
         return { ok: false, error: EColorParseError.InvalidLength };
     }
-    if (!HEX_PATTERN.test(body)) {
+    if (!HEX_PATTERN.test(raw)) {
         return { ok: false, error: EColorParseError.InvalidDigits };
     }
+    const body: string = raw.length <= 4 ? expandShorthand(raw) : raw;
     const red: number = parseHexPair(body, 0);
     const green: number = parseHexPair(body, 2);
     const blue: number = parseHexPair(body, 4);
     const alpha: number = body.length === 8 ? parseHexPair(body, 6) : OPAQUE_BYTE;
     return { ok: true, value: { r: red, g: green, b: blue, a: alpha } };
+}
+
+// Discriminated result so an invalid channel string is a representable value,
+// never a thrown exception (mirrors ColorParseResult).
+export type ChannelParseResult =
+    | Readonly<{ ok: true; value: number }>
+    | Readonly<{ ok: false }>;
+
+const INTEGER_PATTERN: RegExp = /^[0-9]+$/;
+
+// Parse a channel string to an integer clamped into [min, max]. Channels are
+// unsigned integers (bytes 0..255, percent 0..100, hue 0..360); a non-integer or
+// empty string is rejected. clamp() is defense-in-depth for an in-range integer
+// that still exceeds the channel bound.
+export function parseChannelInput(
+    text: string,
+    min: number,
+    max: number,
+): ChannelParseResult {
+    const trimmed: string = text.trim();
+    if (!INTEGER_PATTERN.test(trimmed)) {
+        return { ok: false };
+    }
+    const parsed: number = Number.parseInt(trimmed, 10);
+    if (!Number.isFinite(parsed)) {
+        return { ok: false };
+    }
+    return { ok: true, value: clamp(parsed, min, max) };
 }
 
 // Serialize channel bytes to an uppercase, zero-padded hex string. The '#' prefix

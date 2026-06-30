@@ -15,6 +15,7 @@ import { type SegmentItem } from '../SegmentedControl/SegmentedControl.types';
 import { TextField } from '../TextField/TextField';
 import { EUiStatus, toneProperties } from '../tone';
 import toneStyles from '../tone.module.css';
+import { ChannelInput } from './ChannelInput';
 import {
     type ColorParseResult,
     EColorParseError,
@@ -77,7 +78,7 @@ function resolveMode(id: string): EColorMode | undefined {
 function describeHexError(error: EColorParseError): string {
     switch (error) {
         case EColorParseError.InvalidLength:
-            return 'Enter 6 or 8 hex digits.';
+            return 'Enter 3, 4, 6, or 8 hex digits.';
         case EColorParseError.InvalidDigits:
             return 'Use only the digits 0-9 and A-F.';
     }
@@ -91,6 +92,7 @@ export function ColorPicker({
     defaultMode,
     id,
     enabled,
+    channelInputs,
     tone,
 }: ColorPickerProps): ReactElement {
     const resolvedEnabled: EEnabledState = useResolvedEnabled(enabled);
@@ -204,100 +206,185 @@ export function ColorPicker({
         setHexDraft(null);
     }
 
+    // Wrap a slider with its optional adjacent numeric input. The ChannelInput
+    // gets a DISTINCT accessible name ("<Channel> value") so the existing
+    // getByLabelText('Red') queries keep matching the slider uniquely, and it
+    // calls the SAME channel handler the slider does - one controlled contract.
+    function renderChannelRow(
+        sliderNode: ReactElement,
+        inputLabel: string,
+        inputValue: number,
+        inputMin: number,
+        inputMax: number,
+        onInput: (value: number) => void,
+    ): ReactElement {
+        return (
+            <div className={styles.channelRow}>
+                {sliderNode}
+                {channelInputs === true ? (
+                    <ChannelInput
+                        label={inputLabel}
+                        value={inputValue}
+                        min={inputMin}
+                        max={inputMax}
+                        enabled={resolvedEnabled}
+                        onChange={onInput}
+                    />
+                ) : null}
+            </div>
+        );
+    }
+
     function renderChannels(): ReactElement {
         switch (mode) {
             case EColorMode.Rgb:
                 return (
                     <>
-                        <Slider
-                            label="Red"
-                            value={rgba.r}
-                            min={0}
-                            max={OPAQUE_BYTE}
-                            step={1}
-                            enabled={resolvedEnabled}
-                            onChange={handleRed}
-                            formatValueText={formatByte}
-                        />
-                        <Slider
-                            label="Green"
-                            value={rgba.g}
-                            min={0}
-                            max={OPAQUE_BYTE}
-                            step={1}
-                            enabled={resolvedEnabled}
-                            onChange={handleGreen}
-                            formatValueText={formatByte}
-                        />
-                        <Slider
-                            label="Blue"
-                            value={rgba.b}
-                            min={0}
-                            max={OPAQUE_BYTE}
-                            step={1}
-                            enabled={resolvedEnabled}
-                            onChange={handleBlue}
-                            formatValueText={formatByte}
-                        />
-                        {useAlpha ? (
+                        {renderChannelRow(
                             <Slider
-                                label="Alpha"
-                                value={alphaPercent}
+                                label="Red"
+                                value={rgba.r}
                                 min={0}
-                                max={PERCENT_MAX}
+                                max={OPAQUE_BYTE}
                                 step={1}
                                 enabled={resolvedEnabled}
-                                onChange={handleAlpha}
-                                formatValueText={formatPercent}
-                            />
-                        ) : null}
+                                onChange={handleRed}
+                                formatValueText={formatByte}
+                            />,
+                            'Red value',
+                            rgba.r,
+                            0,
+                            OPAQUE_BYTE,
+                            handleRed,
+                        )}
+                        {renderChannelRow(
+                            <Slider
+                                label="Green"
+                                value={rgba.g}
+                                min={0}
+                                max={OPAQUE_BYTE}
+                                step={1}
+                                enabled={resolvedEnabled}
+                                onChange={handleGreen}
+                                formatValueText={formatByte}
+                            />,
+                            'Green value',
+                            rgba.g,
+                            0,
+                            OPAQUE_BYTE,
+                            handleGreen,
+                        )}
+                        {renderChannelRow(
+                            <Slider
+                                label="Blue"
+                                value={rgba.b}
+                                min={0}
+                                max={OPAQUE_BYTE}
+                                step={1}
+                                enabled={resolvedEnabled}
+                                onChange={handleBlue}
+                                formatValueText={formatByte}
+                            />,
+                            'Blue value',
+                            rgba.b,
+                            0,
+                            OPAQUE_BYTE,
+                            handleBlue,
+                        )}
+                        {useAlpha
+                            ? renderChannelRow(
+                                  <Slider
+                                      label="Alpha"
+                                      value={alphaPercent}
+                                      min={0}
+                                      max={PERCENT_MAX}
+                                      step={1}
+                                      enabled={resolvedEnabled}
+                                      onChange={handleAlpha}
+                                      formatValueText={formatPercent}
+                                  />,
+                                  'Alpha value',
+                                  alphaPercent,
+                                  0,
+                                  PERCENT_MAX,
+                                  handleAlpha,
+                              )
+                            : null}
                     </>
                 );
             case EColorMode.Hsv:
                 return (
                     <>
-                        <Slider
-                            label="Hue"
-                            value={hsv.h}
-                            min={0}
-                            max={HUE_MAX}
-                            step={1}
-                            enabled={resolvedEnabled}
-                            onChange={handleHue}
-                            formatValueText={formatDegrees}
-                        />
-                        <Slider
-                            label="Saturation"
-                            value={hsv.s}
-                            min={0}
-                            max={PERCENT_MAX}
-                            step={1}
-                            enabled={resolvedEnabled}
-                            onChange={handleSaturation}
-                            formatValueText={formatPercent}
-                        />
-                        <Slider
-                            label="Value"
-                            value={hsv.v}
-                            min={0}
-                            max={PERCENT_MAX}
-                            step={1}
-                            enabled={resolvedEnabled}
-                            onChange={handleValue}
-                            formatValueText={formatPercent}
-                        />
-                        {useAlpha ? (
+                        {renderChannelRow(
                             <Slider
-                                label="Alpha"
-                                value={alphaPercent}
+                                label="Hue"
+                                value={hsv.h}
+                                min={0}
+                                max={HUE_MAX}
+                                step={1}
+                                enabled={resolvedEnabled}
+                                onChange={handleHue}
+                                formatValueText={formatDegrees}
+                            />,
+                            'Hue value',
+                            hsv.h,
+                            0,
+                            HUE_MAX,
+                            handleHue,
+                        )}
+                        {renderChannelRow(
+                            <Slider
+                                label="Saturation"
+                                value={hsv.s}
                                 min={0}
                                 max={PERCENT_MAX}
                                 step={1}
                                 enabled={resolvedEnabled}
-                                onChange={handleAlpha}
+                                onChange={handleSaturation}
                                 formatValueText={formatPercent}
-                            />
-                        ) : null}
+                            />,
+                            'Saturation value',
+                            hsv.s,
+                            0,
+                            PERCENT_MAX,
+                            handleSaturation,
+                        )}
+                        {renderChannelRow(
+                            <Slider
+                                label="Value"
+                                value={hsv.v}
+                                min={0}
+                                max={PERCENT_MAX}
+                                step={1}
+                                enabled={resolvedEnabled}
+                                onChange={handleValue}
+                                formatValueText={formatPercent}
+                            />,
+                            'Value value',
+                            hsv.v,
+                            0,
+                            PERCENT_MAX,
+                            handleValue,
+                        )}
+                        {useAlpha
+                            ? renderChannelRow(
+                                  <Slider
+                                      label="Alpha"
+                                      value={alphaPercent}
+                                      min={0}
+                                      max={PERCENT_MAX}
+                                      step={1}
+                                      enabled={resolvedEnabled}
+                                      onChange={handleAlpha}
+                                      formatValueText={formatPercent}
+                                  />,
+                                  'Alpha value',
+                                  alphaPercent,
+                                  0,
+                                  PERCENT_MAX,
+                                  handleAlpha,
+                              )
+                            : null}
                     </>
                 );
             case EColorMode.Hex:

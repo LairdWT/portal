@@ -39,5 +39,12 @@ export type ColorPickerProps = Readonly<
         defaultMode?: EColorMode;
         id?: string;
         enabled?: EEnabledState;
+        // When true, each channel slider (and the alpha slider) renders an
+        // adjacent number-only input that shows the current channel value and
+        // sets it through the same controlled contract. Hex mode is unaffected
+        // (it already has a text input). Default (omitted) keeps the 1.x default
+        // markup and all existing tests/snapshots unchanged. Additive and
+        // frozen-API-safe.
+        channelInputs?: boolean;
     } & Toned
 >;

@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+    type ChannelParseResult,
     type ColorParseResult,
     EColorParseError,
     formatHexColor,
     type HsvColor,
     hsvToRgb,
+    parseChannelInput,
     parseHexColor,
     type RgbaBytes,
     rgbToHsv,
@@ -44,8 +46,24 @@ describe('parseHexColor', (): void => {
         });
     });
 
-    it('rejects lengths other than 6 or 8 with InvalidLength', (): void => {
-        for (const text of ['ABC', '#ABCD', 'ABCDE', '#ABCDEFA', '#ABCDEFABC']) {
+    it('expands 3-digit shorthand by doubling each nibble', (): void => {
+        const result: ColorParseResult = parseHexColor('#FFF');
+        expect(result).toEqual({
+            ok: true,
+            value: { r: 255, g: 255, b: 255, a: 255 },
+        });
+    });
+
+    it('expands 4-digit shorthand including the alpha nibble', (): void => {
+        const result: ColorParseResult = parseHexColor('#abcd');
+        expect(result).toEqual({
+            ok: true,
+            value: { r: 170, g: 187, b: 204, a: 221 },
+        });
+    });
+
+    it('rejects genuinely invalid lengths (5/7/9) with InvalidLength', (): void => {
+        for (const text of ['ABCDE', '#ABCDEFA', '#ABCDEFABC']) {
             const result: ColorParseResult = parseHexColor(text);
             expect(result.ok).toBe(false);
             if (!result.ok) {
@@ -60,6 +78,43 @@ describe('parseHexColor', (): void => {
         if (!result.ok) {
             expect(result.error).toBe(EColorParseError.InvalidDigits);
         }
+    });
+});
+
+describe('parseChannelInput', (): void => {
+    it('accepts an in-range integer', (): void => {
+        const result: ChannelParseResult = parseChannelInput('128', 0, 255);
+        expect(result).toEqual({ ok: true, value: 128 });
+    });
+
+    it('trims surrounding whitespace before parsing', (): void => {
+        const result: ChannelParseResult = parseChannelInput('  42 ', 0, 255);
+        expect(result).toEqual({ ok: true, value: 42 });
+    });
+
+    it('clamps a value above the maximum to the maximum', (): void => {
+        const result: ChannelParseResult = parseChannelInput('999', 0, 255);
+        expect(result).toEqual({ ok: true, value: 255 });
+    });
+
+    it('clamps using the supplied channel bound', (): void => {
+        const result: ChannelParseResult = parseChannelInput('500', 0, 360);
+        expect(result).toEqual({ ok: true, value: 360 });
+    });
+
+    it('rejects a non-numeric string', (): void => {
+        const result: ChannelParseResult = parseChannelInput('abc', 0, 255);
+        expect(result).toEqual({ ok: false });
+    });
+
+    it('rejects an empty string', (): void => {
+        const result: ChannelParseResult = parseChannelInput('', 0, 255);
+        expect(result).toEqual({ ok: false });
+    });
+
+    it('rejects a non-integer numeric string', (): void => {
+        const result: ChannelParseResult = parseChannelInput('1.5', 0, 255);
+        expect(result).toEqual({ ok: false });
     });
 });
 

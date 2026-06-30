@@ -1,0 +1,74 @@
+/*
+ * ChannelInput. The INTERNAL number-only editable input rendered beside each
+ * ColorPicker slider. Modeled on TextField.module.css: the field surface is the
+ * dark tone scrim and the accent reads only as the focus border and ring, so the
+ * tabular digits stay on the high-contrast foreground and never depend on tone for
+ * AA. Tokens and the derived tone vars drive every value; no color or pixel
+ * literal. The beveled compose is paired with a non-zero --portal-bevel-2 radius.
+ * Motion is gated behind prefers-reduced-motion.
+ */
+
+.field {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+}
+
+.input {
+    composes: beveled from '../../theme/surfaces.module.css';
+    box-sizing: border-box;
+
+    /* token-derived width sized for up to 3 digits + suffix; no raw px */
+    inline-size: calc(var(--portal-touch-target-min) * 1.5);
+    min-block-size: var(--portal-touch-target-min); /* 3rem touch floor */
+    padding-inline: var(--portal-space-2);
+    padding-block: var(--portal-space-1);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-bevel-2); /* paired non-zero radius for beveled */
+    background-color: var(--portal-color-surface-0);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-mono); /* tabular digits read as a HUD readout */
+    font-size: var(--portal-size-text-md);
+    text-align: end;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .input {
+        transition:
+            border-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ui-fast) var(--portal-easing-standard);
+    }
+}
+
+.input:focus-visible {
+    border-color: var(--portal-tone-accent);
+    outline: var(--portal-border-thickness-thin) solid var(--portal-color-focus);
+    outline-offset: var(--portal-border-thickness-thin);
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow-strong);
+}
+
+.input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Invalid draft: toned border carries the danger signal; the digits stay on the
+ * high-contrast foreground (AA), never recolored to the danger accent. */
+.input[aria-invalid='true'] {
+    --portal-tone: var(--portal-color-danger);
+
+    border-color: var(--portal-tone-accent);
+}
+
+.srOnly {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}

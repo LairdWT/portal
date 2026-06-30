@@ -50,6 +50,18 @@ export const Disabled: Story = {
     args: { enabled: EEnabledState.Disabled, value: '#A0444D' },
 };
 
+// channelInputs on: each slider gains an adjacent number-only input that shows
+// and edits the exact channel value through the same controlled contract.
+export const WithChannelInputs: Story = {
+    args: { channelInputs: true, value: '#5F6DAC' },
+};
+
+// channelInputs plus alpha: exercises the alpha numeric input alongside the
+// 8-digit hex and the transparency checker.
+export const WithChannelInputsAndAlpha: Story = {
+    args: { channelInputs: true, alpha: true, value: '#5F6DACC0' },
+};
+
 // Two pickers side by side read as one machined-HUD panel family.
 export const Composition: Story = {
     render: (): ReactElement => (

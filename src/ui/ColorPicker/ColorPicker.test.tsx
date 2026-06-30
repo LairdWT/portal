@@ -139,7 +139,9 @@ describe('ColorPicker', (): void => {
         await user.clear(hex);
         await user.type(hex, 'zz');
         expect(hex).toHaveAttribute('aria-invalid', 'true');
-        expect(screen.getByText('Enter 6 or 8 hex digits.')).toBeInTheDocument();
+        expect(
+            screen.getByText('Enter 3, 4, 6, or 8 hex digits.'),
+        ).toBeInTheDocument();
 
         await user.clear(hex);
         await user.type(hex, 'gggggg');
@@ -230,5 +232,128 @@ describe('ColorPicker', (): void => {
         await user.keyboard('{ArrowRight}');
 
         expect(screen.getByLabelText('Hue')).toBeInTheDocument();
+    });
+
+    // E1: the numeric channel value is shown on screen (the input's display value
+    // IS the readout) and does not collide with the slider's accessible name.
+    it('shows a numeric input beside each channel when channelInputs is set', (): void => {
+        render(<ColorPicker label={PICKER_LABEL} value="#102030" channelInputs />);
+
+        expect(screen.getByLabelText('Red')).toBeInTheDocument();
+        expect(screen.getByLabelText('Red value')).toHaveValue('16');
+        expect(screen.getByLabelText('Green value')).toHaveValue('32');
+        expect(screen.getByLabelText('Blue value')).toHaveValue('48');
+    });
+
+    it('renders no channel inputs by default', (): void => {
+        render(<ColorPicker label={PICKER_LABEL} value="#102030" />);
+
+        expect(screen.queryByLabelText('Red value')).not.toBeInTheDocument();
+    });
+
+    // E2: the numeric input writes through the same controlled contract the
+    // slider uses; clamps; rejects non-numeric without emitting; resyncs on blur.
+    it('emits the new hex when a channel number is typed', (): void => {
+        const onValueChange: Mock<(value: string) => void> =
+            vi.fn<(value: string) => void>();
+        render(
+            <ControlledHost
+                label={PICKER_LABEL}
+                value="#102030"
+                channelInputs
+                onValueChange={onValueChange}
+            />,
+        );
+
+        fireEvent.change(screen.getByLabelText('Red value'), {
+            target: { value: '255' },
+        });
+
+        expect(onValueChange).toHaveBeenLastCalledWith('#FF2030');
+    });
+
+    it('clamps an over-range channel number to the maximum', (): void => {
+        const onValueChange: Mock<(value: string) => void> =
+            vi.fn<(value: string) => void>();
+        render(
+            <ControlledHost
+                label={PICKER_LABEL}
+                value="#102030"
+                channelInputs
+                onValueChange={onValueChange}
+            />,
+        );
+
+        fireEvent.change(screen.getByLabelText('Red value'), {
+            target: { value: '999' },
+        });
+
+        expect(onValueChange).toHaveBeenLastCalledWith('#FF2030');
+    });
+
+    it('rejects a non-numeric channel entry without emitting and marks it invalid', (): void => {
+        const onValueChange: Mock<(value: string) => void> =
+            vi.fn<(value: string) => void>();
+        render(
+            <ControlledHost
+                label={PICKER_LABEL}
+                value="#102030"
+                channelInputs
+                onValueChange={onValueChange}
+            />,
+        );
+
+        const redValue: HTMLElement = screen.getByLabelText('Red value');
+        fireEvent.change(redValue, { target: { value: 'abc' } });
+
+        expect(redValue).toHaveAttribute('aria-invalid', 'true');
+        expect(onValueChange).not.toHaveBeenCalled();
+    });
+
+    it('resyncs a channel input to the canonical value on blur', (): void => {
+        render(
+            <ControlledHost label={PICKER_LABEL} value="#102030" channelInputs />,
+        );
+
+        const redValue: HTMLElement = screen.getByLabelText('Red value');
+        fireEvent.change(redValue, { target: { value: 'abc' } });
+        expect(redValue).toHaveValue('abc');
+
+        fireEvent.blur(redValue);
+        expect(redValue).toHaveValue('16');
+    });
+
+    it('disables the channel inputs when the picker is disabled', (): void => {
+        render(
+            <ColorPicker
+                label={PICKER_LABEL}
+                value="#102030"
+                channelInputs
+                enabled={EEnabledState.Disabled}
+            />,
+        );
+
+        expect(screen.getByLabelText('Red value')).toBeDisabled();
+    });
+
+    // E3: hex shorthand (#RGB) is accepted and normalized to the canonical hex.
+    it('accepts hex shorthand and normalizes it', async (): Promise<void> => {
+        const user: UserEvent = userEvent.setup();
+        const onValueChange: Mock<(value: string) => void> =
+            vi.fn<(value: string) => void>();
+        render(
+            <ControlledHost
+                label={PICKER_LABEL}
+                value="#102030"
+                onValueChange={onValueChange}
+            />,
+        );
+
+        await user.click(screen.getByRole('radio', { name: 'Hex' }));
+        const hex: HTMLElement = screen.getByLabelText('Hex');
+
+        await user.clear(hex);
+        await user.type(hex, 'fff');
+        expect(onValueChange).toHaveBeenLastCalledWith('#FFFFFF');
     });
 });

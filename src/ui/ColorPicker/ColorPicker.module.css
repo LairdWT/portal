@@ -105,6 +105,18 @@
     gap: var(--portal-space-3);
 }
 
+/* A slider paired with its optional adjacent numeric input. The slider grows to
+ * fill the row while the fixed-width numeric input sits at the end. */
+.channelRow {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--portal-space-3);
+}
+
+.channelRow > :first-child {
+    flex: 1 1 auto;
+}
+
 .hexField {
     display: flex;
     flex-direction: column;
