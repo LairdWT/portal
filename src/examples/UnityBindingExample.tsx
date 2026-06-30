@@ -181,6 +181,23 @@ export function UnityBindingExample(): ReactElement {
         };
     }, []);
 
+    // Rich readout: the newest wire payload in full (descriptor, value, the
+    // press/held/released interaction, and the stamped time) plus a compact
+    // phase log of the recent edges so all three phases stay visible at once.
+    const latest: FInputWirePayload | undefined = history[0];
+    const readout: string =
+        latest === undefined
+            ? 'Press a control to emit a wire payload.'
+            : [
+                  JSON.stringify(latest, null, 2),
+                  '',
+                  'Recent phases:',
+                  ...history.map(
+                      (payload: FInputWirePayload): string =>
+                          `  ${payload.interaction} @ ${String(payload.timeStampMs)}`,
+                  ),
+              ].join('\n');
+
     return (
         <div style={layoutStyle}>
             <p>
@@ -216,16 +233,7 @@ export function UnityBindingExample(): ReactElement {
                     )}
                 </div>
             </TimeProviderContext.Provider>
-            <pre>
-                {history.length === 0
-                    ? 'Press a control to emit a wire payload.'
-                    : history
-                          .map(
-                              (payload: FInputWirePayload): string =>
-                                  `${payload.interaction} @ ${String(payload.timeStampMs)}`,
-                          )
-                          .join('\n')}
-            </pre>
+            <pre>{readout}</pre>
         </div>
     );
 }
