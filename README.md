@@ -7,7 +7,7 @@ Fiber presentation surface.
 
 ## Demo
 
-![Portal mobile controller: a HUD readout band, a centred distort orb over an interactive rippleGrid shader backdrop, and a metal-trimmed deck holding Start and Select keys, an analog joystick, and an A/B/X/Y action grid](https://raw.githubusercontent.com/LairdWT/portal/main/docs/portal-controller.png)
+![Portal mobile controller: a beveled HUD readout band over a deep shader backdrop, and a metal-trimmed deck holding Start and Select keys, an analog stick, and an A/B/X/Y action grid. The live Storybook adds an animated distort orb over an interactive rippleGrid shader.](https://raw.githubusercontent.com/LairdWT/portal/main/docs/portal-controller.png)
 
 Live, interactive Storybook (every control, the controller showcase with the
 R3F orb backdrop, and the Unity-binding example):
