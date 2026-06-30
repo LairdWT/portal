@@ -48,8 +48,8 @@
 
 .field:focus-within {
     border-color: var(--portal-tone-accent);
-    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
-    outline-offset: var(--portal-space-1);
+    outline: var(--portal-border-thickness-thin) solid var(--portal-color-focus);
+    outline-offset: var(--portal-border-thickness-thin);
     box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow-strong);
 }
 

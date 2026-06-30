@@ -55,6 +55,10 @@
     pointer-events: auto;
 }
 
+.panel:focus-visible {
+    outline: none;
+}
+
 .panel[data-size='sm'] {
     inline-size: min(22rem, calc(100dvw - 2 * var(--portal-space-6)));
 }
