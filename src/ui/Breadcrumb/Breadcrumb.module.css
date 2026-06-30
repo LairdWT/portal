@@ -145,7 +145,7 @@ button.crumbLabel:active:not(:disabled) {
     min-block-size: var(--portal-touch-target-min);
     border: var(--portal-hud-edge-width) solid transparent;
     background:
-        var(--portal-hud-fill) padding-box,
+        linear-gradient(var(--portal-hud-fill), var(--portal-hud-fill)) padding-box,
         var(--portal-gradient-metal) border-box;
     margin-inline-end: calc(-1 * var(--portal-letter-spacing-wide));
     color: var(--portal-color-text-0);

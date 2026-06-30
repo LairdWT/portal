@@ -23,7 +23,7 @@
 .metalTrim {
     border: var(--portal-hud-edge-width) solid transparent;
     background:
-        var(--portal-hud-fill) padding-box,
+        linear-gradient(var(--portal-hud-fill), var(--portal-hud-fill)) padding-box,
         var(--portal-gradient-metal-ring) border-box;
 }
 
@@ -45,7 +45,7 @@
 .metalEdge {
     border: var(--portal-hud-edge-width) solid transparent;
     background:
-        var(--portal-hud-fill) padding-box,
+        linear-gradient(var(--portal-hud-fill), var(--portal-hud-fill)) padding-box,
         var(--portal-gradient-metal) border-box;
 }
 

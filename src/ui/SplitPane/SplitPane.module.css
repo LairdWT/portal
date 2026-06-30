@@ -118,7 +118,7 @@
 .divider[data-active='true'] .handle {
     border-color: transparent;
     background:
-        var(--portal-hud-fill) padding-box,
+        linear-gradient(var(--portal-hud-fill), var(--portal-hud-fill)) padding-box,
         var(--portal-gradient-metal-ring) border-box;
     box-shadow: 0 0 var(--portal-space-2) var(--portal-tone-glow-strong);
 }
