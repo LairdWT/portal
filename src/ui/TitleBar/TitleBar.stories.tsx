@@ -12,6 +12,7 @@ import { ETitleBarLandmark } from './TitleBar.types';
 const meta: Meta<typeof TitleBar> = {
     title: 'UI/TitleBar',
     component: TitleBar,
+    parameters: { layout: 'fullscreen' },
     args: {
         title: 'SAAS RADAR',
     },

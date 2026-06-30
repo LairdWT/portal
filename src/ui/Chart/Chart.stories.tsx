@@ -51,6 +51,7 @@ const FRAME_STYLE: CSSProperties = {
 const meta: Meta<typeof BarChart> = {
     title: 'UI/Chart',
     component: BarChart,
+    parameters: { layout: 'fullscreen' },
     args: {
         label: 'Damage per turn',
         values: BAR_VALUES,

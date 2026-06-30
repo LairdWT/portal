@@ -105,6 +105,7 @@ const SearchableListComponent: (props: SearchableListStoryArgs) => ReactElement 
 const meta: Meta<SearchableListStoryArgs> = {
     title: 'UI/SearchableList',
     component: SearchableListComponent,
+    parameters: { layout: 'fullscreen' },
     args: {
         items: PLANETS,
         searchLabel: 'Filter planets',

@@ -92,6 +92,7 @@ const ListComponent: (props: ListStoryArgs) => ReactElement = List as (
 const meta: Meta<ListStoryArgs> = {
     title: 'UI/List',
     component: ListComponent,
+    parameters: { layout: 'fullscreen' },
     args: {
         items: FRUITS,
         label: 'Fruit',

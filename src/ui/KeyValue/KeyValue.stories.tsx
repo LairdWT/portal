@@ -34,6 +34,7 @@ const longPairs: readonly KeyValuePair[] = [
 const meta: Meta<typeof KeyValue> = {
     title: 'UI/KeyValue',
     component: KeyValue,
+    parameters: { layout: 'fullscreen' },
     args: {
         label: 'Cluster metadata',
         pairs: basePairs,
