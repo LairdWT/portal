@@ -8,5 +8,18 @@ export function isWebGlAvailable(): boolean {
     const canvas: HTMLCanvasElement = document.createElement('canvas');
     const context: RenderingContext | null =
         canvas.getContext('webgl2') ?? canvas.getContext('webgl');
-    return context !== null;
+    if (context === null) {
+        return false;
+    }
+    if (
+        context instanceof WebGLRenderingContext ||
+        context instanceof WebGL2RenderingContext
+    ) {
+        const loseContext: WEBGL_lose_context | null =
+            context.getExtension('WEBGL_lose_context');
+        if (loseContext !== null) {
+            loseContext.loseContext();
+        }
+    }
+    return true;
 }
