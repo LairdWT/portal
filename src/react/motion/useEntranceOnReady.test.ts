@@ -85,6 +85,61 @@ describe('useEntranceOnReady (motion enabled)', (): void => {
         expect(spied.playSpy).toHaveBeenCalledTimes(1);
     });
 
+    it('plays a timeline rebuilt while already ready (reduce-motion toggled off)', (): void => {
+        // Mount with reduced motion ON and already ready: nothing is built or
+        // played, content shows its natural visible state.
+        reducedMotion = true;
+        const spied: SpiedTimeline = buildSpiedTimeline();
+        const preset: StaggerPreset = vi.fn((): Timeline => spied.timeline);
+
+        const view: ReturnType<typeof render> = render(
+            createElement(HarnessComponent, { isReady: true, preset }),
+        );
+        expect(preset).not.toHaveBeenCalled();
+        expect(spied.playSpy).not.toHaveBeenCalled();
+
+        // OS reduce-motion flips OFF while still ready: the build effect re-runs
+        // and rebuilds a fresh paused timeline, but the play-on-transition effect
+        // does NOT re-fire (isReady unchanged). The rebuilt timeline must still end
+        // up playing, not stuck paused at its hidden start offset.
+        reducedMotion = false;
+        act((): void => {
+            view.rerender(
+                createElement(HarnessComponent, { isReady: true, preset }),
+            );
+        });
+
+        expect(preset).toHaveBeenCalledTimes(1);
+        expect(spied.playSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('plays a timeline rebuilt on a preset change while already ready', (): void => {
+        const first: SpiedTimeline = buildSpiedTimeline();
+        const second: SpiedTimeline = buildSpiedTimeline();
+        const firstPreset: StaggerPreset = vi.fn((): Timeline => first.timeline);
+        const secondPreset: StaggerPreset = vi.fn((): Timeline => second.timeline);
+
+        const view: ReturnType<typeof render> = render(
+            createElement(HarnessComponent, { isReady: true, preset: firstPreset }),
+        );
+        // Ready on mount: the first timeline plays (the build effect plays it since
+        // readiness is already true, and the transition effect also fires on mount).
+        expect(first.playSpy).toHaveBeenCalled();
+
+        // A new preset identity rebuilds the timeline while isReady stays true; the
+        // rebuilt timeline must also play (the transition effect will not re-fire).
+        act((): void => {
+            view.rerender(
+                createElement(HarnessComponent, {
+                    isReady: true,
+                    preset: secondPreset,
+                }),
+            );
+        });
+
+        expect(second.playSpy).toHaveBeenCalledTimes(1);
+    });
+
     it('returns a ref object', (): void => {
         const spied: SpiedTimeline = buildSpiedTimeline();
         const view: RenderHookResult<

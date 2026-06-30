@@ -15,6 +15,15 @@ export function useEntranceOnReady<ElementType extends HTMLElement>(
     const ref: RefObject<ElementType | null> = useRef<ElementType | null>(null);
     const timelineRef: RefObject<Timeline | null> = useRef<Timeline | null>(null);
     const prefersReducedMotion: boolean = useReducedMotion();
+    // Mirror the latest readiness so the build effect can play immediately when it
+    // re-runs after readiness has already flipped true (the play-on-transition
+    // effect below would not re-fire because isReady did not change). Synced in a
+    // dedicated effect (refs must not be written during render) and declared before
+    // the build effect so a same-commit readiness change is visible to the rebuild.
+    const isReadyRef: RefObject<boolean> = useRef<boolean>(isReady);
+    useEffect((): void => {
+        isReadyRef.current = isReady;
+    }, [isReady]);
 
     useEffect((): (() => void) | undefined => {
         const node: ElementType | null = ref.current;
@@ -25,6 +34,13 @@ export function useEntranceOnReady<ElementType extends HTMLElement>(
         timeline.pause();
         timeline.seek(0);
         timelineRef.current = timeline;
+        // A rebuild after readiness (e.g. reduce-motion toggled on->off, or a
+        // preset change while already ready) must not leave the fresh timeline
+        // stuck paused at its start offset; play it now since the transition
+        // effect will not re-run on an unchanged isReady.
+        if (isReadyRef.current) {
+            timeline.play();
+        }
         return (): void => {
             timeline.revert();
             timelineRef.current = null;
