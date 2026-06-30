@@ -187,6 +187,12 @@
 }
 
 .actions {
+    /* Lift the title-bar controls above the absolutely-positioned resize grips:
+     * the top-right (ne) corner grip otherwise overlaps the close button and
+     * steals its clicks. A local stacking index (not the overlay-layer token)
+     * keeps the buttons hit-testable regardless of window size. */
+    position: relative;
+    z-index: 1;
     display: flex;
     flex: 0 0 auto;
     align-items: center;
@@ -202,7 +208,10 @@
     min-block-size: var(--portal-touch-target-min);
     margin: 0;
     padding: 0;
-    border: var(--portal-border-thickness-thin) solid transparent;
+
+    /* All three title-bar controls (minimize, maximize, close) share one subtle
+     * beveled box so the close no longer reads as an oversized outlier. */
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
     border-radius: var(--portal-bevel-2);
     background: transparent;
     color: var(--portal-color-text-0);
@@ -226,6 +235,21 @@
 
 .close {
     border-color: var(--portal-tone-border);
+}
+
+/* Minimize: a single thin bar. Maximize: a small beveled square outline. Close:
+ * a drawn cross (two bars). All token-drawn so the controls read as one set, not
+ * ASCII glyphs of differing weights. */
+.minimizeGlyph {
+    inline-size: var(--portal-space-4);
+    block-size: var(--portal-border-thickness-thin);
+    background-color: var(--portal-color-text-0);
+}
+
+.maximizeGlyph {
+    inline-size: var(--portal-space-4);
+    block-size: var(--portal-space-4);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-text-0);
 }
 
 /* A drawn close cross (two thin bars rotated into a +), not the letter X, sized

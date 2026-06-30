@@ -657,7 +657,10 @@ export function Window(props: WindowProps): ReactElement | null {
                                 aria-label={minimizeLabel}
                                 onClick={handleToggleMinimize}
                             >
-                                <span aria-hidden="true">{'_'}</span>
+                                <span
+                                    className={styles.minimizeGlyph}
+                                    aria-hidden="true"
+                                />
                             </button>
                         ) : null}
                         {maximizable ? (
@@ -670,7 +673,10 @@ export function Window(props: WindowProps): ReactElement | null {
                                 }
                                 onClick={handleToggleMaximize}
                             >
-                                <span aria-hidden="true">{'[]'}</span>
+                                <span
+                                    className={styles.maximizeGlyph}
+                                    aria-hidden="true"
+                                />
                             </button>
                         ) : null}
                         <button
