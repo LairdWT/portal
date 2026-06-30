@@ -228,6 +228,33 @@
     border-color: var(--portal-tone-border);
 }
 
+/* A drawn close cross (two thin bars rotated into a +), not the letter X, sized
+ * well inside the affordance box so it reads as a compact close control. */
+.closeGlyph {
+    position: relative;
+    inline-size: var(--portal-space-4);
+    block-size: var(--portal-space-4);
+}
+
+.closeGlyph::before,
+.closeGlyph::after {
+    content: '';
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 0;
+    inline-size: 100%;
+    block-size: var(--portal-border-thickness-thin);
+    background-color: var(--portal-color-text-0);
+}
+
+.closeGlyph::before {
+    transform: translateY(-50%) rotate(45deg);
+}
+
+.closeGlyph::after {
+    transform: translateY(-50%) rotate(-45deg);
+}
+
 .body {
     composes: beveled from '../../theme/surfaces.module.css';
     box-sizing: border-box;

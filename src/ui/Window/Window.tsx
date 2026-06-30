@@ -682,7 +682,10 @@ export function Window(props: WindowProps): ReactElement | null {
                             aria-label="Close"
                             onClick={handleClose}
                         >
-                            <span aria-hidden="true">{'X'}</span>
+                            <span
+                                className={styles.closeGlyph}
+                                aria-hidden="true"
+                            />
                         </button>
                     </div>
                 </div>

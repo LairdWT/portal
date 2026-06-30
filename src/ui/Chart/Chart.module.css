@@ -59,7 +59,6 @@
 
 .bar {
     fill: var(--portal-tone-accent);
-    filter: drop-shadow(0 0 var(--portal-space-1) var(--portal-tone-glow));
 }
 
 /* StackedBar - left-to-right weighted slices with brushed-metal dividers. */
@@ -125,7 +124,6 @@
 
 .gaugeFill {
     fill: var(--portal-tone-accent);
-    filter: drop-shadow(0 0 var(--portal-space-1) var(--portal-tone-glow));
 }
 
 /* RankedBars - top-to-bottom focusable gauge rows. */

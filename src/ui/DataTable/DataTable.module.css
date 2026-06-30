@@ -35,14 +35,15 @@
     cursor: not-allowed;
 }
 
-/* The sticky console strip. A solid highlight fill carries the header, with a
- * HUD edge along its block-end so body rows scroll cleanly under it. */
+/* The sticky console strip. A subtly elevated surface carries the header with a
+ * tone-accent edge along its block-end as the highlight cue (not a bright fill),
+ * so body rows scroll cleanly under it. */
 .headerGroup {
     position: sticky;
     inset-block-start: 0;
     z-index: var(--portal-z-overlay);
-    background-color: var(--portal-color-accent-highlight);
-    border-block-end: var(--portal-hud-edge-width) solid var(--portal-tone-border);
+    background-color: var(--portal-color-surface-1);
+    border-block-end: var(--portal-hud-edge-width) solid var(--portal-tone-accent);
 }
 
 .headerRow {
@@ -64,11 +65,10 @@
     block-size: 100%;
     border-radius: var(--portal-bevel-1);
 
-    /* The header strip is now the light highlight fill, so the label sits on the
-     * darkest background token for a contrast-safe AA read; an arbitrary tone (or
-     * the default accent) cannot guarantee 4.5:1, so tone stays on the carets and
-     * edges while the label stays on --portal-color-bg-0 (the Select precedent). */
-    color: var(--portal-color-bg-0);
+    /* The header strip is a dark elevated surface, so the label uses the bright
+     * accent-highlight (AA on surface-1, the Select precedent); an arbitrary tone
+     * cannot guarantee 4.5:1, so tone stays on the carets and the accent edge. */
+    color: var(--portal-color-accent-highlight);
     font-size: var(--portal-size-text-sm);
     font-weight: var(--portal-weight-label-bold);
     letter-spacing: var(--portal-letter-spacing-wide);
