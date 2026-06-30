@@ -32,7 +32,8 @@
     display: block;
     block-size: var(--portal-space-2);
     overflow: hidden;
-    border-radius: var(--portal-radius-pill);
+    border-radius: var(--portal-bevel-1);
+    corner-shape: var(--portal-corner-shape);
     background-color: var(--portal-color-surface-1);
 }
 
@@ -42,7 +43,8 @@
     display: block;
     block-size: 100%;
     inline-size: clamp(0%, var(--portal-bar-fill), 100%);
-    border-radius: var(--portal-radius-pill);
+    border-radius: var(--portal-bevel-1);
+    corner-shape: var(--portal-corner-shape);
     background-color: var(--portal-color-accent-highlight);
     transition: inline-size var(--portal-duration-frame-base)
         var(--portal-easing-standard);
@@ -56,7 +58,7 @@
     font-variant-numeric: tabular-nums;
 }
 
-@container (width >= 20rem) {
+@container (width >= 16rem) {
     .readout {
         grid-template-columns: minmax(5rem, 1fr) minmax(0, 3fr) auto;
         gap: var(--portal-space-3);

@@ -13,10 +13,11 @@
 
     --dpad-size: clamp(
         calc(var(--portal-touch-target-min) * 3),
-        45vmin,
-        calc(var(--portal-touch-target-max) * 5)
+        36vmin,
+        calc(var(--portal-touch-target-max) * 3.5)
     );
     --dpad-segment-size: var(--portal-touch-target-min);
+    --dpad-glyph-size: var(--portal-space-3);
 
     position: relative;
     display: block;
@@ -68,51 +69,80 @@
     pointer-events: none;
 }
 
+.segment::after {
+    content: '';
+    position: absolute;
+    inset-inline-start: 50%;
+    inset-block-start: 50%;
+    inline-size: var(--dpad-glyph-size);
+    block-size: calc(var(--dpad-glyph-size) * 0.866); /* sqrt(3)/2 -> equilateral */
+    background-color: var(--portal-color-text-0);
+    clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+    transform: translate(-50%, -50%) rotate(var(--dpad-glyph-rotate, 0deg));
+    pointer-events: none;
+}
+
 .segment:focus-visible {
     outline: var(--portal-border-thickness-thin) solid var(--portal-color-focus);
     outline-offset: var(--portal-space-1);
 }
 
 .segment[data-segment='up'] {
+    --dpad-glyph-rotate: 0deg;
+
     inset-block-start: var(--portal-space-2);
     inset-inline-start: 50%;
     transform: translateX(-50%);
 }
 
 .segment[data-segment='down'] {
+    --dpad-glyph-rotate: 180deg;
+
     inset-block-end: var(--portal-space-2);
     inset-inline-start: 50%;
     transform: translateX(-50%);
 }
 
 .segment[data-segment='left'] {
+    --dpad-glyph-rotate: 270deg;
+
     inset-block-start: 50%;
     inset-inline-start: var(--portal-space-2);
     transform: translateY(-50%);
 }
 
 .segment[data-segment='right'] {
+    --dpad-glyph-rotate: 90deg;
+
     inset-block-start: 50%;
     inset-inline-end: var(--portal-space-2);
     transform: translateY(-50%);
 }
 
 .segment[data-segment='up-left'] {
+    --dpad-glyph-rotate: 315deg;
+
     inset-block-start: var(--portal-space-2);
     inset-inline-start: var(--portal-space-2);
 }
 
 .segment[data-segment='up-right'] {
+    --dpad-glyph-rotate: 45deg;
+
     inset-block-start: var(--portal-space-2);
     inset-inline-end: var(--portal-space-2);
 }
 
 .segment[data-segment='down-left'] {
+    --dpad-glyph-rotate: 225deg;
+
     inset-block-end: var(--portal-space-2);
     inset-inline-start: var(--portal-space-2);
 }
 
 .segment[data-segment='down-right'] {
+    --dpad-glyph-rotate: 135deg;
+
     inset-block-end: var(--portal-space-2);
     inset-inline-end: var(--portal-space-2);
 }

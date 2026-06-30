@@ -38,11 +38,13 @@
 }
 
 .track {
-    composes: beveled metalEdge from '../../theme/surfaces.module.css';
+    composes: beveled from '../../theme/surfaces.module.css';
     position: relative;
     flex: none;
     inline-size: var(--toggle-track-inline-size);
     block-size: var(--portal-touch-target-min);
+    border: var(--portal-hud-edge-width) solid var(--portal-color-border);
+    background-color: var(--portal-color-surface-0);
     border-radius: var(--portal-bevel-2);
 }
 
@@ -54,12 +56,13 @@
 }
 
 .toggle[data-checked='checked'] .track {
-    border-color: transparent;
-    background-image:
-        linear-gradient(var(--portal-tone-fill), var(--portal-tone-fill))
-            padding-box,
-        var(--portal-gradient-metal) border-box;
+    border-color: var(--portal-color-accent-highlight);
+    background: var(--portal-gradient-button-face);
     box-shadow: 0 0 var(--portal-space-2) var(--portal-tone-glow);
+}
+
+.toggle:disabled .track {
+    border-color: var(--portal-color-accent);
 }
 
 .knob {
@@ -73,7 +76,7 @@
     );
     aspect-ratio: 1;
     border-radius: var(--portal-bevel-1);
-    background: var(--portal-gradient-metal);
+    background: var(--portal-gradient-button-face);
     transform: translateY(-50%);
 }
 
@@ -89,7 +92,7 @@
         var(--toggle-track-inline-size) - 55% - var(--toggle-knob-inset) -
             var(--portal-border-thickness-thin)
     );
-    background: var(--portal-color-metal-4);
+    background: var(--portal-color-accent-highlight);
 }
 
 .label {

@@ -67,15 +67,15 @@
 /* FRONT parallax layer. Translates from the host-inherited offset at the larger
  * multiplier so it leads the BACK layer for depth, mirroring ControllerPad. */
 .thumb {
-    composes: beveled metalTrim from '../../theme/surfaces.module.css';
     composes: toneScope from '../../ui/tone.module.css';
+    background: var(--portal-tone-accent);
     position: absolute;
     inset-block-start: calc(50% + var(--portal-pad-y, 0) * 45%);
     inset-inline-start: calc(50% + var(--portal-pad-x, 0) * 45%);
-    inline-size: var(--portal-space-4);
-    block-size: var(--portal-space-4);
+    inline-size: var(--portal-space-5);
+    block-size: var(--portal-space-5);
     aspect-ratio: 1;
-    border-radius: var(--portal-bevel-1);
+    border-radius: var(--portal-radius-pill);
     transform: translate(-50%, -50%);
     box-shadow: 0 0 var(--portal-space-2) var(--portal-tone-glow);
     pointer-events: none;
