@@ -35,36 +35,13 @@ export default defineConfig({
             // resolve under node16, nodenext, and bundler. See
             // C:/dev/temp/portal-1.0-stabilization/residual-a-node16-dts-plan.md.
             // NOTE: the api-extractor engine bundled by vite-plugin-dts is older
-            // than this repo's TypeScript, so the dts rollup would print a
-            // non-fatal "newer than the bundled compiler engine" advisory once
-            // per lib entry. The emitted .d.ts is proven correct and is gated by
-            // the type legs of `pnpm smoke:pack`, and no api-extractor release
-            // supports TS 6 yet, so the cosmetic notice is suppressed via the
-            // rollupOptions.messageCallback below to keep the build output clean.
-            // Revisit (and drop the suppression) once api-extractor ships a
+            // than this repo's TypeScript, so the dts rollup prints a non-fatal
+            // "newer than the bundled compiler engine" advisory (once per lib
+            // entry). The emitted .d.ts is proven correct and is gated by the
+            // type legs of `pnpm smoke:pack`; no api-extractor release supports
+            // TS 6 yet. Revisit (and drop this note) once api-extractor ships a
             // TS6-capable engine.
             rollupTypes: true,
-            // Suppress ONLY the api-extractor compiler-version compatibility
-            // notice (see the rollupTypes note above); every other api-extractor
-            // message still surfaces. messageCallback is passed straight through
-            // to Extractor.invoke by vite-plugin-dts.
-            rollupOptions: {
-                messageCallback: (message: {
-                    messageId: string;
-                    handled: boolean;
-                }): void => {
-                    // 'console-preamble' = "Analysis will use the bundled
-                    // TypeScript version ___"; 'console-compiler-version-notice'
-                    // = "...newer than the bundled compiler engine ___". Both
-                    // are the cosmetic TS-version notice.
-                    if (
-                        message.messageId === 'console-preamble' ||
-                        message.messageId === 'console-compiler-version-notice'
-                    ) {
-                        message.handled = true;
-                    }
-                },
-            },
             insertTypesEntry: true,
             include: ['src'],
             exclude: [
