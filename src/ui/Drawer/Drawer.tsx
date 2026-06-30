@@ -381,9 +381,7 @@ function OverlayDrawer(props: DrawerOverlayProps): ReactElement | null {
                         aria-label={closeLabel}
                         onClick={handleClose}
                     >
-                        <span className={styles.marker} aria-hidden="true">
-                            [x]
-                        </span>
+                        <span className={styles.closeGlyph} aria-hidden="true" />
                     </button>
                 </div>
                 <div id={bodyId} className={styles.body}>

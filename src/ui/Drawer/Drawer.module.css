@@ -116,8 +116,7 @@
 
 /* Beveled HUD controls (collapse chevron + overlay close), both clearing the 3rem
  * touch floor. */
-.chevron,
-.close {
+.chevron {
     composes: beveled from '../../theme/surfaces.module.css';
     display: inline-flex;
     flex: none;
@@ -133,24 +132,28 @@
     touch-action: manipulation;
 }
 
+/* The close uses the shared compact control + drawn cross so it matches every
+ * other panel's close affordance; the chevron toggle keeps its own HUD marker. */
 .close {
+    composes: compactControl from '../../theme/surfaces.module.css';
     margin-inline-start: auto;
 }
 
-.chevron:disabled,
-.close:disabled {
+.closeGlyph {
+    composes: crossGlyph from '../../theme/surfaces.module.css';
+}
+
+.chevron:disabled {
     opacity: 0.5;
     cursor: not-allowed;
 }
 
-.chevron:focus-visible,
-.close:focus-visible {
+.chevron:focus-visible {
     outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
     outline-offset: var(--portal-space-1);
 }
 
-.chevron:active:not(:disabled),
-.close:active:not(:disabled) {
+.chevron:active:not(:disabled) {
     transform: scale(0.97);
 }
 

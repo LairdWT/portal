@@ -681,10 +681,7 @@ export function Window(props: WindowProps): ReactElement | null {
                         ) : null}
                         <button
                             type="button"
-                            className={joinClassNames(
-                                styles.affordance,
-                                styles.close,
-                            )}
+                            className={styles.affordance}
                             aria-label="Close"
                             onClick={handleClose}
                         >

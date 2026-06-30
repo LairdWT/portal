@@ -199,68 +199,19 @@
     gap: var(--portal-space-1);
 }
 
+/* All three title-bar controls use the shared compact control button so they
+ * read identically to the close/dismiss affordances on every other panel. */
 .affordance {
-    composes: beveled from '../../theme/surfaces.module.css';
+    composes: compactControl from '../../theme/surfaces.module.css';
 
-    /* Shared glyph size for all three controls (1.25rem). */
+    /* Shared glyph size for the minimize/maximize marks; the close cross reads
+     * the same size through --portal-cross-size. */
     --window-glyph-size: calc(var(--portal-space-4) + var(--portal-space-1));
-
-    position: relative;
-    display: inline-flex;
-    flex: 0 0 auto;
-    align-items: center;
-    justify-content: center;
-
-    /* A compact 2rem visible box (smaller than the 3rem title-bar height, so the
-     * controls sit with breathing room) carrying a larger glyph. The 3rem touch
-     * target is preserved by the transparent ::after hit extender below. */
-    inline-size: var(--portal-space-6);
-    block-size: var(--portal-space-6);
-    margin: 0;
-    padding: 0;
-
-    /* All three title-bar controls (minimize, maximize, close) share one subtle
-     * beveled box (a light bevel-1 chamfer) so the close no longer reads as an
-     * oversized outlier. */
-    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
-    border-radius: var(--portal-bevel-1);
-    background: transparent;
-    color: var(--portal-color-text-0);
-    font-family: inherit;
-    font-size: var(--portal-size-text-md);
-    line-height: var(--portal-line-height-tight);
-    cursor: pointer;
-    touch-action: manipulation;
+    --portal-cross-size: var(--window-glyph-size);
 }
 
-/* Extend the clickable area to the 3rem touch floor over the title bar's full
- * height without enlarging the visible 2rem box. Block axis only, so adjacent
- * controls never overlap each other's hit area. */
-.affordance::after {
-    content: '';
-    position: absolute;
-    inset-inline: 0;
-    inset-block: calc((var(--portal-space-6) - var(--portal-touch-target-min)) / 2);
-}
-
-.affordance:focus-visible {
-    outline: var(--portal-border-thickness-thin) solid var(--portal-color-focus);
-    outline-offset: calc(-1 * var(--portal-border-thickness-thin));
-}
-
-.affordance:active:not(:disabled) {
-    border-color: var(--portal-tone-border);
-    background: var(--portal-color-metal-0);
-    transform: scale(0.97);
-}
-
-.close {
-    border-color: var(--portal-tone-border);
-}
-
-/* Minimize: a single thin bar. Maximize: a small beveled square outline. Close:
- * a drawn cross (two bars). All token-drawn so the controls read as one set, not
- * ASCII glyphs of differing weights. */
+/* Minimize: a single thin bar. Maximize: a small square outline. Close: the
+ * shared drawn cross. All token-drawn so the controls read as one set. */
 .minimizeGlyph {
     inline-size: var(--window-glyph-size);
     block-size: var(--portal-border-thickness-thin);
@@ -273,31 +224,8 @@
     border: var(--portal-border-thickness-thin) solid var(--portal-color-text-0);
 }
 
-/* A drawn close cross (two thin bars rotated into a +), not the letter X, sized
- * well inside the affordance box so it reads as a compact close control. */
 .closeGlyph {
-    position: relative;
-    inline-size: var(--window-glyph-size);
-    block-size: var(--window-glyph-size);
-}
-
-.closeGlyph::before,
-.closeGlyph::after {
-    content: '';
-    position: absolute;
-    inset-block-start: 50%;
-    inset-inline-start: 0;
-    inline-size: 100%;
-    block-size: var(--portal-border-thickness-thin);
-    background-color: var(--portal-color-text-0);
-}
-
-.closeGlyph::before {
-    transform: translateY(-50%) rotate(45deg);
-}
-
-.closeGlyph::after {
-    transform: translateY(-50%) rotate(-45deg);
+    composes: crossGlyph from '../../theme/surfaces.module.css';
 }
 
 .body {

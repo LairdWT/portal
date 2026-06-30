@@ -50,50 +50,13 @@
     letter-spacing: var(--portal-letter-spacing-wide);
 }
 
+/* The shared compact control button + drawn cross, so the chip's remove reads
+ * identically to every other close/dismiss affordance. */
 .remove {
-    composes: beveled from '../../theme/surfaces.module.css';
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-inline-size: var(--portal-touch-target-min);
-    min-block-size: var(--portal-touch-target-min);
-    padding: var(--portal-space-1);
-    border: var(--portal-border-thickness-thin) solid transparent;
-    border-radius: var(--portal-bevel-1);
-    background-color: transparent;
-    color: var(--portal-color-text-1);
-    cursor: pointer;
-    touch-action: manipulation;
+    composes: compactControl from '../../theme/surfaces.module.css';
     user-select: none;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .remove {
-        transition:
-            background-color var(--portal-duration-ui-fast)
-                var(--portal-easing-standard),
-            border-color var(--portal-duration-ui-fast)
-                var(--portal-easing-standard),
-            color var(--portal-duration-ui-fast) var(--portal-easing-standard);
-    }
-}
-
-.remove:focus-visible {
-    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
-    outline-offset: var(--portal-space-1);
-}
-
-.remove:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.remove:hover:not(:disabled) {
-    border-color: var(--portal-tone-border);
-    color: var(--portal-color-text-0);
-}
-
 .removeGlyph {
-    font-size: var(--portal-size-text-md);
-    line-height: var(--portal-line-height-tight);
+    composes: crossGlyph from '../../theme/surfaces.module.css';
 }

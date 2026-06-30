@@ -73,9 +73,7 @@ export function Chip({
                         remove();
                     }}
                 >
-                    <span className={styles.removeGlyph} aria-hidden="true">
-                        x
-                    </span>
+                    <span className={styles.removeGlyph} aria-hidden="true" />
                 </button>
             ) : null}
         </span>

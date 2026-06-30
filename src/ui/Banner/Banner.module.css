@@ -54,74 +54,12 @@
     color: var(--portal-color-text-0);
 }
 
+/* The shared compact control button + drawn cross, so the banner's dismiss reads
+ * identically to every other close/dismiss affordance (and Toast inherits it). */
 .dismiss {
-    composes: beveled from '../../theme/surfaces.module.css';
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex: 0 0 auto;
-    min-inline-size: var(--portal-touch-target-min);
-    min-block-size: var(--portal-touch-target-min);
-    padding: var(--portal-space-2);
-    border: var(--portal-border-thickness-thin) solid transparent;
-    border-radius: var(--portal-bevel-1);
-    background-color: transparent;
-    color: var(--portal-color-text-1);
-    cursor: pointer;
-    touch-action: manipulation;
+    composes: compactControl from '../../theme/surfaces.module.css';
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .dismiss {
-        transition:
-            transform var(--portal-duration-ui-fast) var(--portal-easing-standard),
-            border-color var(--portal-duration-ui-fast)
-                var(--portal-easing-standard),
-            color var(--portal-duration-ui-fast) var(--portal-easing-standard);
-    }
-}
-
-.dismiss:focus-visible {
-    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
-    outline-offset: var(--portal-space-1);
-}
-
-.dismiss:hover:not(:disabled) {
-    color: var(--portal-color-text-0);
-    border-color: var(--portal-tone-border);
-}
-
-.dismiss:active:not(:disabled) {
-    transform: scale(0.97);
-}
-
-/*
- * The dismiss glyph is a CSS-drawn cross (two rotated bars on currentColor), so
- * the close affordance carries no literal text or icon dependency. It is
- * decorative (aria-hidden); the button's aria-label "Dismiss" names the action.
- */
 .dismissGlyph {
-    position: relative;
-    inline-size: var(--portal-space-4);
-    block-size: var(--portal-space-4);
-}
-
-.dismissGlyph::before,
-.dismissGlyph::after {
-    content: '';
-    position: absolute;
-    inset-block-start: 50%;
-    inset-inline-start: 0;
-    inline-size: 100%;
-    block-size: var(--portal-border-thickness-thin);
-    border-radius: var(--portal-radius-pill);
-    background-color: currentcolor;
-}
-
-.dismissGlyph::before {
-    transform: rotate(45deg);
-}
-
-.dismissGlyph::after {
-    transform: rotate(-45deg);
+    composes: crossGlyph from '../../theme/surfaces.module.css';
 }

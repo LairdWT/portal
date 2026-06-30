@@ -67,3 +67,97 @@
 .pressScale {
     transform: scale(var(--portal-press-scale));
 }
+
+/* Shared compact header/panel control button (close, dismiss, minimize, etc.).
+ * A 2rem visible box - smaller than the 3rem title-bar/header height so the
+ * control sits with breathing room - with the touch target restored to the 3rem
+ * floor by a transparent block-axis ::after. One subtle beveled box, hover/focus/
+ * active/disabled treatment shared so every panel's controls read identically.
+ * Consumers add only context (e.g. margin to push a close to the inline end). */
+.compactControl {
+    composes: beveled;
+    position: relative;
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    inline-size: var(--portal-space-6);
+    block-size: var(--portal-space-6);
+    margin: 0;
+    padding: 0;
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-bevel-1);
+    background: transparent;
+    color: var(--portal-color-text-0);
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.compactControl::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    inset-block: calc((var(--portal-space-6) - var(--portal-touch-target-min)) / 2);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .compactControl {
+        transition:
+            border-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard),
+            transform var(--portal-duration-ui-fast) var(--portal-easing-standard);
+    }
+}
+
+.compactControl:focus-visible {
+    outline: var(--portal-border-thickness-thin) solid var(--portal-color-focus);
+    outline-offset: calc(-1 * var(--portal-border-thickness-thin));
+}
+
+.compactControl:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.compactControl:hover:not(:disabled) {
+    border-color: var(--portal-tone-border);
+}
+
+.compactControl:active:not(:disabled) {
+    transform: scale(var(--portal-press-scale));
+}
+
+/* Token-drawn close/dismiss/remove cross: two rotated bars on currentColor, so
+ * every close affordance shares one glyph instead of an ASCII 'x' or '[x]'. Size
+ * via --portal-cross-size (default 1.25rem); color follows the button. */
+.crossGlyph {
+    position: relative;
+    inline-size: var(
+        --portal-cross-size,
+        calc(var(--portal-space-4) + var(--portal-space-1))
+    );
+    block-size: var(
+        --portal-cross-size,
+        calc(var(--portal-space-4) + var(--portal-space-1))
+    );
+}
+
+.crossGlyph::before,
+.crossGlyph::after {
+    content: '';
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 0;
+    inline-size: 100%;
+    block-size: var(--portal-border-thickness-thin);
+    border-radius: var(--portal-radius-pill);
+    background-color: currentcolor;
+}
+
+.crossGlyph::before {
+    transform: translateY(-50%) rotate(45deg);
+}
+
+.crossGlyph::after {
+    transform: translateY(-50%) rotate(-45deg);
+}
