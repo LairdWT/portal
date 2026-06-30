@@ -59,4 +59,8 @@ export type DPadProps = Readonly<{
     onDirectionChange?: (direction: EDpadDirection) => void;
     onSignal?: (signal: InputSignal) => void;
     descriptor?: InputDescriptor;
+    // Opt-in (default false): when true the pointer gesture only starts on the
+    // primary (left/touch) button, forwarded to usePointerControl. Unset leaves
+    // the gesture behavior unchanged (any button starts it).
+    primaryButtonOnly?: boolean;
 }>;

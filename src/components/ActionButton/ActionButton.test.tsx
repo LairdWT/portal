@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
 
@@ -101,5 +101,42 @@ describe('ActionButton', (): void => {
             'data-bevel-corners',
             'none',
         );
+    });
+
+    it('ignores a secondary-button press when primaryButtonOnly is set', (): void => {
+        const onPress: Mock<() => void> = vi.fn<() => void>();
+        render(
+            <ActionButton
+                label={BUTTON_LABEL}
+                enabled={EEnabledState.Enabled}
+                onPress={onPress}
+                primaryButtonOnly
+            />,
+        );
+
+        fireEvent.pointerDown(screen.getByRole('button', { name: BUTTON_LABEL }), {
+            pointerId: 1,
+            button: 2,
+        });
+
+        expect(onPress).not.toHaveBeenCalled();
+    });
+
+    it('still presses on a secondary button by default (primaryButtonOnly unset)', (): void => {
+        const onPress: Mock<() => void> = vi.fn<() => void>();
+        render(
+            <ActionButton
+                label={BUTTON_LABEL}
+                enabled={EEnabledState.Enabled}
+                onPress={onPress}
+            />,
+        );
+
+        fireEvent.pointerDown(screen.getByRole('button', { name: BUTTON_LABEL }), {
+            pointerId: 1,
+            button: 2,
+        });
+
+        expect(onPress).toHaveBeenCalledTimes(1);
     });
 });

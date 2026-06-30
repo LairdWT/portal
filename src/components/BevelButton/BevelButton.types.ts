@@ -20,4 +20,8 @@ export type BevelButtonProps = Readonly<{
     onRelease?: (() => void) | undefined;
     onSignal?: ((signal: InputSignal) => void) | undefined;
     descriptor?: InputDescriptor | undefined;
+    // Opt-in (default false): when true the press only starts on the primary
+    // (left/touch) button, forwarded to useDigitalPress. Unset leaves the press
+    // behavior unchanged (any button starts it).
+    primaryButtonOnly?: boolean | undefined;
 }>;

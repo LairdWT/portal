@@ -33,4 +33,8 @@ export type ActionButtonProps = Readonly<{
     onRelease?: () => void;
     onSignal?: (signal: InputSignal) => void;
     descriptor?: InputDescriptor;
+    // Opt-in (default false): when true the press only starts on the primary
+    // (left/touch) button, forwarded to useDigitalPress. Unset leaves the press
+    // behavior unchanged (any button starts it).
+    primaryButtonOnly?: boolean;
 }>;

@@ -32,7 +32,15 @@ export type DigitalPressOptions = Readonly<{
     onRelease?: (() => void) | undefined;
     onSignal?: ((signal: InputSignal) => void) | undefined;
     descriptor?: InputDescriptor | undefined;
+    // Opt-in (default false): when true the press only starts on the primary
+    // (left/touch) button, mirroring usePointerDrag. When false/unset the
+    // pointerdown handler is unchanged and starts a press on any button.
+    primaryButtonOnly?: boolean | undefined;
 }>;
+
+// Primary pointer button index, matching usePointerDrag.ts. Touch pointers
+// always report 0, so the opt-in gate never affects touch.
+const PRIMARY_BUTTON: number = 0;
 
 export type DigitalPressBinding = Readonly<{
     pressState: EPressState;
@@ -47,6 +55,7 @@ export function useDigitalPress({
     onRelease,
     onSignal,
     descriptor,
+    primaryButtonOnly = false,
 }: DigitalPressOptions): DigitalPressBinding {
     const [pressState, setPressState]: [
         EPressState,
@@ -74,6 +83,9 @@ export function useDigitalPress({
     const onPointerDown: (event: PointerEvent<HTMLButtonElement>) => void =
         useCallback(
             (event: PointerEvent<HTMLButtonElement>): void => {
+                if (primaryButtonOnly && event.button !== PRIMARY_BUTTON) {
+                    return;
+                }
                 switch (enabled) {
                     case EEnabledState.Disabled:
                         return;
@@ -84,7 +96,7 @@ export function useDigitalPress({
                         emitDigital(true, EInputInteraction.Press);
                 }
             },
-            [enabled, onPress, emitDigital],
+            [enabled, onPress, emitDigital, primaryButtonOnly],
         );
 
     const onPointerUp: () => void = useCallback((): void => {

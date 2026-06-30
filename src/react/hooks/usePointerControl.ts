@@ -23,6 +23,10 @@ export type PointerControlOptions = Readonly<{
     deadZone?: number;
     disabled?: boolean;
     onActiveChange?: (active: boolean) => void;
+    // Opt-in (default false): when true the gesture only starts on the primary
+    // (left/touch) button, mirroring usePointerDrag. When false/unset the
+    // pointerdown handler is unchanged and starts on any button.
+    primaryButtonOnly?: boolean;
 }>;
 
 export type PointerControlBinding<ElementType extends HTMLElement> = Readonly<{
@@ -35,11 +39,16 @@ export type PointerControlBinding<ElementType extends HTMLElement> = Readonly<{
 
 const CENTERED_AXIS: Axis2D = { x: 0, y: 0 };
 
+// Primary pointer button index, matching usePointerDrag.ts. Touch pointers
+// always report 0, so the opt-in gate never affects touch.
+const PRIMARY_BUTTON: number = 0;
+
 export function usePointerControl<ElementType extends HTMLElement>({
     onValue,
     deadZone = 0,
     disabled = false,
     onActiveChange,
+    primaryButtonOnly = false,
 }: PointerControlOptions): PointerControlBinding<ElementType> {
     const elementRef: RefObject<ElementType | null> = useRef<ElementType | null>(
         null,
@@ -76,6 +85,9 @@ export function usePointerControl<ElementType extends HTMLElement>({
                 if (disabled) {
                     return;
                 }
+                if (primaryButtonOnly && event.button !== PRIMARY_BUTTON) {
+                    return;
+                }
                 if (activePointerIdRef.current !== null) {
                     return;
                 }
@@ -84,7 +96,7 @@ export function usePointerControl<ElementType extends HTMLElement>({
                 onActiveChange?.(true);
                 sample(event);
             },
-            [disabled, sample, onActiveChange],
+            [disabled, sample, onActiveChange, primaryButtonOnly],
         );
 
     const onPointerMove: (event: ReactPointerEvent<ElementType>) => void =

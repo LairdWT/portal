@@ -171,6 +171,65 @@ describe('DPad', () => {
         expect(onDirectionChange).toHaveBeenLastCalledWith(EDpadDirection.None);
     });
 
+    it('ignores a secondary-button pointer gesture when primaryButtonOnly is set', () => {
+        const onDirectionChange: Mock<(direction: EDpadDirection) => void> =
+            vi.fn<(direction: EDpadDirection) => void>();
+        render(
+            <DPad
+                label={PAD_LABEL}
+                mode={EDpadMode.EightWay}
+                onDirectionChange={onDirectionChange}
+                primaryButtonOnly
+            />,
+        );
+
+        const group: HTMLElement = screen.getByRole('group', {
+            name: PAD_LABEL,
+        });
+        const surface: Element | null = group.firstElementChild;
+        if (surface === null) {
+            throw new Error('Expected a pointer surface element.');
+        }
+
+        fireEvent.pointerDown(surface, {
+            pointerId: ACTIVE_POINTER_ID,
+            button: 2,
+            clientX: 200,
+            clientY: 100,
+        });
+
+        expect(onDirectionChange).not.toHaveBeenCalled();
+    });
+
+    it('still resolves a secondary-button pointer gesture by default (primaryButtonOnly unset)', () => {
+        const onDirectionChange: Mock<(direction: EDpadDirection) => void> =
+            vi.fn<(direction: EDpadDirection) => void>();
+        render(
+            <DPad
+                label={PAD_LABEL}
+                mode={EDpadMode.EightWay}
+                onDirectionChange={onDirectionChange}
+            />,
+        );
+
+        const group: HTMLElement = screen.getByRole('group', {
+            name: PAD_LABEL,
+        });
+        const surface: Element | null = group.firstElementChild;
+        if (surface === null) {
+            throw new Error('Expected a pointer surface element.');
+        }
+
+        fireEvent.pointerDown(surface, {
+            pointerId: ACTIVE_POINTER_ID,
+            button: 2,
+            clientX: 200,
+            clientY: 100,
+        });
+
+        expect(onDirectionChange).toHaveBeenLastCalledWith(EDpadDirection.Right);
+    });
+
     it('does not resolve a pointer gesture when disabled', () => {
         const onDirectionChange: Mock<(direction: EDpadDirection) => void> =
             vi.fn<(direction: EDpadDirection) => void>();

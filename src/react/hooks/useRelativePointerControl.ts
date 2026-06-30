@@ -24,6 +24,10 @@ export type RelativePointerControlOptions = Readonly<{
     onDelta: RelativePointerControlDeltaListener;
     disabled?: boolean;
     onActiveChange?: (active: boolean) => void;
+    // Opt-in (default false): when true the gesture only starts on the primary
+    // (left/touch) button, mirroring usePointerDrag. When false/unset the
+    // pointerdown handler is unchanged and starts on any button.
+    primaryButtonOnly?: boolean;
 }>;
 
 export type RelativePointerControlBinding<ElementType extends HTMLElement> =
@@ -40,10 +44,15 @@ type PointerSample = Readonly<{
     clientY: number;
 }>;
 
+// Primary pointer button index, matching usePointerDrag.ts. Touch pointers
+// always report 0, so the opt-in gate never affects touch.
+const PRIMARY_BUTTON: number = 0;
+
 export function useRelativePointerControl<ElementType extends HTMLElement>({
     onDelta,
     disabled = false,
     onActiveChange,
+    primaryButtonOnly = false,
 }: RelativePointerControlOptions): RelativePointerControlBinding<ElementType> {
     const elementRef: RefObject<ElementType | null> = useRef<ElementType | null>(
         null,
@@ -60,6 +69,9 @@ export function useRelativePointerControl<ElementType extends HTMLElement>({
                 if (disabled) {
                     return;
                 }
+                if (primaryButtonOnly && event.button !== PRIMARY_BUTTON) {
+                    return;
+                }
                 if (activePointerIdRef.current !== null) {
                     return;
                 }
@@ -71,7 +83,7 @@ export function useRelativePointerControl<ElementType extends HTMLElement>({
                 event.currentTarget.setPointerCapture(event.pointerId);
                 onActiveChange?.(true);
             },
-            [disabled, onActiveChange],
+            [disabled, onActiveChange, primaryButtonOnly],
         );
 
     const onPointerMove: (event: ReactPointerEvent<ElementType>) => void =

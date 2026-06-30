@@ -16,6 +16,7 @@ export function BevelButton({
     onRelease,
     onSignal,
     descriptor,
+    primaryButtonOnly = false,
 }: BevelButtonProps): ReactElement {
     const resolvedEnabled: EEnabledState = useResolvedEnabled(enabled);
     const {
@@ -29,6 +30,7 @@ export function BevelButton({
         onRelease,
         onSignal,
         descriptor,
+        primaryButtonOnly,
     });
 
     return (

@@ -185,6 +185,7 @@ export function DPad({
     onDirectionChange,
     onSignal,
     descriptor,
+    primaryButtonOnly = false,
 }: DPadProps): ReactElement {
     const [direction, setDirection]: [
         EDpadDirection,
@@ -233,6 +234,7 @@ export function DPad({
             onValue: handleValue,
             deadZone: POINTER_DEAD_ZONE,
             disabled: isDisabled,
+            primaryButtonOnly,
         });
 
     const handleChildKeyDown: (

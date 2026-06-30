@@ -17,6 +17,7 @@ export function ActionButton({
     onRelease,
     onSignal,
     descriptor,
+    primaryButtonOnly = false,
 }: ActionButtonProps): ReactElement {
     const resolvedEnabled: EEnabledState = useResolvedEnabled(enabled);
     const press: DigitalPressBinding = useDigitalPress({
@@ -25,6 +26,7 @@ export function ActionButton({
         onRelease,
         onSignal,
         descriptor,
+        primaryButtonOnly,
     });
 
     return (
