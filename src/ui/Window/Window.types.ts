@@ -29,6 +29,14 @@ export const EWindowState: {
 } = { Normal: 'normal', Minimized: 'minimized', Maximized: 'maximized' };
 export type EWindowState = (typeof EWindowState)[keyof typeof EWindowState];
 
+// Frame variant. Highlight (default) draws the tone-edge outline + HUD fill on
+// the frame; Metal opts into the machined metalEdge/metalTrim surface chrome.
+export const EWindowFrame: {
+    readonly Highlight: 'highlight';
+    readonly Metal: 'metal';
+} = { Highlight: 'highlight', Metal: 'metal' };
+export type EWindowFrame = (typeof EWindowFrame)[keyof typeof EWindowFrame];
+
 // Which edges/corners expose a resize grip. None disables resize entirely
 // (Helicon non-resizable). Both = all 8 handles. Horizontal exposes the two
 // side edges; Vertical exposes the top/bottom edges. The value doubles as the
@@ -138,6 +146,11 @@ type WindowSharedProps = {
     windowState?: EWindowState;
     onWindowStateChange?: (state: EWindowState) => void;
     status?: EUiStatus;
+    /**
+     * Frame chrome variant. Highlight (default) draws the tone-edge outline plus
+     * HUD fill; Metal opts into the machined metal-edge/metal-trim surface sheen.
+     */
+    frame?: EWindowFrame;
 };
 
 // Floating (non-modal) member: draggable, raised-on-focus, NOT input-blocking.

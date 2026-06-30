@@ -3,6 +3,7 @@ import {
     type Dispatch,
     type FocusEvent as ReactFocusEvent,
     type KeyboardEvent as ReactKeyboardEvent,
+    type PointerEvent as ReactPointerEvent,
     type ReactElement,
     type RefObject,
     type SetStateAction,
@@ -30,6 +31,7 @@ import { EUiStatus, toneProperties } from '../tone';
 import toneStyles from '../tone.module.css';
 import styles from './Window.module.css';
 import {
+    EWindowFrame,
     EWindowResizeEdge,
     EWindowResizeMode,
     EWindowState,
@@ -245,6 +247,7 @@ export function Window(props: WindowProps): ReactElement | null {
         windowState,
         onWindowStateChange,
         status = EUiStatus.None,
+        frame = EWindowFrame.Highlight,
         tone,
     }: WindowProps = props;
 
@@ -358,13 +361,25 @@ export function Window(props: WindowProps): ReactElement | null {
         onMove?.({ x: liveRectRef.current.x, y: liveRectRef.current.y });
     }
 
-    const moveBinding: PointerDragBinding<HTMLButtonElement> =
-        usePointerDrag<HTMLButtonElement>({
+    const moveBinding: PointerDragBinding<HTMLDivElement> =
+        usePointerDrag<HTMLDivElement>({
             disabled: resolvedWindowState !== EWindowState.Normal,
             onDragStart: handleMoveStart,
             onDrag: handleMoveDrag,
             onDragEnd: handleMoveEnd,
         });
+
+    function handleTitleBarPointerDown(
+        event: ReactPointerEvent<HTMLDivElement>,
+    ): void {
+        if (!(event.target instanceof Element)) {
+            return;
+        }
+        if (event.target.closest('[data-window-drag-ignore]') !== null) {
+            return;
+        }
+        moveBinding.onPointerDown(event);
+    }
 
     function handleMoveKeyDown(event: ReactKeyboardEvent<HTMLButtonElement>): void {
         if (resolvedWindowState !== EWindowState.Normal) {
@@ -551,10 +566,17 @@ export function Window(props: WindowProps): ReactElement | null {
     const frameClassName: string = joinClassNames(
         toneStyles.toneScope,
         styles.frame,
+        frame === EWindowFrame.Metal
+            ? surfaceStyles.metalEdge
+            : styles.frameHighlight,
     );
     const titleBarClassName: string = joinClassNames(
         styles.titleBar,
-        isFront ? surfaceStyles.metalTrim : surfaceStyles.metalEdge,
+        frame === EWindowFrame.Metal
+            ? isFront
+                ? surfaceStyles.metalTrim
+                : surfaceStyles.metalEdge
+            : styles.titleBarHighlight,
     );
     const frameStyle: CSSProperties = buildFrameStyle(
         tone,
@@ -593,17 +615,25 @@ export function Window(props: WindowProps): ReactElement | null {
                 data-motion={motion}
                 data-modal={modal}
                 data-resize={resize}
+                data-frame={frame}
                 onFocus={handleFrameFocus}
                 onBlur={handleFrameBlur}
             >
-                <div className={titleBarClassName} data-front={isFront}>
+                {/* The title bar is a pointer-drag region; its keyboard-accessible
+                    move affordance is the focusable grip button below, so the bar
+                    itself needs no interactive role. */}
+                {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
+                <div
+                    className={titleBarClassName}
+                    data-front={isFront}
+                    onPointerDown={handleTitleBarPointerDown}
+                >
                     <button
                         type="button"
                         className={styles.moveGrip}
                         aria-label={`Move ${title}`}
                         aria-keyshortcuts="ArrowUp ArrowDown ArrowLeft ArrowRight"
                         onKeyDown={handleMoveKeyDown}
-                        onPointerDown={moveBinding.onPointerDown}
                     >
                         <span className={styles.gripDots} aria-hidden="true" />
                     </button>
@@ -618,7 +648,7 @@ export function Window(props: WindowProps): ReactElement | null {
                     {statusText !== undefined ? (
                         <span className={styles.status}>{statusText}</span>
                     ) : null}
-                    <div className={styles.actions}>
+                    <div className={styles.actions} data-window-drag-ignore>
                         {titleBarActions}
                         {minimizable ? (
                             <button
@@ -645,11 +675,14 @@ export function Window(props: WindowProps): ReactElement | null {
                         ) : null}
                         <button
                             type="button"
-                            className={styles.affordance}
+                            className={joinClassNames(
+                                styles.affordance,
+                                styles.close,
+                            )}
                             aria-label="Close"
                             onClick={handleClose}
                         >
-                            <span aria-hidden="true">{'x'}</span>
+                            <span aria-hidden="true">{'X'}</span>
                         </button>
                     </div>
                 </div>

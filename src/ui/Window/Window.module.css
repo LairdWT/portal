@@ -30,7 +30,7 @@
 }
 
 .frame {
-    composes: beveled metalEdge from '../../theme/surfaces.module.css';
+    composes: beveled from '../../theme/surfaces.module.css';
     box-sizing: border-box;
     position: fixed;
     inset-block-start: 0;
@@ -41,7 +41,6 @@
     max-inline-size: 100dvw;
     max-block-size: 100dvh;
     border-radius: var(--portal-bevel-3);
-    background: var(--portal-hud-fill);
     box-shadow:
         0 0 var(--portal-space-4) var(--portal-tone-glow),
         0 var(--portal-space-2) var(--portal-space-6)
@@ -49,6 +48,11 @@
     color: var(--portal-color-text-0);
     font-family: var(--portal-font-sans);
     transform: translate(var(--portal-window-x, 0), var(--portal-window-y, 0));
+}
+
+.frameHighlight {
+    border: var(--portal-hud-edge-width) solid var(--portal-tone-border);
+    background: var(--portal-hud-fill);
 }
 
 .frame[data-modal='true'] {
@@ -109,10 +113,16 @@
     min-block-size: var(--portal-touch-target-min);
     padding-inline: var(--portal-space-2);
     border-radius: var(--portal-bevel-3) var(--portal-bevel-3) 0 0;
+    touch-action: none;
+    cursor: move;
 }
 
 .titleBar[data-front='true'] {
     box-shadow: inset 0 0 var(--portal-space-3) var(--portal-tone-glow);
+}
+
+.titleBarHighlight {
+    border-block-end: var(--portal-hud-edge-width) solid var(--portal-tone-border);
 }
 
 .moveGrip {
@@ -214,11 +224,15 @@
     transform: scale(0.97);
 }
 
+.close {
+    border-color: var(--portal-tone-border);
+}
+
 .body {
     composes: beveled from '../../theme/surfaces.module.css';
     box-sizing: border-box;
     min-block-size: 0;
-    padding-block: var(--portal-space-3);
+    padding-block: var(--portal-space-4);
     padding-inline: var(--portal-space-4);
     overflow: auto;
     border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
@@ -240,14 +254,6 @@
     border: 0;
     background: transparent;
     touch-action: none;
-}
-
-.resizeHandle::before {
-    content: '';
-    position: absolute;
-    inset: 35%;
-    background: var(--portal-tone-border);
-    opacity: 0.5;
 }
 
 .resizeHandle:focus-visible {
