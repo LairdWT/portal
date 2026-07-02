@@ -28,11 +28,30 @@ function Surface({ options }: SurfaceProps): ReactElement {
     });
 }
 
-function mount(options: RelativePointerControlOptions): { element: HTMLElement } {
+type CaptureStubs = Readonly<{
+    setPointerCapture: Mock<(pointerId: number) => void>;
+    releasePointerCapture: Mock<(pointerId: number) => void>;
+    hasPointerCapture: Mock<(pointerId: number) => boolean>;
+}>;
+
+function mount(options: RelativePointerControlOptions): {
+    view: RenderResult;
+    element: HTMLElement;
+    stubs: CaptureStubs;
+} {
     const view: RenderResult = render(createElement(Surface, { options }));
     const element: HTMLElement = view.getByTestId(SURFACE_TEST_ID);
-    element.setPointerCapture = vi.fn<(pointerId: number) => void>();
-    return { element };
+    const stubs: CaptureStubs = {
+        setPointerCapture: vi.fn<(pointerId: number) => void>(),
+        releasePointerCapture: vi.fn<(pointerId: number) => void>(),
+        hasPointerCapture: vi.fn<(pointerId: number) => boolean>(
+            (): boolean => true,
+        ),
+    };
+    element.setPointerCapture = stubs.setPointerCapture;
+    element.releasePointerCapture = stubs.releasePointerCapture;
+    element.hasPointerCapture = stubs.hasPointerCapture;
+    return { view, element, stubs };
 }
 
 afterEach((): void => {
@@ -79,5 +98,40 @@ describe('useRelativePointerControl primaryButtonOnly gate', (): void => {
         fireEvent.pointerDown(element, { pointerId: 1, button: 2 });
 
         expect(onActiveChange).toHaveBeenCalledWith(true);
+    });
+});
+
+describe('useRelativePointerControl unmount capture release', (): void => {
+    it('releases a still-held capture on unmount mid-gesture', (): void => {
+        const {
+            view,
+            element,
+            stubs,
+        }: { view: RenderResult; element: HTMLElement; stubs: CaptureStubs } =
+            mount({
+                onDelta: vi.fn<(delta: { x: number; y: number }) => void>(),
+            });
+
+        fireEvent.pointerDown(element, { pointerId: 8, button: 0 });
+        expect(stubs.setPointerCapture).toHaveBeenCalledWith(8);
+
+        // No pointerup/pointercancel arrives; the component unmounts mid-gesture.
+        view.unmount();
+
+        expect(stubs.releasePointerCapture).toHaveBeenCalledWith(8);
+    });
+
+    it('does not release when no gesture is active at unmount', (): void => {
+        const {
+            view,
+            stubs,
+        }: { view: RenderResult; element: HTMLElement; stubs: CaptureStubs } =
+            mount({
+                onDelta: vi.fn<(delta: { x: number; y: number }) => void>(),
+            });
+
+        view.unmount();
+
+        expect(stubs.releasePointerCapture).not.toHaveBeenCalled();
     });
 });

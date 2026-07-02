@@ -1,12 +1,35 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
 
-import type { Axis2D } from '../../input';
+import {
+    type Axis2D,
+    EInputInteraction,
+    EInputValueType,
+    type InputDescriptor,
+    type InputSignal,
+} from '../../input';
 import { EEnabledState } from '../../state/state';
 import { Thumbpad } from './Thumbpad';
 
 const PAD_LABEL: string = 'Movement';
 const ACTIVE_POINTER_ID: number = 7;
+
+// An Axis2D descriptor opts the look surface into the framework signal path.
+const LOOK_DESCRIPTOR: InputDescriptor = {
+    id: 'look',
+    kind: EInputValueType.Axis2D,
+    label: 'Look',
+};
+
+// The pad surface is the first child of the labelled group.
+function getSurface(): Element {
+    const group: HTMLElement = screen.getByRole('group', { name: PAD_LABEL });
+    const surface: Element | null = group.firstElementChild;
+    if (surface === null) {
+        throw new Error('Expected a pointer surface element.');
+    }
+    return surface;
+}
 
 const PAD_RECT: DOMRect = {
     x: 0,
@@ -142,5 +165,63 @@ describe('Thumbpad', () => {
 
         expect(horizontal).toBeDisabled();
         expect(vertical).toBeDisabled();
+    });
+});
+
+describe('Thumbpad onSignal emission', () => {
+    it('emits an Axis2D Move delta per pointer move and nothing on gesture end', () => {
+        const signals: InputSignal[] = [];
+        render(
+            <Thumbpad
+                label={PAD_LABEL}
+                descriptor={LOOK_DESCRIPTOR}
+                onSignal={(signal: InputSignal): void => {
+                    signals.push(signal);
+                }}
+            />,
+        );
+        const surface: Element = getSurface();
+
+        // Pointer down only seeds the origin; a relative surface emits no delta.
+        fireEvent.pointerDown(surface, {
+            pointerId: ACTIVE_POINTER_ID,
+            clientX: 100,
+            clientY: 100,
+        });
+        expect(signals).toHaveLength(0);
+
+        // A 50px move on the 200px-wide pad is a +x delta of 0.5.
+        fireEvent.pointerMove(surface, {
+            pointerId: ACTIVE_POINTER_ID,
+            clientX: 150,
+            clientY: 100,
+        });
+        // The next delta is relative to the PREVIOUS sample (150), not the origin.
+        fireEvent.pointerMove(surface, {
+            pointerId: ACTIVE_POINTER_ID,
+            clientX: 200,
+            clientY: 100,
+        });
+
+        expect(signals).toHaveLength(2);
+        for (const signal of signals) {
+            expect(signal.interaction).toBe(EInputInteraction.Move);
+            expect(signal.value.valueType).toBe(EInputValueType.Axis2D);
+            expect(signal.descriptor.id).toBe('look');
+        }
+        expect(signals[0]?.value).toEqual({
+            valueType: EInputValueType.Axis2D,
+            axis: { x: 0.5, y: 0 },
+        });
+        expect(signals[1]?.value).toEqual({
+            valueType: EInputValueType.Axis2D,
+            axis: { x: 0.5, y: 0 },
+        });
+
+        // A relative surface has no origin to spring back to, so gesture end emits
+        // no neutral/reset signal.
+        const countBeforeEnd: number = signals.length;
+        fireEvent.pointerUp(surface, { pointerId: ACTIVE_POINTER_ID });
+        expect(signals).toHaveLength(countBeforeEnd);
     });
 });

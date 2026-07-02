@@ -11,7 +11,7 @@
 // delivery is throttled and capture is lost.
 
 import type { PointerEvent as ReactPointerEvent, RefObject } from 'react';
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 import type { Axis2D } from '../../input/InputContract';
 import { resolveAxis2D } from '../../input/PointerSpine';
@@ -56,6 +56,11 @@ export function usePointerControl<ElementType extends HTMLElement>({
     const activePointerIdRef: RefObject<number | null> = useRef<number | null>(
         null,
     );
+    // The element that took the capture, tracked separately from elementRef so an
+    // unmount-mid-gesture cleanup can still release it even after React has
+    // detached the DOM ref.
+    const capturedElementRef: RefObject<ElementType | null> =
+        useRef<ElementType | null>(null);
 
     const sample: (event: ReactPointerEvent<ElementType>) => void = useCallback(
         (event: ReactPointerEvent<ElementType>): void => {
@@ -92,6 +97,7 @@ export function usePointerControl<ElementType extends HTMLElement>({
                     return;
                 }
                 activePointerIdRef.current = event.pointerId;
+                capturedElementRef.current = event.currentTarget;
                 event.currentTarget.setPointerCapture(event.pointerId);
                 onActiveChange?.(true);
                 sample(event);
@@ -116,6 +122,7 @@ export function usePointerControl<ElementType extends HTMLElement>({
                 return;
             }
             activePointerIdRef.current = null;
+            capturedElementRef.current = null;
             if (event.currentTarget.hasPointerCapture(event.pointerId)) {
                 event.currentTarget.releasePointerCapture(event.pointerId);
             }
@@ -124,6 +131,30 @@ export function usePointerControl<ElementType extends HTMLElement>({
         },
         [reset, onActiveChange],
     );
+
+    // Defense-in-depth cleanup, mirroring usePointerDrag's unmount teardown: if
+    // the component unmounts mid-gesture the pointerup/pointercancel that would
+    // release the capture never arrives, so release any still-held capture here
+    // and reset the active-pointer state. onActiveChange is intentionally NOT
+    // fired (the consumer is gone). No behavior change outside this path.
+    useEffect((): (() => void) => {
+        return (): void => {
+            const activePointerId: number | null = activePointerIdRef.current;
+            if (activePointerId === null) {
+                return;
+            }
+            activePointerIdRef.current = null;
+            const capturedElement: ElementType | null = capturedElementRef.current;
+            capturedElementRef.current = null;
+            if (capturedElement === null) {
+                return;
+            }
+            if (!capturedElement.hasPointerCapture(activePointerId)) {
+                return;
+            }
+            capturedElement.releasePointerCapture(activePointerId);
+        };
+    }, []);
 
     return {
         ref: elementRef,

@@ -48,8 +48,11 @@ export type EDpadDirection = (typeof EDpadDirection)[keyof typeof EDpadDirection
 // through the group data-direction attribute and per-button data-active.
 //
 // When both onSignal and descriptor are supplied the control also emits a
-// framework-agnostic Digital InputSignal for every direction change: pressed is
-// true when a direction is held and false when the pad returns to None.
+// framework-agnostic Digital InputSignal for every direction change. The default
+// (directionSignals unset) stream is a single pad-level Digital signal: pressed
+// is true when a direction is held and false when the pad returns to None. A
+// direction-to-direction change therefore emits Press -> Press with no Release,
+// so the pad's descriptor id alone cannot reconstruct which direction is active.
 // onDirectionChange is the simple raw callback and fires regardless of signal
 // wiring.
 export type DPadProps = Readonly<{
@@ -63,4 +66,16 @@ export type DPadProps = Readonly<{
     // primary (left/touch) button, forwarded to usePointerControl. Unset leaves
     // the gesture behavior unchanged (any button starts it).
     primaryButtonOnly?: boolean;
+    // Opt-in (default false): richer per-direction Digital signal stream. The
+    // default is false because it preserves the 1.x wire shape byte-for-byte -
+    // the single pad-level Press/Release documented above - which the frozen
+    // public API must not change silently. When true, each transition emits
+    // per-direction Digital signals instead: first a Release for the previous
+    // direction (when it was not None), then a Press for the next (when it is not
+    // None). Each signal carries a descriptor derived from `descriptor` with a
+    // lowercase direction id suffix (e.g. `${descriptor.id}.up`,
+    // `${descriptor.id}.up-left`), so a consumer can reconstruct exactly which
+    // direction is held from the id alone. Requires onSignal and descriptor to be
+    // wired; onDirectionChange and the default stream are otherwise unchanged.
+    directionSignals?: boolean;
 }>;

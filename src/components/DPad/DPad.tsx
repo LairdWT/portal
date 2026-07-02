@@ -6,20 +6,34 @@ import type {
     RefObject,
     SetStateAction,
 } from 'react';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
-import type { Axis2D } from '../../input';
-import { EInputInteraction } from '../../input';
+import type {
+    Axis2D,
+    InputDescriptor,
+    InputSignal,
+    InputSource,
+    TimeProvider,
+} from '../../input';
+import { createInputSource, EInputInteraction } from '../../input';
+import {
+    type ControllerContextValue,
+    useControllerContext,
+} from '../../react/ControllerContext';
 import { type EmitBinding, useEmitBinding } from '../../react/hooks/useEmitBinding';
 import { usePointerControl } from '../../react/hooks/usePointerControl';
 import { useResolvedEnabled } from '../../react/hooks/useResolvedEnabled';
+import { useTimeProvider } from '../../react/TimeProviderContext';
 import { EEnabledState } from '../../state/state';
 import styles from './DPad.module.css';
 import { type DPadProps, EDpadDirection, EDpadMode } from './DPad.types';
 
-// Radial dead-band below which the pointer is treated as centred and resolves
-// to None. The pointer hook already rescales magnitude through this dead zone,
-// so any non-zero magnitude indicates an intended direction.
+// Radial dead zone handed to usePointerControl, which rescales raw magnitude
+// from [POINTER_DEAD_ZONE, 1] onto [0, 1] BEFORE any value reaches
+// resolveDirection. The hook owns the dead-band, so resolveDirection must not
+// re-apply it: re-checking magnitude against this constant would compound the
+// two dead zones and swallow small-but-intended motion (a raw magnitude up to
+// ~0.36 rescales to below 0.2 and would read as None).
 const POINTER_DEAD_ZONE: number = 0.2;
 
 // Octant index from a direction vector. The pad rectangle uses screen
@@ -82,10 +96,13 @@ function collapseToCardinal(
     }
 }
 
-// Resolve a dead-zoned axis to a discrete direction for the active mode.
+// Resolve a dead-zoned axis to a discrete direction for the active mode. The
+// magnitude arriving here is already dead-zoned by usePointerControl, so any
+// non-zero magnitude indicates an intended direction; only an exactly-centred
+// (zero) vector resolves to None.
 function resolveDirection(axis: Axis2D, mode: EDpadMode): EDpadDirection {
     const magnitude: number = Math.hypot(axis.x, axis.y);
-    if (magnitude <= POINTER_DEAD_ZONE) {
+    if (magnitude <= 0) {
         return EDpadDirection.None;
     }
     const octant: number = resolveOctant(axis.x, axis.y);
@@ -113,6 +130,14 @@ const DIAGONAL_DIRECTIONS: readonly EDpadDirection[] = [
     EDpadDirection.UpRight,
     EDpadDirection.DownLeft,
     EDpadDirection.DownRight,
+];
+
+// Every operable direction across both modes. The opt-in per-direction signal
+// stream pre-builds one InputSource per member so a transition only looks the
+// relevant source up rather than allocating on each change.
+const ALL_DIRECTIONS: readonly EDpadDirection[] = [
+    ...CARDINAL_DIRECTIONS,
+    ...DIAGONAL_DIRECTIONS,
 ];
 
 // Human-readable control name announced to assistive tech for each child button.
@@ -186,6 +211,7 @@ export function DPad({
     onSignal,
     descriptor,
     primaryButtonOnly = false,
+    directionSignals = false,
 }: DPadProps): ReactElement {
     const [direction, setDirection]: [
         EDpadDirection,
@@ -199,21 +225,101 @@ export function DPad({
 
     const { emitDigital }: EmitBinding = useEmitBinding(descriptor, onSignal);
 
+    // Ambient wiring for the opt-in per-direction stream. These mirror the exact
+    // inputs useInputSource reads (the context signal sink, the id namespace, and
+    // the injected clock) so a per-direction id composes as
+    // `${idNamespace}.${descriptor.id}.${direction}` - the same namespace the
+    // default pad-level signal carries, with a lowercase direction suffix.
+    const timeProvider: TimeProvider = useTimeProvider();
+    const { onSignal: contextOnSignal, idNamespace }: ControllerContextValue =
+        useControllerContext();
+    const resolvedOnSignal: ((signal: InputSignal) => void) | undefined =
+        onSignal ?? contextOnSignal;
+
+    const directionSources: ReadonlyMap<EDpadDirection, InputSource> = useMemo<
+        ReadonlyMap<EDpadDirection, InputSource>
+    >((): ReadonlyMap<EDpadDirection, InputSource> => {
+        const sources: Map<EDpadDirection, InputSource> = new Map<
+            EDpadDirection,
+            InputSource
+        >();
+        if (
+            !directionSignals ||
+            descriptor === undefined ||
+            resolvedOnSignal === undefined
+        ) {
+            return sources;
+        }
+        const namespacedId: string =
+            idNamespace === undefined
+                ? descriptor.id
+                : `${idNamespace}.${descriptor.id}`;
+        for (const memberDirection of ALL_DIRECTIONS) {
+            const memberDescriptor: InputDescriptor = {
+                ...descriptor,
+                id: `${namespacedId}.${memberDirection}`,
+            };
+            sources.set(
+                memberDirection,
+                createInputSource({
+                    descriptor: memberDescriptor,
+                    emit: resolvedOnSignal,
+                    timeProvider,
+                }),
+            );
+        }
+        return sources;
+    }, [directionSignals, descriptor, resolvedOnSignal, idNamespace, timeProvider]);
+
+    // Emit one per-direction Digital signal. None never has a source (it is the
+    // rest state, not an input), so the guard short-circuits it.
+    const emitDirectionSignal: (
+        direction: EDpadDirection,
+        interaction: EInputInteraction,
+    ) => void = useCallback(
+        (direction: EDpadDirection, interaction: EInputInteraction): void => {
+            const source: InputSource | undefined = directionSources.get(direction);
+            if (source === undefined) {
+                return;
+            }
+            source.emitDigital(
+                interaction === EInputInteraction.Press,
+                interaction,
+            );
+        },
+        [directionSources],
+    );
+
     const commitDirection: (next: EDpadDirection) => void = useCallback(
         (next: EDpadDirection): void => {
-            if (directionRef.current === next) {
+            const previous: EDpadDirection = directionRef.current;
+            if (previous === next) {
                 return;
             }
             directionRef.current = next;
             setDirection(next);
             onDirectionChange?.(next);
+            // Opt-in stream: Release the direction we are leaving, then Press the
+            // one we are entering, so the signal stream reconstructs the pad
+            // state. Skip None on both edges (it is the rest state, not an input).
+            if (directionSignals) {
+                if (previous !== EDpadDirection.None) {
+                    emitDirectionSignal(previous, EInputInteraction.Release);
+                }
+                if (next !== EDpadDirection.None) {
+                    emitDirectionSignal(next, EInputInteraction.Press);
+                }
+                return;
+            }
+            // Default stream (byte-identical to 1.x): a single pad-level Digital
+            // signal, pressed while a direction is held and released at None.
             const pressed: boolean = next !== EDpadDirection.None;
             const interaction: EInputInteraction = pressed
                 ? EInputInteraction.Press
                 : EInputInteraction.Release;
             emitDigital(pressed, interaction);
         },
-        [onDirectionChange, emitDigital],
+        [onDirectionChange, emitDigital, directionSignals, emitDirectionSignal],
     );
 
     const handleValue: (axis: Axis2D) => void = useCallback(
