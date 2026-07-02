@@ -1,0 +1,109 @@
+/*
+ * TimePicker. Segmented HH:MM(:SS) entry: mono beveled segment keys joined by
+ * drawn colon separators, plus the AM/PM key under a 12-hour cycle. The
+ * segments are real numeric inputs (select-all on focus, replace on type);
+ * the group carries the visible label. Every value resolves from a
+ * --portal-* / --portal-tone-* token; motion reduced-gated.
+ */
+
+.root {
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-1);
+    font-family: var(--portal-font-sans);
+}
+
+/* Invalid: force the tone seed to danger for the whole scope, matching
+ * TextField's convention. */
+.root[data-invalid='true'] {
+    --portal-tone: var(--portal-color-danger);
+}
+
+.label {
+    font-size: var(--portal-size-text-sm);
+    letter-spacing: var(--portal-letter-spacing-wide);
+    line-height: var(--portal-line-height-tight);
+    color: var(--portal-color-text-1);
+}
+
+.group {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--portal-space-1);
+}
+
+.segment {
+    composes: beveled from '../../theme/surfaces.module.css';
+    box-sizing: border-box;
+    inline-size: calc(var(--portal-touch-target-min) * 1.1);
+    min-block-size: var(--portal-touch-target-min);
+    padding-inline: var(--portal-space-2);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-bevel-1);
+    background-color: var(--portal-color-surface-0);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-mono);
+    font-size: var(--portal-size-text-lg);
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .segment {
+        transition:
+            border-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ui-fast) var(--portal-easing-standard);
+    }
+}
+
+.segment:focus-visible {
+    border-color: var(--portal-tone-accent);
+    outline: var(--portal-border-thickness-thin) solid var(--portal-color-focus);
+    outline-offset: var(--portal-border-thickness-thin);
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow-strong);
+}
+
+.segment:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.segment:hover:not(:disabled) {
+    border-color: var(--portal-tone-border);
+}
+
+.segment[aria-invalid='true'] {
+    border-color: var(--portal-tone-accent);
+}
+
+/* The colon: two token-drawn dots, never a typed character. */
+.separator {
+    display: inline-flex;
+    inline-size: var(--portal-space-1);
+    block-size: var(--portal-space-4);
+    background-image:
+        radial-gradient(currentcolor 45%, transparent 50%),
+        radial-gradient(currentcolor 45%, transparent 50%);
+    background-repeat: no-repeat;
+    background-size: 100% 25%;
+    background-position:
+        0 20%,
+        0 80%;
+    color: var(--portal-color-text-1);
+}
+
+.meridiem {
+    composes: compactControl from '../../theme/surfaces.module.css';
+    font-family: var(--portal-font-mono);
+    font-size: var(--portal-size-text-sm);
+    letter-spacing: var(--portal-letter-spacing-wide);
+}
+
+/* High-contrast foreground for the message; the danger signal is carried by
+ * aria-invalid and the toned borders. */
+.error {
+    font-size: var(--portal-size-text-sm);
+    line-height: var(--portal-line-height-tight);
+    color: var(--portal-color-text-0);
+}

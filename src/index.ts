@@ -210,6 +210,14 @@ export {
     type BreadcrumbProps,
     EBreadcrumbCrumbState,
 } from './ui/Breadcrumb/Breadcrumb.types';
+export { Calendar } from './ui/Calendar/Calendar';
+export { type CalendarProps } from './ui/Calendar/Calendar.types';
+export {
+    type CalendarDate,
+    dateToIso,
+    parseIsoDate,
+    todayDate,
+} from './ui/Calendar/calendarMath';
 export { BarChart } from './ui/Chart/BarChart';
 export {
     type BarChartProps,
@@ -268,6 +276,8 @@ export {
     type TableColumn,
     type TableSort,
 } from './ui/DataTable/DataTable.types';
+export { DatePicker } from './ui/DatePicker/DatePicker';
+export { type DatePickerProps } from './ui/DatePicker/DatePicker.types';
 export { ConfirmDialog } from './ui/Dialog/ConfirmDialog';
 export { Dialog } from './ui/Dialog/Dialog';
 export {
@@ -302,6 +312,11 @@ export {
 } from './ui/expansion';
 export { Field } from './ui/Field/Field';
 export { type FieldControlProps, type FieldProps } from './ui/Field/Field.types';
+export { FileUpload } from './ui/FileUpload/FileUpload';
+export {
+    EFileRejection,
+    type FileUploadProps,
+} from './ui/FileUpload/FileUpload.types';
 export { KeyValue } from './ui/KeyValue/KeyValue';
 export {
     EKeyValueOverflow,
@@ -498,6 +513,12 @@ export {
     ETextFieldType,
     type TextFieldProps,
 } from './ui/TextField/TextField.types';
+export { TimePicker } from './ui/TimePicker/TimePicker';
+export {
+    ETimePickerCycle,
+    type TimePickerProps,
+    type TimeValue,
+} from './ui/TimePicker/TimePicker.types';
 export { TitleBar } from './ui/TitleBar/TitleBar';
 export {
     ETitleBarLandmark,

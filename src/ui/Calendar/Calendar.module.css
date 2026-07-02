@@ -1,0 +1,161 @@
+/*
+ * Calendar. A month grid on the machined-HUD language: a beveled panel with
+ * compact turn keys, dimmed out-of-month days, a toned selected day, and a
+ * drawn today ring. Day cells hold the 3rem touch floor (the grid is a
+ * touch-primary control), the selected/today marks are shape-plus-color
+ * (never color alone), and every value resolves from a --portal-* /
+ * --portal-tone-* token. Motion is reduced-motion gated.
+ */
+
+.root {
+    composes: beveled from '../../theme/surfaces.module.css';
+    display: inline-flex;
+    flex-direction: column;
+    gap: var(--portal-space-2);
+    padding: var(--portal-space-3);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-bevel-2);
+    background-color: var(--portal-color-surface-0);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+}
+
+.label {
+    font-size: var(--portal-size-text-sm);
+    letter-spacing: var(--portal-letter-spacing-wide);
+    line-height: var(--portal-line-height-tight);
+    color: var(--portal-color-text-1);
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--portal-space-2);
+}
+
+.heading {
+    font-size: var(--portal-size-text-md);
+    font-weight: var(--portal-weight-label-medium);
+    letter-spacing: var(--portal-letter-spacing-wide);
+}
+
+.turnKey {
+    composes: compactControl from '../../theme/surfaces.module.css';
+}
+
+/* The month-turn chevron, pointing along the inline axis. */
+.turnGlyph {
+    composes: chevronGlyph from '../../theme/surfaces.module.css';
+    color: var(--portal-tone-accent);
+}
+
+.turnGlyph[data-direction='previous'] {
+    --portal-chevron-rotate: 135deg;
+}
+
+.turnGlyph[data-direction='next'] {
+    --portal-chevron-rotate: -45deg;
+}
+
+.grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-1);
+}
+
+.weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(var(--portal-touch-target-min), 1fr));
+    gap: var(--portal-space-1);
+}
+
+.weekday {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-block-size: var(--portal-space-5);
+    color: var(--portal-color-text-1);
+    font-size: var(--portal-size-text-sm);
+    letter-spacing: var(--portal-letter-spacing-wide);
+}
+
+.week {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(var(--portal-touch-target-min), 1fr));
+    gap: var(--portal-space-1);
+}
+
+.day {
+    composes: beveled from '../../theme/surfaces.module.css';
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: var(--portal-touch-target-min);
+    min-block-size: var(--portal-touch-target-min);
+    border: var(--portal-border-thickness-thin) solid transparent;
+    border-radius: var(--portal-bevel-1);
+    background-color: transparent;
+    color: var(--portal-color-text-0);
+    font-family: inherit;
+    font-size: var(--portal-size-text-md);
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .day {
+        transition:
+            background-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard),
+            border-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ui-fast) var(--portal-easing-standard),
+            transform var(--portal-duration-ui-fast) var(--portal-easing-standard);
+    }
+}
+
+/* Out-of-month days dim to the secondary text token only - an extra opacity
+ * would sink them below the 4.5:1 contrast floor the axe gate enforces. */
+.day[data-in-month='false'] {
+    color: var(--portal-color-text-1);
+}
+
+/* Today: a drawn ring (shape, not color alone) under any selection state. */
+.day[data-today='true'] {
+    border-color: var(--portal-color-border);
+    box-shadow: inset 0 0 0 var(--portal-border-thickness-thin)
+        var(--portal-tone-edge);
+}
+
+.day[data-selected='true'] {
+    border-color: var(--portal-tone-accent);
+    background: linear-gradient(
+        160deg,
+        var(--portal-tone-fill) 0%,
+        var(--portal-color-surface-0) 100%
+    );
+    box-shadow: 0 0 var(--portal-space-2) var(--portal-tone-glow-strong);
+    font-weight: var(--portal-weight-label-strong);
+}
+
+.day[data-disabled='true'] {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.day:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: calc(-1 * var(--portal-border-thickness-normal));
+}
+
+.day:hover:not(:disabled, [data-disabled='true']) {
+    background-color: var(--portal-tone-fill);
+    transform: scale(1.06);
+}
+
+.day:active:not(:disabled, [data-disabled='true']) {
+    transform: scale(var(--portal-press-scale));
+}

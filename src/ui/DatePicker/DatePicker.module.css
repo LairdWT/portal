@@ -1,0 +1,116 @@
+/*
+ * DatePicker. An ISO text field beside a calendar toggle key; the popup
+ * Calendar arrives through the shared Popover (which owns the frame,
+ * entrance, and dismissal). The toggle's mark is a token-drawn month grid -
+ * a bordered box with a header rule and day dots - never a typed glyph.
+ * Every value resolves from a --portal-* / --portal-tone-* token; logical
+ * properties; motion reduced-gated.
+ */
+
+.root {
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-1);
+    font-family: var(--portal-font-sans);
+}
+
+.label {
+    font-size: var(--portal-size-text-sm);
+    letter-spacing: var(--portal-letter-spacing-wide);
+    line-height: var(--portal-line-height-tight);
+    color: var(--portal-color-text-1);
+}
+
+.control {
+    display: flex;
+    gap: var(--portal-space-2);
+}
+
+.input {
+    composes: beveled from '../../theme/surfaces.module.css';
+    box-sizing: border-box;
+    flex: 1 1 auto;
+    min-inline-size: 0;
+    min-block-size: var(--portal-touch-target-min);
+    padding-inline: var(--portal-space-3);
+    padding-block: var(--portal-space-2);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-bevel-2);
+    background-color: var(--portal-color-surface-0);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-mono);
+    font-size: var(--portal-size-text-md);
+    line-height: var(--portal-line-height-normal);
+    font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .input {
+        transition:
+            border-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ui-fast) var(--portal-easing-standard);
+    }
+}
+
+.input::placeholder {
+    color: var(--portal-color-text-1);
+}
+
+.input:focus-visible {
+    border-color: var(--portal-tone-accent);
+    outline: var(--portal-border-thickness-thin) solid var(--portal-color-focus);
+    outline-offset: var(--portal-border-thickness-thin);
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow-strong);
+}
+
+.input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.input:hover:not(:disabled) {
+    border-color: var(--portal-tone-border);
+}
+
+.input[aria-invalid='true'] {
+    --portal-tone: var(--portal-color-danger);
+
+    border-color: var(--portal-tone-accent);
+}
+
+.toggle {
+    composes: compactControl from '../../theme/surfaces.module.css';
+}
+
+/* The token-drawn month-grid mark: a bordered box whose header rule and day
+ * dots are painted as layered gradients on currentColor-adjacent tokens. */
+.toggleGlyph {
+    box-sizing: border-box;
+    inline-size: var(--portal-space-4);
+    block-size: var(--portal-space-4);
+    border: var(--portal-border-thickness-thin) solid currentcolor;
+    border-radius: var(--portal-bevel-1);
+    background-image:
+        linear-gradient(currentcolor, currentcolor),
+        radial-gradient(currentcolor 40%, transparent 45%),
+        radial-gradient(currentcolor 40%, transparent 45%);
+    background-repeat: no-repeat;
+    background-size:
+        100% var(--portal-border-thickness-thin),
+        30% 30%,
+        30% 30%;
+    background-position:
+        0 25%,
+        25% 70%,
+        70% 70%;
+    color: var(--portal-tone-accent);
+}
+
+/* Draft-format hint or caller error: high-contrast foreground; the danger
+ * signal is carried by aria-invalid and the toned border. */
+.message {
+    font-size: var(--portal-size-text-sm);
+    line-height: var(--portal-line-height-tight);
+    color: var(--portal-color-text-0);
+}

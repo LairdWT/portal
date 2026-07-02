@@ -4,6 +4,56 @@ All notable changes to this project are documented in this file. The format is
 based on Keep a Changelog, and the project follows Semantic Versioning with the
 0.x caveat that, before 1.0, a minor version may carry a breaking change.
 
+## [1.7.0] - 2026-07-02
+
+The Tier-1 "form stack" phase of the coverage roadmap: eleven additions that
+make end-to-end forms buildable from the package alone. All public-API
+changes are additive; the freeze holds.
+
+### Added
+
+- `Field`: form scaffolding wrapper (label / hint / error / required) wiring
+  id, aria-describedby, aria-invalid, and aria-required to ANY control
+  through a spreadable render-prop object; invalid forces the tone seed to
+  danger for the whole scope.
+- `TextArea`: the multiline TextField twin - rows, logical block-axis resize
+  gate (`ETextAreaResize`), progressive `field-sizing: content` auto-sizing.
+- `OtpField`: segmented one-time-code entry over ONE visually hidden native
+  input (native paste splitting and backspace), sibling-selector cell
+  mirror, `autocomplete="one-time-code"`, blinking caret (steady under
+  reduced motion), `onComplete` at full length. `EOtpFieldMode` numeric/text.
+- `RangeSlider`: dual-thumb min/max selector - two named `role=slider`
+  thumbs with full APG keyboard clamped so the pair never crosses,
+  float-safe step quantization, nearest-thumb pointer pickup across the
+  whole track, logical fractions (RTL mirrors), `formatValue` ->
+  aria-valuetext.
+- `Combobox`: form-level single-value autocomplete - options fuzzy-ranked
+  with the shared `fuzzyMatch` scorer, matched characters emphasized, shared
+  Popover listbox with the full ARIA combobox contract; free text that
+  matches nothing stays as typed.
+- `TagInput`: multi-value token entry - removable Chips in a beveled shell
+  behaving as one text control, Enter/comma commit, duplicate-safe,
+  Backspace pops, optional fuzzy suggestion listbox excluding committed
+  tags.
+- `Calendar` + the zero-dependency `calendarMath` engine: an APG month grid
+  with roving-tab-stop keyboard (arrows / paging / Home / End), Intl-driven
+  month and weekday names and locale first-day-of-week, min/max windows and
+  a disabled-date predicate, and a drawn today ring. `CalendarDate` plus
+  `dateToIso` / `parseIsoDate` / `todayDate` are exported for value
+  handling; the engine runs plain calendar-day objects over UTC arithmetic
+  (DST-proof) with no date dependency.
+- `DatePicker`: ISO text field + Calendar-in-Popover dialog. Strict
+  YYYY-MM-DD commits (window-gated), clearing commits null, invalid drafts
+  stay local with a format hint, picking commits and closes.
+- `TimePicker`: segmented HH:MM(:SS) entry - real numeric segments with
+  arrow stepping and wrap, select-on-focus replace typing, and an AM/PM key
+  under the 12-hour cycle (`ETimePickerCycle`, defaulting from the locale);
+  the value stays 24-hour.
+- `FileUpload`: dropzone + browse over a real hidden file input - native
+  picker and keyboard for free, drag state on the toned target ring,
+  `accept`/`maxBytes` gating with per-file `EFileRejection` reasons,
+  removable Chip file rows with formatted sizes.
+
 ## [1.6.0] - 2026-07-02
 
 ### Changed

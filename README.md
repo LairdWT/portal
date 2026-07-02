@@ -218,9 +218,11 @@ A domain-agnostic UI layer, separate from the game-input controllers above. It
 emits plain value and selection callbacks and never the input-signal contract,
 so it suits any React UI, not only game input. It spans, among others:
 
-- Inputs and forms: `CTA`, `TextField`, `SecretField`, `SearchBox`, `Select`,
-  `Checkbox`, `RadioGroup`, `SegmentedControl`, `NumberStepper`, `Rating`,
-  `ColorPicker`, `Toggle`.
+- Inputs and forms: `CTA`, `TextField`, `TextArea`, `SecretField`, `SearchBox`,
+  `Select`, `Combobox`, `TagInput`, `Checkbox`, `RadioGroup`,
+  `SegmentedControl`, `NumberStepper`, `RangeSlider`, `Rating`, `ColorPicker`,
+  `Toggle`, `OtpField`, `Field` (form scaffolding), `Calendar`, `DatePicker`,
+  `TimePicker`, `FileUpload`.
 - Data and navigation: `List` / `SearchableList`, `DataTable`, `TreeView`,
   `Accordion`, `Tabs`, `Breadcrumb`, `Pagination`, `NavRail`,
   `Menu` / `MenuBar` / `ContextMenu`, `CommandPalette`, `RadialMenu` (the
