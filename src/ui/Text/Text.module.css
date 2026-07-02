@@ -4,8 +4,9 @@
  * from --portal-* tokens and the derived --portal-tone-* vars only - no literal
  * colors and no fixed-pixel sizing. Text is non-interactive: no focus target, no
  * pointer behaviour, and no motion, so there is nothing to gate behind
- * reduced-motion. The accent role is the sole tone-aware role and reads
- * --portal-tone-accent; the dim role derives a quieter foreground from the text
+ * reduced-motion. The accent role uses the fixed AA-safe accent-highlight token,
+ * not tone (per CodingStandards, tone never colors AA-critical text; it stays on
+ * borders/markers/glow); the dim role derives a quieter foreground from the text
  * token via color-mix, and the styled role clips the metal gradient to the glyph
  * shapes for an aesthetic display run.
  */
@@ -20,7 +21,7 @@
 
 .root[data-role='heading'] {
     font-size: var(--portal-size-text-lg);
-    font-weight: 700;
+    font-weight: var(--portal-weight-label-strong);
     line-height: var(--portal-line-height-tight);
     color: var(--portal-color-text-0);
 }
@@ -32,7 +33,7 @@
 
 .root[data-role='section'] {
     font-size: var(--portal-size-text-sm);
-    font-weight: 600;
+    font-weight: var(--portal-weight-label-medium);
     letter-spacing: var(--portal-letter-spacing-wide);
     line-height: var(--portal-line-height-tight);
     text-transform: uppercase;
@@ -54,9 +55,12 @@
     );
 }
 
+/* Accent text uses the fixed AA-safe accent-highlight token, never tone: per
+ * CodingStandards, tone stays on borders/markers/glow and never colors
+ * AA-critical text. */
 .root[data-role='accent'] {
-    font-weight: 600;
-    color: var(--portal-tone-accent);
+    font-weight: var(--portal-weight-label-medium);
+    color: var(--portal-color-accent-highlight);
 }
 
 .root[data-role='mono'] {
@@ -67,7 +71,7 @@
 
 .root[data-role='styled'] {
     font-size: var(--portal-size-text-lg);
-    font-weight: 700;
+    font-weight: var(--portal-weight-label-strong);
     line-height: var(--portal-line-height-tight);
     background: var(--portal-gradient-metal);
     background-clip: text;

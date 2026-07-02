@@ -25,7 +25,7 @@
     color: var(--portal-color-text-0);
     font-family: var(--portal-font-sans);
     font-size: var(--portal-size-text-md);
-    font-weight: 700;
+    font-weight: var(--portal-weight-label-strong);
     line-height: var(--portal-line-height-tight);
     letter-spacing: var(--portal-letter-spacing-wide);
     cursor: pointer;
@@ -100,7 +100,9 @@
     box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow);
 }
 
-/* Ghost: transparent, accent text surfacing on hover/active. */
+/* Ghost: transparent; on hover/active the label surfaces in the fixed AA-safe
+ * accent-highlight token. An arbitrary tone cannot meet AA as text, so tone stays
+ * on the fill/glow only, mirroring the primary/secondary variants' rationale. */
 .cta[data-variant='ghost'] {
     border-color: transparent;
     background: transparent;
@@ -110,7 +112,7 @@
 .cta[data-variant='ghost']:hover:not(:disabled),
 .cta[data-variant='ghost']:active:not(:disabled) {
     background: var(--portal-tone-fill);
-    color: var(--portal-tone-accent);
+    color: var(--portal-color-accent-highlight);
 }
 
 /* Danger: the danger status surface. The seed is forced to the danger token so
@@ -138,5 +140,5 @@
 }
 
 .cta:active:not(:disabled) {
-    transform: scale(0.97);
+    transform: scale(var(--portal-press-scale));
 }
