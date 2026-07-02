@@ -33,8 +33,14 @@
     composes: beveled from '../../theme/surfaces.module.css';
     box-sizing: border-box;
     position: fixed;
-    inset-block-start: 0;
-    inset-inline-start: 0;
+
+    /* Physical anchor (not logical inset-inline/block): the drag + resize math is
+       physical (clientX/clientY, innerWidth) and the transform below is a physical
+       translate(x, y). Under dir=rtl a logical inset-inline-start resolves to the
+       RIGHT edge while translateX still moves rightward, throwing the frame
+       off-screen; physical left/top keeps the anchor aligned with the transform. */
+    top: 0;
+    left: 0;
     z-index: calc(var(--portal-z-overlay) + var(--portal-window-z, 0));
     display: grid;
     grid-template-rows: auto minmax(0, 1fr);
@@ -86,7 +92,7 @@
     from {
         opacity: 0;
         transform: translate(var(--portal-window-x, 0), var(--portal-window-y, 0))
-            scale(0.98);
+            scale(var(--portal-press-scale));
     }
 
     to {
@@ -261,61 +267,68 @@
     outline-offset: calc(-1 * var(--portal-border-thickness-thin));
 }
 
+/* The n/s/e/w handles are compass-physical by definition (their labels and
+   ns/ew/nesw/nwse cursors are physical), and the resize math is physical
+   (clientX/clientY), so each grip's EDGE anchor is a physical left/top/right/
+   bottom - a logical inset-inline anchor would flip under dir=rtl and put the
+   grip on the wrong physical side, fighting its cursor and the transform. The
+   symmetric centring bands (inset-inline / inset-block, equal on both sides) do
+   not flip, so they stay logical. */
 .resizeHandle[data-edge='n'] {
-    inset-block-start: 0;
+    top: 0;
     inset-inline: var(--portal-touch-target-min);
     block-size: var(--portal-space-3);
     cursor: ns-resize;
 }
 
 .resizeHandle[data-edge='s'] {
-    inset-block-end: 0;
+    bottom: 0;
     inset-inline: var(--portal-touch-target-min);
     block-size: var(--portal-space-3);
     cursor: ns-resize;
 }
 
 .resizeHandle[data-edge='e'] {
-    inset-inline-end: 0;
+    right: 0;
     inset-block: var(--portal-touch-target-min);
     inline-size: var(--portal-space-3);
     cursor: ew-resize;
 }
 
 .resizeHandle[data-edge='w'] {
-    inset-inline-start: 0;
+    left: 0;
     inset-block: var(--portal-touch-target-min);
     inline-size: var(--portal-space-3);
     cursor: ew-resize;
 }
 
 .resizeHandle[data-edge='ne'] {
-    inset-block-start: 0;
-    inset-inline-end: 0;
+    top: 0;
+    right: 0;
     inline-size: var(--portal-touch-target-min);
     block-size: var(--portal-touch-target-min);
     cursor: nesw-resize;
 }
 
 .resizeHandle[data-edge='nw'] {
-    inset-block-start: 0;
-    inset-inline-start: 0;
+    top: 0;
+    left: 0;
     inline-size: var(--portal-touch-target-min);
     block-size: var(--portal-touch-target-min);
     cursor: nwse-resize;
 }
 
 .resizeHandle[data-edge='se'] {
-    inset-block-end: 0;
-    inset-inline-end: 0;
+    bottom: 0;
+    right: 0;
     inline-size: var(--portal-touch-target-min);
     block-size: var(--portal-touch-target-min);
     cursor: nwse-resize;
 }
 
 .resizeHandle[data-edge='sw'] {
-    inset-block-end: 0;
-    inset-inline-start: 0;
+    bottom: 0;
+    left: 0;
     inline-size: var(--portal-touch-target-min);
     block-size: var(--portal-touch-target-min);
     cursor: nesw-resize;

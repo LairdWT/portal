@@ -3,6 +3,7 @@ import {
     type Dispatch,
     type ReactElement,
     type SetStateAction,
+    useEffect,
     useState,
 } from 'react';
 
@@ -187,6 +188,48 @@ function MultiWindowDemo(): ReactElement {
     );
 }
 
+// RTL contract: the frame anchors PHYSICALLY (left/top) and positions via a
+// physical translate, so an off-origin floating window lands in the same physical
+// place under dir=rtl - it does not mirror off-screen the way a logical anchor
+// would. The window portals to the shared overlay root on <body>, so a React-tree
+// wrapper cannot reach it; the RTL context must live on the document element.
+// Apply it for the story's lifetime and restore it on unmount so the flag never
+// leaks into a sibling story.
+function RtlDemo(): ReactElement {
+    const [open, setOpen]: [boolean, Dispatch<SetStateAction<boolean>>] =
+        useState<boolean>(true);
+    useEffect((): (() => void) => {
+        const element: HTMLElement = document.documentElement;
+        const previous: string | null = element.getAttribute('dir');
+        element.setAttribute('dir', 'rtl');
+        return (): void => {
+            if (previous === null) {
+                element.removeAttribute('dir');
+                return;
+            }
+            element.setAttribute('dir', previous);
+        };
+    }, []);
+    return (
+        <div dir="rtl">
+            <Window
+                open={open}
+                onOpenChange={setOpen}
+                title="RTL console"
+                defaultPosition={{ x: 140, y: 96 }}
+                defaultSize={{ width: 460, height: 280 }}
+            >
+                <p>
+                    Under dir=rtl the frame still anchors physically (left/top) and
+                    positions with a physical translate, so it lands on-screen at
+                    its defaultPosition; the n/s/e/w resize grips keep their compass
+                    corners and cursors.
+                </p>
+            </Window>
+        </div>
+    );
+}
+
 // Window's public props are a discriminated (modal) union, which collapses
 // Storybook's arg inference to `never`. The stories drive the component through
 // dedicated wrapper components (each owns its controlled state), so a flat
@@ -237,4 +280,8 @@ export const StatusDanger: Story = {
 
 export const MultiWindow: Story = {
     render: (): ReactElement => <MultiWindowDemo />,
+};
+
+export const RTL: Story = {
+    render: (): ReactElement => <RtlDemo />,
 };
