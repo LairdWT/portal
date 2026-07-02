@@ -4,6 +4,28 @@ All notable changes to this project are documented in this file. The format is
 based on Keep a Changelog, and the project follows Semantic Versioning with the
 0.x caveat that, before 1.0, a minor version may carry a breaking change.
 
+## [Unreleased]
+
+All public-API changes are additive-optional; the freeze holds.
+
+### Added
+
+- `RadialMenu` (generic UI) and `RadialPad` (game-input controller) - an
+  octagonal radial with 4-, 6-, and 8-sided variants. Selectable sections fan
+  out from each polygon edge with a staggered entrance, around a beveled center
+  hub that holds 0, 1, 2, or 4 action buttons (`confirm` / `cancel` / `next` /
+  `previous`) laid out as a 2x2 grid of centered drawn symbols. Both are
+  open/close modal overlays that reuse the shared overlay root, focus trap, and
+  dismiss primitives; `RadialMenu` selects by `onSelect(id)`, `RadialPad` emits
+  a per-target Digital `InputSignal` pulse (id-suffixed like `DPad`, e.g.
+  `radial.section-0` / `radial.confirm`) alongside its raw callbacks. New
+  `ERadialAction` value export and `RadialItem` / `RadialMenuProps` /
+  `RadialPadProps` / `RadialSides` type exports.
+- Two shared drawn glyphs in `surfaces.module.css`: `checkGlyph` (confirm tick)
+  and `triangleGlyph` (rotatable equilateral triangle for next/previous), so the
+  radial symbols reuse the same token-drawn glyph system as the existing
+  cross/chevron marks rather than falling back to text.
+
 ## [1.3.0] - 2026-07-02
 
 A remediation pass keyed off the post-1.2.0 deep review. All public-API changes

@@ -25,6 +25,8 @@ export {
 } from './components/HudPanel/HudPanel.types';
 export { Joystick } from './components/Joystick/Joystick';
 export { type JoystickProps } from './components/Joystick/Joystick.types';
+export { RadialPad } from './components/RadialPad/RadialPad';
+export { type RadialPadProps } from './components/RadialPad/RadialPad.types';
 export { Slider } from './components/Slider/Slider';
 export { type SliderProps } from './components/Slider/Slider.types';
 export { Thumbpad } from './components/Thumbpad/Thumbpad';
@@ -362,6 +364,13 @@ export {
     type IndeterminateProgressProps,
     type ProgressProps,
 } from './ui/Progress/Progress.types';
+export {
+    ERadialAction,
+    type RadialItem,
+    type RadialMenuProps,
+    type RadialSides,
+} from './ui/Radial/Radial.types';
+export { RadialMenu } from './ui/Radial/RadialMenu';
 export { RadioGroup } from './ui/RadioGroup/RadioGroup';
 export {
     ERadioOrientation,

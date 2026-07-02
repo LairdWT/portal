@@ -214,3 +214,33 @@
     block-size: 100%;
     transform: translate(-50%, -50%);
 }
+
+/* Token-drawn confirm check: a box carrying only its end + block-end borders,
+ * rotated 45deg so the two arms read as a tick. Taller than it is wide so the
+ * arms are the classic short/long check proportions. currentColor, so the
+ * button's text color drives it. Shared by any confirm affordance (RadialMenu /
+ * RadialPad center hub) so none falls back to an ASCII check. */
+.checkGlyph {
+    inline-size: var(--portal-space-3);
+    block-size: var(--portal-space-4);
+    border-inline-end: var(--portal-border-thickness-thin) solid currentcolor;
+    border-block-end: var(--portal-border-thickness-thin) solid currentcolor;
+    transform: rotate(45deg);
+}
+
+/* Token-drawn filled triangle, pointing up by default and rotatable via
+ * --portal-triangle-rotate (90deg -> right / next, -90deg -> left / previous).
+ * The block size derives from the inline size through the shared equilateral
+ * ratio, so the mark stays equilateral without re-authoring sqrt(3)/2. Shared by
+ * any directional/step affordance drawn on a real element (RadialMenu /
+ * RadialPad next/previous). */
+.triangleGlyph {
+    inline-size: var(--portal-triangle-size, var(--portal-space-3));
+    block-size: calc(
+        var(--portal-triangle-size, var(--portal-space-3)) *
+            var(--portal-ratio-equilateral)
+    );
+    background-color: currentcolor;
+    clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+    transform: rotate(var(--portal-triangle-rotate, 0deg));
+}

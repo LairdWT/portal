@@ -1,0 +1,327 @@
+/*
+ * RadialCore - the shared surface behind RadialMenu (Tier-2 beveled HUD) and
+ * RadialPad (Tier-1 brushed-metal controller). The backdrop and ring are
+ * portaled into the shared overlay root and sit on the overlay stacking layer
+ * via the --portal-z-overlay token (never an inline z-index literal). The ring
+ * is a square positioning field: the center hub sits at its middle and one
+ * section slot radiates to each polygon edge. Every value resolves from a
+ * --portal-* / --portal-tone-* token; the only inline values are the per-slot
+ * --radial-angle / --radial-index the component computes from the side count.
+ * Section slots are placed by rotating to their edge angle, translating outward
+ * by the shared rest distance, then un-rotating so the button stays upright.
+ * Entrance motion (sections sliding out from each edge, the hub scaling in, the
+ * backdrop fading) is gated behind BOTH the reduced-motion media query and the
+ * data-motion attribute the component sets. Tone drives the section/hub edge and
+ * glow only; the hub symbol colors are the fixed status tokens.
+ */
+
+.backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: var(--portal-z-overlay);
+    background-color: color-mix(
+        in oklab,
+        var(--portal-color-bg-0) 72%,
+        transparent
+    );
+}
+
+.positioner {
+    position: fixed;
+    inset: 0;
+    z-index: var(--portal-z-overlay);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--portal-space-5);
+    pointer-events: none;
+}
+
+/* The ring / focus container (role="dialog"). Transparent: the section buttons
+ * and center hub ARE the visible surface, floating over the dimmed backdrop. The
+ * radial sizing ladder derives entirely from the touch floor and the spacing
+ * scale, so there is no authored pixel geometry. */
+.panel {
+    composes: toneScope from '../tone.module.css';
+
+    --radial-section: var(--portal-touch-target-min);
+    --radial-hub: calc(var(--portal-touch-target-min) * 2 + var(--portal-space-2));
+    --radial-gap: var(--portal-space-5);
+    --radial-distance-rest: calc(
+        var(--radial-hub) / 2 + var(--radial-gap) + var(--radial-section) / 2
+    );
+    --radial-size: calc(
+        (var(--radial-distance-rest) + var(--radial-section) / 2) * 2
+    );
+
+    position: relative;
+    inline-size: var(--radial-size);
+    block-size: var(--radial-size);
+    pointer-events: auto;
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+}
+
+.panel:focus-visible {
+    outline: none;
+}
+
+/* One slot per edge, centered on the ring and pushed outward to its edge. The
+ * upright button rides inside; the rotate/translate/counter-rotate keeps it
+ * axis-aligned at every angle. */
+.slot {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    inline-size: var(--radial-section);
+    block-size: var(--radial-section);
+    transform: translate(-50%, -50%) rotate(var(--radial-angle))
+        translateY(calc(-1 * var(--radial-distance-rest)))
+        rotate(calc(-1 * var(--radial-angle)));
+}
+
+.section {
+    composes: beveled from '../../theme/surfaces.module.css';
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--portal-space-1);
+    inline-size: 100%;
+    block-size: 100%;
+    min-inline-size: var(--portal-touch-target-min);
+    min-block-size: var(--portal-touch-target-min);
+    padding: var(--portal-space-1);
+    border: var(--portal-border-thickness-thin) solid
+        var(--portal-color-border-accent);
+    border-radius: var(--portal-bevel-2);
+    background-color: color-mix(
+        in oklab,
+        var(--portal-color-surface-0),
+        var(--portal-color-text-1) 14%
+    );
+    box-shadow:
+        0 0 var(--portal-space-3) var(--portal-tone-glow),
+        0 var(--portal-space-1) var(--portal-space-3)
+            color-mix(in oklab, var(--portal-color-bg-0) 60%, transparent);
+    color: var(--portal-color-text-0);
+    font-family: inherit;
+    font-size: var(--portal-size-text-sm);
+    line-height: var(--portal-line-height-tight);
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.sectionIcon {
+    display: inline-flex;
+    font-size: var(--portal-size-text-lg);
+    line-height: var(--portal-line-height-tight);
+}
+
+.sectionLabel {
+    max-inline-size: 100%;
+    overflow: hidden;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.section:focus-visible {
+    outline: var(--portal-border-thickness-thin) solid var(--portal-color-focus);
+    outline-offset: var(--portal-space-1);
+}
+
+.section:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.section:hover:not(:disabled) {
+    border-color: var(--portal-tone-border);
+    box-shadow: 0 0 var(--portal-space-2) var(--portal-tone-glow);
+}
+
+.section:active:not(:disabled) {
+    transform: scale(var(--portal-press-scale));
+}
+
+/* Controller variant: the brushed-metal key face inside the animated metal ring,
+ * matching DPad / BevelButton. Dark text keeps AA contrast over the light metal. */
+.panel[data-variant='controller'] .section {
+    border-color: transparent;
+    background:
+        var(--portal-gradient-metal) padding-box,
+        var(--portal-gradient-metal-ring) border-box;
+    color: var(--portal-color-bg-0);
+}
+
+/* The beveled center button area. Holds the 2x2 action grid (or nothing, for a
+ * 0-button hub). Sits above the section slots at the exact ring center. */
+.hub {
+    composes: beveled from '../../theme/surfaces.module.css';
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    place-content: center;
+    place-items: center;
+    gap: var(--portal-space-2);
+    inline-size: var(--radial-hub);
+    block-size: var(--radial-hub);
+    padding: var(--portal-space-2);
+    border: var(--portal-border-thickness-thin) solid
+        var(--portal-color-border-accent);
+    border-radius: var(--portal-bevel-3);
+    background-color: color-mix(
+        in oklab,
+        var(--portal-color-surface-0),
+        var(--portal-color-text-1) 14%
+    );
+    box-shadow:
+        0 0 var(--portal-space-3) var(--portal-tone-glow),
+        0 var(--portal-space-1) var(--portal-space-3)
+            color-mix(in oklab, var(--portal-color-bg-0) 60%, transparent);
+    transform: translate(-50%, -50%);
+}
+
+/* A single action centers rather than sitting in a left grid cell. */
+.hub[data-count='1'] {
+    grid-template-columns: auto;
+}
+
+.panel[data-variant='controller'] .hub {
+    border-color: transparent;
+    background:
+        var(--portal-gradient-metal) padding-box,
+        var(--portal-gradient-metal-ring) border-box;
+}
+
+.hubButton {
+    composes: beveled from '../../theme/surfaces.module.css';
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: var(--portal-touch-target-min);
+    block-size: var(--portal-touch-target-min);
+    padding: 0;
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-bevel-1);
+    background-color: transparent;
+    color: var(--portal-color-text-0);
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.hubButton:focus-visible {
+    outline: var(--portal-border-thickness-thin) solid var(--portal-color-focus);
+    outline-offset: calc(-1 * var(--portal-border-thickness-thin));
+}
+
+.hubButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.hubButton:hover:not(:disabled) {
+    border-color: var(--portal-tone-border);
+}
+
+.hubButton:active:not(:disabled) {
+    transform: scale(var(--portal-press-scale));
+}
+
+/* On the controller's metal hub, a dark face keeps the light symbols legible.
+ * Placed after the base pseudo-class rules so specificity never descends. */
+.panel[data-variant='controller'] .hubButton {
+    background-color: var(--portal-color-bg-1);
+}
+
+/* Center symbols: reuse the shared drawn glyphs and pin the recognisable status
+ * colors. Confirm = success check, cancel = danger cross, next/previous = accent
+ * triangles rotated to point right / left. */
+.glyphConfirm {
+    composes: checkGlyph from '../../theme/surfaces.module.css';
+    color: var(--portal-color-success);
+}
+
+.glyphCancel {
+    composes: crossGlyph from '../../theme/surfaces.module.css';
+    color: var(--portal-color-danger);
+}
+
+.glyphNext {
+    composes: triangleGlyph from '../../theme/surfaces.module.css';
+
+    --portal-triangle-rotate: 90deg;
+
+    color: var(--portal-color-accent-highlight);
+}
+
+.glyphPrevious {
+    composes: triangleGlyph from '../../theme/surfaces.module.css';
+
+    --portal-triangle-rotate: -90deg;
+
+    color: var(--portal-color-accent-highlight);
+}
+
+/* Motion - reduced-motion gated. Sections slide out from the center to each edge
+ * with a per-index stagger; the hub scales in; the backdrop fades. In the resting
+ * / reduced state the slots already sit at their rest distance (no animation). */
+@media (prefers-reduced-motion: no-preference) {
+    .panel[data-motion='full'] .slot {
+        animation: portal-radial-out var(--portal-duration-ui-base)
+            var(--portal-easing-emphasized) both;
+        animation-delay: calc(
+            var(--radial-index) * var(--portal-duration-ui-fast) / 4
+        );
+    }
+
+    .panel[data-motion='full'] .hub {
+        animation: portal-radial-hub var(--portal-duration-ui-base)
+            var(--portal-easing-emphasized) both;
+    }
+
+    .backdrop[data-motion='full'] {
+        animation: portal-radial-fade var(--portal-duration-ui-base)
+            var(--portal-easing-standard);
+    }
+}
+
+@keyframes portal-radial-out {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) rotate(var(--radial-angle)) translateY(0)
+            rotate(calc(-1 * var(--radial-angle))) scale(0.4);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) rotate(var(--radial-angle))
+            translateY(calc(-1 * var(--radial-distance-rest)))
+            rotate(calc(-1 * var(--radial-angle))) scale(1);
+    }
+}
+
+@keyframes portal-radial-hub {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.6);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+@keyframes portal-radial-fade {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
