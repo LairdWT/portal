@@ -1,11 +1,14 @@
 // Pure geometry for the radial surfaces (RadialMenu, RadialPad). No React, no
-// DOM: it maps a side count to per-section wedge geometry the CSS consumes as
-// custom properties. Each section is a true wedge - the annular slice between
-// an outer flat-top N-gon and an inner N-gon hole (which clears the center
-// hub) - expressed as a clip-path polygon over the full panel box, plus a
-// rim-inset face polygon (the machined edge), the label anchor point, and the
-// entrance-motion vector. Kept separate so the math is unit testable on its
-// own and shared byte-for-byte between the menu and controller variants.
+// DOM: it maps a side count to per-section wedge geometry and center-hub
+// geometry the CSS consumes as custom properties. Each section is a true
+// wedge - the annular slice between an outer flat-top N-gon and an inner
+// N-gon hole - expressed as a clip-path polygon over the full panel box, plus
+// a rim-inset face polygon (the machined edge), the label anchor point, and
+// the entrance-motion vector. The hub is the matching flat-top N-gon (square
+// hub for 4 wedges, hexagon for 6, octagon for 8) with its vertices chamfered
+// in the library's beveled-corner idiom, split into 1, 2 (vertical seam), or
+// 4 (2x2) action cells. Kept separate so the math is unit testable on its own
+// and shared byte-for-byte between the menu and controller variants.
 
 // Supported polygon side counts. A radial has one section wedge per edge, so
 // the side count is also the maximum section count. Modeled as a numeric
@@ -19,7 +22,7 @@ export type RadialSides = 4 | 6 | 8;
 // functions in percent coordinates, the anchor is the wedge's visual center
 // (label position and transform origin), and the enter offsets are the
 // translate() start point of the edge-emergence animation (pulled toward the
-// panel center; the wedge animates outward to rest).
+// panel center; the wedge animates outward to rest and back inward on close).
 export type RadialWedge = Readonly<{
     clipPath: string;
     faceClipPath: string;
@@ -29,12 +32,31 @@ export type RadialWedge = Readonly<{
     enterY: string;
 }>;
 
-// An x/y pair in unit space: the panel center is the origin and 1 is half the
-// panel size, so a point converts to percent as 50 + value * 50.
+// One hub action cell: its clip polygon (relative to the hub box) and the
+// anchor its glyph centers on.
+export type RadialHubCell = Readonly<{
+    clipPath: string;
+    anchorX: string;
+    anchorY: string;
+}>;
+
+// The center hub: the chamfered N-gon outline (the rim silhouette) and the
+// rim-inset action cells. A count of 0 still returns one cell - the
+// non-interactive center panel face.
+export type RadialHubGeometry = Readonly<{
+    clipPath: string;
+    cells: readonly RadialHubCell[];
+}>;
+
+// An x/y pair in unit space: the box center is the origin and 1 is half the
+// box size, so a point converts to percent as 50 + value * 50.
 type Point = Readonly<{ x: number; y: number }>;
 
-// A directed offset edge used while insetting the wedge outline.
+// A directed offset edge used while insetting polygons.
 type OffsetEdge = Readonly<{ origin: Point; direction: Point }>;
+
+// The clipping axis for the hub cell splits.
+type ClipAxis = 'x' | 'y';
 
 // The full turn in degrees. Named so the angle step is not a bare 360 literal.
 const FULL_TURN_DEGREES: number = 360;
@@ -48,34 +70,58 @@ const RADIANS_PER_DEGREE: number = Math.PI / 180;
 const OUTER_RADIUS_FRACTION: number = 0.98;
 
 // Inner N-gon (hub hole) circumradius per side count, as a fraction of the
-// half-panel. Each value keeps the hole boundary clear of the fixed-size
-// center hub (including its beveled corners) at the panel's minimum size; the
-// binding direction differs per side count (a hub corner meets a hole vertex
-// on the square, but a hole edge on the octagon), hence the per-N values.
+// half-panel. The hub is the SAME flat-top N-gon as the hole, so their edges
+// are parallel and the moat between them is uniform by construction; each
+// value places the hole edge one moat-width outside the hub edge at the
+// panel's minimum size (hub apothem + moat, divided by cos(step/2)). The
+// square hub needs the largest hole because a square's apothem is the
+// smallest fraction of its circumradius.
 const INNER_RADIUS_FRACTION: Readonly<Record<RadialSides, number>> = {
-    4: 0.46,
-    6: 0.5,
-    8: 0.48,
+    4: 0.54,
+    6: 0.39,
+    8: 0.41,
 };
 
-// Half-angle (degrees) removed from each side of a wedge so adjacent wedges
-// are separated by a machined seam radiating from the center.
-const SEAM_HALF_ANGLE_DEGREES: number = 0.75;
+// Half of the LINEAR gap between adjacent wedges, in unit space. The seam is
+// cut by offsetting each wedge's side edges inward by this constant distance
+// (not by trimming an angle), so the gap is identical at the inner and outer
+// corners - a constant-width machined seam along the whole shared edge.
+const SEAM_HALF_FRACTION: number = 0.008;
 
 // Rim thickness in unit space: the face polygon is the wedge outline inset by
-// this amount, so the outline shows through as the machined metal edge. At
-// the panel's size range this lands on ~2px, matching the HUD edge width.
+// this amount, so the outline shows through as the machined edge. At the
+// panel's size range this lands on ~2px, matching the HUD edge width.
 const RIM_INSET_FRACTION: number = 0.012;
 
 // How far (in percent of the panel box) a wedge starts toward the center
-// before the entrance animation slides it out to rest at its edge.
+// before the entrance animation slides it out to rest at its edge (and back
+// in when closing).
 const ENTER_DISTANCE_PERCENT: number = 8;
+
+// Chamfer length cut from each hub vertex along both adjoining edges, in hub
+// unit space. This is the polygon analogue of the library's corner-shape
+// bevel: every hub corner is a straight machined cut, matching the beveled
+// corner identity at the hub's rendered size instead of a raw sharp vertex.
+const HUB_CHAMFER_FRACTION: number = 0.1;
+
+// Hub rim thickness in hub unit space (~2px at the hub's rendered size): the
+// cells are inset by this amount so the hub background shows through as the
+// themed edge.
+const HUB_RIM_FRACTION: number = 0.04;
+
+// Half of the seam between hub cells, in hub unit space. Two adjacent cells
+// are separated by twice this (~2px), reading as the same machined seam
+// weight as the rim.
+const HUB_SEAM_HALF_FRACTION: number = 0.02;
+
+// The hub caps at a 2x2 grid of cells.
+const MAX_HUB_CELLS: number = 4;
 
 // Rounding scale for emitted coordinates (three decimals), so the generated
 // CSS strings stay short and deterministic.
 const COORDINATE_PRECISION: number = 1000;
 
-// Guard for parallel-line intersection; adjacent wedge edges are never
+// Guard for parallel-line intersection; adjacent polygon edges are never
 // parallel, so this only defends against degenerate inputs.
 const PARALLEL_EPSILON: number = 1e-9;
 
@@ -101,7 +147,7 @@ function roundCoordinate(value: number): number {
     return rounded;
 }
 
-// Unit-space coordinate (-1..1) to a percent string of the panel box (0..100%).
+// Unit-space coordinate (-1..1) to a percent string of the box (0..100%).
 function formatCoordinate(value: number): string {
     const HALF_PERCENT: number = 50;
     return `${String(roundCoordinate(HALF_PERCENT + value * HALF_PERCENT))}%`;
@@ -123,8 +169,25 @@ function polygonPath(points: readonly Point[]): string {
     return `polygon(${coordinates})`;
 }
 
+// Vertex-average centroid: exact enough to anchor a glyph inside the convex
+// hub cells and wedge shapes this module produces.
+function polygonCentroid(points: readonly Point[]): Point {
+    const count: number = points.length;
+    if (count === 0) {
+        return { x: 0, y: 0 };
+    }
+    return {
+        x:
+            points.reduce((sum: number, point: Point): number => sum + point.x, 0) /
+            count,
+        y:
+            points.reduce((sum: number, point: Point): number => sum + point.y, 0) /
+            count,
+    };
+}
+
 // Intersection of two offset edges treated as infinite lines. The parallel
-// fall-through returns the second edge's origin: adjacent wedge edges are
+// fall-through returns the second edge's origin: adjacent polygon edges are
 // never parallel, so this branch only defends degenerate inputs.
 function intersectEdges(first: OffsetEdge, second: OffsetEdge): Point {
     const cross: number =
@@ -143,25 +206,22 @@ function intersectEdges(first: OffsetEdge, second: OffsetEdge): Point {
     };
 }
 
-// Insets a convex polygon by offsetting every edge toward the centroid and
-// re-intersecting adjacent edges. Winding-agnostic: the inward normal is
-// chosen per edge by testing against the centroid.
-function insetConvexPolygon(
+// Offsets each polygon edge inward (toward the centroid) by its own distance
+// and re-intersects adjacent edges to rebuild the vertices. Winding-agnostic:
+// the inward normal is chosen per edge by testing against the centroid. An
+// offset of 0 leaves that edge's line untouched, which is how the wedge seams
+// move only the side edges while the inner/outer chords stay on the ring
+// boundaries.
+function offsetPolygonEdges(
     points: readonly Point[],
-    inset: number,
+    offsets: readonly number[],
 ): readonly Point[] {
     const count: number = points.length;
-    const centroid: Point = {
-        x:
-            points.reduce((sum: number, point: Point): number => sum + point.x, 0) /
-            count,
-        y:
-            points.reduce((sum: number, point: Point): number => sum + point.y, 0) /
-            count,
-    };
+    const centroid: Point = polygonCentroid(points);
     const edges: readonly OffsetEdge[] = points.map(
         (point: Point, index: number): OffsetEdge => {
             const next: Point = points[(index + 1) % count] ?? point;
+            const offset: number = offsets[index] ?? 0;
             const edgeX: number = next.x - point.x;
             const edgeY: number = next.y - point.y;
             const length: number = Math.hypot(edgeX, edgeY);
@@ -173,8 +233,8 @@ function insetConvexPolygon(
             const sign: number = towardCentroid < 0 ? -1 : 1;
             return {
                 origin: {
-                    x: point.x + inwardX * sign * inset,
-                    y: point.y + inwardY * sign * inset,
+                    x: point.x + inwardX * sign * offset,
+                    y: point.y + inwardY * sign * offset,
                 },
                 direction,
             };
@@ -186,34 +246,93 @@ function insetConvexPolygon(
     });
 }
 
+// Uniform inset: every edge moves inward by the same distance.
+function insetConvexPolygon(
+    points: readonly Point[],
+    inset: number,
+): readonly Point[] {
+    return offsetPolygonEdges(
+        points,
+        points.map((): number => inset),
+    );
+}
+
+// Sutherland-Hodgman clip of a convex polygon against one axis-aligned
+// half-plane; used to split the hub face into its action cells.
+function clipPolygonToHalfPlane(
+    points: readonly Point[],
+    axis: ClipAxis,
+    limit: number,
+    keepLess: boolean,
+): readonly Point[] {
+    const count: number = points.length;
+    const result: Point[] = [];
+    for (let index: number = 0; index < count; index += 1) {
+        const current: Point = points[index] ?? { x: 0, y: 0 };
+        const next: Point = points[(index + 1) % count] ?? current;
+        const currentValue: number = axis === 'x' ? current.x : current.y;
+        const nextValue: number = axis === 'x' ? next.x : next.y;
+        const currentInside: boolean = keepLess
+            ? currentValue <= limit
+            : currentValue >= limit;
+        const nextInside: boolean = keepLess
+            ? nextValue <= limit
+            : nextValue >= limit;
+        if (currentInside) {
+            result.push(current);
+        }
+        if (currentInside === nextInside) {
+            continue;
+        }
+        const towardLimit: number =
+            (limit - currentValue) / (nextValue - currentValue);
+        result.push({
+            x: current.x + (next.x - current.x) * towardLimit,
+            y: current.y + (next.y - current.y) * towardLimit,
+        });
+    }
+    return result;
+}
+
 // The per-section wedge geometry for a flat-top N-gon with section 0 at the
 // top, stepping clockwise one polygon edge per section. Each wedge is the
-// quadrilateral between the inner and outer N-gon chords of its edge, with
-// the seam half-angle trimmed from both sides; its outer boundary IS the
-// polygon's straight edge, so the assembled sections read as the N-gon
+// quadrilateral between the inner and outer N-gon chords of its edge; its
+// side edges are then offset inward by the constant linear seam half-width,
+// so adjacent wedges are separated by a uniform machined gap along the whole
+// shared edge (identical at the inner and outer corners). The outer boundary
+// IS the polygon's straight edge, so the assembled sections read as the N-gon
 // itself. The returned array has one entry per side; a consumer with fewer
 // items simply uses the leading wedges.
 export function radialWedges(sides: RadialSides): readonly RadialWedge[] {
     const step: number = FULL_TURN_DEGREES / sides;
-    const halfSpan: number = step / 2 - SEAM_HALF_ANGLE_DEGREES;
+    const halfStep: number = step / 2;
     const innerRadius: number = INNER_RADIUS_FRACTION[sides];
-    // Both boundary chords cut across the wedge at cos(halfSpan) of their
+    // Both boundary chords cut across the wedge at cos(halfStep) of their
     // circumradius along the center direction, so the visual center (label
     // anchor, transform origin) sits midway between the two apothems.
     const anchorRadius: number =
         ((innerRadius + OUTER_RADIUS_FRACTION) / 2) *
-        Math.cos(halfSpan * RADIANS_PER_DEGREE);
+        Math.cos(halfStep * RADIANS_PER_DEGREE);
     const wedges: RadialWedge[] = [];
     for (let index: number = 0; index < sides; index += 1) {
         const centerAngle: number = index * step;
-        const leftAngle: number = centerAngle - halfSpan;
-        const rightAngle: number = centerAngle + halfSpan;
-        const outline: readonly Point[] = [
+        const leftAngle: number = centerAngle - halfStep;
+        const rightAngle: number = centerAngle + halfStep;
+        // Full sector quad: [inner-left, outer-left, outer-right, inner-right].
+        // Edges are left side, outer chord, right side, inner chord; only the
+        // side edges take the seam offset.
+        const sector: readonly Point[] = [
             polarPoint(innerRadius, leftAngle),
             polarPoint(OUTER_RADIUS_FRACTION, leftAngle),
             polarPoint(OUTER_RADIUS_FRACTION, rightAngle),
             polarPoint(innerRadius, rightAngle),
         ];
+        const outline: readonly Point[] = offsetPolygonEdges(sector, [
+            SEAM_HALF_FRACTION,
+            0,
+            SEAM_HALF_FRACTION,
+            0,
+        ]);
         const face: readonly Point[] = insetConvexPolygon(
             outline,
             RIM_INSET_FRACTION,
@@ -230,4 +349,152 @@ export function radialWedges(sides: RadialSides): readonly RadialWedge[] {
         });
     }
     return wedges;
+}
+
+// The hub outline: the same flat-top N-gon as the ring's inner hole, scaled
+// uniformly to fit the square hub box (a hexagon letterboxes vertically), with
+// every vertex chamfered - the polygon rendering of the library's beveled
+// corner identity.
+function hubOutline(sides: RadialSides): readonly Point[] {
+    const step: number = FULL_TURN_DEGREES / sides;
+    const vertices: Point[] = [];
+    for (let index: number = 0; index < sides; index += 1) {
+        vertices.push(polarPoint(1, (index + 0.5) * step));
+    }
+    const maxExtent: number = vertices.reduce(
+        (max: number, point: Point): number =>
+            Math.max(max, Math.abs(point.x), Math.abs(point.y)),
+        0,
+    );
+    const scaled: readonly Point[] = vertices.map(
+        (point: Point): Point => ({
+            x: point.x / maxExtent,
+            y: point.y / maxExtent,
+        }),
+    );
+    const chamfered: Point[] = [];
+    const count: number = scaled.length;
+    for (let index: number = 0; index < count; index += 1) {
+        const vertex: Point = scaled[index] ?? { x: 0, y: 0 };
+        const previous: Point = scaled[(index + count - 1) % count] ?? vertex;
+        const next: Point = scaled[(index + 1) % count] ?? vertex;
+        const fromPrevious: number = Math.hypot(
+            vertex.x - previous.x,
+            vertex.y - previous.y,
+        );
+        const toNext: number = Math.hypot(next.x - vertex.x, next.y - vertex.y);
+        chamfered.push({
+            x:
+                vertex.x -
+                ((vertex.x - previous.x) / fromPrevious) * HUB_CHAMFER_FRACTION,
+            y:
+                vertex.y -
+                ((vertex.y - previous.y) / fromPrevious) * HUB_CHAMFER_FRACTION,
+        });
+        chamfered.push({
+            x: vertex.x + ((next.x - vertex.x) / toNext) * HUB_CHAMFER_FRACTION,
+            y: vertex.y + ((next.y - vertex.y) / toNext) * HUB_CHAMFER_FRACTION,
+        });
+    }
+    return chamfered;
+}
+
+function toHubCell(points: readonly Point[]): RadialHubCell {
+    const centroid: Point = polygonCentroid(points);
+    return {
+        clipPath: polygonPath(points),
+        anchorX: formatCoordinate(centroid.x),
+        anchorY: formatCoordinate(centroid.y),
+    };
+}
+
+// Hub cell layout vocabulary, derived from the action count. This is the hub
+// button-area contract as a state enum: Single is the full face (both the
+// 0-action panel and the 1-action full-bevel button), Split is the vertical
+// two-way split, Grid is the 2x2; Triple covers a stray count of 3 (top row
+// plus a bottom cell spanning the width).
+const EHubLayout: {
+    readonly Single: 'single';
+    readonly Split: 'split';
+    readonly Triple: 'triple';
+    readonly Grid: 'grid';
+} = {
+    Single: 'single',
+    Split: 'split',
+    Triple: 'triple',
+    Grid: 'grid',
+};
+type EHubLayout = (typeof EHubLayout)[keyof typeof EHubLayout];
+
+function hubLayoutForCount(count: number): EHubLayout {
+    if (count <= 1) {
+        return EHubLayout.Single;
+    }
+    if (count === 2) {
+        return EHubLayout.Split;
+    }
+    if (count === 3) {
+        return EHubLayout.Triple;
+    }
+    return EHubLayout.Grid;
+}
+
+// Splits the rim-inset hub face into the layout's cells by clipping against
+// the seam half-planes, so the hub background reads through as the machined
+// seams between the action faces.
+function hubCellsForLayout(
+    face: readonly Point[],
+    layout: EHubLayout,
+): readonly (readonly Point[])[] {
+    if (layout === EHubLayout.Single) {
+        return [face];
+    }
+    const seam: number = HUB_SEAM_HALF_FRACTION;
+    const left: readonly Point[] = clipPolygonToHalfPlane(face, 'x', -seam, true);
+    const right: readonly Point[] = clipPolygonToHalfPlane(face, 'x', seam, false);
+    if (layout === EHubLayout.Split) {
+        return [left, right];
+    }
+    const topLeft: readonly Point[] = clipPolygonToHalfPlane(
+        left,
+        'y',
+        -seam,
+        true,
+    );
+    const topRight: readonly Point[] = clipPolygonToHalfPlane(
+        right,
+        'y',
+        -seam,
+        true,
+    );
+    if (layout === EHubLayout.Triple) {
+        return [topLeft, topRight, clipPolygonToHalfPlane(face, 'y', seam, false)];
+    }
+    return [
+        topLeft,
+        topRight,
+        clipPolygonToHalfPlane(left, 'y', seam, false),
+        clipPolygonToHalfPlane(right, 'y', seam, false),
+    ];
+}
+
+// The center hub geometry for a given side count and action count. The cell
+// layout implements the hub contract: 0 -> one non-interactive panel cell,
+// 1 -> one cell filling the whole face, 2 -> a vertical split (side-by-side
+// halves), 4 -> a 2x2 grid.
+export function radialHubGeometry(
+    sides: RadialSides,
+    count: number,
+): RadialHubGeometry {
+    const outline: readonly Point[] = hubOutline(sides);
+    const face: readonly Point[] = insetConvexPolygon(outline, HUB_RIM_FRACTION);
+    const cellCount: number = Math.max(
+        0,
+        Math.min(MAX_HUB_CELLS, Math.trunc(count)),
+    );
+    const layout: EHubLayout = hubLayoutForCount(cellCount);
+    return {
+        clipPath: polygonPath(outline),
+        cells: hubCellsForLayout(face, layout).map(toHubCell),
+    };
 }

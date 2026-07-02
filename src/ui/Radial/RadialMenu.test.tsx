@@ -1,4 +1,10 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import {
+    fireEvent,
+    render,
+    type RenderResult,
+    screen,
+    waitFor,
+} from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { afterEach, describe, expect, it, type Mock, vi } from 'vitest';
 
@@ -18,6 +24,14 @@ const ITEMS: readonly RadialItem[] = [
 
 function noop(): void {
     // Intentionally empty: a stand-in handler where the call is not asserted.
+}
+
+// jsdom has no AnimationEvent constructor, so fireEvent.animationEnd drops
+// the animationName; build a plain bubbling event and pin the name on it.
+function fireAnimationEnd(target: HTMLElement, animationName: string): void {
+    const event: Event = new Event('animationend', { bubbles: true });
+    Object.defineProperty(event, 'animationName', { value: animationName });
+    fireEvent(target, event);
 }
 
 afterEach((): void => {
@@ -130,6 +144,77 @@ describe('RadialMenu', (): void => {
         await user.click(screen.getByRole('button', { name: 'Cancel' }));
         expect(onCenterAction).toHaveBeenCalledWith(ERadialAction.Cancel);
         expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('collapses through a closing state and unmounts when the exit animation ends', (): void => {
+        const view: RenderResult = render(
+            <RadialMenu
+                open
+                onClose={noop}
+                label="Actions"
+                items={ITEMS}
+                onSelect={noop}
+                sides={4}
+            />,
+        );
+        const dialog: HTMLElement = screen.getByRole('dialog', {
+            name: 'Actions',
+        });
+        expect(dialog.getAttribute('data-state')).toBe('open');
+
+        view.rerender(
+            <RadialMenu
+                open={false}
+                onClose={noop}
+                label="Actions"
+                items={ITEMS}
+                onSelect={noop}
+                sides={4}
+            />,
+        );
+        // Still mounted: the wedges play the inward collapse first.
+        expect(dialog.getAttribute('data-state')).toBe('closing');
+
+        // An unrelated animation (e.g. a re-run entrance) must not unmount it.
+        fireAnimationEnd(dialog, 'portal-radial-section-in');
+        expect(screen.getByRole('dialog', { name: 'Actions' })).toBe(dialog);
+
+        // The exit animation ending settles the surface to closed. CSS
+        // modules scope the keyframe name, so the component matches by
+        // inclusion; the scoped name always contains the raw one.
+        fireAnimationEnd(dialog, 'portal-radial-section-out');
+        expect(screen.queryByRole('dialog')).toBeNull();
+    });
+
+    it('renders an icon-only section as a glyph key named by its label', (): void => {
+        const iconItems: readonly RadialItem[] = [
+            {
+                id: 'a',
+                label: 'Alpha',
+                icon: <span data-testid="alpha-icon" />,
+                iconOnly: true,
+            },
+            // No icon supplied: iconOnly is ignored so the wedge never
+            // renders empty.
+            { id: 'b', label: 'Bravo', iconOnly: true },
+            { id: 'c', label: 'Charlie' },
+            { id: 'd', label: 'Delta' },
+        ];
+        render(
+            <RadialMenu
+                open
+                onClose={noop}
+                label="Actions"
+                items={iconItems}
+                onSelect={noop}
+                sides={4}
+            />,
+        );
+        const alpha: HTMLElement = screen.getByRole('button', { name: 'Alpha' });
+        expect(alpha.textContent).not.toContain('Alpha');
+        expect(screen.getByTestId('alpha-icon')).toBeInTheDocument();
+        const bravo: HTMLElement = screen.getByRole('button', { name: 'Bravo' });
+        expect(bravo.textContent).toContain('Bravo');
     });
 
     it('renders no hub buttons when no center actions are requested', (): void => {

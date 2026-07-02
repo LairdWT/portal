@@ -134,7 +134,9 @@
 
 /* Token-drawn close/dismiss/remove cross: two rotated bars on currentColor, so
  * every close affordance shares one glyph instead of an ASCII 'x' or '[x]'. Size
- * via --portal-cross-size (default 1.25rem); color follows the button. */
+ * via --portal-cross-size (default 1.25rem), bar weight via
+ * --portal-cross-weight (default the thin border thickness, so existing
+ * consumers render unchanged); color follows the button. */
 .crossGlyph {
     position: relative;
     inline-size: var(
@@ -154,7 +156,7 @@
     inset-block-start: 50%;
     inset-inline-start: 0;
     inline-size: 100%;
-    block-size: var(--portal-border-thickness-thin);
+    block-size: var(--portal-cross-weight, var(--portal-border-thickness-thin));
     border-radius: var(--portal-radius-pill);
     background-color: currentcolor;
 }
@@ -215,17 +217,24 @@
     transform: translate(-50%, -50%);
 }
 
-/* Token-drawn confirm check: a box carrying only its end + block-end borders,
- * rotated 45deg so the two arms read as a tick. Taller than it is wide so the
- * arms are the classic short/long check proportions. currentColor, so the
- * button's text color drives it. Shared by any confirm affordance (RadialMenu /
- * RadialPad center hub) so none falls back to an ASCII check. */
-.checkGlyph {
-    inline-size: var(--portal-space-3);
-    block-size: var(--portal-space-4);
-    border-inline-end: var(--portal-border-thickness-thin) solid currentcolor;
-    border-block-end: var(--portal-border-thickness-thin) solid currentcolor;
-    transform: rotate(45deg);
+/* Token-drawn confirm/status ring: a bordered circle on currentColor. Size via
+ * --portal-circle-size (default 1.25rem), stroke via --portal-circle-weight
+ * (default the normal border thickness, so it reads bold at control scale).
+ * Shared by any confirm affordance (RadialMenu / RadialPad center hub) so none
+ * falls back to an ASCII 'O'. */
+.circleGlyph {
+    box-sizing: border-box;
+    inline-size: var(
+        --portal-circle-size,
+        calc(var(--portal-space-4) + var(--portal-space-1))
+    );
+    block-size: var(
+        --portal-circle-size,
+        calc(var(--portal-space-4) + var(--portal-space-1))
+    );
+    border: var(--portal-circle-weight, var(--portal-border-thickness-normal)) solid
+        currentcolor;
+    border-radius: var(--portal-radius-pill);
 }
 
 /* Token-drawn filled triangle, pointing up by default and rotatable via

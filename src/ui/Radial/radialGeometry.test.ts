@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { type RadialSides, type RadialWedge, radialWedges } from './radialGeometry';
+import {
+    type RadialHubGeometry,
+    radialHubGeometry,
+    type RadialSides,
+    type RadialWedge,
+    radialWedges,
+} from './radialGeometry';
 
 const ALL_SIDES: readonly RadialSides[] = [4, 6, 8];
 
@@ -72,9 +78,9 @@ describe('radialWedges', (): void => {
                     expect(point.y).toBeGreaterThanOrEqual(0);
                     expect(point.y).toBeLessThanOrEqual(100);
                     // Inside the outer boundary, clear of the center hub area
-                    // (the hub occupies well under 40% of the half-size).
+                    // (the tightest inner hole sits at 39% of the half-size).
                     expect(distanceFromCenter(point)).toBeLessThanOrEqual(49.001);
-                    expect(distanceFromCenter(point)).toBeGreaterThanOrEqual(20);
+                    expect(distanceFromCenter(point)).toBeGreaterThanOrEqual(15);
                 }
             }
         }
@@ -123,6 +129,71 @@ describe('radialWedges', (): void => {
         }
     });
 
+    it('keeps a uniform linear gap between adjacent wedges', (): void => {
+        // Perpendicular distance from a point to the infinite line through
+        // lineStart -> lineEnd.
+        function distanceToLine(
+            point: ParsedPoint,
+            lineStart: ParsedPoint,
+            lineEnd: ParsedPoint,
+        ): number {
+            const edgeX: number = lineEnd.x - lineStart.x;
+            const edgeY: number = lineEnd.y - lineStart.y;
+            const cross: number =
+                edgeX * (point.y - lineStart.y) - edgeY * (point.x - lineStart.x);
+            return Math.abs(cross) / Math.hypot(edgeX, edgeY);
+        }
+        for (const sides of ALL_SIDES) {
+            const wedges: readonly RadialWedge[] = radialWedges(sides);
+            for (let index: number = 0; index < sides; index += 1) {
+                const current: RadialWedge | undefined = wedges[index];
+                const neighbor: RadialWedge | undefined =
+                    wedges[(index + 1) % sides];
+                expect(current).toBeDefined();
+                expect(neighbor).toBeDefined();
+                if (current === undefined || neighbor === undefined) {
+                    continue;
+                }
+                // Silhouette order is [inner-left, outer-left, outer-right,
+                // inner-right]: the current wedge's right side faces the
+                // neighbor's left side across the seam.
+                const currentPoints: readonly ParsedPoint[] = polygonPoints(
+                    current.clipPath,
+                );
+                const neighborPoints: readonly ParsedPoint[] = polygonPoints(
+                    neighbor.clipPath,
+                );
+                const outerCorner: ParsedPoint | undefined = currentPoints[2];
+                const innerCorner: ParsedPoint | undefined = currentPoints[3];
+                const neighborInner: ParsedPoint | undefined = neighborPoints[0];
+                const neighborOuter: ParsedPoint | undefined = neighborPoints[1];
+                if (
+                    outerCorner === undefined ||
+                    innerCorner === undefined ||
+                    neighborInner === undefined ||
+                    neighborOuter === undefined
+                ) {
+                    continue;
+                }
+                const outerGap: number = distanceToLine(
+                    outerCorner,
+                    neighborInner,
+                    neighborOuter,
+                );
+                const innerGap: number = distanceToLine(
+                    innerCorner,
+                    neighborInner,
+                    neighborOuter,
+                );
+                // The seam is a constant-width machined gap: identical at the
+                // outer and inner corners (the old angular trim made the
+                // outer gap roughly double the inner one).
+                expect(outerGap).toBeCloseTo(innerGap, 2);
+                expect(outerGap).toBeGreaterThan(0);
+            }
+        }
+    });
+
     it('emits entrance offsets pointing from the center toward each edge', (): void => {
         const wedges: readonly RadialWedge[] = radialWedges(4);
         const [top, right, bottom, left]: readonly (RadialWedge | undefined)[] =
@@ -148,5 +219,77 @@ describe('radialWedges', (): void => {
         expect(percentValue(right.enterX)).toBeLessThan(0);
         expect(percentValue(bottom.enterY)).toBeLessThan(0);
         expect(percentValue(left.enterX)).toBeGreaterThan(0);
+    });
+});
+
+describe('radialHubGeometry', (): void => {
+    it('matches the ring: a chamfered N-gon outline per side count', (): void => {
+        for (const sides of ALL_SIDES) {
+            const hub: RadialHubGeometry = radialHubGeometry(sides, 4);
+            // Every vertex is chamfered into two, so the outline has 2N points.
+            expect(polygonPoints(hub.clipPath)).toHaveLength(sides * 2);
+            for (const point of polygonPoints(hub.clipPath)) {
+                expect(point.x).toBeGreaterThanOrEqual(0);
+                expect(point.x).toBeLessThanOrEqual(100);
+                expect(point.y).toBeGreaterThanOrEqual(0);
+                expect(point.y).toBeLessThanOrEqual(100);
+            }
+        }
+    });
+
+    it('implements the cell contract: 0/1 fill, 2 split vertically, 4 grid', (): void => {
+        const panel: RadialHubGeometry = radialHubGeometry(8, 0);
+        expect(panel.cells).toHaveLength(1);
+        expect(percentValue(panel.cells[0]?.anchorX ?? '')).toBeCloseTo(50, 1);
+
+        const single: RadialHubGeometry = radialHubGeometry(8, 1);
+        expect(single.cells).toHaveLength(1);
+
+        const split: RadialHubGeometry = radialHubGeometry(8, 2);
+        expect(split.cells).toHaveLength(2);
+        // Side-by-side halves: anchors sit left and right of center on one row.
+        expect(percentValue(split.cells[0]?.anchorX ?? '')).toBeLessThan(50);
+        expect(percentValue(split.cells[1]?.anchorX ?? '')).toBeGreaterThan(50);
+        expect(percentValue(split.cells[0]?.anchorY ?? '')).toBeCloseTo(50, 1);
+
+        const grid: RadialHubGeometry = radialHubGeometry(8, 4);
+        expect(grid.cells).toHaveLength(4);
+        expect(percentValue(grid.cells[0]?.anchorX ?? '')).toBeLessThan(50);
+        expect(percentValue(grid.cells[0]?.anchorY ?? '')).toBeLessThan(50);
+        expect(percentValue(grid.cells[3]?.anchorX ?? '')).toBeGreaterThan(50);
+        expect(percentValue(grid.cells[3]?.anchorY ?? '')).toBeGreaterThan(50);
+    });
+
+    it('clamps a stray action count into the 2x2 grid', (): void => {
+        expect(radialHubGeometry(8, 9).cells).toHaveLength(4);
+        expect(radialHubGeometry(8, 3).cells).toHaveLength(3);
+        expect(radialHubGeometry(8, -1).cells).toHaveLength(1);
+    });
+
+    it('insets every cell inside the hub outline', (): void => {
+        for (const sides of ALL_SIDES) {
+            const hub: RadialHubGeometry = radialHubGeometry(sides, 4);
+            const outline: readonly ParsedPoint[] = polygonPoints(hub.clipPath);
+            const minX: number = Math.min(
+                ...outline.map((point: ParsedPoint): number => point.x),
+            );
+            const maxX: number = Math.max(
+                ...outline.map((point: ParsedPoint): number => point.x),
+            );
+            const minY: number = Math.min(
+                ...outline.map((point: ParsedPoint): number => point.y),
+            );
+            const maxY: number = Math.max(
+                ...outline.map((point: ParsedPoint): number => point.y),
+            );
+            for (const cell of hub.cells) {
+                for (const point of polygonPoints(cell.clipPath)) {
+                    expect(point.x).toBeGreaterThan(minX);
+                    expect(point.x).toBeLessThan(maxX);
+                    expect(point.y).toBeGreaterThan(minY);
+                    expect(point.y).toBeLessThan(maxY);
+                }
+            }
+        }
     });
 });

@@ -4,6 +4,54 @@ All notable changes to this project are documented in this file. The format is
 based on Keep a Changelog, and the project follows Semantic Versioning with the
 0.x caveat that, before 1.0, a minor version may carry a breaking change.
 
+## [1.5.0] - 2026-07-02
+
+All public-API changes are additive-optional; the freeze holds.
+
+### Added
+
+- `RadialItem.iconOnly`: a radial section can present as a pure glyph key -
+  the visible text is omitted while `label` still names the wedge for
+  assistive tech (ignored when no icon is supplied, so a section never
+  renders empty). New `IconSections` story demonstrates drawn SVG marks.
+- `circleGlyph` joins the shared token-drawn glyphs in `surfaces.module.css`
+  (a bordered ring on currentColor with size and stroke knobs), and
+  `crossGlyph` gains a `--portal-cross-weight` knob (defaults to the thin
+  border thickness, so every existing consumer renders unchanged).
+
+### Changed
+
+- Radial center hub redesigned. It is now the same flat-top N-gon as the ring
+  (square for 4 wedges, hexagon for 6, octagon for 8) with chamfered
+  vertices - the polygon rendering of the corner-shape bevel identity - so
+  hub and ring read as one machined assembly with a uniform moat. The action
+  cells are clip-polygon slices of the hub face (0 = non-interactive panel,
+  1 = the whole face, 2 = vertical split, 4 = 2x2 grid) instead of grid
+  rectangles sheared by an overflow corner. The hub is themed rather than
+  metallic: an accent-highlight/tone rim over tone-fill faces. Confirm is
+  now a bold success-green ring (was a check) and cancel a bold danger-red
+  cross; next/previous keep their accent triangles; all four carry a soft
+  self-colored bloom.
+- Radial open/close is now stateful and animated both ways: opening staggers
+  the wedges outward from the center while the hub and backdrop only fade;
+  closing collapses the wedges back inward together and the surface unmounts
+  when the exit animation ends (timer backstop; reduced motion closes
+  immediately).
+- Radial wedge seams are constant-width: the side edges are offset by a
+  linear distance instead of an angular trim, so the gap between
+  neighbouring wedges is identical at the inner and outer corners
+  (unit-tested).
+- Radial depth pass: menu wedge faces carry a center-dark radial wash with a
+  tone rim-light and the shared scanline texture; controller faces recess
+  the brushed ramp behind a center vignette; the hub tracks the panel size
+  and reads smaller relative to the wedges.
+
+### Removed
+
+- `checkGlyph` from `surfaces.module.css` (internal and unconsumed once the
+  radial confirm became the ring; CSS-module utilities are not part of the
+  public API).
+
 ## [1.4.0] - 2026-07-02
 
 All public-API changes are additive-optional; the freeze holds.

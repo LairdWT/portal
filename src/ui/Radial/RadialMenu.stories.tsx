@@ -27,6 +27,45 @@ const CENTER_ACTIONS: readonly ERadialAction[] = [
     ERadialAction.Next,
 ];
 
+// Simple geometric SVG marks (on currentColor) for the icon-only story, so
+// the glyph-key presentation is demonstrated with real drawn icons rather
+// than letters.
+function shapeIcon(path: string): ReactElement {
+    return (
+        <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+        >
+            <path d={path} />
+        </svg>
+    );
+}
+
+const ICON_ITEMS: readonly RadialItem[] = [
+    {
+        id: 'move',
+        label: 'Move',
+        iconOnly: true,
+        icon: shapeIcon('M12 2 22 12 12 22 2 12Z'),
+    },
+    {
+        id: 'strike',
+        label: 'Strike',
+        iconOnly: true,
+        icon: shapeIcon('M12 3 21 20H3Z'),
+    },
+    {
+        id: 'guard',
+        label: 'Guard',
+        iconOnly: true,
+        icon: shapeIcon('M5 4H19V16L12 21 5 16Z'),
+    },
+    { id: 'wait', label: 'Wait', iconOnly: true, icon: shapeIcon('M4 4H20V20H4Z') },
+];
+
 // A small controlled harness so each story is a real open/close radial: the
 // trigger opens it, selecting an item or cancelling closes it. Opened by default
 // so the story renders the radial for the visual and a11y (axe) gates.
@@ -34,16 +73,21 @@ type DemoProps = Readonly<{
     sides: RadialSides;
     centerActions: readonly ERadialAction[];
     itemCount: number;
+    items?: readonly RadialItem[];
 }>;
 
 function RadialMenuDemo({
     sides,
     centerActions,
     itemCount,
+    items: itemsOverride,
 }: DemoProps): ReactElement {
     const [open, setOpen]: [boolean, Dispatch<SetStateAction<boolean>>] =
         useState<boolean>(true);
-    const items: readonly RadialItem[] = ACTION_ITEMS.slice(0, itemCount);
+    const items: readonly RadialItem[] = (itemsOverride ?? ACTION_ITEMS).slice(
+        0,
+        itemCount,
+    );
     return (
         <>
             <button
@@ -106,4 +150,15 @@ export const SingleConfirm: Story = {
 
 export const ConfirmCancel: Story = {
     args: { centerActions: [ERadialAction.Confirm, ERadialAction.Cancel] },
+};
+
+// Icon-only sections: each wedge is a pure glyph key (the label still names
+// it for assistive tech), around the split-vertical two-action hub.
+export const IconSections: Story = {
+    args: {
+        sides: 4,
+        itemCount: 4,
+        items: ICON_ITEMS,
+        centerActions: [ERadialAction.Confirm, ERadialAction.Cancel],
+    },
 };

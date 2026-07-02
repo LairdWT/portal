@@ -7,26 +7,34 @@
  * Geometry: the panel is a square positioning field. Every section button
  * spans the WHOLE panel and is cut down to its wedge by the clip-path polygon
  * the component computes (radialGeometry.ts) - the annular slice between the
- * outer flat-top N-gon and the inner N-gon hole that clears the center hub.
+ * outer flat-top N-gon and the inner N-gon hole. Adjacent wedges are
+ * separated by a constant-width machined seam (a linear edge offset, not an
+ * angular trim, so the gap is identical at the inner and outer corners).
  * Because all wedges share the panel box, one continuous gradient paints
  * across the assembled ring: the button's own background shows through the
  * rim (the sliver between --radial-clip and the inset --radial-face-clip) as
- * a machined metal edge, and the ::before face fills the wedge interior. The
- * clip polygons are physical coordinates, so the label anchors use physical
+ * a machined edge, and the ::before face fills the wedge interior. The clip
+ * polygons are physical coordinates, so the label anchors use physical
  * top/left on purpose (the Window physical-anchor precedent): the radial is
  * rotationally symmetric and must not mirror under dir=rtl.
  *
- * Center hub: a beveled square that IS the button area - 0 actions render a
- * non-interactive machined panel, 1 fills the whole bevel, 2 splits it with a
- * vertical seam, 4 forms a 2x2 grid. The container paints the metal; the
- * HUD-edge-width padding and gap read as the rim and the machined seams. Its
- * size is derived so a 2x2 cell lands exactly on the 3rem touch floor.
+ * Center hub: the SAME flat-top N-gon as the ring's hole (square for 4,
+ * hexagon for 6, octagon for 8) with chamfered vertices - the polygon
+ * rendering of the corner-shape bevel identity - so hub and ring read as one
+ * machined assembly with a uniform moat. The hub is themed, not metallic:
+ * its rim carries the accent-highlight/tone ramp and its action cells sit on
+ * the tone fill, so the bold status symbols (green confirm ring, red cancel
+ * cross, accent triangles) own the center. Cell clip polygons implement the
+ * button-area contract: 0 = non-interactive panel, 1 = the whole face,
+ * 2 = a vertical split, 4 = a 2x2 grid.
  *
  * Motion (gated behind BOTH the reduced-motion media query and the
- * data-motion attribute): each wedge emerges from the panel center out to its
- * edge with a per-index stagger, the hub scales in, the backdrop fades.
- * Every value resolves from a --portal-* / --portal-tone-* token; the only
- * inline values are the per-wedge custom properties computed from the side
+ * data-motion attribute) is stateful via data-state: opening staggers each
+ * wedge outward from the center to its edge while the hub and backdrop only
+ * fade; closing collapses all wedges back inward together, then the surface
+ * unmounts (the component listens for the exit animation's end). Every value
+ * resolves from a --portal-* / --portal-tone-* token; the only inline values
+ * are the per-wedge / per-cell custom properties computed from the side
  * count.
  */
 
@@ -56,24 +64,22 @@
  * the visible surface, floating over the dimmed backdrop, so the depth shadow
  * and tone glow ride a filter that follows the composite silhouette. The size
  * floor keeps every 8-sided wedge above the 3rem touch target at the smallest
- * panel; the hub derivation below makes a 2x2 hub cell exactly the floor. */
+ * panel; the hub tracks the panel with a hard floor at which a 2x2 cell spans
+ * the 3rem touch target (its polygon-cut outer corner trims one corner of the
+ * cell, the same ratified concession the beveled corners make elsewhere). */
 .panel {
     composes: toneScope from '../tone.module.css';
 
     --radial-size: clamp(19.5rem, 80vmin, 26rem);
-
-    /* The hub tracks the panel so the center-to-ring proportion holds across
-     * the clamp range, with a hard floor at which a 2x2 hub cell is exactly
-     * the 3rem touch target (2 cells + the rim padding and seam gap). */
     --radial-hub: max(
         calc(var(--portal-touch-target-min) * 2 + var(--portal-hud-edge-width) * 3),
-        calc(var(--radial-size) * 0.3)
+        calc(var(--radial-size) * 0.26)
     );
 
     /* The panel box stays pointer-transparent: only the wedges and the hub
-     * (below) take pointer events, so a click in the moat or outside the
-     * N-gon's corners falls through to the backdrop and dismisses - matching
-     * the visible shape, not the square bounding box. */
+     * take pointer events, so a click in the moat or outside the N-gon's
+     * corners falls through to the backdrop and dismisses - matching the
+     * visible shape, not the square bounding box. */
     position: relative;
     inline-size: var(--radial-size);
     block-size: var(--radial-size);
@@ -90,6 +96,46 @@
 
 .panel:focus-visible {
     outline: none;
+}
+
+/* Shared face layers, defined per variant so the state rules can restack
+ * them without re-authoring. The menu face is a center-dark radial wash
+ * whose outer edge picks up the tone (rim light), textured by the shared
+ * scanline pitch; the controller face is the brushed ramp recessed by a
+ * center vignette, so the ring reads as a machined dish rather than a flat
+ * sheet. */
+.panel[data-variant='menu'] {
+    --radial-face-lines: repeating-linear-gradient(
+        180deg,
+        transparent 0,
+        transparent calc(var(--portal-scanline-pitch) - 1px),
+        color-mix(in oklab, var(--portal-color-text-1) 6%, transparent)
+            var(--portal-scanline-pitch)
+    );
+    --radial-face-base: radial-gradient(
+        circle closest-side at 50% 50%,
+        color-mix(
+                in oklab,
+                var(--portal-color-accent-shadow) 72%,
+                var(--portal-color-bg-0)
+            )
+            30%,
+        var(--portal-color-surface-0) 68%,
+        color-mix(
+                in oklab,
+                var(--portal-tone-accent) 24%,
+                var(--portal-color-surface-0)
+            )
+            98%
+    );
+}
+
+.panel[data-variant='controller'] {
+    --radial-face-vignette: radial-gradient(
+        circle closest-side,
+        color-mix(in oklab, var(--portal-color-bg-0) 32%, transparent) 28%,
+        transparent 74%
+    );
 }
 
 /* One wedge per section. The button covers the full panel and the clip-path
@@ -127,8 +173,8 @@
     cursor: not-allowed;
 }
 
-/* Menu (Tier-2): the static machined metal edge around a HUD fill face - the
- * modal-surface treatment (metalEdge), not the animated controller ring. */
+/* Menu (Tier-2): the static machined metal edge - the modal-surface treatment
+ * (metalEdge), not the animated controller ring. */
 .panel[data-variant='menu'] .section {
     background: var(--portal-gradient-metal);
 }
@@ -140,6 +186,11 @@
 .panel[data-variant='controller'] .section {
     background: var(--portal-gradient-metal-ring);
     color: var(--portal-color-bg-0);
+}
+
+/* While collapsing, the surface is display-only. */
+.panel[data-state='closing'] .section {
+    pointer-events: none;
 }
 
 /* Outlines cannot trace a clip-path, so focus swaps the rim to the focus
@@ -162,39 +213,48 @@
     color: var(--portal-color-text-0);
 }
 
-/* Face fills, lowest to highest state. The menu face is a solid color (so
- * hover can transition); the controller face is the shared brushed ramp,
- * which - because every wedge shares the panel box - reads as one continuous
- * brushed sheet across the ring. */
+/* Face fills, lowest to highest state. Layer stacks come from the variant's
+ * face custom properties above; hover and press restack them with a tone wash
+ * or the recessed ramp instead of re-authoring the base. */
 .panel[data-variant='menu'] .section::before {
-    background-color: var(--portal-hud-fill);
+    background: var(--radial-face-lines), var(--radial-face-base);
 }
 
 .panel[data-variant='controller'] .section::before {
-    background: var(--portal-gradient-metal);
+    background: var(--radial-face-vignette), var(--portal-gradient-metal);
 }
 
 .panel[data-variant='menu'] .section:hover:not(:disabled)::before {
-    background-color: var(--portal-tone-fill);
+    background:
+        var(--radial-face-lines),
+        linear-gradient(
+            color-mix(in oklab, var(--portal-tone-fill) 60%, transparent),
+            color-mix(in oklab, var(--portal-tone-fill) 60%, transparent)
+        ),
+        var(--radial-face-base);
 }
 
 .panel[data-variant='menu'] .section:active:not(:disabled)::before {
-    background-color: color-mix(
-        in oklab,
-        var(--portal-tone-fill),
-        var(--portal-color-bg-0) 25%
-    );
+    background:
+        var(--radial-face-lines),
+        linear-gradient(
+            color-mix(in oklab, var(--portal-color-bg-0) 45%, transparent),
+            color-mix(in oklab, var(--portal-color-bg-0) 45%, transparent)
+        ),
+        var(--radial-face-base);
 }
 
 /* Pressed controller wedge reads as recessed metal: the face darkens to the
  * steel end of the ramp, matching BevelButton's pressed treatment. */
 .panel[data-variant='controller'] .section:active:not(:disabled)::before {
-    background: linear-gradient(
-        160deg,
-        var(--portal-color-metal-0) 0%,
-        var(--portal-color-metal-1) 55%,
-        var(--portal-color-metal-0) 100%
-    );
+    background:
+        var(--radial-face-vignette),
+        linear-gradient(
+            160deg,
+            var(--portal-color-metal-0) 0%,
+            var(--portal-color-metal-1) 55%,
+            var(--portal-color-metal-0) 100%
+        );
 }
 
 /* Label cluster pinned to the wedge's visual center. Physical top/left on
@@ -218,103 +278,143 @@
     line-height: var(--portal-line-height-tight);
 }
 
+/* Icon-only sections read as glyph keys, so the icon steps up to carry the
+ * wedge alone. */
+.sectionBody[data-display='icon'] .sectionIcon {
+    font-size: var(--portal-size-font-medium);
+}
+
+/* Tracked HUD label. Deliberately WITHOUT the wideLabel end-margin trim: the
+ * negative margin shrinks the shrink-to-fit body a fraction below the label's
+ * max-content, which false-triggers the nowrap ellipsis. The untrimmed
+ * trailing letter-space costs an invisible ~0.5px of optical centering. */
 .sectionLabel {
     max-inline-size: 100%;
     overflow: hidden;
     font-size: var(--portal-size-text-sm);
     font-weight: var(--portal-weight-label-medium);
     line-height: var(--portal-line-height-tight);
+    letter-spacing: var(--portal-letter-spacing-wide);
     text-align: center;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
+/* Engraved key labels on the controller metal. */
+.panel[data-variant='controller'] .sectionLabel {
+    font-weight: var(--portal-weight-label-strong);
+}
+
 /* Label budget per side count: the wedge chord narrows as sides increase. */
 .panel[data-sides='4'] .sectionBody {
-    max-inline-size: calc(var(--radial-size) * 0.3);
+    max-inline-size: calc(var(--radial-size) * 0.34);
 }
 
 .panel[data-sides='6'] .sectionBody {
-    max-inline-size: calc(var(--radial-size) * 0.24);
+    max-inline-size: calc(var(--radial-size) * 0.28);
 }
 
 .panel[data-sides='8'] .sectionBody {
-    max-inline-size: calc(var(--radial-size) * 0.19);
+    max-inline-size: calc(var(--radial-size) * 0.22);
 }
 
-/* The beveled center button area. The container paints the metal; the
- * HUD-edge-width padding and gap are the rim and the machined seams between
- * the action faces. overflow: hidden clips the rectangular faces to the
- * beveled corners. Grid math: a 2x2 cell is exactly
- * (hub - 2*padding - gap) / 2 = the 3rem touch floor. */
+/* The center hub: the chamfered N-gon, clipped by the geometry the component
+ * computes. The container paints the themed rim (highlight/tone ramp - the
+ * hub is deliberately NOT metallic); the rim-inset action cells sit on top,
+ * so the ~2px reveal and the seams between cells read as the machined edge. */
 .hub {
-    composes: beveled from '../../theme/surfaces.module.css';
     position: absolute;
     inset-block-start: 50%;
     inset-inline-start: 50%;
-    box-sizing: border-box;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-auto-rows: 1fr;
-    gap: var(--portal-hud-edge-width);
     inline-size: var(--radial-hub);
     block-size: var(--radial-hub);
-    padding: var(--portal-hud-edge-width);
-    border-radius: var(--portal-bevel-3);
-    overflow: hidden;
+    clip-path: var(--radial-hub-clip);
+    background: linear-gradient(
+        155deg,
+        var(--portal-color-accent-highlight),
+        var(--portal-tone-edge) 45%,
+        var(--portal-tone-accent) 85%,
+        var(--portal-color-accent-highlight)
+    );
     transform: translate(-50%, -50%);
     pointer-events: auto;
 }
 
-/* 0 = one non-interactive panel cell, 1 = one full-bevel button. */
-.hub[data-count='0'],
-.hub[data-count='1'] {
-    grid-template-columns: 1fr;
+.panel[data-state='closing'] .hub {
+    pointer-events: none;
 }
 
-.panel[data-variant='menu'] .hub {
-    background: var(--portal-gradient-metal);
-}
-
-.panel[data-variant='controller'] .hub {
-    background: var(--portal-gradient-metal-ring);
-}
-
-/* The 0-action hub face: the machined center panel, no button semantics. */
+/* The 0-action hub face: the themed center panel, no button semantics. */
 .hubPanel {
-    inline-size: 100%;
-    block-size: 100%;
+    position: absolute;
+    inset: 0;
+    clip-path: var(--radial-cell-clip);
+    background:
+        radial-gradient(
+            circle closest-side at 50% 38%,
+            color-mix(in oklab, var(--portal-tone-accent) 16%, transparent),
+            transparent 78%
+        ),
+        linear-gradient(
+            165deg,
+            var(--portal-tone-fill),
+            color-mix(
+                in oklab,
+                var(--portal-tone-fill) 45%,
+                var(--portal-color-bg-0)
+            )
+        );
 }
 
-.panel[data-variant='menu'] .hubPanel {
-    background-color: var(--portal-hud-fill);
-}
-
-.panel[data-variant='controller'] .hubPanel {
-    background-color: var(--portal-color-bg-1);
-}
-
-/* Hub action faces stay dark in BOTH variants so the status-colored symbols
- * (success check, danger cross, accent triangles) keep their legibility; the
- * controller's metal identity comes from the rim and seams around them. */
+/* One action cell. Like the wedges, the button spans the hub box and its
+ * clip polygon is both the visible face and the hit area; the transform
+ * origin sits on the cell anchor so the press recesses the cell in place. */
 .hubButton {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    inline-size: 100%;
-    block-size: 100%;
+    position: absolute;
+    inset: 0;
     margin: 0;
     padding: 0;
     border: none;
     appearance: none;
+    clip-path: var(--radial-cell-clip);
+    transform-origin: var(--radial-anchor-x) var(--radial-anchor-y);
+    background:
+        radial-gradient(
+            circle closest-side at 50% 38%,
+            color-mix(in oklab, var(--portal-tone-accent) 16%, transparent),
+            transparent 78%
+        ),
+        linear-gradient(
+            165deg,
+            var(--portal-tone-fill),
+            color-mix(
+                in oklab,
+                var(--portal-tone-fill) 45%,
+                var(--portal-color-bg-0)
+            )
+        );
     color: var(--portal-color-text-0);
     cursor: pointer;
     touch-action: manipulation;
 }
 
 .hubButton:focus-visible {
-    outline: var(--portal-border-thickness-thin) solid var(--portal-color-focus);
-    outline-offset: calc(-1 * var(--portal-border-thickness-normal));
+    outline: none;
+    filter: drop-shadow(0 0 var(--portal-space-2) var(--portal-color-focus));
+    background:
+        linear-gradient(
+            color-mix(in oklab, var(--portal-color-focus) 30%, transparent),
+            color-mix(in oklab, var(--portal-color-focus) 30%, transparent)
+        ),
+        linear-gradient(
+            165deg,
+            var(--portal-tone-fill),
+            color-mix(
+                in oklab,
+                var(--portal-tone-fill) 45%,
+                var(--portal-color-bg-0)
+            )
+        );
 }
 
 .hubButton:disabled {
@@ -322,39 +422,58 @@
     cursor: not-allowed;
 }
 
-.panel[data-variant='menu'] .hubButton {
-    background-color: var(--portal-hud-fill);
-}
-
-.panel[data-variant='controller'] .hubButton {
-    background-color: var(--portal-color-bg-1);
+.panel[data-state='closing'] .hubButton {
+    pointer-events: none;
 }
 
 .panel .hubButton:hover:not(:disabled) {
-    background-color: var(--portal-tone-fill);
+    filter: drop-shadow(0 0 var(--portal-space-2) var(--portal-tone-glow-strong));
+    background:
+        linear-gradient(
+            color-mix(in oklab, var(--portal-tone-accent) 20%, transparent),
+            color-mix(in oklab, var(--portal-tone-accent) 20%, transparent)
+        ),
+        linear-gradient(
+            165deg,
+            var(--portal-tone-fill),
+            color-mix(
+                in oklab,
+                var(--portal-tone-fill) 45%,
+                var(--portal-color-bg-0)
+            )
+        );
 }
 
 .panel .hubButton:active:not(:disabled) {
     transform: scale(var(--portal-press-scale));
 }
 
-/* 2 actions sit on one row, so the split is the vertical seam. A stray count
- * of 3 keeps the 2x2 shape with the last action spanning the bottom row. */
-.hub[data-count='3'] .hubButton:nth-child(3) {
-    grid-column: 1 / -1;
+/* Glyph holder pinned to the cell anchor (physical, like the wedge labels). */
+.hubGlyphAnchor {
+    position: absolute;
+    top: var(--radial-anchor-y);
+    left: var(--radial-anchor-x);
+    display: inline-flex;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
 }
 
-/* Center symbols: reuse the shared drawn glyphs and pin the recognisable status
- * colors. Confirm = success check, cancel = danger cross, next/previous = accent
- * triangles rotated to point right / left. */
+/* Center symbols: bold status-colored marks with a soft self-colored bloom.
+ * Confirm = bold success ring, cancel = bold danger cross, next/previous =
+ * accent triangles rotated to point right / left. */
 .glyphConfirm {
-    composes: checkGlyph from '../../theme/surfaces.module.css';
+    composes: circleGlyph from '../../theme/surfaces.module.css';
     color: var(--portal-color-success);
+    filter: drop-shadow(0 0 var(--portal-space-1) currentcolor);
 }
 
 .glyphCancel {
     composes: crossGlyph from '../../theme/surfaces.module.css';
+
+    --portal-cross-weight: var(--portal-border-thickness-normal);
+
     color: var(--portal-color-danger);
+    filter: drop-shadow(0 0 var(--portal-space-1) currentcolor);
 }
 
 .glyphNext {
@@ -363,6 +482,7 @@
     --portal-triangle-rotate: 90deg;
 
     color: var(--portal-color-accent-highlight);
+    filter: drop-shadow(0 0 var(--portal-space-1) currentcolor);
 }
 
 .glyphPrevious {
@@ -371,15 +491,19 @@
     --portal-triangle-rotate: -90deg;
 
     color: var(--portal-color-accent-highlight);
+    filter: drop-shadow(0 0 var(--portal-space-1) currentcolor);
 }
 
-/* Motion - reduced-motion gated. Each wedge starts pulled toward the panel
- * center (its per-wedge --radial-enter-* offset) and slides out to rest at
- * its edge with a per-index stagger; the hub scales in; the backdrop fades.
- * Fill mode is backwards (not both): the from-state holds through each
+/* Motion - reduced-motion gated and stateful. Opening: each wedge starts
+ * pulled toward the panel center (its per-wedge --radial-enter-* offset) and
+ * slides out to rest at its edge with a per-index stagger; only the wedges
+ * move - the hub and backdrop just fade in. Closing: every wedge collapses
+ * back inward together (fill: forwards holds the collapsed frame until the
+ * component unmounts on animationend) while the hub and backdrop fade out.
+ * Entrance fill is backwards (not both): the from-state holds through each
  * wedge's stagger delay, and after the run the animation releases the
- * transform so the press scale works. In the resting / reduced state the
- * wedges already sit clipped at their edges (no animation). */
+ * transform so the press scale works. Under reduced motion there is no
+ * closing state - the surface mounts and unmounts at rest. */
 @media (prefers-reduced-motion: no-preference) {
     .section {
         transition:
@@ -387,19 +511,13 @@
             transform var(--portal-duration-ui-fast) var(--portal-easing-standard);
     }
 
-    .section::before {
-        transition: background-color var(--portal-duration-ui-fast)
-            var(--portal-easing-standard);
-    }
-
     .hubButton {
         transition:
-            background-color var(--portal-duration-ui-fast)
-                var(--portal-easing-standard),
+            filter var(--portal-duration-ui-fast) var(--portal-easing-standard),
             transform var(--portal-duration-ui-fast) var(--portal-easing-standard);
     }
 
-    .panel[data-motion='full'] .section {
+    .panel[data-motion='full'][data-state='open'] .section {
         animation: portal-radial-section-in var(--portal-duration-ui-base)
             var(--portal-easing-emphasized) backwards;
         animation-delay: calc(
@@ -407,14 +525,29 @@
         );
     }
 
-    .panel[data-motion='full'] .hub {
-        animation: portal-radial-hub-in var(--portal-duration-ui-base)
-            var(--portal-easing-emphasized) backwards;
+    .panel[data-motion='full'][data-state='closing'] .section {
+        animation: portal-radial-section-out var(--portal-duration-ui-base)
+            var(--portal-easing-standard) forwards;
     }
 
-    .backdrop[data-motion='full'] {
+    .panel[data-motion='full'][data-state='open'] .hub {
+        animation: portal-radial-fade var(--portal-duration-ui-base)
+            var(--portal-easing-standard) backwards;
+    }
+
+    .panel[data-motion='full'][data-state='closing'] .hub {
+        animation: portal-radial-fade-out var(--portal-duration-ui-base)
+            var(--portal-easing-standard) forwards;
+    }
+
+    .backdrop[data-motion='full'][data-state='open'] {
         animation: portal-radial-fade var(--portal-duration-ui-base)
             var(--portal-easing-standard);
+    }
+
+    .backdrop[data-motion='full'][data-state='closing'] {
+        animation: portal-radial-fade-out var(--portal-duration-ui-base)
+            var(--portal-easing-standard) forwards;
     }
 }
 
@@ -431,15 +564,16 @@
     }
 }
 
-@keyframes portal-radial-hub-in {
+@keyframes portal-radial-section-out {
     from {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.7);
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
     }
 
     to {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
+        opacity: 0;
+        transform: translate(var(--radial-enter-x), var(--radial-enter-y))
+            scale(0.9);
     }
 }
 
@@ -450,5 +584,15 @@
 
     to {
         opacity: 1;
+    }
+}
+
+@keyframes portal-radial-fade-out {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
     }
 }

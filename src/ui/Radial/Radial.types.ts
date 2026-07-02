@@ -6,11 +6,15 @@ export type { RadialSides } from './radialGeometry';
 
 // One radiating section: a selectable option placed at a polygon edge. `label`
 // is the accessible name (used as the button's aria-label); `icon` is optional
-// decorative content shown above the label and is marked aria-hidden.
+// decorative content shown above the label and is marked aria-hidden. Set
+// `iconOnly` to present the section as a pure glyph key: the visible text is
+// omitted while `label` still names the button for assistive tech (ignored
+// when no icon is supplied, so a section never renders empty).
 export type RadialItem = Readonly<{
     id: string;
     label: string;
     icon?: ReactNode;
+    iconOnly?: boolean;
     disabled?: boolean;
 }>;
 
