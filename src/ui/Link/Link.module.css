@@ -1,0 +1,46 @@
+/*
+ * Link. The themed anchor: accent-highlight text (the AA-safe accent) with a
+ * tone-tinted underline that brightens on hover, the HUD focus ring, and a
+ * drawn outward chevron on external links. Tokens only; motion reduced-gated.
+ */
+
+.link {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--portal-space-1);
+    color: var(--portal-color-accent-highlight);
+    font-family: var(--portal-font-sans);
+    text-decoration-line: underline;
+    text-decoration-color: var(--portal-tone-border);
+    text-decoration-thickness: var(--portal-border-thickness-thin);
+    text-underline-offset: var(--portal-space-1);
+    border-radius: var(--portal-bevel-1);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .link {
+        transition:
+            color var(--portal-duration-ui-fast) var(--portal-easing-standard),
+            text-decoration-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard);
+    }
+}
+
+.link:hover {
+    color: var(--portal-color-text-0);
+    text-decoration-color: var(--portal-tone-accent);
+}
+
+.link:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: var(--portal-border-thickness-thin);
+}
+
+/* The outward mark: the shared chevron rotated toward the block-start
+ * inline-end corner. */
+.externalMark {
+    composes: chevronGlyph from '../../theme/surfaces.module.css';
+    align-self: center;
+
+    --portal-chevron-rotate: -90deg;
+}

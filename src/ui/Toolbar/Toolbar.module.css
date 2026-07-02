@@ -1,0 +1,48 @@
+/*
+ * Toolbar. A beveled HUD strip clustering compact controls: the machined
+ * surface matches MenuBar's shell, groups flow with a tight gap, and the
+ * separator is a drawn rule. Orientation switches the axis; every value
+ * resolves from a --portal-* token.
+ */
+
+.toolbar {
+    composes: beveled from '../../theme/surfaces.module.css';
+    display: inline-flex;
+    align-items: center;
+    gap: var(--portal-space-2);
+    padding: var(--portal-space-1);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-bevel-2);
+    background-color: var(--portal-color-surface-1);
+    font-family: var(--portal-font-sans);
+}
+
+.toolbar[data-orientation='vertical'] {
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.group {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--portal-space-1);
+}
+
+.toolbar[data-orientation='vertical'] .group {
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.separator {
+    align-self: stretch;
+    inline-size: var(--portal-border-thickness-thin);
+    min-block-size: var(--portal-space-4);
+    background-color: var(--portal-color-border);
+}
+
+.toolbar[data-orientation='vertical'] .separator {
+    inline-size: auto;
+    min-inline-size: var(--portal-space-4);
+    block-size: var(--portal-border-thickness-thin);
+    min-block-size: 0;
+}

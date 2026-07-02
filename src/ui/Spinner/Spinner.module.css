@@ -1,0 +1,58 @@
+/*
+ * Spinner. A toned conic arc ring spun by a compositor-cheap transform
+ * rotation (never an angle custom property, which would repaint per frame).
+ * Under reduced motion the animation drops and the static partial ring still
+ * reads as busy. The ring is drawn with a conic gradient masked to an
+ * annulus; thickness and sizes come from tokens.
+ */
+
+.root {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.arc {
+    inline-size: var(--portal-space-5);
+    block-size: var(--portal-space-5);
+    border-radius: var(--portal-radius-pill);
+    background: conic-gradient(
+        from 0deg,
+        transparent 0deg,
+        var(--portal-tone-accent) 300deg,
+        var(--portal-color-accent-highlight) 360deg
+    );
+    mask: radial-gradient(
+        farthest-side,
+        transparent calc(100% - var(--portal-space-1)),
+        black
+            calc(100% - var(--portal-space-1) + var(--portal-border-thickness-thin))
+    );
+    filter: drop-shadow(0 0 var(--portal-space-2) var(--portal-tone-glow));
+}
+
+.root[data-size='sm'] .arc {
+    inline-size: var(--portal-space-4);
+    block-size: var(--portal-space-4);
+}
+
+.root[data-size='lg'] .arc {
+    inline-size: var(--portal-space-6);
+    block-size: var(--portal-space-6);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .arc {
+        animation: portal-spinner-turn 900ms linear infinite;
+    }
+}
+
+@keyframes portal-spinner-turn {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
