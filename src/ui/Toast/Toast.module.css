@@ -61,10 +61,18 @@
     inline-size: 100%;
 }
 
+/* Entrance and exit are both reduced-motion gated. A dismissed card flips to
+ * data-state='leaving' and stays mounted while the exit plays (fill: forwards
+ * holds the vanished frame until the provider removes it on animationend). */
 @media (prefers-reduced-motion: no-preference) {
     .card[data-motion='full'] {
         animation: portal-toast-in var(--portal-duration-ui-base)
             var(--portal-easing-standard);
+    }
+
+    .card[data-motion='full'][data-state='leaving'] {
+        animation: portal-toast-out var(--portal-duration-ui-base)
+            var(--portal-easing-standard) forwards;
     }
 }
 
@@ -77,6 +85,18 @@
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+@keyframes portal-toast-out {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(var(--portal-space-3)) scale(0.98);
     }
 }
 

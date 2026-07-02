@@ -65,6 +65,17 @@ function renderProvider(props?: Partial<ToastProviderProps>): RenderResult {
     );
 }
 
+// Mirrors the provider's exit backstop: jsdom plays no CSS animation, so a
+// leaving card is removed by the fallback timer rather than animationend.
+const EXIT_FALLBACK_MS: number = 600;
+
+// Runs a dismissed card's exit phase down to removal under fake timers.
+function finishExit(): void {
+    act((): void => {
+        vi.advanceTimersByTime(EXIT_FALLBACK_MS);
+    });
+}
+
 beforeEach((): void => {
     vi.useFakeTimers();
 });
@@ -84,7 +95,7 @@ describe('ToastProvider', (): void => {
         expect(screen.getByText('Toast 1')).toBeInTheDocument();
     });
 
-    it('auto-dismisses a toast after its duration', (): void => {
+    it('auto-dismisses a toast after its duration, playing the exit first', (): void => {
         renderProvider();
 
         fireEvent.click(screen.getByRole('button', { name: 'add' }));
@@ -94,14 +105,48 @@ describe('ToastProvider', (): void => {
             vi.advanceTimersByTime(4000);
         });
 
+        // The duration elapsed: the card is leaving (exit animation), not yet
+        // removed.
+        const leaving: HTMLElement | null = screen
+            .getByText('Toast 1')
+            .closest('[data-state]');
+        expect(leaving?.getAttribute('data-state')).toBe('leaving');
+
+        finishExit();
         expect(screen.queryByText('Toast 1')).toBeNull();
     });
 
-    it('removes a toast immediately when its dismiss button is pressed', (): void => {
+    it('removes a dismissed toast after its exit animation', (): void => {
         renderProvider();
 
         fireEvent.click(screen.getByRole('button', { name: 'add' }));
         fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }));
+
+        // Dismiss marks the card leaving; it stays mounted through the exit.
+        expect(screen.getByText('Toast 1')).toBeInTheDocument();
+        finishExit();
+        expect(screen.queryByText('Toast 1')).toBeNull();
+    });
+
+    it('removes a leaving toast the moment its exit animation ends', (): void => {
+        renderProvider();
+
+        fireEvent.click(screen.getByRole('button', { name: 'add' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }));
+
+        const card: HTMLElement | null = screen
+            .getByText('Toast 1')
+            .closest('[data-state]');
+        if (card === null) {
+            throw new Error('expected a leaving toast card');
+        }
+        // jsdom has no AnimationEvent constructor: build a plain event and pin
+        // the (CSS-modules-scoped, matched by inclusion) keyframe name on it.
+        const exitEnd: Event = new Event('animationend', { bubbles: true });
+        Object.defineProperty(exitEnd, 'animationName', {
+            value: 'portal-toast-out',
+        });
+        fireEvent(card, exitEnd);
 
         expect(screen.queryByText('Toast 1')).toBeNull();
     });
@@ -198,6 +243,7 @@ describe('ToastProvider', (): void => {
             act((): void => {
                 vi.advanceTimersByTime(1);
             });
+            finishExit();
             expect(screen.queryByText('Toast 1')).toBeNull();
         });
 
@@ -225,6 +271,7 @@ describe('ToastProvider', (): void => {
             act((): void => {
                 vi.advanceTimersByTime(1);
             });
+            finishExit();
             expect(screen.queryByText('Toast 1')).toBeNull();
         });
 
@@ -260,6 +307,7 @@ describe('ToastProvider', (): void => {
             act((): void => {
                 vi.advanceTimersByTime(1);
             });
+            finishExit();
             expect(screen.queryByText('Toast 1')).toBeNull();
         });
 
@@ -295,6 +343,7 @@ describe('ToastProvider', (): void => {
             act((): void => {
                 vi.advanceTimersByTime(1);
             });
+            finishExit();
             expect(screen.queryByText('Toast 1')).toBeNull();
         });
 

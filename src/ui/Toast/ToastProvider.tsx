@@ -33,6 +33,13 @@ const DEFAULT_DURATION_MS: number = 6000;
 const DEFAULT_MAX: number = 4;
 const VIEWPORT_LABEL: string = 'Notifications';
 
+// The exit keyframe name (CSS modules scope it with a suffix, so the
+// animationend handler matches by inclusion) and the removal backstop while a
+// card is leaving, covering the exit duration (ui-base) plus generous
+// headroom for a throttled frame.
+const EXIT_ANIMATION_NAME: string = 'portal-toast-out';
+const EXIT_FALLBACK_MS: number = 600;
+
 // A live auto-dismiss timer plus the bookkeeping needed to pause and resume it:
 // `remaining` is the time left when the timer was (re)armed and `startedAt` the
 // moment it was armed, so a pause can bank the unused remainder exactly. A null
@@ -62,24 +69,67 @@ function toBannerKind(kind: EToastKind): EBannerKind {
 type ToastCardProps = Readonly<{
     toast: ToastRecord;
     reducedMotion: boolean;
+    leaving: boolean;
     onDismiss: (id: string) => void;
+    onGone: (id: string) => void;
 }>;
 
 // One toast card. The Banner provides the tinted severity surface, the
 // status/alert live-region role, and the labelled dismiss button; this wrapper
-// only carries the reduced-motion-gated entrance and the optional title.
+// carries the reduced-motion-gated entrance/exit and the optional title. A
+// dismissed card stays mounted in the `leaving` state so the exit animation
+// can play; it reports itself gone on the exit animation's end - a NATIVE
+// animationend listener (works identically in the browser and jsdom) with a
+// timer backstop for a throttled frame.
 function ToastCard({
     toast,
     reducedMotion,
+    leaving,
     onDismiss,
+    onGone,
 }: ToastCardProps): ReactElement {
+    const cardRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(
+        null,
+    );
+
+    useEffect((): (() => void) | undefined => {
+        if (!leaving) {
+            return undefined;
+        }
+        const timer: number = window.setTimeout((): void => {
+            onGone(toast.id);
+        }, EXIT_FALLBACK_MS);
+        const card: HTMLDivElement | null = cardRef.current;
+        if (card === null) {
+            return (): void => {
+                window.clearTimeout(timer);
+            };
+        }
+        const handleAnimationEnd: (event: AnimationEvent) => void = (
+            event: AnimationEvent,
+        ): void => {
+            // CSS modules scope the keyframe name, so match by inclusion.
+            if (!event.animationName.includes(EXIT_ANIMATION_NAME)) {
+                return;
+            }
+            onGone(toast.id);
+        };
+        card.addEventListener('animationend', handleAnimationEnd);
+        return (): void => {
+            window.clearTimeout(timer);
+            card.removeEventListener('animationend', handleAnimationEnd);
+        };
+    }, [leaving, onGone, toast.id]);
+
     function handleDismiss(): void {
         onDismiss(toast.id);
     }
     return (
         <div
+            ref={cardRef}
             className={styles.card}
             data-kind={toast.kind}
+            data-state={leaving ? 'leaving' : 'open'}
             data-motion={
                 reducedMotion ? EOverlayMotion.Reduced : EOverlayMotion.Full
             }
@@ -101,9 +151,11 @@ function ToastCard({
 
 type ToastViewportProps = Readonly<{
     toasts: readonly ToastRecord[];
+    leavingIds: ReadonlySet<string>;
     placement: EToastPlacement;
     reducedMotion: boolean;
     onDismiss: (id: string) => void;
+    onGone: (id: string) => void;
     onPointerPause: () => void;
     onPointerRelease: () => void;
     onFocusPause: () => void;
@@ -118,9 +170,11 @@ type ToastViewportProps = Readonly<{
 // while the pointer still rests over the stack - must not resume.
 function ToastViewport({
     toasts,
+    leavingIds,
     placement,
     reducedMotion,
     onDismiss,
+    onGone,
     onPointerPause,
     onPointerRelease,
     onFocusPause,
@@ -163,7 +217,9 @@ function ToastViewport({
                         key={toast.id}
                         toast={toast}
                         reducedMotion={reducedMotion}
+                        leaving={leavingIds.has(toast.id)}
                         onDismiss={onDismiss}
+                        onGone={onGone}
                     />
                 ),
             )}
@@ -182,6 +238,14 @@ export function ToastProvider({
         readonly ToastRecord[],
         Dispatch<SetStateAction<readonly ToastRecord[]>>,
     ] = useState<readonly ToastRecord[]>([]);
+    // Ids of dismissed toasts still playing their exit animation. They stay in
+    // `toasts` (so the leaving card keeps rendering) until the card reports
+    // itself gone; under reduced motion this set stays empty and dismissal
+    // removes immediately.
+    const [leavingIds, setLeavingIds]: [
+        ReadonlySet<string>,
+        Dispatch<SetStateAction<ReadonlySet<string>>>,
+    ] = useState<ReadonlySet<string>>(new Set<string>());
     const prefersReducedMotion: boolean = useReducedMotion();
 
     const timersRef: RefObject<Map<string, TimerEntry>> = useRef<
@@ -210,14 +274,43 @@ export function ToastProvider({
         timersRef.current.delete(id);
     }, []);
 
+    // Final removal: drop the toast and clear its leaving mark. This is the
+    // card's onGone callback and the direct path for reduced motion / clear().
+    const settle: (id: string) => void = useCallback((id: string): void => {
+        setToasts((prev: readonly ToastRecord[]): readonly ToastRecord[] =>
+            prev.filter((toast: ToastRecord): boolean => toast.id !== id),
+        );
+        setLeavingIds((prev: ReadonlySet<string>): ReadonlySet<string> => {
+            if (!prev.has(id)) {
+                return prev;
+            }
+            const next: Set<string> = new Set<string>(prev);
+            next.delete(id);
+            return next;
+        });
+    }, []);
+
+    // Dismissal is two-phase under full motion: mark the card leaving so its
+    // exit animation plays, then the card settles itself on animationend (or
+    // the backstop timer). Reduced motion removes immediately - the leaving
+    // state exists only to be animated.
     const dismiss: (id: string) => void = useCallback(
         (id: string): void => {
             clearTimer(id);
-            setToasts((prev: readonly ToastRecord[]): readonly ToastRecord[] =>
-                prev.filter((toast: ToastRecord): boolean => toast.id !== id),
-            );
+            if (prefersReducedMotion) {
+                settle(id);
+                return;
+            }
+            setLeavingIds((prev: ReadonlySet<string>): ReadonlySet<string> => {
+                if (prev.has(id)) {
+                    return prev;
+                }
+                const next: Set<string> = new Set<string>(prev);
+                next.add(id);
+                return next;
+            });
         },
-        [clearTimer],
+        [clearTimer, prefersReducedMotion, settle],
     );
 
     const scheduleTimer: (id: string, duration: number) => void = useCallback(
@@ -271,6 +364,7 @@ export function ToastProvider({
         });
         timersRef.current.clear();
         setToasts([]);
+        setLeavingIds(new Set<string>());
     }, []);
 
     const pauseAll: () => void = useCallback((): void => {
@@ -382,9 +476,11 @@ export function ToastProvider({
             {children}
             <ToastViewport
                 toasts={toasts}
+                leavingIds={leavingIds}
                 placement={placement}
                 reducedMotion={prefersReducedMotion}
                 onDismiss={dismiss}
+                onGone={settle}
                 onPointerPause={pausePointer}
                 onPointerRelease={releasePointer}
                 onFocusPause={pauseFocus}
