@@ -1,0 +1,96 @@
+/*
+ * TextArea. The multiline twin of TextField: the same dark tone-scrim surface,
+ * focus border + ring on the tone accent, danger-forced error state, and
+ * token-only styling. Resize is gated by the data-resize attribute (logical
+ * block-axis growth or pinned); data-autosize opts into content-driven sizing
+ * behind an @supports query so browsers without field-sizing keep the rows
+ * floor. No literal colors or pixels; logical properties throughout. Motion
+ * is gated behind prefers-reduced-motion.
+ */
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-1);
+    font-family: var(--portal-font-sans);
+}
+
+.label {
+    font-size: var(--portal-size-text-sm);
+    letter-spacing: var(--portal-letter-spacing-wide);
+    line-height: var(--portal-line-height-tight);
+    color: var(--portal-color-text-1);
+}
+
+.input {
+    composes: beveled from '../../theme/surfaces.module.css';
+    box-sizing: border-box;
+    min-block-size: var(--portal-touch-target-min);
+    padding-inline: var(--portal-space-3);
+    padding-block: var(--portal-space-2);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-bevel-2);
+    background-color: var(--portal-color-surface-0);
+    color: var(--portal-color-text-0);
+    font-family: inherit;
+    font-size: var(--portal-size-text-md);
+    line-height: var(--portal-line-height-normal);
+    resize: block;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .input {
+        transition:
+            border-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ui-fast) var(--portal-easing-standard);
+    }
+}
+
+.input::placeholder {
+    color: var(--portal-color-text-1);
+}
+
+.input:focus-visible {
+    border-color: var(--portal-tone-accent);
+    outline: var(--portal-border-thickness-thin) solid var(--portal-color-focus);
+    outline-offset: var(--portal-border-thickness-thin);
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow-strong);
+}
+
+.input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.input:hover:not(:disabled) {
+    border-color: var(--portal-tone-border);
+}
+
+.input[data-resize='none'] {
+    resize: none;
+}
+
+/* Content-driven sizing where supported; `rows` stays the floor because
+ * min-block-size above still applies. */
+@supports (field-sizing: content) {
+    .input[data-autosize='true'] {
+        field-sizing: content;
+    }
+}
+
+/* The error message forces the seed to the danger token so the accent and the
+ * text resolve to danger regardless of any passed tone. */
+.input[aria-invalid='true'] {
+    --portal-tone: var(--portal-color-danger);
+
+    border-color: var(--portal-tone-accent);
+}
+
+/* High-contrast foreground for the message; the danger signal is carried by
+ * aria-invalid and the toned border, never by message color alone. */
+.error {
+    font-size: var(--portal-size-text-sm);
+    line-height: var(--portal-line-height-tight);
+    color: var(--portal-color-text-0);
+}

@@ -1,0 +1,133 @@
+/*
+ * RangeSlider. Dual-thumb min/max selector on the machined-HUD language: a
+ * recessed beveled rail, a toned fill between the thumbs, and two beveled
+ * button-face knobs. The whole track is the pointer surface (the nearest
+ * thumb takes the gesture), so it holds the 3rem touch floor; the knobs are
+ * positioned with LOGICAL insets from unitless fraction custom properties
+ * (--range-lower / --range-upper set by the component), so RTL mirrors
+ * without extra rules. Geometry is direct-manipulation and never transitions;
+ * only glow/border ease. Every value resolves from a --portal-* /
+ * --portal-tone-* token.
+ */
+
+.root {
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-1);
+    font-family: var(--portal-font-sans);
+}
+
+.label {
+    font-size: var(--portal-size-text-sm);
+    letter-spacing: var(--portal-letter-spacing-wide);
+    line-height: var(--portal-line-height-tight);
+    color: var(--portal-color-text-1);
+}
+
+.track {
+    position: relative;
+    min-block-size: var(--portal-touch-target-min);
+}
+
+/* The pointer capture layer over the rail. touch-action: none is mandatory
+ * for usePointerDrag; the thumbs above it carry their own binding. */
+.surface {
+    position: absolute;
+    inset: 0;
+    touch-action: none;
+    cursor: pointer;
+}
+
+.root[data-enabled='disabled'] .surface {
+    cursor: not-allowed;
+}
+
+/* The recessed rail spanning the full width. */
+.rail {
+    composes: beveled from '../../theme/surfaces.module.css';
+    position: absolute;
+    inset-inline: 0;
+    inset-block-start: 50%;
+    block-size: var(--portal-space-2);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-bevel-1);
+    background-color: var(--portal-color-surface-1);
+    transform: translateY(-50%);
+}
+
+/* The toned fill between the thumbs. Sized purely by the fraction custom
+ * properties; no transition (direct manipulation must track the pointer). */
+.fill {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: calc(var(--range-lower) * 100%);
+    inline-size: calc((var(--range-upper) - var(--range-lower)) * 100%);
+    block-size: var(--portal-space-2);
+    border-radius: var(--portal-bevel-1);
+    background: linear-gradient(
+        90deg,
+        var(--portal-tone-fill),
+        var(--portal-tone-accent)
+    );
+    box-shadow: 0 0 var(--portal-space-2) var(--portal-tone-glow);
+    transform: translateY(-50%);
+}
+
+/* A beveled button-face knob per thumb, centered on its fraction. The thumbs
+ * are divs with role=slider, so the disabled guard is the aria-disabled
+ * attribute rather than :disabled. touch-action gates their own drag binding. */
+.thumb {
+    composes: beveled from '../../theme/surfaces.module.css';
+    position: absolute;
+    inset-block-start: 50%;
+    inline-size: var(--portal-space-5);
+    block-size: var(--portal-space-5);
+    border: var(--portal-border-thickness-thin) solid var(--portal-tone-accent);
+    border-radius: var(--portal-bevel-1);
+    background: var(--portal-gradient-button-face);
+    cursor: grab;
+    touch-action: none;
+    transform: translate(-50%, -50%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .thumb {
+        transition:
+            border-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ui-fast) var(--portal-easing-standard);
+    }
+}
+
+.thumb[data-thumb='lower'] {
+    inset-inline-start: calc(var(--range-lower) * 100%);
+}
+
+.thumb[data-thumb='upper'] {
+    inset-inline-start: calc(var(--range-upper) * 100%);
+}
+
+.thumb:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: var(--portal-space-1);
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow-strong);
+}
+
+.thumb:hover:not([aria-disabled='true']) {
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow-strong);
+}
+
+.thumb:active:not([aria-disabled='true']) {
+    cursor: grabbing;
+    background: var(--portal-gradient-button-face-pressed);
+}
+
+.root[data-enabled='disabled'] .rail,
+.root[data-enabled='disabled'] .fill,
+.root[data-enabled='disabled'] .thumb {
+    opacity: 0.5;
+}
+
+.root[data-enabled='disabled'] .thumb {
+    cursor: not-allowed;
+}

@@ -1,0 +1,140 @@
+/*
+ * OtpField. Segmented one-time-code entry: one real, visually hidden input
+ * (the sr-only clip technique, matching Checkbox) owns value/focus/paste; the
+ * beveled cells are a decorative mirror wired entirely through sibling
+ * selectors, so no focus state lives in React. The active cell shows a caret
+ * while the input is focused and the focus ring when it is keyboard-focused.
+ * Every value resolves from a --portal-* / --portal-tone-* token; no literal
+ * colors or sizes. Motion (the caret blink) is reduced-motion gated - reduced
+ * motion keeps a steady caret.
+ */
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-1);
+    font-family: var(--portal-font-sans);
+}
+
+/* Invalid: force the tone seed to danger for the whole scope, matching
+ * TextField's convention; the cell borders below read the tone accent. */
+.field[data-invalid='true'] {
+    --portal-tone: var(--portal-color-danger);
+}
+
+.label {
+    font-size: var(--portal-size-text-sm);
+    letter-spacing: var(--portal-letter-spacing-wide);
+    line-height: var(--portal-line-height-tight);
+    color: var(--portal-color-text-1);
+}
+
+/* The cell row doubles as a label for the hidden input, so tapping anywhere
+ * on it focuses the real control natively. It is the touch target: the cells
+ * inside it may be narrower than the floor individually. */
+.cells {
+    position: relative;
+    display: inline-flex;
+    gap: var(--portal-space-2);
+    min-block-size: var(--portal-touch-target-min);
+    align-items: center;
+    cursor: text;
+}
+
+/* The visually hidden native input (sr-only clip technique, matching
+ * Checkbox). It stays focusable and in the tab order. */
+.input {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+.cell {
+    composes: beveled from '../../theme/surfaces.module.css';
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    inline-size: var(--portal-space-6);
+    block-size: var(--portal-touch-target-min);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-bevel-1);
+    background-color: var(--portal-color-surface-0);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-mono);
+    font-size: var(--portal-size-text-lg);
+    font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .cell {
+        transition:
+            border-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ui-fast) var(--portal-easing-standard);
+    }
+}
+
+.cell[data-filled='true'] {
+    border-color: var(--portal-tone-border);
+}
+
+/* The caret: a token-drawn bar in the active cell while the input holds
+ * focus. Present steadily; the blink is layered on in the motion block. */
+.input:focus ~ .cell[data-active='true']::after {
+    content: '';
+    position: absolute;
+    inline-size: var(--portal-border-thickness-thin);
+    block-size: 1em;
+    background-color: var(--portal-color-text-0);
+}
+
+/* Keyboard focus promotes the active cell to the ring treatment. */
+.input:focus-visible ~ .cell[data-active='true'] {
+    border-color: var(--portal-tone-accent);
+    outline: var(--portal-border-thickness-thin) solid var(--portal-color-focus);
+    outline-offset: var(--portal-border-thickness-thin);
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow-strong);
+}
+
+.field[data-enabled='disabled'] .cells {
+    cursor: not-allowed;
+}
+
+.field[data-enabled='disabled'] .cell {
+    opacity: 0.5;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .input:focus ~ .cell[data-active='true']::after {
+        animation: portal-otp-caret 1s var(--portal-easing-standard) infinite;
+    }
+}
+
+@keyframes portal-otp-caret {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+/* High-contrast foreground for the message; the danger signal is carried by
+ * aria-invalid and the toned borders, never by message color alone. */
+.error {
+    font-size: var(--portal-size-text-sm);
+    line-height: var(--portal-line-height-tight);
+    color: var(--portal-color-text-0);
+}

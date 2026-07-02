@@ -295,6 +295,8 @@ export {
     setExpanded,
     toggleExpanded,
 } from './ui/expansion';
+export { Field } from './ui/Field/Field';
+export { type FieldControlProps, type FieldProps } from './ui/Field/Field.types';
 export { KeyValue } from './ui/KeyValue/KeyValue';
 export {
     EKeyValueOverflow,
@@ -343,6 +345,8 @@ export {
     ENumberStepperFinish,
     type NumberStepperProps,
 } from './ui/NumberStepper/NumberStepper.types';
+export { OtpField } from './ui/OtpField/OtpField';
+export { EOtpFieldMode, type OtpFieldProps } from './ui/OtpField/OtpField.types';
 export { Pagination } from './ui/Pagination/Pagination';
 export {
     EPaginationEdge,
@@ -381,6 +385,12 @@ export {
     type RadioGroupProps,
     type RadioItem,
 } from './ui/RadioGroup/RadioGroup.types';
+export { RangeSlider } from './ui/RangeSlider/RangeSlider';
+export {
+    ERangeThumb,
+    type RangeSliderProps,
+    type RangeSliderValue,
+} from './ui/RangeSlider/RangeSlider.types';
 export { Rating } from './ui/Rating/Rating';
 export {
     ERatingMarkState,
@@ -474,6 +484,8 @@ export {
     type TextHeadingLevel,
     type TextProps,
 } from './ui/Text/Text.types';
+export { TextArea } from './ui/TextArea/TextArea';
+export { ETextAreaResize, type TextAreaProps } from './ui/TextArea/TextArea.types';
 export { TextField } from './ui/TextField/TextField';
 export {
     ETextFieldType,

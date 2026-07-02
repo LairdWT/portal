@@ -1,0 +1,57 @@
+/*
+ * Field. The form scaffolding wrapper of the UI layer: label / hint / error
+ * frame around a consumer-supplied control. The root carries the shared
+ * .toneScope so the derived --portal-tone-* vars resolve for the control it
+ * wraps; when invalid the seed is forced to the danger token, matching
+ * TextField's convention, so a wrapped control's toned styling reads danger
+ * without per-consumer wiring. No literal colors or pixels; logical
+ * properties throughout.
+ */
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-1);
+    font-family: var(--portal-font-sans);
+}
+
+/* Invalid: force the tone seed to danger for the whole scope, so the wrapped
+ * control's tone-derived accents follow the error state. */
+.field[data-invalid='true'] {
+    --portal-tone: var(--portal-color-danger);
+}
+
+.label {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--portal-space-1);
+    font-size: var(--portal-size-text-sm);
+    letter-spacing: var(--portal-letter-spacing-wide);
+    line-height: var(--portal-line-height-tight);
+    color: var(--portal-color-text-1);
+}
+
+/* The required marker: a small token-drawn diamond, decorative (the control
+ * carries aria-required through the wiring). Drawn, not an ASCII asterisk,
+ * matching the library's no-typed-glyphs rule. */
+.requiredMark {
+    inline-size: var(--portal-space-2);
+    block-size: var(--portal-space-2);
+    background-color: var(--portal-tone-accent);
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
+
+.hint {
+    font-size: var(--portal-size-text-sm);
+    line-height: var(--portal-line-height-tight);
+    color: var(--portal-color-text-1);
+}
+
+/* The message text uses the high-contrast foreground (not the danger accent,
+ * which is too dark to meet AA over the scrim). The danger signal is carried
+ * by aria-invalid and the toned control, never by message color alone. */
+.error {
+    font-size: var(--portal-size-text-sm);
+    line-height: var(--portal-line-height-tight);
+    color: var(--portal-color-text-0);
+}
