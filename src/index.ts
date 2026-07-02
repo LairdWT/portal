@@ -226,13 +226,17 @@ export {
     type ChartSegment,
     EChartA11yDetail,
     type LegendRowProps,
+    type LineChartProps,
     type RankedBarsProps,
     type RatioBarProps,
+    type SparklineProps,
     type StackedBarProps,
 } from './ui/Chart/Chart.types';
 export { LegendRow } from './ui/Chart/LegendRow';
+export { LineChart } from './ui/Chart/LineChart';
 export { RankedBars } from './ui/Chart/RankedBars';
 export { RatioBar } from './ui/Chart/RatioBar';
+export { Sparkline } from './ui/Chart/Sparkline';
 export { StackedBar } from './ui/Chart/StackedBar';
 export { Checkbox } from './ui/Checkbox/Checkbox';
 export {
@@ -530,6 +534,11 @@ export {
     ETextFieldType,
     type TextFieldProps,
 } from './ui/TextField/TextField.types';
+export { Timeline } from './ui/Timeline/Timeline';
+export {
+    type TimelineItem,
+    type TimelineProps,
+} from './ui/Timeline/Timeline.types';
 export { TimePicker } from './ui/TimePicker/TimePicker';
 export {
     ETimePickerCycle,
@@ -581,3 +590,5 @@ export {
     type WindowRect,
     type WindowSize,
 } from './ui/Window/Window.types';
+export { Wizard } from './ui/Wizard/Wizard';
+export { type WizardProps, type WizardStep } from './ui/Wizard/Wizard.types';

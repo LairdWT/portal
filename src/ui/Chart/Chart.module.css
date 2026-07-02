@@ -235,6 +235,49 @@
     font-variant-numeric: tabular-nums;
 }
 
+/* LineChart - the framed trend line: gridlines under a toned stroke. */
+.lineChart {
+    composes: frame;
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-2);
+}
+
+.gridline {
+    stroke: var(--portal-color-metal-2);
+    stroke-width: var(--portal-border-thickness-thin);
+    vector-effect: non-scaling-stroke;
+}
+
+/* The trend stroke and its optional area wash, shared with the Sparkline. The
+ * non-scaling stroke keeps the line weight constant under the stretched
+ * viewBox. */
+.sparkLine {
+    fill: none;
+    stroke: var(--portal-tone-accent);
+    stroke-width: var(--portal-border-thickness-normal);
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+}
+
+.sparkArea {
+    fill: var(--portal-tone-fill);
+}
+
+/* Sparkline - the compact inline form: no frame, no caption, no baseline. */
+.sparkline {
+    display: inline-flex;
+    inline-size: calc(var(--portal-touch-target-min) * 2);
+    block-size: var(--portal-space-5);
+}
+
+.sparklineChart {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+}
+
 /* The framed empty-state placeholder: a dim, centered italic note. */
 .empty {
     margin: 0;

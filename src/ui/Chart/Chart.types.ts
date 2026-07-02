@@ -65,6 +65,32 @@ export type BarChartProps = Readonly<{
 }> &
     Toned;
 
+// Compact inline trend line over a bare numeric series: the sparkline proper.
+// No frame, caption, or axes - it slots beside a value (a StatTile, a table
+// cell) and its role=img name carries the summary. `filled` adds the toned
+// area wash under the line.
+export type SparklineProps = Readonly<{
+    label: string;
+    values: readonly number[];
+    filled?: boolean;
+    status?: EUiStatus;
+}> &
+    Toned;
+
+// Framed trend line with the family's caption, baseline, and gridlines.
+// `detail` defaults to Table (the series is data-bearing); `filled` adds the
+// toned area wash under the line.
+export type LineChartProps = Readonly<{
+    label: string;
+    values: readonly number[];
+    summary?: string;
+    emptyLabel?: string;
+    detail?: EChartA11yDetail;
+    filled?: boolean;
+    status?: EUiStatus;
+}> &
+    Toned;
+
 // Horizontal stacked bar of weighted slices (Helicon `stacked_bar`).
 export type StackedBarProps = Readonly<{
     label: string;

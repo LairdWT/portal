@@ -1,0 +1,99 @@
+/*
+ * Timeline. A vertical activity feed: toned marker dots on a connecting
+ * hairline rail, mono timestamps, and the machined text hierarchy. Status
+ * forces the tone seed per row (the universal danger/success override), so
+ * the dot and its glow follow without per-row wiring. Tokens only.
+ */
+
+.root {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--portal-font-sans);
+}
+
+.item {
+    display: flex;
+    gap: var(--portal-space-3);
+}
+
+/* Status forces the tone seed, matching the library's universal override. */
+.item[data-status='danger'] {
+    --portal-tone: var(--portal-color-danger);
+}
+
+.item[data-status='success'] {
+    --portal-tone: var(--portal-color-success);
+}
+
+/* The marker column: a toned dot over a rail that runs to the next row. */
+.marker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 0 0 auto;
+    inline-size: var(--portal-space-4);
+}
+
+.dot {
+    flex: 0 0 auto;
+    inline-size: var(--portal-space-2);
+    block-size: var(--portal-space-2);
+    margin-block-start: var(--portal-space-1);
+    border: var(--portal-border-thickness-thin) solid var(--portal-tone-accent);
+    background-color: var(--portal-tone-fill);
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    filter: drop-shadow(0 0 var(--portal-space-1) var(--portal-tone-glow));
+}
+
+.rail {
+    flex: 1 1 auto;
+    inline-size: var(--portal-border-thickness-thin);
+    min-block-size: var(--portal-space-3);
+    background-color: var(--portal-color-border);
+}
+
+/* The last row's rail stops at its dot. */
+.item:last-child .rail {
+    display: none;
+}
+
+.body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-1);
+    padding-block-end: var(--portal-space-4);
+    min-inline-size: 0;
+}
+
+.item:last-child .body {
+    padding-block-end: 0;
+}
+
+.head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--portal-space-3);
+    flex-wrap: wrap;
+}
+
+.title {
+    color: var(--portal-color-text-0);
+    font-size: var(--portal-size-text-md);
+    font-weight: var(--portal-weight-label-medium);
+}
+
+.time {
+    color: var(--portal-color-text-1);
+    font-family: var(--portal-font-mono);
+    font-size: var(--portal-size-text-sm);
+    font-variant-numeric: tabular-nums;
+}
+
+.description {
+    color: var(--portal-color-text-1);
+    font-size: var(--portal-size-text-sm);
+    line-height: var(--portal-line-height-normal);
+}
