@@ -100,6 +100,7 @@ exports[`public barrel value exports > matches the frozen export-name inventory 
   "ETreeNodeState",
   "EUiStatus",
   "EVisibility",
+  "EWindowFrame",
   "EWindowResizeEdge",
   "EWindowResizeMode",
   "EWindowState",

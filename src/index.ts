@@ -493,6 +493,7 @@ export {
 } from './ui/TreeView/TreeView.types';
 export { Window } from './ui/Window/Window';
 export {
+    EWindowFrame,
     EWindowResizeEdge,
     EWindowResizeMode,
     EWindowState,
