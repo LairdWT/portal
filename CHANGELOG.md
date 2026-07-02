@@ -4,6 +4,58 @@ All notable changes to this project are documented in this file. The format is
 based on Keep a Changelog, and the project follows Semantic Versioning with the
 0.x caveat that, before 1.0, a minor version may carry a breaking change.
 
+## [1.9.0] - 2026-07-02
+
+The Tier-3 "HUD identity" phase of the coverage roadmap: the radial
+instruments, the game surfaces, and the DockLayout capstone. All public-API
+changes are additive; the freeze holds.
+
+### Added
+
+- `Gauge`: the radial arc meter in the Chart-family chrome - a 270-degree
+  instrument sweep (pure `gaugeMath` on polygonMath's polar convention),
+  status band ring, a pathLength-normalized dash fill that sweeps on value
+  change (reduced-motion gated), and a centered mono readout carrying
+  role=meter.
+- `Dial` (game input): the rotary scalar control - a machined knob
+  (role=slider) with a RELATIVE twist model (grabbing never jumps the
+  value; wrapped angular deltas accumulate across the atan2 seam), full
+  keyboard stepping, optional release detents, scalar InputSignal emission,
+  and a toned conic sweep ring.
+- `Cooldown`: the clockwise-unwinding radial scrim wrapping any children -
+  driven by the registered `--portal-cooldown-angle` property in a one-shot
+  bounded keyframe (the documented paint exception beside the Spinner
+  transform rule), animationend + backstop `onComplete` fired exactly once,
+  a numeric countdown under reduced motion, and a ready flash only on live
+  completion.
+- `InventoryGrid`: the APG-grid slot surface - pure `slotMath` (RTL-aware
+  pointer hit testing, keyboard grid stepping, exported splice-semantics
+  `moveSlot`), gridcell buttons carrying keyboard grab/move/drop/cancel
+  with live-region narration, and pointer drag-reorder with a
+  transform-only ghost.
+- `Hotbar` (game input): the single-row action bar - machined keys with
+  keybind chips (aria-keyshortcuts), per-slot digital-press signals, one
+  activation path for pointer and keyboard, and an aria-pressed active
+  slot.
+- `LogConsole`: the virtualized mono scrollback (useVirtualWindow; a
+  handful of rows mounted for thousands of entries) - follow-tail pinning
+  with scroll-away unpin / scroll-back repin, severity carried by non-text
+  edge bars and row washes, a latest-entry announcer instead of a live
+  window, and contained Scanlines.
+- `VirtualKeyboard` (game input): the data-driven on-screen key matrix
+  (exported `QWERTY_ROWS`) - machined BevelButton key faces, one-shot Shift
+  and latched Symbol layers, pointerdown commits with a keyboard-click
+  path that can never double-commit.
+- `DockLayout`: the docking manager capstone - a CONTROLLED, serializable
+  layout tree (`split`/`tabs` nodes plus floating rects, all JSON-safe)
+  rendered through SplitPane, Tabs, and floating Windows. Pure `dockMath`
+  operations (dockAtEdge / dockIntoGroup / floatPanel / removePanel /
+  setFraction / setActiveTab, all exported) with normalization invariants;
+  grip drags drop onto RTL-aware edge zones, tab groups, or float at the
+  pointer; the per-group dock menu reaches every pointer outcome from the
+  keyboard; floating panels dock back from their title bar. v1 boundary:
+  edge docking + center tab groups + floating.
+
 ## [1.8.0] - 2026-07-02
 
 The Tier-2 "app polish" phase of the coverage roadmap. All public-API

@@ -230,12 +230,18 @@ so it suits any React UI, not only game input. It spans, among others:
   game-input sibling).
 - Surfaces and overlays: `Panel`, `ReadoutPanel`, `Section`, `Dialog`,
   `Drawer` (with resize snap points), `Popover`, `Tooltip`, `Toast`,
-  `Window`, `SplitPane`, `Carousel`, `Lightbox`.
+  `Window`, `SplitPane`, `Carousel`, `Lightbox`, `DockLayout` (the docking
+  manager: a serializable split/tab/floating layout over SplitPane, Tabs,
+  and Window).
 - Display and feedback: `Text`, `Badge`, `Chip`, `StatPill`, `StatTile`,
   `KeyValue`, the `Chart` family (bars, `Sparkline`, `LineChart`),
   `Progress`, `Spinner`, `Banner`, `Avatar`, `Skeleton`, `EmptyState`,
   `Marquee`, `Scanlines`, `StepTrack`, `Timeline`, `TitleBar`,
   `StatusFooter`, `SelectableTile`.
+- Game HUD: `Gauge` (radial arc meter), `Cooldown` (unwinding ability
+  scrim), `LogConsole` (virtualized scrollback), `InventoryGrid` (slot grid
+  with keyboard grab/move and drag-reorder), plus the signal-emitting
+  `Dial`, `Hotbar`, and `VirtualKeyboard` on the game-input side.
 - Layout: `Stack`, `Grid`, `Divider`.
 
 See the live Storybook (linked above) for the full, current catalogue with
