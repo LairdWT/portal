@@ -62,8 +62,51 @@
 
 @media (prefers-reduced-motion: no-preference) {
     .item {
-        transition: background-color var(--portal-duration-ui-fast)
+        transition:
+            background-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard),
+            transform var(--portal-duration-ui-fast) var(--portal-easing-standard);
+    }
+
+    /* The fly-out mounts on open, so a mount animation is its entrance. */
+    .flyout {
+        animation: portal-menu-flyout-in var(--portal-duration-ui-base)
             var(--portal-easing-standard);
+    }
+
+    /* The checkable marks are pseudo-elements created when aria-checked flips
+     * on, so a creation animation plays exactly at the moment of checking. */
+    .item[data-kind='checkbox'][aria-checked='true'] .indicator::after,
+    .item[data-kind='radio'][aria-checked='true'] .indicator::after {
+        animation: portal-menu-mark-in var(--portal-duration-ui-fast)
+            var(--portal-easing-emphasized);
+    }
+}
+
+@keyframes portal-menu-flyout-in {
+    from {
+        opacity: 0;
+        transform: translateX(calc(-1 * var(--portal-space-1))) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+/* Shared by the check tick and the radio dot: the tick's static transform is
+ * rotate(45deg) and rotating a filled disc is visually inert, so one keyframe
+ * serves both marks. */
+@keyframes portal-menu-mark-in {
+    from {
+        opacity: 0;
+        transform: rotate(45deg) scale(0.4);
+    }
+
+    to {
+        opacity: 1;
+        transform: rotate(45deg) scale(1);
     }
 }
 
@@ -84,10 +127,18 @@
     outline-offset: calc(-1 * var(--portal-border-thickness-normal));
 }
 
-/* Pointer hover highlight: reuses the roving-active fill token. Declared after
- * :focus-visible to keep selector specificity in descending order. */
+/* Pointer hover highlight: reuses the roving-active fill token, plus a small
+ * reading-direction nudge (a static transform state; its transition is gated in
+ * the motion block above). Declared after :focus-visible to keep selector
+ * specificity in descending order. */
 .item:not([aria-disabled='true']):hover {
     background-color: var(--portal-tone-fill);
+    transform: translateX(calc(var(--portal-space-1) / 2));
+}
+
+/* translateX is physical, so the hover nudge flips under right-to-left. */
+.item:not([aria-disabled='true']):hover:dir(rtl) {
+    transform: translateX(calc(-1 * var(--portal-space-1) / 2));
 }
 
 /* Reserved leading slot for the checkable shape. Always present so labels align

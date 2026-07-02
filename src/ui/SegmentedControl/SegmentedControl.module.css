@@ -54,6 +54,11 @@
                 var(--portal-easing-standard),
             color var(--portal-duration-ui-base) var(--portal-easing-standard);
     }
+
+    .segment::after {
+        transition: transform var(--portal-duration-ui-base)
+            var(--portal-easing-emphasized);
+    }
 }
 
 .segment:focus-visible {
@@ -84,9 +89,11 @@
 /*
  * The selected indicator: a tone-accent rail under the active segment. It is a
  * non-color-only redundancy alongside aria-checked and the text-contrast scrim,
- * not the sole signal of selection.
+ * not the sole signal of selection. The rail exists on every segment, collapsed
+ * to scaleX(0), so selection GROWS it from the center instead of popping it in;
+ * the transition lives in the motion block above.
  */
-.segment[data-state='selected']::after {
+.segment::after {
     content: '';
     position: absolute;
     inset-inline: var(--portal-space-3);
@@ -94,6 +101,11 @@
     block-size: var(--portal-border-thickness-normal);
     border-radius: var(--portal-radius-pill);
     background-color: var(--portal-tone-accent);
+    transform: scaleX(0);
+}
+
+.segment[data-state='selected']::after {
+    transform: scaleX(1);
 }
 
 .label {

@@ -114,6 +114,23 @@
     transform: translate(calc(-1 * var(--toggle-knob-travel)), -50%);
 }
 
+/* Press squash: the knob dips while held, composed with whichever travel state
+ * it is in. A static transform state (reduced-motion safe); only the transition
+ * above is gated. */
+.toggle:active:not(:disabled) .knob {
+    transform: translate(0, -50%) scale(var(--portal-press-scale));
+}
+
+.toggle[data-checked='checked']:active:not(:disabled) .knob {
+    transform: translate(var(--toggle-knob-travel), -50%)
+        scale(var(--portal-press-scale));
+}
+
+.toggle[data-checked='checked']:active:not(:disabled) .knob:dir(rtl) {
+    transform: translate(calc(-1 * var(--toggle-knob-travel)), -50%)
+        scale(var(--portal-press-scale));
+}
+
 .label {
     color: inherit;
 }

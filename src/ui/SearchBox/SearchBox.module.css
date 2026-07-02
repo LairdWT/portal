@@ -141,6 +141,23 @@
     .clear {
         transition: color var(--portal-duration-ui-fast)
             var(--portal-easing-standard);
+
+        /* The clear key mounts only once the field is filled, so a mount
+         * animation pops it in exactly when it becomes available. */
+        animation: portal-searchbox-clear-in var(--portal-duration-ui-fast)
+            var(--portal-easing-emphasized);
+    }
+}
+
+@keyframes portal-searchbox-clear-in {
+    from {
+        opacity: 0;
+        transform: scale(0.6);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
     }
 }
 

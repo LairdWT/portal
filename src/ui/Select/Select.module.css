@@ -162,6 +162,34 @@
     user-select: none;
 }
 
+@media (prefers-reduced-motion: no-preference) {
+    .option {
+        transition:
+            background-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard),
+            transform var(--portal-duration-ui-fast) var(--portal-easing-standard);
+    }
+
+    /* The selected check is a pseudo-element created when data-selected flips
+     * on, so a creation animation plays exactly at the moment of selection. */
+    .option[data-selected='true']::after {
+        animation: portal-select-mark-in var(--portal-duration-ui-fast)
+            var(--portal-easing-emphasized);
+    }
+}
+
+@keyframes portal-select-mark-in {
+    from {
+        opacity: 0;
+        transform: rotate(45deg) scale(0.4);
+    }
+
+    to {
+        opacity: 1;
+        transform: rotate(45deg) scale(1);
+    }
+}
+
 .option[data-active='true'] {
     background-color: var(--portal-tone-fill);
 }
@@ -191,4 +219,10 @@
 
 .option:not([data-disabled='true']):hover {
     background-color: var(--portal-tone-fill);
+    transform: translateX(calc(var(--portal-space-1) / 2));
+}
+
+/* translateX is physical, so the hover nudge flips under right-to-left. */
+.option:not([data-disabled='true']):hover:dir(rtl) {
+    transform: translateX(calc(-1 * var(--portal-space-1) / 2));
 }

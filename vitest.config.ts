@@ -18,6 +18,13 @@ const dirname: string =
 // runs axe accessibility checks (a11y violations fail the run; see preview.ts).
 export default defineConfig({
     plugins: [react()],
+    // animejs is pulled in at runtime by the motion hooks (StatPill/StatTile
+    // value pulses). Without the explicit include, the browser-mode Storybook
+    // project discovers it mid-run, and Vite's dependency re-optimization
+    // reload fails whichever story file is in flight.
+    optimizeDeps: {
+        include: ['animejs'],
+    },
     css: {
         modules: {
             localsConvention: 'camelCaseOnly',

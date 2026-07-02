@@ -86,10 +86,12 @@
 }
 
 /* Preview: a lighter, provisional tone treatment so a hover/focus preview reads
- * as not-yet-committed and never as the solid filled face. */
+ * as not-yet-committed and never as the solid filled face. The scale pop is a
+ * static transform state (reduced-motion safe); only its transition is gated. */
 .pip[data-state='preview'] {
     border-color: var(--portal-tone-edge);
     background-color: var(--portal-tone-edge);
+    transform: scale(1.12);
 }
 
 /*
@@ -129,6 +131,7 @@
                 var(--portal-easing-standard),
             border-color var(--portal-duration-ui-base)
                 var(--portal-easing-standard),
-            box-shadow var(--portal-duration-ui-base) var(--portal-easing-standard);
+            box-shadow var(--portal-duration-ui-base) var(--portal-easing-standard),
+            transform var(--portal-duration-ui-fast) var(--portal-easing-emphasized);
     }
 }

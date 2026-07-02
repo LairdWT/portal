@@ -53,6 +53,11 @@
                 var(--portal-easing-standard),
             color var(--portal-duration-ui-base) var(--portal-easing-standard);
     }
+
+    .tab::after {
+        transition: transform var(--portal-duration-ui-base)
+            var(--portal-easing-emphasized);
+    }
 }
 
 .tab:focus-visible {
@@ -83,9 +88,11 @@
 /*
  * The selected indicator: a tone-accent rail under the active tab. It is a
  * non-color-only redundancy alongside aria-selected and the text-contrast
- * scrim, not the sole signal of selection.
+ * scrim, not the sole signal of selection. The rail exists on every tab,
+ * collapsed to scaleX(0), so selection GROWS it from the center instead of
+ * popping it in; the transition lives in the motion block above.
  */
-.tab[data-state='selected']::after {
+.tab::after {
     content: '';
     position: absolute;
     inset-inline: var(--portal-space-3);
@@ -93,6 +100,11 @@
     block-size: var(--portal-border-thickness-normal);
     border-radius: var(--portal-radius-pill);
     background-color: var(--portal-tone-accent);
+    transform: scaleX(0);
+}
+
+.tab[data-state='selected']::after {
+    transform: scaleX(1);
 }
 
 .label {

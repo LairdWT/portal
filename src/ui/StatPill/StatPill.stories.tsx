@@ -1,5 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { type ReactElement } from 'react';
+import {
+    type Dispatch,
+    type ReactElement,
+    type SetStateAction,
+    useEffect,
+    useState,
+} from 'react';
 
 import { EUiStatus } from '../tone';
 import { StatPill } from './StatPill';
@@ -52,4 +58,33 @@ export const PillRow: Story = {
             <StatPill label="Phase" value="combat" />
         </div>
     ),
+};
+
+// Demonstrates the value-change pulse: the readout ticks on a timer and the
+// value span pulses on every change (reduced-motion users see the plain tick).
+function LiveTelemetryDemo(): ReactElement {
+    const [tick, setTick]: [number, Dispatch<SetStateAction<number>>] =
+        useState<number>(88);
+    useEffect((): (() => void) => {
+        const timer: number = window.setInterval((): void => {
+            setTick((current: number): number => (current + 3) % 100);
+        }, 1400);
+        return (): void => {
+            window.clearInterval(timer);
+        };
+    }, []);
+    return (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <StatPill label="Energy" value={tick} />
+            <StatPill
+                label="Shield"
+                value={(tick * 7) % 100}
+                tone="oklch(0.7 0.15 240)"
+            />
+        </div>
+    );
+}
+
+export const LiveTelemetry: Story = {
+    render: (): ReactElement => <LiveTelemetryDemo />,
 };

@@ -75,6 +75,23 @@
                 var(--portal-easing-standard),
             box-shadow var(--portal-duration-ui-fast) var(--portal-easing-standard);
     }
+
+    /* The rail is a pseudo-element created when data-state flips to selected,
+     * so a creation animation plays exactly at the moment of selection. */
+    .row[data-state='selected']::before {
+        animation: portal-list-rail-in var(--portal-duration-ui-base)
+            var(--portal-easing-emphasized);
+    }
+}
+
+@keyframes portal-list-rail-in {
+    from {
+        transform: scaleY(0);
+    }
+
+    to {
+        transform: scaleY(1);
+    }
 }
 
 /* Selected row: an angular toned scrim plus a SHARP (non-pill) inline-start

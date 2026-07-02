@@ -4,6 +4,44 @@ All notable changes to this project are documented in this file. The format is
 based on Keep a Changelog, and the project follows Semantic Versioning with the
 0.x caveat that, before 1.0, a minor version may carry a breaking change.
 
+## [Unreleased]
+
+### Added
+
+- Micro-interaction "juice" pass across the interactive catalogue, every
+  addition transform/opacity-only, token-timed, and reduced-motion gated,
+  with RTL mirrors wherever a physical transform meets logical layout:
+    - Tabs / SegmentedControl: the selected indicator rail now lives on every
+      tab collapsed to `scaleX(0)` and GROWS in on selection instead of
+      popping.
+    - Menu: submenu fly-outs animate in, rows nudge toward reading direction
+      on hover, and the checkable tick / radio dot pop in at the moment of
+      checking.
+    - Select: option rows ease their hover fill with the same nudge, and the
+      selected check pops in on selection.
+    - List: the selection accent rail grows in (`scaleY`) when a row is
+      selected.
+    - SearchBox: the clear key pops in the moment the field becomes filled.
+    - Toggle: the knob squashes under the press while it slides.
+    - Rating: the hover/focus preview pip scales up so the provisional value
+      reads at a glance.
+    - StatPill / StatTile: the value readout pulses when the value changes -
+      the first internal consumers of the exported `useChangeMotion` + `pulse`
+      motion hooks. New `LiveTelemetry` StatPill story shows the tick.
+
+### Fixed
+
+- Skill-guided best-practices review (react-ts family): the Toggle knob
+  slide and the HudPanel readout fill both animated layout properties
+  (`inset-inline-start` / `inline-size`); each now rides `transform` with
+  exact token-derived geometry and an RTL mirror. Dialog action buttons
+  gained the `:not(:disabled)` interaction guards the rest of the library
+  uses, and the DPad direction-collapse switch is exhaustively typed (no
+  value-returning `default` over the union).
+- The browser-mode Storybook test project pre-optimizes `animejs` so the
+  motion hooks entering the module graph cannot trigger a mid-run Vite
+  dependency reload.
+
 ## [1.5.1] - 2026-07-02
 
 ### Added

@@ -1,5 +1,7 @@
-import { type ReactElement } from 'react';
+import { type ReactElement, type RefObject } from 'react';
 
+import { pulse } from '../../react/motion/motionPresets';
+import { useChangeMotion } from '../../react/motion/useChangeMotion';
 import { toneProperties } from '../tone';
 import toneStyles from '../tone.module.css';
 import styles from './StatTile.module.css';
@@ -18,6 +20,10 @@ export function StatTile({
     status,
     tone,
 }: StatTileProps): ReactElement {
+    // A changed value pulses the readout to draw the eye (reduced-motion gated
+    // and reverted on unmount inside the hook); first render never animates.
+    const valueRef: RefObject<HTMLSpanElement | null> =
+        useChangeMotion<HTMLSpanElement>(value, pulse);
     const valueText: string = String(value);
     const accessibleName: string = composeStatName(label, valueText, unit, delta);
     const className: string = [toneStyles.toneScope, styles.root]
@@ -35,7 +41,7 @@ export function StatTile({
             {emphasis === EStatTileEmphasis.Hero ? (
                 <span className={styles.accentRule} aria-hidden="true" />
             ) : null}
-            <span className={styles.value}>
+            <span ref={valueRef} className={styles.value}>
                 {valueText}
                 {unit !== undefined ? (
                     <span className={styles.unit}> {unit}</span>
