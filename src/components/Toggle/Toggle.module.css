@@ -76,7 +76,13 @@
     );
     aspect-ratio: 1;
     border-radius: var(--portal-bevel-1);
-    background: var(--portal-gradient-metal);
+
+    /* The ActionButton tab face (the radial indent ramp), NOT the metal ramp.
+     * Scoped to the knob's own box - the track behind it keeps its own flat
+     * fill, so the gradient can never bleed outside the thumb (the earlier
+     * regression). Off reads as the recessed face; on swaps to the lit face
+     * below. */
+    background: var(--portal-gradient-button-face-pressed);
     transform: translateY(-50%);
 }
 
@@ -92,7 +98,7 @@
         var(--toggle-track-inline-size) - 55% - var(--toggle-knob-inset) -
             var(--portal-border-thickness-thin)
     );
-    background: var(--portal-color-metal-4);
+    background: var(--portal-gradient-button-face);
 }
 
 .label {

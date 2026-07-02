@@ -339,7 +339,10 @@ export {
     type NavRailProps,
 } from './ui/NavRail/NavRail.types';
 export { NumberStepper } from './ui/NumberStepper/NumberStepper';
-export { type NumberStepperProps } from './ui/NumberStepper/NumberStepper.types';
+export {
+    ENumberStepperFinish,
+    type NumberStepperProps,
+} from './ui/NumberStepper/NumberStepper.types';
 export { Pagination } from './ui/Pagination/Pagination';
 export {
     EPaginationEdge,

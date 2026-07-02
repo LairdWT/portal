@@ -195,6 +195,7 @@ export function Marquee({
                 <button
                     type="button"
                     className={styles.control}
+                    aria-label={paused ? resumeLabel : pauseLabel}
                     aria-pressed={paused}
                     disabled={isDisabled}
                     onClick={togglePlay}
@@ -204,9 +205,6 @@ export function Marquee({
                         data-paused={paused ? 'true' : 'false'}
                         aria-hidden="true"
                     />
-                    <span className={styles.controlLabel}>
-                        {paused ? resumeLabel : pauseLabel}
-                    </span>
                 </button>
             ) : null}
         </div>

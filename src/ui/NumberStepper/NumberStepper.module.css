@@ -1,26 +1,24 @@
 /*
- * NumberStepper. The machined-HUD numeric stepper of the generic UI layer: two
- * beveled brushed-metal step keys flanking a recessed beveled HUD value readout,
- * mirroring Helicon's [-] value [+]. Corners adopt the shared .beveled corner
- * identity (corner-shape: bevel + a --portal-bevel-N radius fallback); no
- * rounded/squircle radius appears. The keys reuse the shared metal tokens - a
- * brushed-metal face inside the animated --portal-gradient-metal-ring trim, the
- * BevelButton machined key - and recess to the steel end of the ramp on press.
- * The readout is a dark, inset-milled HUD cell with a tabular monospace value.
- * Only --portal-* tokens and the derived --portal-tone-* vars drive every value:
- * no literal colors, no fixed-pixel layout. The accent reads only as the HUD
- * border, the focus ring, and the glow; text stays on the dark surface for
- * contrast (tone is never a solid mid-tone fill behind text). All motion - the
- * ring sheen and the transitions - is gated behind prefers-reduced-motion.
+ * NumberStepper. The HUD numeric stepper of the generic UI layer: two beveled
+ * step keys flanking a recessed beveled HUD value readout, mirroring Helicon's
+ * [-] value [+]. Corners adopt the shared .beveled corner identity
+ * (corner-shape: bevel + a --portal-bevel-N radius fallback); no
+ * rounded/squircle radius appears. The DEFAULT keys are quiet themed HUD keys
+ * (subtle raised surface, tone border/fill on hover); data-finish='metal'
+ * opts into the brushed-metal BevelButton key face with the animated ring and
+ * the recessed-steel press. The readout is a dark, inset-milled HUD cell with
+ * a tabular monospace value. Only --portal-* tokens and the derived
+ * --portal-tone-* vars drive every value: no literal colors, no fixed-pixel
+ * layout. All motion - the metal sheen and the transitions - is gated behind
+ * prefers-reduced-motion.
  *
  * .minusGlyph/.plusGlyph compose the shared token-drawn +/- glyph utilities
- * (currentColor marks on a decorative aria-hidden span). .key keeps an
- * inline metal ring rather than composing .metalTrim: the key needs the
- * brushed-metal FACE on the padding-box (not metalTrim's flat --portal-hud-fill),
- * and overriding a composed utility's background is cascade-order fragile across
- * bundlers, so the ring + face are declared inline from the same shared
- * --portal-* metal tokens. The sheen reuses the registered --portal-metal-angle
- * technique, matching BevelButton/ActionButton, and is reduced-motion gated.
+ * (currentColor marks on a decorative aria-hidden span). The metal key keeps
+ * an inline metal ring rather than composing .metalTrim: the key needs the
+ * brushed-metal FACE on the padding-box (not metalTrim's flat
+ * --portal-hud-fill), and overriding a composed utility's background is
+ * cascade-order fragile across bundlers, so the ring + face are declared
+ * inline from the same shared --portal-* metal tokens.
  */
 
 .root {
@@ -37,6 +35,8 @@
     font-family: var(--portal-font-sans);
 }
 
+/* The standard themed key: a quietly raised HUD surface whose border and fill
+ * answer the tone on hover - the generic-UI default. */
 .key {
     composes: beveled from '../../theme/surfaces.module.css';
     display: inline-flex;
@@ -46,16 +46,10 @@
     min-block-size: var(--portal-touch-target-min);
     padding-block: var(--portal-space-2);
     padding-inline: var(--portal-space-3);
-    border: var(--portal-hud-edge-width) solid transparent;
+    border: var(--portal-hud-edge-width) solid var(--portal-color-border);
     border-radius: var(--portal-bevel-2);
-
-    /* A brushed-metal face (padding-box) inside the animated metal ring
-     * (border-box), driven by the shared metal tokens - the BevelButton machined
-     * key. The ring rotates via the registered --portal-metal-angle. */
-    background:
-        var(--portal-gradient-metal) padding-box,
-        var(--portal-gradient-metal-ring) border-box;
-    color: var(--portal-color-bg-0);
+    background-color: var(--portal-color-surface-1);
+    color: var(--portal-color-text-0);
     cursor: pointer;
     touch-action: manipulation;
     user-select: none;
@@ -63,8 +57,15 @@
 
 @media (prefers-reduced-motion: no-preference) {
     .key {
-        transition: transform var(--portal-duration-ui-fast)
-            var(--portal-easing-standard);
+        transition:
+            transform var(--portal-duration-ui-fast) var(--portal-easing-standard),
+            border-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard),
+            background-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard);
+    }
+
+    .root[data-finish='metal'] .key {
         animation: portal-stepper-sheen var(--portal-duration-metal-sheen) linear
             infinite;
     }
@@ -94,12 +95,35 @@
     cursor: not-allowed;
 }
 
+.key:hover:not(:disabled) {
+    border-color: var(--portal-tone-border);
+    background-color: var(--portal-tone-fill);
+    box-shadow: 0 0 var(--portal-space-2) var(--portal-tone-glow);
+}
+
 .key:active:not(:disabled) {
     transform: scale(var(--portal-press-scale));
+    background-color: color-mix(
+        in oklab,
+        var(--portal-tone-fill),
+        var(--portal-color-bg-0) 30%
+    );
+}
 
-    /* Pressed reads as recessed steel: the face darkens to the steel end of the
-     * metal ramp while the ring carries over (the clip persists from the base
-     * rule). Matches the BevelButton press treatment. */
+/* Metal finish (opt-in): a brushed-metal face (padding-box) inside the
+ * animated metal ring (border-box), driven by the shared metal tokens - the
+ * BevelButton machined key. Dark glyphs keep AA over the light metal. */
+.root[data-finish='metal'] .key {
+    border-color: transparent;
+    background:
+        var(--portal-gradient-metal) padding-box,
+        var(--portal-gradient-metal-ring) border-box;
+    color: var(--portal-color-bg-0);
+}
+
+.root[data-finish='metal'] .key:active:not(:disabled) {
+    /* Pressed reads as recessed steel: the face darkens to the steel end of
+     * the metal ramp while the ring carries over. Matches BevelButton. */
     background-image:
         linear-gradient(
             160deg,

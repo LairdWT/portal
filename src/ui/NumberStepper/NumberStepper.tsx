@@ -12,7 +12,11 @@ import { EUiStatus, toneProperties } from '../tone';
 import toneStyles from '../tone.module.css';
 import { applyStep, clampToRange, normalizeStep } from './NumberStepper.logic';
 import styles from './NumberStepper.module.css';
-import { EStepDirection, type NumberStepperProps } from './NumberStepper.types';
+import {
+    ENumberStepperFinish,
+    EStepDirection,
+    type NumberStepperProps,
+} from './NumberStepper.types';
 
 export function NumberStepper({
     label,
@@ -27,6 +31,7 @@ export function NumberStepper({
     formatValue,
     decrementLabel,
     incrementLabel,
+    finish = ENumberStepperFinish.Standard,
     id,
     tone,
 }: NumberStepperProps): ReactElement {
@@ -167,6 +172,7 @@ export function NumberStepper({
             style={toneProperties(tone)}
             data-status={status ?? EUiStatus.None}
             data-enabled={resolvedEnabled}
+            data-finish={finish}
         >
             <button
                 type="button"

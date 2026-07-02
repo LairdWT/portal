@@ -31,6 +31,20 @@ export const EStepDirection: {
 };
 export type EStepDirection = (typeof EStepDirection)[keyof typeof EStepDirection];
 
+// Step-key finish. Standard (the default) is the quiet themed HUD key that
+// matches the generic UI layer; Metal opts into the brushed-metal BevelButton
+// key face (the pre-1.6 default look). The kebab-case values double as the
+// data-finish attribute the CSS reads.
+export const ENumberStepperFinish: {
+    readonly Standard: 'standard';
+    readonly Metal: 'metal';
+} = {
+    Standard: 'standard',
+    Metal: 'metal',
+};
+export type ENumberStepperFinish =
+    (typeof ENumberStepperFinish)[keyof typeof ENumberStepperFinish];
+
 // Props for the controlled NumberStepper. The value/onChange pair is controlled
 // (the prop is never written back); min/max/step are saturating-clamped; tone and
 // the universal status flow through the shared tone scope.
@@ -87,6 +101,11 @@ export type NumberStepperProps = Readonly<
          */
         decrementLabel?: string;
         incrementLabel?: string;
+        /**
+         * Step-key finish. Defaults to ENumberStepperFinish.Standard (the
+         * themed HUD key); pass Metal for the brushed-metal key face.
+         */
+        finish?: ENumberStepperFinish;
         /**
          * Optional explicit id for the spinbutton element (falls back to useId).
          */

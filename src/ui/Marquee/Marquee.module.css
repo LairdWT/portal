@@ -85,38 +85,16 @@
     pointer-events: none;
 }
 
+/* The play/pause toggle: the shared compact control - the same subtle beveled
+ * icon button as every panel's close/minimize affordances - carrying only the
+ * drawn glyph. Its accessible name lives on aria-label (pauseLabel /
+ * resumeLabel), so the strip keeps a simple, quiet toggle instead of a wide
+ * worded metal key beside it. */
 .control {
-    composes: beveled metalEdge pressScale from '../../theme/surfaces.module.css';
-    display: inline-flex;
-    align-items: center;
-    gap: var(--portal-space-2);
-    min-block-size: var(--portal-touch-target-min);
-    min-inline-size: var(--portal-touch-target-min);
-    padding-inline: var(--portal-space-3);
-    border-radius: var(--portal-bevel-2);
-    color: var(--portal-color-text-0);
-    font-family: var(--portal-font-mono);
-    font-weight: var(--portal-weight-label-bold);
-    cursor: pointer;
-    touch-action: manipulation;
+    composes: compactControl from '../../theme/surfaces.module.css';
 }
 
-.control:focus-visible {
-    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
-    outline-offset: calc(-1 * var(--portal-border-thickness-normal));
-}
-
-.control:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.control:active:not(:disabled) {
-    transform: scale(var(--portal-press-scale));
-}
-
-/* Local token-drawn play/pause glyph on a decorative aria-hidden span. The
- * button's accessible name still comes from the visible .controlLabel text.
+/* Local token-drawn play/pause glyph on a decorative aria-hidden span.
  * Pause = two vertical bars (default/playing); Play = a right-pointing triangle
  * (when paused). currentColor only, sized from --portal-space tokens. */
 .controlGlyph {
@@ -155,20 +133,10 @@
     content: none;
 }
 
-.controlLabel {
-    color: var(--portal-color-text-0);
-    letter-spacing: var(--portal-letter-spacing-wide);
-}
-
 /* All motion lives behind the no-preference gate. Under reduce there is no
  * animation at all; combined with the JS static-fallback path the strip is a
  * readable, manually-scrollable ticker. */
 @media (prefers-reduced-motion: no-preference) {
-    .control {
-        transition: transform var(--portal-duration-ui-fast)
-            var(--portal-easing-standard);
-    }
-
     .viewport[data-animating='true'] .track {
         animation: portal-marquee-scroll var(--portal-marquee-duration) linear
             infinite;

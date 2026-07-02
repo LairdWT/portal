@@ -169,6 +169,43 @@
     transform: translateY(-50%) rotate(-45deg);
 }
 
+/* Universal disclosure toggle chip: a small beveled brushed-metal box with a
+ * dark chevron drawn from two borders - the TreeView twisty, promoted so any
+ * expand/collapse affordance can share the machined chip instead of a bare
+ * chevron. Size via --portal-toggle-chip-size (default 1rem); state via
+ * --portal-toggle-chip-rotate (-45deg = collapsed / points right, the default;
+ * 45deg = expanded / points down). The chip is static; only the chevron
+ * rotates, and that rotation is reduced-motion gated. */
+.toggleChip {
+    composes: beveled;
+    position: relative;
+    inline-size: var(--portal-toggle-chip-size, var(--portal-space-4));
+    block-size: var(--portal-toggle-chip-size, var(--portal-space-4));
+    border-radius: var(--portal-bevel-1);
+    background: var(--portal-gradient-metal);
+}
+
+.toggleChip::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    inline-size: var(--portal-space-2);
+    block-size: var(--portal-space-2);
+    border-inline-end: var(--portal-border-thickness-thin) solid
+        var(--portal-color-bg-0);
+    border-block-end: var(--portal-border-thickness-thin) solid
+        var(--portal-color-bg-0);
+    transform: rotate(var(--portal-toggle-chip-rotate, -45deg));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .toggleChip::after {
+        transition: transform var(--portal-duration-ui-fast)
+            var(--portal-easing-standard);
+    }
+}
+
 /* Token-drawn disclosure chevron (a corner of two borders on currentColor).
  * Points down by default (expanded); rotate via --portal-chevron-rotate (e.g.
  * -45deg for a collapsed/right state). Size via --portal-chevron-size (default

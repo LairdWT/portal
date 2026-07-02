@@ -10,7 +10,10 @@ import { EEnabledState } from '../../state/state';
 import { Panel } from '../Panel/Panel';
 import { EUiStatus } from '../tone';
 import { NumberStepper } from './NumberStepper';
-import { type NumberStepperProps } from './NumberStepper.types';
+import {
+    ENumberStepperFinish,
+    type NumberStepperProps,
+} from './NumberStepper.types';
 
 // A controlled wrapper the stories share: NumberStepper is controlled, so the
 // story owns the value and feeds it back through `value`, the pattern a consumer
@@ -63,6 +66,12 @@ export const Stepped: Story = {
 
 export const Disabled: Story = {
     args: { enabled: EEnabledState.Disabled },
+};
+
+// The opt-in brushed-metal key finish (the pre-1.6 default look); the standard
+// themed keys above are the default.
+export const MetalFinish: Story = {
+    args: { finish: ENumberStepperFinish.Metal },
 };
 
 // The universal danger status routes the seed through the tone scope.

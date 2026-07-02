@@ -67,6 +67,7 @@ exports[`public barrel value exports > matches the frozen export-name inventory 
   "EMenuNodeKind",
   "EMenuOrientation",
   "ENavItemState",
+  "ENumberStepperFinish",
   "EPaginationEdge",
   "EPanelElevation",
   "EPopoverPlacement",

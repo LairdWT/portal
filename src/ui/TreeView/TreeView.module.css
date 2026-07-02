@@ -147,41 +147,15 @@
     cursor: not-allowed;
 }
 
-/* The machined chip: a beveled brushed-metal box (consuming the shared metal
- * gradient at small scale, density-appropriate trim) with a chevron drawn from
- * two borders. The chip is static; only the chevron rotates on expand. */
+/* The machined chip is the shared universal toggle chip (surfaces.module.css):
+ * TreeView is its reference consumer. The chip is static; only the chevron
+ * rotates on expand, driven by the shared rotate knob. */
 .twistyMark {
-    composes: beveled from '../../theme/surfaces.module.css';
-    position: relative;
-    inline-size: var(--portal-space-4);
-    block-size: var(--portal-space-4);
-    border-radius: var(--portal-bevel-1);
-    background: var(--portal-gradient-metal);
+    composes: toggleChip from '../../theme/surfaces.module.css';
 }
 
-.twistyMark::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    margin: auto;
-    inline-size: var(--portal-space-2);
-    block-size: var(--portal-space-2);
-    border-inline-end: var(--portal-border-thickness-thin) solid
-        var(--portal-color-bg-0);
-    border-block-end: var(--portal-border-thickness-thin) solid
-        var(--portal-color-bg-0);
-    transform: rotate(-45deg);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-    .twistyMark::after {
-        transition: transform var(--portal-duration-ui-fast)
-            var(--portal-easing-standard);
-    }
-}
-
-.twisty[data-state='expanded'] .twistyMark::after {
-    transform: rotate(45deg);
+.twisty[data-state='expanded'] .twistyMark {
+    --portal-toggle-chip-rotate: 45deg;
 }
 
 /* The leaf marker shares the twisty column width so labels align, and renders a
