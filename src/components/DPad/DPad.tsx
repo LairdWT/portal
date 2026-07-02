@@ -1,4 +1,5 @@
 import type {
+    CSSProperties,
     Dispatch,
     FocusEvent as ReactFocusEvent,
     KeyboardEvent as ReactKeyboardEvent,
@@ -27,6 +28,27 @@ import { useTimeProvider } from '../../react/TimeProviderContext';
 import { EEnabledState } from '../../state/state';
 import styles from './DPad.module.css';
 import { type DPadProps, EDpadDirection, EDpadMode } from './DPad.types';
+import {
+    type DpadGeometry,
+    dpadGeometry,
+    type DpadKeyGeometry,
+} from './dpadGeometry';
+
+// The cross has one static shape; compute its clip polygons once.
+const GEOMETRY: DpadGeometry = dpadGeometry();
+
+// Per-key custom properties driving the CSS geometry (key silhouette, rim
+// inset face, glyph anchor). String-typed so the computed keys satisfy the
+// CSSProperties index signature - the RadialCore pattern.
+const CLIP_PROPERTY: string = '--dpad-clip';
+const FACE_CLIP_PROPERTY: string = '--dpad-face-clip';
+const ANCHOR_X_PROPERTY: string = '--dpad-anchor-x';
+const ANCHOR_Y_PROPERTY: string = '--dpad-anchor-y';
+
+const CAP_STYLE: CSSProperties = {
+    [CLIP_PROPERTY]: GEOMETRY.capClipPath,
+    [FACE_CLIP_PROPERTY]: GEOMETRY.capFaceClipPath,
+};
 
 // Radial dead zone handed to usePointerControl, which rescales raw magnitude
 // from [POINTER_DEAD_ZONE, 1] onto [0, 1] BEFORE any value reaches
@@ -205,7 +227,7 @@ function parseDpadDirection(value: string | undefined): EDpadDirection | null {
 
 export function DPad({
     label,
-    mode = EDpadMode.EightWay,
+    mode = EDpadMode.FourWay,
     enabled,
     onDirectionChange,
     onSignal,
@@ -433,12 +455,28 @@ export function DPad({
                 onPointerUp={onPointerUp}
                 onPointerCancel={onPointerCancel}
             />
-            {children.map(
-                (childDirection: EDpadDirection): ReactElement => (
+            <span className={styles.cap} style={CAP_STYLE} aria-hidden="true" />
+            {children.map((childDirection: EDpadDirection): ReactElement | null => {
+                const key: DpadKeyGeometry | undefined =
+                    GEOMETRY.keys[childDirection];
+                if (key === undefined) {
+                    // Unreachable: every operable direction has a key
+                    // shape. Guarded so a geometry regression can never
+                    // render an unclipped pad-sized button.
+                    return null;
+                }
+                const keyStyle: CSSProperties = {
+                    [CLIP_PROPERTY]: key.clipPath,
+                    [FACE_CLIP_PROPERTY]: key.faceClipPath,
+                    [ANCHOR_X_PROPERTY]: key.anchorX,
+                    [ANCHOR_Y_PROPERTY]: key.anchorY,
+                };
+                return (
                     <button
                         key={childDirection}
                         type="button"
                         className={styles.segment}
+                        style={keyStyle}
                         aria-label={DIRECTION_LABELS[childDirection]}
                         aria-pressed={direction === childDirection}
                         disabled={isDisabled}
@@ -447,8 +485,8 @@ export function DPad({
                         onKeyDown={handleChildKeyDown}
                         onKeyUp={handleChildKeyUp}
                     />
-                ),
-            )}
+                );
+            })}
         </div>
     );
 }

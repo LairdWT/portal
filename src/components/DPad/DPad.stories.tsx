@@ -24,7 +24,6 @@ const meta: Meta<typeof DPad> = {
     component: DPad,
     args: {
         label: 'Direction pad',
-        mode: EDpadMode.EightWay,
         enabled: EEnabledState.Enabled,
     },
 };
@@ -33,10 +32,11 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
+// The four-button cross is the DPad's default form.
 export const Default: Story = {};
 
-export const FourWay: Story = {
-    args: { mode: EDpadMode.FourWay },
+export const EightWay: Story = {
+    args: { mode: EDpadMode.EightWay },
 };
 
 export const Disabled: Story = {

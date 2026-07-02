@@ -7,9 +7,25 @@
 // the entrance-motion vector. The hub is the matching flat-top N-gon (square
 // hub for 4 wedges, hexagon for 6, octagon for 8) - the exact shape of the
 // ring's hole, so the moat between them is uniform - split into 1, 2
-// (vertical seam), or 4 (2x2) action cells. Kept separate so the math is unit
-// testable on its own and shared byte-for-byte between the menu and
-// controller variants.
+// (vertical seam), or 4 (2x2) action cells. The polygon primitives live in
+// the shared ui/polygonMath module (the DPad cross reuses them); this module
+// owns only the radial-specific shapes and constants, kept unit testable on
+// their own and shared byte-for-byte between the menu and controller
+// variants.
+
+import {
+    clipPolygonToHalfPlane,
+    formatCoordinate,
+    formatPercent,
+    insetConvexPolygon,
+    offsetPolygonEdges,
+    type Point,
+    polarPoint,
+    polygonAreaCentroid,
+    polygonPath,
+    RADIANS_PER_DEGREE,
+    roundCoordinate,
+} from '../polygonMath';
 
 // Supported polygon side counts. A radial has one section wedge per edge, so
 // the side count is also the maximum section count. Modeled as a numeric
@@ -41,7 +57,7 @@ export type RadialHubCell = Readonly<{
     anchorY: string;
 }>;
 
-// The center hub: the chamfered N-gon outline (the rim silhouette), the
+// The center hub: the hole-matching N-gon outline (the rim silhouette), the
 // rim-inset action cells, and the hub box size as a fraction of the panel.
 // A count of 0 still returns one cell - the non-interactive center panel
 // face.
@@ -51,21 +67,8 @@ export type RadialHubGeometry = Readonly<{
     sizeFraction: string;
 }>;
 
-// An x/y pair in unit space: the box center is the origin and 1 is half the
-// box size, so a point converts to percent as 50 + value * 50.
-type Point = Readonly<{ x: number; y: number }>;
-
-// A directed offset edge used while insetting polygons.
-type OffsetEdge = Readonly<{ origin: Point; direction: Point }>;
-
-// The clipping axis for the hub cell splits.
-type ClipAxis = 'x' | 'y';
-
 // The full turn in degrees. Named so the angle step is not a bare 360 literal.
 const FULL_TURN_DEGREES: number = 360;
-
-// Degrees-to-radians factor for the polar conversions below.
-const RADIANS_PER_DEGREE: number = Math.PI / 180;
 
 // Outer N-gon circumradius as a fraction of the half-panel. Slightly inside
 // 1 so the wedge tips never touch the panel edge and the hover/focus glow has
@@ -75,10 +78,9 @@ const OUTER_RADIUS_FRACTION: number = 0.98;
 // Inner N-gon (hub hole) circumradius per side count, as a fraction of the
 // half-panel. The hub is the SAME flat-top N-gon as the hole, so their edges
 // are parallel and the moat between them is uniform by construction; each
-// value places the hole edge one moat-width outside the hub edge at the
-// panel's minimum size (hub apothem + moat, divided by cos(step/2)). The
-// square hub needs the largest hole because a square's apothem is the
-// smallest fraction of its circumradius.
+// value is pulled in to the limit where a 2x2 hub cell still clears the 3rem
+// touch floor at the panel's minimum size (the hexagon letterboxes
+// vertically, so its hole cannot shrink as far).
 const INNER_RADIUS_FRACTION: Readonly<Record<RadialSides, number>> = {
     4: 0.49,
     6: 0.39,
@@ -114,14 +116,6 @@ const HUB_SEAM_HALF_FRACTION: number = 0.02;
 // The hub caps at a 2x2 grid of cells.
 const MAX_HUB_CELLS: number = 4;
 
-// Rounding scale for emitted coordinates (three decimals), so the generated
-// CSS strings stay short and deterministic.
-const COORDINATE_PRECISION: number = 1000;
-
-// Guard for parallel-line intersection; adjacent polygon edges are never
-// parallel, so this only defends against degenerate inputs.
-const PARALLEL_EPSILON: number = 1e-9;
-
 // Normalizes an arbitrary runtime side count onto the supported geometry.
 // The compile-time type already restricts `sides` to 4 | 6 | 8, but values
 // can arrive from untyped surfaces (Storybook controls, JS consumers); an
@@ -138,201 +132,6 @@ export function resolveRadialSides(sides: number): RadialSides {
         return 6;
     }
     return 8;
-}
-
-// Point at `radius` in the direction `angleDegrees`, measured clockwise from
-// straight up (screen coordinates: +y is down), matching the section-0-at-top
-// convention.
-function polarPoint(radius: number, angleDegrees: number): Point {
-    const radians: number = angleDegrees * RADIANS_PER_DEGREE;
-    return {
-        x: radius * Math.sin(radians),
-        y: -radius * Math.cos(radians),
-    };
-}
-
-// Rounds to the emitted precision and normalizes negative zero so the
-// generated strings never carry a cosmetic minus sign.
-function roundCoordinate(value: number): number {
-    const rounded: number =
-        Math.round(value * COORDINATE_PRECISION) / COORDINATE_PRECISION;
-    if (rounded === 0) {
-        return 0;
-    }
-    return rounded;
-}
-
-// Unit-space coordinate (-1..1) to a percent string of the box (0..100%).
-function formatCoordinate(value: number): string {
-    const HALF_PERCENT: number = 50;
-    return `${String(roundCoordinate(HALF_PERCENT + value * HALF_PERCENT))}%`;
-}
-
-// A value already expressed in percent units (e.g. the entrance offset) to a
-// percent string.
-function formatPercent(value: number): string {
-    return `${String(roundCoordinate(value))}%`;
-}
-
-function polygonPath(points: readonly Point[]): string {
-    const coordinates: string = points
-        .map(
-            (point: Point): string =>
-                `${formatCoordinate(point.x)} ${formatCoordinate(point.y)}`,
-        )
-        .join(', ');
-    return `polygon(${coordinates})`;
-}
-
-// Vertex-average centroid: used only to orient the inward normals while
-// offsetting edges (any interior point works for that).
-function polygonCentroid(points: readonly Point[]): Point {
-    const count: number = points.length;
-    if (count === 0) {
-        return { x: 0, y: 0 };
-    }
-    return {
-        x:
-            points.reduce((sum: number, point: Point): number => sum + point.x, 0) /
-            count,
-        y:
-            points.reduce((sum: number, point: Point): number => sum + point.y, 0) /
-            count,
-    };
-}
-
-// Shoelace (area-weighted) centroid: the true visual center of a polygon.
-// Glyph anchors use this, NOT the vertex average - a clipped cell has more
-// vertices along its cut edges, so averaging vertices would drag the anchor
-// toward them and the glyph would sit off the perceived middle of the cell.
-function polygonAreaCentroid(points: readonly Point[]): Point {
-    const count: number = points.length;
-    let doubleArea: number = 0;
-    let momentX: number = 0;
-    let momentY: number = 0;
-    for (let index: number = 0; index < count; index += 1) {
-        const current: Point = points[index] ?? { x: 0, y: 0 };
-        const next: Point = points[(index + 1) % count] ?? current;
-        const cross: number = current.x * next.y - next.x * current.y;
-        doubleArea += cross;
-        momentX += (current.x + next.x) * cross;
-        momentY += (current.y + next.y) * cross;
-    }
-    if (Math.abs(doubleArea) < PARALLEL_EPSILON) {
-        return polygonCentroid(points);
-    }
-    return {
-        x: momentX / (3 * doubleArea),
-        y: momentY / (3 * doubleArea),
-    };
-}
-
-// Intersection of two offset edges treated as infinite lines. The parallel
-// fall-through returns the second edge's origin: adjacent polygon edges are
-// never parallel, so this branch only defends degenerate inputs.
-function intersectEdges(first: OffsetEdge, second: OffsetEdge): Point {
-    const cross: number =
-        first.direction.x * second.direction.y -
-        first.direction.y * second.direction.x;
-    if (Math.abs(cross) < PARALLEL_EPSILON) {
-        return second.origin;
-    }
-    const deltaX: number = second.origin.x - first.origin.x;
-    const deltaY: number = second.origin.y - first.origin.y;
-    const along: number =
-        (deltaX * second.direction.y - deltaY * second.direction.x) / cross;
-    return {
-        x: first.origin.x + along * first.direction.x,
-        y: first.origin.y + along * first.direction.y,
-    };
-}
-
-// Offsets each polygon edge inward (toward the centroid) by its own distance
-// and re-intersects adjacent edges to rebuild the vertices. Winding-agnostic:
-// the inward normal is chosen per edge by testing against the centroid. An
-// offset of 0 leaves that edge's line untouched, which is how the wedge seams
-// move only the side edges while the inner/outer chords stay on the ring
-// boundaries.
-function offsetPolygonEdges(
-    points: readonly Point[],
-    offsets: readonly number[],
-): readonly Point[] {
-    const count: number = points.length;
-    const centroid: Point = polygonCentroid(points);
-    const edges: readonly OffsetEdge[] = points.map(
-        (point: Point, index: number): OffsetEdge => {
-            const next: Point = points[(index + 1) % count] ?? point;
-            const offset: number = offsets[index] ?? 0;
-            const edgeX: number = next.x - point.x;
-            const edgeY: number = next.y - point.y;
-            const length: number = Math.hypot(edgeX, edgeY);
-            const direction: Point = { x: edgeX / length, y: edgeY / length };
-            const inwardX: number = -direction.y;
-            const inwardY: number = direction.x;
-            const towardCentroid: number =
-                (centroid.x - point.x) * inwardX + (centroid.y - point.y) * inwardY;
-            const sign: number = towardCentroid < 0 ? -1 : 1;
-            return {
-                origin: {
-                    x: point.x + inwardX * sign * offset,
-                    y: point.y + inwardY * sign * offset,
-                },
-                direction,
-            };
-        },
-    );
-    return edges.map((edge: OffsetEdge, index: number): Point => {
-        const previous: OffsetEdge = edges[(index + count - 1) % count] ?? edge;
-        return intersectEdges(previous, edge);
-    });
-}
-
-// Uniform inset: every edge moves inward by the same distance.
-function insetConvexPolygon(
-    points: readonly Point[],
-    inset: number,
-): readonly Point[] {
-    return offsetPolygonEdges(
-        points,
-        points.map((): number => inset),
-    );
-}
-
-// Sutherland-Hodgman clip of a convex polygon against one axis-aligned
-// half-plane; used to split the hub face into its action cells.
-function clipPolygonToHalfPlane(
-    points: readonly Point[],
-    axis: ClipAxis,
-    limit: number,
-    keepLess: boolean,
-): readonly Point[] {
-    const count: number = points.length;
-    const result: Point[] = [];
-    for (let index: number = 0; index < count; index += 1) {
-        const current: Point = points[index] ?? { x: 0, y: 0 };
-        const next: Point = points[(index + 1) % count] ?? current;
-        const currentValue: number = axis === 'x' ? current.x : current.y;
-        const nextValue: number = axis === 'x' ? next.x : next.y;
-        const currentInside: boolean = keepLess
-            ? currentValue <= limit
-            : currentValue >= limit;
-        const nextInside: boolean = keepLess
-            ? nextValue <= limit
-            : nextValue >= limit;
-        if (currentInside) {
-            result.push(current);
-        }
-        if (currentInside === nextInside) {
-            continue;
-        }
-        const towardLimit: number =
-            (limit - currentValue) / (nextValue - currentValue);
-        result.push({
-            x: current.x + (next.x - current.x) * towardLimit,
-            y: current.y + (next.y - current.y) * towardLimit,
-        });
-    }
-    return result;
 }
 
 // The per-section wedge geometry for a flat-top N-gon with section 0 at the

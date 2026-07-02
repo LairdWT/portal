@@ -1,14 +1,26 @@
 /*
  * DPad. A cross-shaped digital directional pad modelled as a role="group"
- * container with one <button> per operable direction. Cardinal buttons are
- * positioned over a square base using logical properties and intrinsic sizing;
- * EightWay adds four diagonal buttons at the corners. The held direction is
- * reflected through data-direction on the base and aria-pressed plus
- * data-active on each button; no live values are written through the DOM.
+ * container with one <button> per operable direction. The pad is a square
+ * positioning field; every key spans the WHOLE pad and is cut down to its
+ * shape by the clip-path polygons the component computes (dpadGeometry.ts):
+ * four chamfered cardinal arms around a passive beveled center cap - the
+ * classic plus cross - plus four corner keys in EightWay. The machined
+ * language matches the radial controls: the key's own background shows
+ * through the rim (the sliver between --dpad-clip and the inset
+ * --dpad-face-clip) as a themed lit edge, the ::before face is brushed metal
+ * recessed by a center vignette (Tier 1), and the ::after glyph is a dark
+ * engraved triangle anchored on the key's visual center. The clip polygons
+ * are physical coordinates, so the anchors use physical top/left (the Window
+ * precedent): the cross must not mirror under dir=rtl.
+ *
+ * Behavior is unchanged: the transparent pointer surface owns the octant
+ * gesture (the buttons set pointer-events: none and stay the keyboard and
+ * assistive-tech surface); the held direction is reflected through
+ * data-direction on the group and aria-pressed / data-active per button. All
+ * motion is transitions on transform/filter only, reduced-motion gated.
  */
 
 .base {
-    composes: beveled metalEdge from '../../theme/surfaces.module.css';
     composes: toneScope from '../../ui/tone.module.css';
 
     --dpad-size: clamp(
@@ -16,7 +28,25 @@
         28vmin,
         calc(var(--portal-touch-target-max) * 3)
     );
-    --dpad-segment-size: var(--portal-touch-target-min);
+
+    /* The themed machined rim shared with the radial family, so the cross
+     * reads as the same lit frame (highlight/tone ramp - not a metal
+     * outline). */
+    --dpad-rim: linear-gradient(
+        155deg,
+        var(--portal-color-accent-highlight),
+        var(--portal-tone-edge) 45%,
+        var(--portal-tone-accent) 85%,
+        var(--portal-color-accent-highlight)
+    );
+
+    /* Center vignette over the brushed faces: because every key shares the
+     * pad box, one radial gradient dishes the whole cross. */
+    --dpad-face-vignette: radial-gradient(
+        circle closest-side,
+        color-mix(in oklab, var(--portal-color-bg-0) 32%, transparent) 26%,
+        transparent 72%
+    );
     --dpad-glyph-size: var(--portal-space-4);
 
     position: relative;
@@ -26,7 +56,11 @@
     min-inline-size: calc(var(--portal-touch-target-min) * 3);
     min-block-size: calc(var(--portal-touch-target-min) * 3);
     padding: 0;
-    border-radius: var(--portal-bevel-3);
+    filter: drop-shadow(0 0 var(--portal-space-3) var(--portal-tone-glow))
+        drop-shadow(
+            0 var(--portal-space-1) var(--portal-space-3)
+                color-mix(in oklab, var(--portal-color-bg-0) 60%, transparent)
+        );
     appearance: none;
     touch-action: none;
     user-select: none;
@@ -46,42 +80,79 @@
     touch-action: none;
 }
 
-.segment {
-    composes: beveled from '../../theme/surfaces.module.css';
+/* The passive beveled center cap: the themed face at the pivot of the cross,
+ * matching the radial hub panel. Decorative - the gesture surface beneath
+ * owns pointer input. */
+.cap {
     position: absolute;
-    inline-size: var(--dpad-segment-size);
-    block-size: var(--dpad-segment-size);
-    min-inline-size: var(--portal-touch-target-min);
-    min-block-size: var(--portal-touch-target-min);
-    padding: 0;
-    border: var(--portal-border-thickness-thin) solid transparent;
-    border-radius: var(--portal-bevel-1);
-
-    /* A solid brushed-metal key face inside the shared metal ring, matching
-     * BevelButton, so each direction reads as an action key carrying its glyph
-     * rather than a hollow metal outline. */
-    background:
-        var(--portal-gradient-metal) padding-box,
-        var(--portal-gradient-metal-ring) border-box;
-    color: var(--portal-color-text-0);
-    appearance: none;
-    transition: background-color var(--portal-duration-frame-fast)
-        var(--portal-easing-standard);
-
-    /*
-     * Pointer, touch, and mouse input passes through the buttons to the group,
-     * which owns the octant gesture; the buttons are the keyboard and
-     * assistive-tech surface only. This also removes the disabled-button
-     * pointer-dead-zone hazard, since the buttons never handle pointer input.
-     */
+    inset: 0;
+    clip-path: var(--dpad-clip);
+    background: var(--dpad-rim);
     pointer-events: none;
 }
 
+.cap::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    clip-path: var(--dpad-face-clip);
+    background:
+        radial-gradient(
+            circle closest-side at 50% 42%,
+            color-mix(in oklab, var(--portal-tone-accent) 16%, transparent),
+            transparent 75%
+        ),
+        linear-gradient(
+            165deg,
+            var(--portal-tone-fill),
+            color-mix(
+                in oklab,
+                var(--portal-tone-fill) 45%,
+                var(--portal-color-bg-0)
+            )
+        );
+}
+
+/* One key per operable direction. The button covers the full pad and the
+ * clip-path cuts it down to its arm / corner shape; the transform origin
+ * sits on the key's own visual center so the active recess lands in place.
+ *
+ * Pointer, touch, and mouse input passes through the buttons to the group,
+ * which owns the octant gesture; the buttons are the keyboard and
+ * assistive-tech surface only. This also removes the disabled-button
+ * pointer-dead-zone hazard, since the buttons never handle pointer input. */
+.segment {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    padding: 0;
+    border: none;
+    appearance: none;
+    clip-path: var(--dpad-clip);
+    transform-origin: var(--dpad-anchor-x) var(--dpad-anchor-y);
+    background: var(--dpad-rim);
+    color: var(--portal-color-bg-0);
+    pointer-events: none;
+}
+
+/* The brushed-metal key face inside the themed rim, recessed by the shared
+ * center vignette - the Tier-1 machined key, matching RadialPad. */
+.segment::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    clip-path: var(--dpad-face-clip);
+    background: var(--dpad-face-vignette), var(--portal-gradient-metal);
+}
+
+/* The engraved directional triangle, pinned to the key's visual center.
+ * Physical top/left on purpose: the clip polygons are physical, so the
+ * anchor must not flip under dir=rtl. */
 .segment::after {
     content: '';
     position: absolute;
-    inset-inline-start: 50%;
-    inset-block-start: 50%;
+    top: var(--dpad-anchor-y);
+    left: var(--dpad-anchor-x);
     inline-size: var(--dpad-glyph-size);
     block-size: calc(var(--dpad-glyph-size) * var(--portal-ratio-equilateral));
     background-color: var(--portal-color-bg-0);
@@ -90,82 +161,69 @@
     pointer-events: none;
 }
 
+/* Outlines cannot trace a clip-path, so keyboard focus swaps the rim to the
+ * focus color and adds a silhouette glow - the shared clipped-shape focus
+ * idiom. */
 .segment:focus-visible {
-    outline: var(--portal-border-thickness-thin) solid var(--portal-color-focus);
-    outline-offset: var(--portal-space-1);
+    outline: none;
+    background: var(--portal-color-focus);
+    filter: drop-shadow(0 0 var(--portal-space-2) var(--portal-color-focus));
 }
 
 .segment[data-segment='up'] {
     --dpad-glyph-rotate: 0deg;
-
-    inset-block-start: var(--portal-space-2);
-    inset-inline-start: 50%;
-    transform: translateX(-50%);
 }
 
 .segment[data-segment='down'] {
     --dpad-glyph-rotate: 180deg;
-
-    inset-block-end: var(--portal-space-2);
-    inset-inline-start: 50%;
-    transform: translateX(-50%);
 }
 
 .segment[data-segment='left'] {
     --dpad-glyph-rotate: 270deg;
-
-    inset-block-start: 50%;
-    inset-inline-start: var(--portal-space-2);
-    transform: translateY(-50%);
 }
 
 .segment[data-segment='right'] {
     --dpad-glyph-rotate: 90deg;
-
-    inset-block-start: 50%;
-    inset-inline-end: var(--portal-space-2);
-    transform: translateY(-50%);
 }
 
 .segment[data-segment='up-left'] {
     --dpad-glyph-rotate: 315deg;
-
-    inset-block-start: var(--portal-space-2);
-    inset-inline-start: var(--portal-space-2);
 }
 
 .segment[data-segment='up-right'] {
     --dpad-glyph-rotate: 45deg;
-
-    inset-block-start: var(--portal-space-2);
-    inset-inline-end: var(--portal-space-2);
 }
 
 .segment[data-segment='down-left'] {
     --dpad-glyph-rotate: 225deg;
-
-    inset-block-end: var(--portal-space-2);
-    inset-inline-start: var(--portal-space-2);
 }
 
 .segment[data-segment='down-right'] {
     --dpad-glyph-rotate: 135deg;
-
-    inset-block-end: var(--portal-space-2);
-    inset-inline-end: var(--portal-space-2);
 }
 
+/* A held direction recesses in place with a tone glow, its face washed with
+ * the tone fill over the metal - the radial press treatment. */
 .segment[data-active='true'] {
-    border-color: transparent;
-    background-image:
-        linear-gradient(var(--portal-tone-fill), var(--portal-tone-fill))
-            padding-box,
-        var(--portal-gradient-metal-ring) border-box;
-    box-shadow: 0 0 var(--portal-space-2) var(--portal-tone-glow);
+    transform: scale(var(--portal-press-scale));
+    filter: drop-shadow(0 0 var(--portal-space-2) var(--portal-tone-glow-strong));
 }
 
-@media (prefers-reduced-motion: reduce) {
+.segment[data-active='true']::before {
+    background:
+        var(--dpad-face-vignette),
+        linear-gradient(
+            color-mix(in oklab, var(--portal-tone-fill) 55%, transparent),
+            color-mix(in oklab, var(--portal-tone-fill) 55%, transparent)
+        ),
+        var(--portal-gradient-metal);
+}
+
+@media (prefers-reduced-motion: no-preference) {
     .segment {
-        transition: none;
+        transition:
+            transform var(--portal-duration-frame-fast)
+                var(--portal-easing-standard),
+            filter var(--portal-duration-frame-fast) var(--portal-easing-standard);
     }
 }
