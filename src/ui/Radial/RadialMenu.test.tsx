@@ -39,7 +39,7 @@ afterEach((): void => {
 });
 
 describe('RadialMenu', (): void => {
-    it('renders nothing while closed', (): void => {
+    it('defaults to the collapsible form: closed renders the persistent toggle', (): void => {
         render(
             <RadialMenu
                 open={false}
@@ -50,6 +50,25 @@ describe('RadialMenu', (): void => {
             />,
         );
         expect(screen.queryByRole('dialog')).toBeNull();
+        const toggle: HTMLElement = screen.getByRole('button', {
+            name: 'Actions',
+        });
+        expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    });
+
+    it('renders nothing while closed in the overlay form', (): void => {
+        render(
+            <RadialMenu
+                open={false}
+                onClose={noop}
+                label="Actions"
+                items={ITEMS}
+                onSelect={noop}
+                collapsible={false}
+            />,
+        );
+        expect(screen.queryByRole('dialog')).toBeNull();
+        expect(screen.queryByRole('button')).toBeNull();
     });
 
     it('renders a labelled modal with one section button per side', (): void => {
@@ -61,6 +80,7 @@ describe('RadialMenu', (): void => {
                 items={ITEMS}
                 onSelect={noop}
                 sides={4}
+                collapsible={false}
             />,
         );
         const dialog: HTMLElement = screen.getByRole('dialog', {
@@ -155,6 +175,7 @@ describe('RadialMenu', (): void => {
                 items={ITEMS}
                 onSelect={noop}
                 sides={4}
+                collapsible={false}
             />,
         );
         const dialog: HTMLElement = screen.getByRole('dialog', {
@@ -170,6 +191,7 @@ describe('RadialMenu', (): void => {
                 items={ITEMS}
                 onSelect={noop}
                 sides={4}
+                collapsible={false}
             />,
         );
         // Still mounted: the wedges play the inward collapse first.
@@ -241,7 +263,7 @@ describe('RadialMenu', (): void => {
         ).toBeNull();
     });
 
-    it('renders no hub buttons when no center actions are requested', (): void => {
+    it('renders no hub buttons when no center actions are requested (overlay)', (): void => {
         render(
             <RadialMenu
                 open
@@ -250,6 +272,7 @@ describe('RadialMenu', (): void => {
                 items={ITEMS}
                 onSelect={noop}
                 sides={4}
+                collapsible={false}
             />,
         );
         // Only the four section wedges are interactive; the 0-action hub is a
@@ -380,6 +403,46 @@ describe('RadialMenu', (): void => {
         expect(toggle.getAttribute('aria-expanded')).toBe('true');
         await user.click(toggle);
         expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('renders a custom icon and text label on the collapsed toggle', (): void => {
+        render(
+            <RadialMenu
+                open={false}
+                onOpen={noop}
+                onClose={noop}
+                label="Quick actions"
+                items={ITEMS}
+                onSelect={noop}
+                toggleIcon={<span data-testid="toggle-gear" />}
+                toggleText="Actions"
+            />,
+        );
+        const toggle: HTMLElement = screen.getByRole('button', {
+            name: 'Quick actions',
+        });
+        expect(screen.getByTestId('toggle-gear')).toBeInTheDocument();
+        expect(toggle.textContent).toContain('Actions');
+    });
+
+    it('falls back to the drawn plus mark when no toggle content is supplied', (): void => {
+        render(
+            <RadialMenu
+                open={false}
+                onOpen={noop}
+                onClose={noop}
+                label="Quick actions"
+                items={ITEMS}
+                onSelect={noop}
+            />,
+        );
+        // The default mark is token-drawn (no text) and flags its expanded
+        // state for the rotation styling.
+        const toggle: HTMLElement = screen.getByRole('button', {
+            name: 'Quick actions',
+        });
+        expect(toggle.textContent).toBe('');
+        expect(toggle.querySelector('[data-expanded="false"]')).not.toBeNull();
     });
 
     it('dismisses on the Escape key', async (): Promise<void> => {

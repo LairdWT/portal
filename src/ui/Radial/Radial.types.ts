@@ -53,9 +53,9 @@ export type ERadialVariant = (typeof ERadialVariant)[keyof typeof ERadialVariant
 // animation and reports raw activations) and each public wrapper maps its own
 // props onto this shape and supplies the activation behavior. `collapsible`
 // switches the core from a portaled modal overlay to an INLINE disclosure: the
-// hub stays mounted as the collapsed state (a toggle button wearing the shared
-// toggle chip) and only the wedges fan out/collapse; `onOpen` is the toggle's
-// expand request.
+// hub stays mounted as the collapsed state - a themed toggle button marked by
+// a tone plus, or by the optional `toggleIcon` / `toggleText` content - and
+// only the wedges fan out/collapse; `onOpen` is the toggle's expand request.
 export type RadialCoreProps = Readonly<{
     open: boolean;
     onClose: () => void;
@@ -66,6 +66,8 @@ export type RadialCoreProps = Readonly<{
     centerActions: readonly ERadialAction[];
     variant: ERadialVariant;
     collapsible: boolean;
+    toggleIcon?: ReactNode | undefined;
+    toggleText?: string | undefined;
     onActivateSection: (item: RadialItem, index: number) => void;
     onActivateAction: (action: ERadialAction) => void;
     disabled: boolean;
@@ -81,11 +83,12 @@ export type RadialCoreProps = Readonly<{
 // actions page through them (wrapping) with the wedge entrance replaying per
 // page; onCenterAction still fires for every action press.
 //
-// Collapsible: by default the menu is a portaled MODAL overlay. Set
-// `collapsible` for the inline disclosure form - the center hub stays mounted
-// as the collapsed state (a toggle button named by `label`, wearing the shared
-// toggle chip) and the wedges animate out around it on open and collapse back
-// into it on close; `onOpen` receives the toggle's expand request.
+// Collapsible: the DEFAULT form. The menu is an inline disclosure - the center
+// hub stays mounted as the collapsed state (a themed toggle button named by
+// `label`, marked by a tone plus or by the optional `toggleIcon` /
+// `toggleText` content) and the wedges animate out around it on open and
+// collapse back into it on close; `onOpen` receives the toggle's expand
+// request. Set `collapsible` to false for the portaled MODAL overlay form.
 export type RadialMenuProps = Readonly<{
     open: boolean;
     onClose: () => void;
@@ -100,5 +103,10 @@ export type RadialMenuProps = Readonly<{
     // keep it open, e.g. while paging through pages with the center next/previous.
     closeOnSelect?: boolean;
     collapsible?: boolean;
+    // Optional visible content for the collapsed toggle face: a decorative
+    // icon and/or a short text label (either or both; the default is the
+    // drawn plus mark). `label` still names the toggle for assistive tech.
+    toggleIcon?: ReactNode;
+    toggleText?: string | undefined;
     tone?: string | undefined;
 }>;

@@ -8,6 +8,14 @@ based on Keep a Changelog, and the project follows Semantic Versioning with the
 
 ### Changed
 
+- BREAKING-lean: `RadialMenu` now DEFAULTS to the collapsible inline form -
+  the persistent themed hub toggle with the animated expand - and the
+  portaled modal overlay becomes the opt-in via `collapsible={false}`. The
+  prop surface is unchanged; only the default flipped (`RadialPad` still
+  pins the overlay-free controller form explicitly). The Storybook demos
+  follow: cancel-only is the default center hub (Previous/Next belong to
+  the paged story), a `FullHub` story keeps the 2x2 grid, and an `Overlay`
+  story demonstrates the modal form.
 - Collapsible RadialMenu rest state redesigned: the hub face itself is the
   toggle and stays on the theme ramp - its mark is now a themed tone-accent
   plus (rotating into the cancel-cross while open) instead of the metal
@@ -17,6 +25,10 @@ based on Keep a Changelog, and the project follows Semantic Versioning with the
   story now presents the default eight-sided wheel paging sixteen items
   (was a four-sided demo). `surfaces.module.css` `plusGlyph` gains size and
   weight knobs (defaults unchanged).
+- `RadialMenu.toggleIcon` / `RadialMenu.toggleText` (additive): optional
+  visible content for the collapsed toggle face - a decorative icon and/or
+  a short text label (either or both) replacing the default plus mark,
+  while `label` keeps naming the toggle for assistive tech.
 
 ### Added
 

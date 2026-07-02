@@ -546,6 +546,37 @@
     }
 }
 
+/* Consumer-supplied collapsed-toggle content: an optional icon and/or a short
+ * text label stacked on the hub face, replacing the default plus mark. The
+ * icon wears the same tone-accent bloom as the drawn symbols; the text stays
+ * on the primary text token for contrast and clips to the hub's room. */
+.hubToggleBody {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--portal-space-1);
+    inline-size: calc(var(--radial-size) * var(--radial-hub-fraction) * 0.72);
+    color: var(--portal-color-text-0);
+}
+
+.hubToggleIcon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--portal-tone-accent);
+    filter: drop-shadow(0 0 var(--portal-space-2) currentcolor);
+}
+
+.hubToggleText {
+    overflow: hidden;
+    max-inline-size: 100%;
+    font-size: var(--portal-size-text-sm);
+    font-weight: var(--portal-weight-label-medium);
+    letter-spacing: var(--portal-letter-spacing-wide);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 /* The symbol answers the pointer: it swells on hover and dips on press. */
 .panel .hubButton:hover:not(:disabled) .hubGlyphAnchor {
     transform: translate(-50%, -50%) scale(1.15);

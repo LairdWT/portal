@@ -125,6 +125,8 @@ export function RadialCore({
     centerActions,
     variant,
     collapsible,
+    toggleIcon,
+    toggleText,
     onActivateSection,
     onActivateAction,
     disabled,
@@ -395,7 +397,9 @@ export function RadialCore({
             >
                 {hubToggle ? (
                     // The collapsible open/close toggle: the whole hub face
-                    // is the button, wearing the shared toggle chip.
+                    // is the button. Its mark is the themed plus by default;
+                    // a consumer-supplied icon and/or short text label
+                    // replaces it (the button is still named by aria-label).
                     <button
                         type="button"
                         className={styles.hubButton}
@@ -410,10 +414,26 @@ export function RadialCore({
                         onClick={handleToggleClick}
                     >
                         <span className={styles.hubGlyphAnchor} aria-hidden="true">
-                            <span
-                                className={styles.hubToggleGlyph}
-                                data-expanded={open ? 'true' : 'false'}
-                            />
+                            {toggleIcon === undefined &&
+                            toggleText === undefined ? (
+                                <span
+                                    className={styles.hubToggleGlyph}
+                                    data-expanded={open ? 'true' : 'false'}
+                                />
+                            ) : (
+                                <span className={styles.hubToggleBody}>
+                                    {toggleIcon !== undefined ? (
+                                        <span className={styles.hubToggleIcon}>
+                                            {toggleIcon}
+                                        </span>
+                                    ) : null}
+                                    {toggleText !== undefined ? (
+                                        <span className={styles.hubToggleText}>
+                                            {toggleText}
+                                        </span>
+                                    ) : null}
+                                </span>
+                            )}
                         </span>
                     </button>
                 ) : null}

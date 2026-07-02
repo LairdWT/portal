@@ -2,6 +2,7 @@ import { type Meta, type StoryObj } from '@storybook/react-vite';
 import {
     type Dispatch,
     type ReactElement,
+    type ReactNode,
     type SetStateAction,
     useState,
 } from 'react';
@@ -77,9 +78,10 @@ const ICON_ITEMS: readonly RadialItem[] = [
     { id: 'wait', label: 'Wait', iconOnly: true, icon: shapeIcon('M4 4H20V20H4Z') },
 ];
 
-// A small controlled harness so each story is a real open/close radial: the
-// trigger opens it, selecting an item or cancelling closes it. Opened by default
-// so the story renders the radial for the visual and a11y (axe) gates.
+// A small controlled harness so each story is a real open/close radial in the
+// DEFAULT collapsible form: the persistent hub toggle opens it, selecting an
+// item or cancelling collapses it back to the hub. Opened by default so the
+// story renders the full ring for the visual and a11y (axe) gates.
 type DemoProps = Readonly<{
     sides: RadialSides;
     centerActions: readonly ERadialAction[];
@@ -100,17 +102,12 @@ function RadialMenuDemo({
         itemCount,
     );
     return (
-        <>
-            <button
-                type="button"
-                onClick={(): void => {
-                    setOpen(true);
-                }}
-            >
-                Open radial menu
-            </button>
+        <div style={{ padding: 'var(--portal-space-6, 2rem)' }}>
             <RadialMenu
                 open={open}
+                onOpen={(): void => {
+                    setOpen(true);
+                }}
                 onClose={(): void => {
                     setOpen(false);
                 }}
@@ -125,7 +122,7 @@ function RadialMenuDemo({
                     console.log('action', action);
                 }}
             />
-        </>
+        </div>
     );
 }
 
@@ -133,7 +130,9 @@ const meta: Meta<typeof RadialMenuDemo> = {
     title: 'UI/RadialMenu',
     component: RadialMenuDemo,
     parameters: { layout: 'fullscreen' },
-    args: { sides: 8, centerActions: CENTER_ACTIONS, itemCount: 8 },
+    // Cancel-only is the default hub: most menus just need the close
+    // affordance in the middle (Previous/Next belong to the paged story).
+    args: { sides: 8, centerActions: [ERadialAction.Cancel], itemCount: 8 },
     // `sides` is the RadialSides union, not a free number: the control offers
     // exactly the supported polygon counts (the component also normalizes any
     // out-of-range runtime value onto them).
@@ -156,7 +155,8 @@ export const Square: Story = {
     args: { sides: 4, itemCount: 4 },
 };
 
-// Center hub variants: no hub, a single confirm, and a confirm/cancel pair.
+// Center hub variants: no hub, a single confirm, a confirm/cancel pair, and
+// the full 2x2 action grid.
 export const NoCenterButtons: Story = {
     args: { centerActions: [] },
 };
@@ -169,14 +169,17 @@ export const ConfirmCancel: Story = {
     args: { centerActions: [ERadialAction.Confirm, ERadialAction.Cancel] },
 };
 
+export const FullHub: Story = {
+    args: { centerActions: CENTER_ACTIONS },
+};
+
 // Icon-only sections: each wedge is a pure glyph key (the label still names
-// it for assistive tech), around the split-vertical two-action hub.
+// it for assistive tech), around the default cancel hub.
 export const IconSections: Story = {
     args: {
         sides: 4,
         itemCount: 4,
         items: ICON_ITEMS,
-        centerActions: [ERadialAction.Confirm, ERadialAction.Cancel],
     },
 };
 
@@ -191,16 +194,25 @@ export const Paged: Story = {
     },
 };
 
-// The collapsible inline form: the hub itself is the themed open/close
-// toggle (a tone plus that rotates into a cross), the box grows from the
-// hub footprint to the full ring, and the wedges fan out around it in place.
-function CollapsibleRadialDemo(): ReactElement {
+// The rest state of the default collapsible form: the hub itself is the
+// themed open/close toggle (a tone plus that rotates into a cross), the box
+// grows from the hub footprint to the full ring, and the wedges fan out
+// around it in place. The optional toggle content swaps the plus for an icon
+// and/or a short text label.
+type CollapsedDemoProps = Readonly<{
+    toggleIcon?: ReactNode;
+    toggleText?: string | undefined;
+}>;
+
+function CollapsedRadialDemo({
+    toggleIcon,
+    toggleText,
+}: CollapsedDemoProps): ReactElement {
     const [open, setOpen]: [boolean, Dispatch<SetStateAction<boolean>>] =
         useState<boolean>(false);
     return (
         <div style={{ padding: 'var(--portal-space-6, 2rem)' }}>
             <RadialMenu
-                collapsible
                 open={open}
                 onOpen={(): void => {
                     setOpen(true);
@@ -211,7 +223,8 @@ function CollapsibleRadialDemo(): ReactElement {
                 label="Quick actions"
                 items={ACTION_ITEMS}
                 sides={8}
-                centerActions={[ERadialAction.Confirm, ERadialAction.Cancel]}
+                toggleIcon={toggleIcon}
+                toggleText={toggleText}
                 onSelect={(id: string): void => {
                     console.log('select', id);
                 }}
@@ -220,6 +233,56 @@ function CollapsibleRadialDemo(): ReactElement {
     );
 }
 
-export const Collapsible: Story = {
-    render: (): ReactElement => <CollapsibleRadialDemo />,
+export const Collapsed: Story = {
+    render: (): ReactElement => <CollapsedRadialDemo />,
+};
+
+export const CollapsedTextLabel: Story = {
+    render: (): ReactElement => <CollapsedRadialDemo toggleText="Actions" />,
+};
+
+export const CollapsedIconLabel: Story = {
+    render: (): ReactElement => (
+        <CollapsedRadialDemo
+            toggleIcon={shapeIcon('M12 2 22 12 12 22 2 12Z')}
+            toggleText="Battle"
+        />
+    ),
+};
+
+// The portaled modal overlay form (collapsible={false}): a trigger opens the
+// wheel over a dismissable backdrop, and closing unmounts it entirely.
+function OverlayRadialDemo(): ReactElement {
+    const [open, setOpen]: [boolean, Dispatch<SetStateAction<boolean>>] =
+        useState<boolean>(true);
+    return (
+        <>
+            <button
+                type="button"
+                onClick={(): void => {
+                    setOpen(true);
+                }}
+            >
+                Open radial menu
+            </button>
+            <RadialMenu
+                collapsible={false}
+                open={open}
+                onClose={(): void => {
+                    setOpen(false);
+                }}
+                label="Battle actions"
+                items={ACTION_ITEMS.slice(0, 8)}
+                sides={8}
+                centerActions={[ERadialAction.Cancel]}
+                onSelect={(id: string): void => {
+                    console.log('select', id);
+                }}
+            />
+        </>
+    );
+}
+
+export const Overlay: Story = {
+    render: (): ReactElement => <OverlayRadialDemo />,
 };

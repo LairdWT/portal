@@ -63,7 +63,8 @@ ESM enabled, and a TypeScript `moduleResolution` of `bundler`, `node16`, or
 
 Import components from the package root and load the stylesheet once at your
 application entry point. The flagship `RadialMenu` in a few lines - an
-octagonal action wheel with a confirm/cancel hub:
+octagonal action wheel that collapses to its own themed hub toggle (the
+default inline form) with a cancel key in the middle:
 
 ```tsx
 import { type ReactElement, useState } from 'react';
@@ -74,40 +75,37 @@ import '@laird-wt/portal/styles.css';
 export function Example(): ReactElement {
     const [open, setOpen] = useState(false);
     return (
-        <>
-            <button type="button" onClick={() => setOpen(true)}>
-                Battle actions
-            </button>
-            <RadialMenu
-                open={open}
-                onClose={() => setOpen(false)}
-                label="Battle actions"
-                sides={8}
-                items={[
-                    { id: 'attack', label: 'Attack' },
-                    { id: 'defend', label: 'Defend' },
-                    { id: 'item', label: 'Item' },
-                    { id: 'magic', label: 'Magic' },
-                    { id: 'talk', label: 'Talk' },
-                    { id: 'flee', label: 'Flee' },
-                    { id: 'wait', label: 'Wait' },
-                    { id: 'scan', label: 'Scan' },
-                ]}
-                centerActions={[ERadialAction.Confirm, ERadialAction.Cancel]}
-                onSelect={(id) => console.log('selected', id)}
-            />
-        </>
+        <RadialMenu
+            open={open}
+            onOpen={() => setOpen(true)}
+            onClose={() => setOpen(false)}
+            label="Battle actions"
+            sides={8}
+            items={[
+                { id: 'attack', label: 'Attack' },
+                { id: 'defend', label: 'Defend' },
+                { id: 'item', label: 'Item' },
+                { id: 'magic', label: 'Magic' },
+                { id: 'talk', label: 'Talk' },
+                { id: 'flee', label: 'Flee' },
+                { id: 'wait', label: 'Wait' },
+                { id: 'scan', label: 'Scan' },
+            ]}
+            centerActions={[ERadialAction.Cancel]}
+            onSelect={(id) => console.log('selected', id)}
+        />
     );
 }
 ```
 
-The radial also pages: pass more items than sides plus the
-`ERadialAction.Previous` / `ERadialAction.Next` center actions and the wheel
-pages through them. Pass `collapsible` (with `onOpen`) for the inline
-disclosure form - the center hub stays mounted as the open/close toggle and
-the wedges fan out around it in place. Sections take an optional `icon`
-(with `iconOnly` for pure glyph keys), and every mode honors the user's
-reduced-motion preference.
+The collapsed hub is the open/close toggle: it wears a drawn plus mark by
+default, or pass `toggleIcon` / `toggleText` for a custom icon or short text
+label. Set `collapsible={false}` for the portaled modal-overlay form driven
+by your own trigger. The radial also pages: pass more items than sides plus
+the `ERadialAction.Previous` / `ERadialAction.Next` center actions and the
+wheel pages through them. Sections take an optional `icon` (with `iconOnly`
+for pure glyph keys), and every mode honors the user's reduced-motion
+preference.
 
 The optional 3D surface lives behind a separate entry point. Mount it inside a
 React Three Fiber `<Canvas>` (the 3D peers above must be installed):

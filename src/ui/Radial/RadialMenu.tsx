@@ -24,8 +24,9 @@ import { resolveRadialSides } from './radialGeometry';
 // and dismissal. Cancel always closes; selecting closes unless
 // closeOnSelect=false. When more items than sides are supplied, the Next /
 // Previous center actions page through them (wrapping; the page resets on
-// every open so the menu always reopens on page one). `collapsible` renders
-// the inline disclosure form whose hub persists as the open/close toggle.
+// every open so the menu always reopens on page one). The collapsible inline
+// disclosure - whose hub persists as the open/close toggle - is the DEFAULT
+// form; collapsible=false renders the portaled modal overlay instead.
 export function RadialMenu({
     open,
     onClose,
@@ -37,7 +38,9 @@ export function RadialMenu({
     centerActions = [],
     onCenterAction,
     closeOnSelect = true,
-    collapsible = false,
+    collapsible = true,
+    toggleIcon,
+    toggleText,
     tone,
 }: RadialMenuProps): ReactElement | null {
     const resolvedSides: RadialSides = resolveRadialSides(sides);
@@ -109,6 +112,8 @@ export function RadialMenu({
             centerActions={centerActions}
             variant={ERadialVariant.Menu}
             collapsible={collapsible}
+            toggleIcon={toggleIcon}
+            toggleText={toggleText}
             onActivateSection={handleActivateSection}
             onActivateAction={handleActivateAction}
             disabled={false}
