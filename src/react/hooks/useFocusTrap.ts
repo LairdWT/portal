@@ -2,9 +2,15 @@
 // modal mode). While active, it moves focus into the container, keeps Tab and
 // Shift+Tab cycling within it, and on release restores focus to the element that
 // was focused before activation. The keydown listener is removed on cleanup, so a
-// deactivated or unmounted trap leaves no global handler behind.
+// deactivated or unmounted trap leaves no global handler behind. Stacked traps
+// coordinate through focusTrapLayers: only the topmost active trap enforces
+// containment, so a modal opened above another (ConfirmDialog over Dialog) owns
+// Tab alone instead of the two traps bouncing focus between their containers;
+// when it releases, the trap beneath resumes.
 
 import { type RefObject, useEffect } from 'react';
+
+import { focusTrapLayers, type OverlayLayer } from './overlayLayers';
 
 export type UseFocusTrapOptions = Readonly<{
     // Whether the trap is engaged. Pass the modal's open state.
@@ -61,8 +67,13 @@ export function useFocusTrap(options: UseFocusTrapOptions): void {
             initialFocusRef?.current ?? collectFocusable(container)[0] ?? container;
         initialTarget.focus();
 
+        const layer: OverlayLayer = focusTrapLayers.register();
+
         function handleKeyDown(event: KeyboardEvent): void {
             if (event.key !== 'Tab') {
+                return;
+            }
+            if (!layer.isTop()) {
                 return;
             }
             const node: HTMLElement | null = containerRef.current;
@@ -97,6 +108,7 @@ export function useFocusTrap(options: UseFocusTrapOptions): void {
 
         document.addEventListener('keydown', handleKeyDown, true);
         return (): void => {
+            layer.release();
             document.removeEventListener('keydown', handleKeyDown, true);
             if (restoreFocus && previouslyFocused instanceof HTMLElement) {
                 previouslyFocused.focus();

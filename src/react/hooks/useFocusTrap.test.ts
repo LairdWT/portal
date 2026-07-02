@@ -132,4 +132,61 @@ describe('useFocusTrap', (): void => {
 
         expect(document.activeElement).toBe(outside);
     });
+
+    // Stacked traps (ConfirmDialog over Dialog): only the topmost trap may
+    // enforce containment, otherwise the two traps bounce focus between their
+    // containers and Tab never advances inside the upper modal.
+    describe('stacked traps', (): void => {
+        it('lets only the topmost trap enforce containment', (): void => {
+            const lower: ReturnType<typeof buildContainer> = buildContainer();
+            const upper: ReturnType<typeof buildContainer> = buildContainer();
+            const lowerRef: RefLike = { current: lower.container };
+            const upperRef: RefLike = { current: upper.container };
+
+            renderHook((): void => {
+                useFocusTrap({ active: true, containerRef: lowerRef });
+            });
+            renderHook((): void => {
+                useFocusTrap({ active: true, containerRef: upperRef });
+            });
+
+            // Tab from the upper trap's last element wraps INSIDE the upper
+            // container instead of being yanked away by the lower trap.
+            upper.last.focus();
+            pressTab(false);
+            expect(document.activeElement).toBe(upper.first);
+
+            // Even with focus inside the lower container, the dormant lower
+            // trap must not act; the topmost trap reclaims focus instead.
+            lower.first.focus();
+            pressTab(false);
+            expect(document.activeElement).toBe(upper.first);
+        });
+
+        it('resumes the lower trap when the upper trap releases', (): void => {
+            const lower: ReturnType<typeof buildContainer> = buildContainer();
+            const upper: ReturnType<typeof buildContainer> = buildContainer();
+            const lowerRef: RefLike = { current: lower.container };
+            const upperRef: RefLike = { current: upper.container };
+
+            renderHook((): void => {
+                useFocusTrap({ active: true, containerRef: lowerRef });
+            });
+            const upperView: RenderHookResult<void, unknown> = renderHook(
+                (): void => {
+                    useFocusTrap({
+                        active: true,
+                        containerRef: upperRef,
+                        restoreFocus: false,
+                    });
+                },
+            );
+
+            upperView.unmount();
+
+            lower.last.focus();
+            pressTab(false);
+            expect(document.activeElement).toBe(lower.first);
+        });
+    });
 });

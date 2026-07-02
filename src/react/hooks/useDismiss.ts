@@ -5,8 +5,14 @@
 // never self-dismisses. Both document listeners are removed on cleanup and the
 // hook re-subscribes only when the enabled flag flips, reading the latest options
 // through a ref so a changing callback or ref set never churns the subscription.
+// Stacked overlays coordinate through dismissLayers: only the topmost enabled
+// hook acts on a given Escape or outside pointerdown, so dismissal peels one
+// layer per event (ConfirmDialog first, then the Dialog beneath) instead of one
+// event collapsing the whole stack.
 
 import { type RefObject, useEffect, useRef } from 'react';
+
+import { dismissLayers, type OverlayLayer } from './overlayLayers';
 
 export type UseDismissOptions = Readonly<{
     // Whether the listeners are active. Defaults to true; pass the overlay's open
@@ -54,8 +60,13 @@ export function useDismiss(options: UseDismissOptions): void {
             );
         }
 
+        const layer: OverlayLayer = dismissLayers.register();
+
         function handlePointerDown(event: PointerEvent): void {
             if (latestRef.current.outsidePointer === false) {
+                return;
+            }
+            if (!layer.isTop()) {
                 return;
             }
             if (isInsideAny(event.target)) {
@@ -66,6 +77,9 @@ export function useDismiss(options: UseDismissOptions): void {
 
         function handleKeyDown(event: KeyboardEvent): void {
             if (latestRef.current.escapeKey === false) {
+                return;
+            }
+            if (!layer.isTop()) {
                 return;
             }
             if (event.key !== 'Escape') {
@@ -79,6 +93,7 @@ export function useDismiss(options: UseDismissOptions): void {
         document.addEventListener('pointerdown', handlePointerDown, true);
         document.addEventListener('keydown', handleKeyDown);
         return (): void => {
+            layer.release();
             document.removeEventListener('pointerdown', handlePointerDown, true);
             document.removeEventListener('keydown', handleKeyDown);
         };

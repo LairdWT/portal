@@ -151,4 +151,92 @@ describe('Dialog', (): void => {
             expect(document.body.style.overflow).toBe('');
         });
     });
+
+    // Stacked modals (a confirm opened over a settings dialog): the overlay
+    // layer stack must hand Tab and Escape to the upper dialog alone, then to
+    // the lower one once the upper closes - one event peels one layer.
+    describe('stacked dialogs', (): void => {
+        function StackedHarness(): ReactElement {
+            const [outerOpen, setOuterOpen]: [
+                boolean,
+                Dispatch<SetStateAction<boolean>>,
+            ] = useState<boolean>(true);
+            const [innerOpen, setInnerOpen]: [
+                boolean,
+                Dispatch<SetStateAction<boolean>>,
+            ] = useState<boolean>(true);
+            return (
+                <>
+                    <Dialog
+                        open={outerOpen}
+                        onClose={(): void => {
+                            setOuterOpen(false);
+                        }}
+                        title="Outer"
+                    >
+                        <button type="button">outer action</button>
+                    </Dialog>
+                    <Dialog
+                        open={innerOpen}
+                        onClose={(): void => {
+                            setInnerOpen(false);
+                        }}
+                        title="Inner"
+                    >
+                        <button type="button">inner first</button>
+                        <button type="button">inner second</button>
+                    </Dialog>
+                </>
+            );
+        }
+
+        it('Escape closes only the upper dialog, then the lower', async (): Promise<void> => {
+            const user: UserEvent = userEvent.setup();
+            render(<StackedHarness />);
+
+            expect(
+                screen.getByRole('dialog', { name: 'Inner' }),
+            ).toBeInTheDocument();
+            expect(
+                screen.getByRole('dialog', { name: 'Outer' }),
+            ).toBeInTheDocument();
+
+            await user.keyboard('{Escape}');
+            await waitFor((): void => {
+                expect(screen.queryByRole('dialog', { name: 'Inner' })).toBeNull();
+            });
+            expect(
+                screen.getByRole('dialog', { name: 'Outer' }),
+            ).toBeInTheDocument();
+
+            await user.keyboard('{Escape}');
+            await waitFor((): void => {
+                expect(screen.queryByRole('dialog', { name: 'Outer' })).toBeNull();
+            });
+        });
+
+        it('Tab cycles inside the upper dialog without the lower trap stealing focus', async (): Promise<void> => {
+            const user: UserEvent = userEvent.setup();
+            render(<StackedHarness />);
+
+            const innerFirst: HTMLElement = screen.getByRole('button', {
+                name: 'inner first',
+            });
+            const innerSecond: HTMLElement = screen.getByRole('button', {
+                name: 'inner second',
+            });
+            await waitFor((): void => {
+                expect(innerFirst).toHaveFocus();
+            });
+
+            await user.tab();
+            expect(innerSecond).toHaveFocus();
+
+            await user.tab();
+            expect(innerFirst).toHaveFocus();
+
+            await user.tab();
+            expect(innerSecond).toHaveFocus();
+        });
+    });
 });

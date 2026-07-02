@@ -104,6 +104,67 @@ describe('useDismiss', (): void => {
         expect(onDismiss).not.toHaveBeenCalled();
     });
 
+    // Stacked overlays (ConfirmDialog over Dialog, Menu over a modal): one
+    // Escape or outside pointerdown peels only the topmost layer instead of
+    // collapsing the whole stack.
+    describe('stacked layers', (): void => {
+        it('routes Escape to only the topmost layer, then the next', (): void => {
+            const lowerDismiss: Mock<() => void> = vi.fn<() => void>();
+            const upperDismiss: Mock<() => void> = vi.fn<() => void>();
+            const ref: RefLike = { current: null };
+
+            renderHook((): void => {
+                useDismiss({ enabled: true, onDismiss: lowerDismiss, refs: [ref] });
+            });
+            const upperView: RenderHookResult<void, unknown> = renderHook(
+                (): void => {
+                    useDismiss({
+                        enabled: true,
+                        onDismiss: upperDismiss,
+                        refs: [ref],
+                    });
+                },
+            );
+
+            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+            expect(upperDismiss).toHaveBeenCalledTimes(1);
+            expect(lowerDismiss).not.toHaveBeenCalled();
+
+            upperView.unmount();
+            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+            expect(upperDismiss).toHaveBeenCalledTimes(1);
+            expect(lowerDismiss).toHaveBeenCalledTimes(1);
+        });
+
+        it('routes an outside pointerdown to only the topmost layer', (): void => {
+            const outside: HTMLElement = appendElement('button');
+            const lowerDismiss: Mock<() => void> = vi.fn<() => void>();
+            const upperDismiss: Mock<() => void> = vi.fn<() => void>();
+            const ref: RefLike = { current: null };
+
+            renderHook((): void => {
+                useDismiss({ enabled: true, onDismiss: lowerDismiss, refs: [ref] });
+            });
+            const upperView: RenderHookResult<void, unknown> = renderHook(
+                (): void => {
+                    useDismiss({
+                        enabled: true,
+                        onDismiss: upperDismiss,
+                        refs: [ref],
+                    });
+                },
+            );
+
+            pointerDownOn(outside);
+            expect(upperDismiss).toHaveBeenCalledTimes(1);
+            expect(lowerDismiss).not.toHaveBeenCalled();
+
+            upperView.unmount();
+            pointerDownOn(outside);
+            expect(lowerDismiss).toHaveBeenCalledTimes(1);
+        });
+    });
+
     it('honours the outsidePointer and escapeKey toggles', (): void => {
         const outside: HTMLElement = appendElement('button');
         const onDismiss: Mock<() => void> = vi.fn<() => void>();
