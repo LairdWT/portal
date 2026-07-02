@@ -1,0 +1,102 @@
+/*
+ * VirtualKeyboard. A data-driven on-screen key matrix wearing the
+ * BevelButton machined-key language: brushed-metal cap faces (dark bg-0 cap
+ * text for AA on the light metal), the beveled corner identity, the shared
+ * recessed press treatment (transform + steel face), and tone-accent edge on
+ * latched layer toggles. Every key meets the 3rem touch floor; widths flex
+ * by widthUnits through an inline flex-grow. Tokens only.
+ */
+
+.board {
+    composes: toneScope from '../../ui/tone.module.css';
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-2);
+    user-select: none;
+}
+
+.row {
+    display: flex;
+    gap: var(--portal-space-2);
+}
+
+.key {
+    display: inline-flex;
+    flex: 1 1 0;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: var(--portal-touch-target-min);
+    min-block-size: var(--portal-touch-target-min);
+    padding-block: var(--portal-space-2);
+    padding-inline: var(--portal-space-2);
+    border: var(--portal-border-thickness-thin) solid transparent;
+    border-radius: var(--portal-radius-md);
+    corner-shape: bevel;
+    background:
+        var(--portal-gradient-metal) padding-box,
+        var(--portal-gradient-metal-ring) border-box;
+    color: var(--portal-color-bg-0);
+    cursor: pointer;
+    touch-action: none;
+    user-select: none;
+    appearance: none;
+}
+
+.key:focus-visible {
+    outline: var(--portal-border-thickness-thin) solid var(--portal-color-focus);
+    outline-offset: calc(-1 * var(--portal-border-thickness-normal));
+}
+
+/* Pressed reads as recessed steel (the BevelButton pressed recipe). */
+.key[data-pressed='pressed']:not(:disabled) {
+    transform: scale(var(--portal-press-scale));
+    background-image:
+        linear-gradient(
+            160deg,
+            var(--portal-color-metal-0) 0%,
+            var(--portal-color-metal-1) 55%,
+            var(--portal-color-metal-0) 100%
+        ),
+        var(--portal-gradient-metal-ring);
+    color: var(--portal-color-text-0);
+}
+
+/* A latched layer toggle (SHIFT held, SYM active): the steel face with the
+ * tone edge, so the active layer is visible at a glance. */
+.key[aria-pressed='true'] {
+    border-color: var(--portal-tone-accent);
+    background:
+        linear-gradient(
+                160deg,
+                var(--portal-color-metal-0) 0%,
+                var(--portal-color-metal-1) 55%,
+                var(--portal-color-metal-0) 100%
+            )
+            padding-box,
+        var(--portal-gradient-metal-ring) border-box;
+    color: var(--portal-color-text-0);
+    box-shadow: 0 0 var(--portal-space-2) var(--portal-tone-glow);
+}
+
+.key:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.cap {
+    display: inline-block;
+    margin-inline-end: calc(-1 * var(--portal-letter-spacing-wide));
+    font-family: var(--portal-font-sans);
+    font-size: var(--portal-size-text-md);
+    font-weight: var(--portal-weight-label-bold);
+    line-height: var(--portal-line-height-tight);
+    letter-spacing: var(--portal-letter-spacing-wide);
+    text-align: center;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .key {
+        transition: transform var(--portal-duration-frame-fast)
+            var(--portal-easing-standard);
+    }
+}

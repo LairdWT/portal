@@ -20,6 +20,11 @@ export {
     EDpadDirection,
     EDpadMode,
 } from './components/DPad/DPad.types';
+export { Hotbar } from './components/Hotbar/Hotbar';
+export {
+    type HotbarProps,
+    type HotbarSlot,
+} from './components/Hotbar/Hotbar.types';
 export { HudPanel } from './components/HudPanel/HudPanel';
 export {
     type HudPanelProps,
@@ -39,6 +44,15 @@ export {
     nextCheckedState,
     type ToggleProps,
 } from './components/Toggle/Toggle.types';
+export { QWERTY_ROWS } from './components/VirtualKeyboard/keyboardLayout';
+export { VirtualKeyboard } from './components/VirtualKeyboard/VirtualKeyboard';
+export {
+    EKeyAction,
+    EKeyboardLayer,
+    type VirtualKeyboardProps,
+    type VirtualKeyboardRow,
+    type VirtualKeyDef,
+} from './components/VirtualKeyboard/VirtualKeyboard.types';
 export {
     createInputSource,
     type CreateInputSourceOptions,
@@ -332,6 +346,12 @@ export {
 } from './ui/FileUpload/FileUpload.types';
 export { Gauge } from './ui/Gauge/Gauge';
 export { type GaugeBand, type GaugeProps } from './ui/Gauge/Gauge.types';
+export { InventoryGrid } from './ui/InventoryGrid/InventoryGrid';
+export {
+    type InventoryGridProps,
+    type InventorySlot,
+} from './ui/InventoryGrid/InventoryGrid.types';
+export { moveSlot } from './ui/InventoryGrid/slotMath';
 export { KeyValue } from './ui/KeyValue/KeyValue';
 export {
     EKeyValueOverflow,
@@ -363,6 +383,12 @@ export {
 } from './ui/List/List.types';
 export { SearchableList } from './ui/List/SearchableList';
 export { type SearchableListProps } from './ui/List/SearchableList.types';
+export { LogConsole } from './ui/LogConsole/LogConsole';
+export {
+    ELogSeverity,
+    type LogConsoleProps,
+    type LogEntry,
+} from './ui/LogConsole/LogConsole.types';
 export { Marquee } from './ui/Marquee/Marquee';
 export {
     EMarqueeDirection,

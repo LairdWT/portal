@@ -1,0 +1,115 @@
+/*
+ * InventoryGrid. A machined slot surface: square beveled cells on the dark
+ * face, the SelectableTile state language for the move flow (selected =
+ * grabbed, targetable = valid destination, data-drop = the hovered target),
+ * and a transform-only drag ghost driven by the --inventory-drag-* custom
+ * properties. Tokens only; tone drives borders and glow, never cell content
+ * text. The ghost transform is deliberately untransitioned (it follows the
+ * pointer directly); border/glow feedback transitions are motion-gated.
+ */
+
+.root {
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-2);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+}
+
+.grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-2);
+}
+
+/* One APG row: an equal-track grid, so columns align across rows. */
+.gridRow {
+    display: grid;
+    grid-template-columns: repeat(
+        var(--inventory-columns, 4),
+        minmax(var(--portal-touch-target-min), 1fr)
+    );
+    gap: var(--portal-space-2);
+}
+
+.cell {
+    composes: beveled from '../../theme/surfaces.module.css';
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1;
+    min-inline-size: var(--portal-touch-target-min);
+    min-block-size: var(--portal-touch-target-min);
+    padding: var(--portal-space-1);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-bevel-2);
+    background-color: var(--portal-color-surface-0);
+    color: inherit;
+    font: inherit;
+    appearance: none;
+    cursor: grab;
+    touch-action: none;
+}
+
+.cell[data-occupied='false'] {
+    cursor: default;
+    background-color: var(--portal-color-bg-1);
+}
+
+.cell:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.cell:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: var(--portal-space-1);
+}
+
+/* The grabbed (or pointer-dragged) slot. */
+.cell[data-state='selected'] {
+    border-color: var(--portal-tone-accent);
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow-strong);
+}
+
+/* Valid destinations while a move is live: a dashed machined seam. */
+.cell[data-state='targetable'] {
+    border-style: dashed;
+    border-color: var(--portal-tone-border);
+}
+
+/* The hovered drop target under a pointer drag. */
+.cell[data-drop='true'] {
+    border-style: solid;
+    border-color: var(--portal-tone-accent);
+    box-shadow: 0 0 var(--portal-space-2) var(--portal-tone-glow);
+}
+
+/* The pointer ghost: transform-only, above its siblings while airborne
+ * (local stacking only - never the overlay layer). */
+.cell[data-dragging='true'] {
+    z-index: 1;
+    transform: translate(var(--inventory-drag-x, 0), var(--inventory-drag-y, 0));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .cell {
+        transition:
+            border-color var(--portal-duration-ui-base)
+                var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ui-base) var(--portal-easing-standard);
+    }
+}
+
+/* The repo's per-component sr-only idiom for the move announcer. */
+.srOnly {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}

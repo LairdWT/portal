@@ -1,0 +1,153 @@
+/*
+ * LogConsole. A machined terminal scrollback: beveled dark frame, a tracked
+ * header with the follow-tail toggle, single-line mono rows at a fixed
+ * --portal-space-5 (1.5rem = the 24px JS virtualization constant) height,
+ * severity keyed through the universal status tokens on the row accents, and
+ * the contained Scanlines overlay pinned over the (non-scrolling) shell.
+ * Long messages ellipsize - wrapping would break the uniform-row-height
+ * virtualization precondition. Tokens only.
+ */
+
+.root {
+    composes: beveled from '../../theme/surfaces.module.css';
+    display: flex;
+    flex-direction: column;
+    border: var(--portal-hud-edge-width) solid var(--portal-tone-border);
+    border-radius: var(--portal-bevel-3);
+    background-color: var(--portal-color-bg-0);
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-mono);
+}
+
+.bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--portal-space-3);
+    padding-block: var(--portal-space-2);
+    padding-inline: var(--portal-space-4);
+    border-block-end: var(--portal-border-thickness-thin) solid
+        var(--portal-color-metal-2);
+}
+
+.title {
+    color: var(--portal-color-text-1);
+    font-family: var(--portal-font-sans);
+    font-size: var(--portal-size-text-sm);
+    line-height: var(--portal-line-height-tight);
+    letter-spacing: var(--portal-letter-spacing-wide);
+}
+
+.followKey {
+    min-block-size: var(--portal-touch-target-min);
+    padding-inline: var(--portal-space-3);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-bevel-1);
+    background-color: var(--portal-color-surface-0);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+    font-size: var(--portal-size-text-sm);
+    appearance: none;
+    cursor: pointer;
+}
+
+.followKey[aria-pressed='true'] {
+    border-color: var(--portal-tone-accent);
+    box-shadow: 0 0 var(--portal-space-2) var(--portal-tone-glow);
+}
+
+.followKey:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: var(--portal-space-1);
+}
+
+/* The positioned, non-scrolling host the Scanlines overlay pins to. */
+.shell {
+    position: relative;
+}
+
+.viewport {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.viewport:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: calc(-1 * var(--portal-border-thickness-normal));
+}
+
+/* The full-height scrollbar spacer; the window block translates to the
+ * current slice offset inside it. */
+.spacer {
+    position: relative;
+    overflow: hidden;
+}
+
+.window {
+    display: flex;
+    flex-direction: column;
+}
+
+/* One single-line entry: the 1.5rem block-size IS the virtualization
+ * constant (ROW_HEIGHT_PX = 24). */
+.row {
+    display: flex;
+    gap: var(--portal-space-3);
+    align-items: center;
+    block-size: var(--portal-space-5);
+    padding-inline: var(--portal-space-4);
+    font-size: var(--portal-size-text-sm);
+    white-space: nowrap;
+}
+
+.time {
+    flex: 0 0 auto;
+    color: var(--portal-color-text-1);
+    font-variant-numeric: tabular-nums;
+}
+
+.message {
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Severity is carried by NON-TEXT cues only - the inset edge bar and a faint
+ * row wash - because the status colors sit below the 4.5:1 text floor on the
+ * console bg (the Calendar contrast lesson). Text stays text-0/text-1; Debug
+ * dims the whole row to text-1 (still AA). */
+.row[data-severity='debug'] {
+    color: var(--portal-color-text-1);
+}
+
+.row[data-severity='warning'] {
+    background-color: color-mix(
+        in oklab,
+        var(--portal-color-warning) 10%,
+        transparent
+    );
+    box-shadow: inset var(--portal-space-1) 0 0 0 var(--portal-color-warning);
+}
+
+.row[data-severity='error'] {
+    background-color: color-mix(
+        in oklab,
+        var(--portal-color-danger) 12%,
+        transparent
+    );
+    box-shadow: inset var(--portal-space-1) 0 0 0 var(--portal-color-danger);
+}
+
+/* The repo's per-component sr-only idiom for the latest-entry announcer. */
+.srOnly {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
