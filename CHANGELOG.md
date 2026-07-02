@@ -4,6 +4,44 @@ All notable changes to this project are documented in this file. The format is
 based on Keep a Changelog, and the project follows Semantic Versioning with the
 0.x caveat that, before 1.0, a minor version may carry a breaking change.
 
+## [1.8.0] - 2026-07-02
+
+The Tier-2 "app polish" phase of the coverage roadmap. All public-API
+changes are additive; the freeze holds.
+
+### Added
+
+- Layout family (`Stack` / `Grid` / `Divider`): the compositional
+  primitives - one-axis flow with a shared token gap scale, an equal-track
+  grid with a clamped column count, and a drawn separator rule with an
+  optional centered label.
+- `Spinner`: the compact inline busy indicator - a toned conic arc spun by
+  a compositor-cheap transform rotation; reduced motion keeps a static
+  partial ring.
+- `Link`: the themed anchor with a tone-tinted underline, HUD focus ring,
+  and a hardened external form wearing a drawn outward chevron.
+- `Toolbar` (+ `ToolbarGroup`, `ToolbarSeparator`): a role=toolbar strip
+  managing one roving tab stop across its interactive descendants (APG
+  pattern) - orientation-aware arrows, Home/End, pointer-follow.
+- `Sparkline` + `LineChart` extend the Chart SVG family through a shared
+  series normalizer: the compact inline trend (role=img summary, optional
+  toned area wash) and the framed form with caption, gridlines, and the
+  hidden-data-table fallback.
+- `Timeline`: the vertical activity feed - toned diamond markers on a
+  connecting rail, mono timestamps, per-row status tone overrides.
+- `Wizard`: the interactive multi-step container over StepTrack -
+  controlled navigation, canAdvance gating, Finish on the last step, and a
+  per-step panel entrance (reduced-motion gated).
+- `Carousel`: a scroll-snap slide strip (APG basic carousel) - native
+  swipe/trackpad/keyboard scrolling drives the same index as the compact
+  turn keys and the dot rail; smoothing rides scroll-behavior under full
+  motion only; off-screen slides hide from assistive tech.
+- `Lightbox`: the media viewer composition - a modal Dialog carrying a
+  Carousel, with slide media capped to the dynamic viewport.
+- `Drawer.snapPoints` (additive on the resize model): a released resize
+  drag (pointercancel included) settles onto the nearest snap size; the
+  live drag and keyboard steps stay free.
+
 ## [1.7.0] - 2026-07-02
 
 The Tier-1 "form stack" phase of the coverage roadmap: eleven additions that

@@ -1,0 +1,17 @@
+/*
+ * Lightbox. The media-viewer frame inside the Dialog: slides center their
+ * content and cap media to the dynamic viewport so tall images never push
+ * the dialog chrome off screen. Tokens only.
+ */
+
+.frame {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Cap any replaced media a consumer drops into a slide. */
+.frame :is(img, video, canvas) {
+    max-inline-size: 100%;
+    max-block-size: min(70dvh, 40rem);
+    object-fit: contain;
+}

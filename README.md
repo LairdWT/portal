@@ -224,15 +224,19 @@ so it suits any React UI, not only game input. It spans, among others:
   `Toggle`, `OtpField`, `Field` (form scaffolding), `Calendar`, `DatePicker`,
   `TimePicker`, `FileUpload`.
 - Data and navigation: `List` / `SearchableList`, `DataTable`, `TreeView`,
-  `Accordion`, `Tabs`, `Breadcrumb`, `Pagination`, `NavRail`,
-  `Menu` / `MenuBar` / `ContextMenu`, `CommandPalette`, `RadialMenu` (the
-  flagship radial action wheel; `RadialPad` is its game-input sibling).
+  `Accordion`, `Tabs`, `Breadcrumb`, `Pagination`, `NavRail`, `Toolbar`,
+  `Link`, `Menu` / `MenuBar` / `ContextMenu`, `CommandPalette`, `Wizard`,
+  `RadialMenu` (the flagship radial action wheel; `RadialPad` is its
+  game-input sibling).
 - Surfaces and overlays: `Panel`, `ReadoutPanel`, `Section`, `Dialog`,
-  `Drawer`, `Popover`, `Tooltip`, `Toast`, `Window`, `SplitPane`.
+  `Drawer` (with resize snap points), `Popover`, `Tooltip`, `Toast`,
+  `Window`, `SplitPane`, `Carousel`, `Lightbox`.
 - Display and feedback: `Text`, `Badge`, `Chip`, `StatPill`, `StatTile`,
-  `KeyValue`, the `Chart` family, `Progress`, `Banner`, `Avatar`, `Skeleton`,
-  `EmptyState`, `Marquee`, `Scanlines`, `StepTrack`, `TitleBar`, `StatusFooter`,
-  `SelectableTile`.
+  `KeyValue`, the `Chart` family (bars, `Sparkline`, `LineChart`),
+  `Progress`, `Spinner`, `Banner`, `Avatar`, `Skeleton`, `EmptyState`,
+  `Marquee`, `Scanlines`, `StepTrack`, `Timeline`, `TitleBar`,
+  `StatusFooter`, `SelectableTile`.
+- Layout: `Stack`, `Grid`, `Divider`.
 
 See the live Storybook (linked above) for the full, current catalogue with
 interactive examples.

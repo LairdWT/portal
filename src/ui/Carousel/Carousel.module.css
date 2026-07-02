@@ -1,0 +1,127 @@
+/*
+ * Carousel. A scroll-snap slide strip in the machined frame: the track
+ * scrolls natively (swipe / trackpad / keyboard on the focusable region) with
+ * mandatory x-snap, the compact turn keys and the dot rail drive the same
+ * scroll, and smoothing rides scroll-behavior under full motion only.
+ * Tokens throughout.
+ */
+
+.root {
+    composes: beveled from '../../theme/surfaces.module.css';
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-3);
+    padding: var(--portal-space-3);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-bevel-2);
+    background-color: var(--portal-color-surface-0);
+    font-family: var(--portal-font-sans);
+}
+
+.track {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    border-radius: var(--portal-bevel-1);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .track {
+        scroll-behavior: smooth;
+    }
+}
+
+.track:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: var(--portal-space-1);
+}
+
+.slide {
+    flex: 0 0 100%;
+    scroll-snap-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-block-size: var(--portal-touch-target-min);
+    color: var(--portal-color-text-0);
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--portal-space-3);
+}
+
+.turnKey {
+    composes: compactControl from '../../theme/surfaces.module.css';
+}
+
+.turnGlyph {
+    composes: chevronGlyph from '../../theme/surfaces.module.css';
+    color: var(--portal-tone-accent);
+}
+
+.turnGlyph[data-direction='previous'] {
+    --portal-chevron-rotate: 135deg;
+}
+
+.turnGlyph[data-direction='next'] {
+    --portal-chevron-rotate: -45deg;
+}
+
+.dots {
+    display: flex;
+    align-items: center;
+    gap: var(--portal-space-2);
+}
+
+/* A dot key: a small beveled diamond that lights when current. The hit area
+ * meets the touch floor while the visible mark stays compact. */
+.dot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: var(--portal-touch-target-min);
+    min-block-size: var(--portal-touch-target-min);
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.dot::after {
+    content: '';
+    inline-size: var(--portal-space-2);
+    block-size: var(--portal-space-2);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    background-color: transparent;
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .dot::after {
+        transition:
+            background-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard),
+            border-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard),
+            transform var(--portal-duration-ui-fast) var(--portal-easing-emphasized);
+    }
+}
+
+.dot:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: calc(-1 * var(--portal-space-2));
+}
+
+.dot[data-active='true']::after {
+    border-color: var(--portal-tone-accent);
+    background-color: var(--portal-tone-accent);
+    transform: scale(1.2);
+    filter: drop-shadow(0 0 var(--portal-space-1) var(--portal-tone-glow));
+}
+
+.dot:hover:not(:disabled)::after {
+    border-color: var(--portal-tone-accent);
+}

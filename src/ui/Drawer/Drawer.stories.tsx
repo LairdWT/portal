@@ -119,6 +119,7 @@ type InlineDemoProps = Readonly<{
     collapsible?: boolean;
     initialCollapsed?: boolean;
     resizable?: boolean;
+    snapPoints?: readonly number[];
     tone?: string;
     status?: EUiStatus;
     enabled?: EEnabledState;
@@ -154,6 +155,9 @@ function ControlledInlineDrawer(props: InlineDemoProps): ReactElement {
                           minSize: 200,
                           maxSize: 480,
                       }
+                    : {})}
+                {...(props.snapPoints !== undefined
+                    ? { snapPoints: props.snapPoints }
                     : {})}
             >
                 {DEMO_BODY}
@@ -221,6 +225,18 @@ export const InlineCollapsible: Story = {
                 initialCollapsed
             />
         </div>
+    ),
+};
+
+// Release the resize drag and the panel settles onto the nearest snap size
+// (240 / 360 / 480 px here); the live drag stays free.
+export const SnapPoints: Story = {
+    render: (): ReactElement => (
+        <ControlledInlineDrawer
+            edge={EDrawerEdge.InlineStart}
+            resizable
+            snapPoints={[240, 360, 480]}
+        />
     ),
 };
 

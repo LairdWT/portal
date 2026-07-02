@@ -39,6 +39,7 @@ import {
     clampSize,
     edgeAxis,
     edgeOrientation,
+    nearestSnap,
     sizeFromDrag,
     sizeFromKey,
 } from './Drawer.geometry';
@@ -81,6 +82,7 @@ type ResizeModel = Readonly<{
     minSize: number;
     maxSize: number;
     hasMax: boolean;
+    snapPoints: readonly number[];
 }>;
 
 // Join the tone scope and a component class into one definite string (the CSS
@@ -102,7 +104,13 @@ function resolveResizeModel(edge: EDrawerEdge, resize: DrawerResize): ResizeMode
     const hasMax: boolean = resize.maxSize !== undefined;
     const maxSize: number = resize.maxSize ?? Number.POSITIVE_INFINITY;
     const raw: number = resize.size ?? resize.defaultSize ?? fallback;
-    return { size: clampSize(raw, minSize, maxSize), minSize, maxSize, hasMax };
+    return {
+        size: clampSize(raw, minSize, maxSize),
+        minSize,
+        maxSize,
+        hasMax,
+        snapPoints: resize.snapPoints ?? [],
+    };
 }
 
 // The dock-axis inline-size / block-size style (the only authored px, computed in
@@ -219,6 +227,32 @@ function DrawerResizeHandle(props: DrawerResizeHandleProps): ReactElement {
                     model.maxSize,
                 );
                 onSizeChange?.(next);
+            },
+            // On release (pointerup AND pointercancel share this path) the
+            // size settles onto the nearest snap point when any are
+            // configured; the live drag above stays free.
+            onDragEnd: (state: PointerDragState): void => {
+                if (model.snapPoints.length === 0) {
+                    return;
+                }
+                const released: number = sizeFromDrag(
+                    edge,
+                    startSizeRef.current,
+                    state.dx,
+                    state.dy,
+                    model.minSize,
+                    model.maxSize,
+                );
+                const settled: number = nearestSnap(
+                    released,
+                    model.snapPoints,
+                    model.minSize,
+                    model.maxSize,
+                );
+                if (settled === released) {
+                    return;
+                }
+                onSizeChange?.(settled);
             },
         });
 

@@ -88,6 +88,32 @@ export function sizeFromDrag(
     return clampSize(next, minSize, maxSize);
 }
 
+// Settle a released size onto the nearest snap point. Points are clamped
+// into [minSize, maxSize] before comparison so an out-of-range point can
+// never win; non-finite points are ignored. Without any usable point the
+// size passes through unchanged (snapping is opt-in per gesture end).
+export function nearestSnap(
+    size: number,
+    snapPoints: readonly number[],
+    minSize: number,
+    maxSize: number,
+): number {
+    let best: number | null = null;
+    let bestDistance: number = Number.POSITIVE_INFINITY;
+    for (const point of snapPoints) {
+        if (!Number.isFinite(point)) {
+            continue;
+        }
+        const clamped: number = clampSize(point, minSize, maxSize);
+        const distance: number = Math.abs(clamped - size);
+        if (distance < bestDistance) {
+            best = clamped;
+            bestDistance = distance;
+        }
+    }
+    return best ?? size;
+}
+
 // The signed unit step a single arrow press contributes along the edge axis: +1
 // for ArrowRight (vertical separator) / ArrowDown (horizontal), -1 for
 // ArrowLeft / ArrowUp, and null for any other key or a cross-axis arrow (which

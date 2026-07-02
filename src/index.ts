@@ -218,6 +218,11 @@ export {
     parseIsoDate,
     todayDate,
 } from './ui/Calendar/calendarMath';
+export { Carousel } from './ui/Carousel/Carousel';
+export {
+    type CarouselItem,
+    type CarouselProps,
+} from './ui/Carousel/Carousel.types';
 export { BarChart } from './ui/Chart/BarChart';
 export {
     type BarChartProps,
@@ -340,6 +345,8 @@ export {
     type StackProps,
 } from './ui/Layout/Layout.types';
 export { Stack } from './ui/Layout/Stack';
+export { Lightbox } from './ui/Lightbox/Lightbox';
+export { type LightboxProps } from './ui/Lightbox/Lightbox.types';
 export { Link } from './ui/Link/Link';
 export { type LinkProps } from './ui/Link/Link.types';
 export { List } from './ui/List/List';

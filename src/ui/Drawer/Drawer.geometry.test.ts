@@ -4,6 +4,7 @@ import {
     clampSize,
     edgeAxis,
     edgeOrientation,
+    nearestSnap,
     resizeSign,
     sizeFromDrag,
     sizeFromKey,
@@ -11,6 +12,25 @@ import {
 import { EDrawerEdge } from './Drawer.types';
 
 describe('Drawer.geometry', (): void => {
+    describe('nearestSnap', (): void => {
+        it('settles onto the closest point', (): void => {
+            expect(nearestSnap(210, [120, 240, 480], 0, 1000)).toBe(240);
+            expect(nearestSnap(150, [120, 240, 480], 0, 1000)).toBe(120);
+        });
+
+        it('clamps points into the bounds before comparing', (): void => {
+            // 480 clamps to the 300 ceiling, beating the distant 120.
+            expect(nearestSnap(290, [120, 480], 0, 300)).toBe(300);
+        });
+
+        it('ignores non-finite points and passes through without any', (): void => {
+            expect(
+                nearestSnap(210, [Number.POSITIVE_INFINITY, Number.NaN], 0, 1000),
+            ).toBe(210);
+            expect(nearestSnap(210, [], 0, 1000)).toBe(210);
+        });
+    });
+
     describe('edgeAxis', (): void => {
         it('locks the side edges to x and the bottom edge to y', (): void => {
             expect(edgeAxis(EDrawerEdge.InlineStart)).toBe('x');

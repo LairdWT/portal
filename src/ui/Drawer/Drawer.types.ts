@@ -78,6 +78,12 @@ export type DrawerResize = Readonly<{
     minSize?: number;
     maxSize?: number;
     resizeLabel?: string;
+    // Snap sizes (CSS px on the dock axis). When present, a RELEASED resize
+    // drag settles onto the nearest point (pointercancel shares the path);
+    // the live drag and the keyboard steps stay free. Points outside
+    // [minSize, maxSize] clamp before comparison; non-finite points are
+    // ignored.
+    snapPoints?: readonly number[];
 }>;
 
 // Fields shared by both modes.
