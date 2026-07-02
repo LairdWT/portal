@@ -1,7 +1,7 @@
 {
     "name": "@laird-wt/portal",
     "private": false,
-    "version": "1.5.1",
+    "version": "1.6.0",
     "type": "module",
     "description": "Publishable React game-input and virtual-controller component library.",
     "license": "MIT",
