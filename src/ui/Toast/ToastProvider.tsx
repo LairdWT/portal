@@ -104,20 +104,27 @@ type ToastViewportProps = Readonly<{
     placement: EToastPlacement;
     reducedMotion: boolean;
     onDismiss: (id: string) => void;
-    onPause: () => void;
-    onResume: () => void;
+    onPointerPause: () => void;
+    onPointerRelease: () => void;
+    onFocusPause: () => void;
+    onFocusRelease: () => void;
 }>;
 
 // The portaled, corner-anchored stack. It is a labelled region whose cards are
-// the per-severity live regions. Pointer-over or focus-within pauses the
-// auto-dismiss timers (so a reader is not cut off) and leaving resumes them.
+// the per-severity live regions. Pointer-over and focus-within are two
+// INDEPENDENT pause sources: whichever engages first pauses the auto-dismiss
+// timers (so a reader is not cut off) and the timers only resume once BOTH have
+// cleared. Leaving with the pointer while a control stays focused - or blurring
+// while the pointer still rests over the stack - must not resume.
 function ToastViewport({
     toasts,
     placement,
     reducedMotion,
     onDismiss,
-    onPause,
-    onResume,
+    onPointerPause,
+    onPointerRelease,
+    onFocusPause,
+    onFocusRelease,
 }: ToastViewportProps): ReactElement | null {
     const [overlayRoot]: [
         HTMLElement | null,
@@ -127,13 +134,16 @@ function ToastViewport({
         return null;
     }
 
+    // A blur whose focus target is still inside the viewport is focus moving
+    // between two cards (or their controls), not focus leaving: keep the focus
+    // source engaged and release only when focus truly exits the stack.
     function handleBlur(event: FocusEvent<HTMLDivElement>): void {
         const next: Node | null =
             event.relatedTarget instanceof Node ? event.relatedTarget : null;
         if (next !== null && event.currentTarget.contains(next)) {
             return;
         }
-        onResume();
+        onFocusRelease();
     }
 
     return createPortal(
@@ -142,9 +152,9 @@ function ToastViewport({
             role="region"
             aria-label={VIEWPORT_LABEL}
             data-placement={placement}
-            onPointerEnter={onPause}
-            onPointerLeave={onResume}
-            onFocus={onPause}
+            onPointerEnter={onPointerPause}
+            onPointerLeave={onPointerRelease}
+            onFocus={onFocusPause}
             onBlur={handleBlur}
         >
             {toasts.map(
@@ -177,7 +187,15 @@ export function ToastProvider({
     const timersRef: RefObject<Map<string, TimerEntry>> = useRef<
         Map<string, TimerEntry>
     >(new Map<string, TimerEntry>());
+    // Auto-dismiss can be paused by two independent sources: the pointer resting
+    // over the stack and focus resting within it. `pausedRef` records whether the
+    // shared timers are currently banked (the FIRST source to engage banks them),
+    // while the two source refs record which sources still hold the pause open so
+    // a resume runs only once BOTH have cleared. Blur events carry no pointer
+    // data, so pointer-inside is tracked here rather than read off the event.
     const pausedRef: RefObject<boolean> = useRef<boolean>(false);
+    const pointerInsideRef: RefObject<boolean> = useRef<boolean>(false);
+    const focusInsideRef: RefObject<boolean> = useRef<boolean>(false);
     const idPrefix: string = useId();
     const counterRef: RefObject<number> = useRef<number>(0);
 
@@ -288,6 +306,42 @@ export function ToastProvider({
         });
     }, [dismiss, scheduleTimer]);
 
+    // The pointer entered the stack: engage the pointer source and pause. The
+    // shared pause is idempotent, so focus engaging afterwards is a no-op that
+    // leaves the banked remainder untouched.
+    const pausePointer: () => void = useCallback((): void => {
+        pointerInsideRef.current = true;
+        pauseAll();
+    }, [pauseAll]);
+
+    // The pointer left: clear only the pointer source. Do not resume while focus
+    // still holds the stack, otherwise a keyboard user on a Dismiss button would
+    // lose the toast the moment the mouse drifts off the viewport.
+    const releasePointer: () => void = useCallback((): void => {
+        pointerInsideRef.current = false;
+        if (focusInsideRef.current) {
+            return;
+        }
+        resumeAll();
+    }, [resumeAll]);
+
+    // Focus entered the stack: engage the focus source and pause (idempotent
+    // alongside the pointer source).
+    const pauseFocus: () => void = useCallback((): void => {
+        focusInsideRef.current = true;
+        pauseAll();
+    }, [pauseAll]);
+
+    // Focus left the stack for outside it: clear only the focus source. Do not
+    // resume while the pointer is still resting over the stack.
+    const releaseFocus: () => void = useCallback((): void => {
+        focusInsideRef.current = false;
+        if (pointerInsideRef.current) {
+            return;
+        }
+        resumeAll();
+    }, [resumeAll]);
+
     // Drop the timers of any toast that left the queue (for example trimmed by
     // `max`), so an overflowed toast never fires a stale auto-dismiss.
     useEffect((): void => {
@@ -331,8 +385,10 @@ export function ToastProvider({
                 placement={placement}
                 reducedMotion={prefersReducedMotion}
                 onDismiss={dismiss}
-                onPause={pauseAll}
-                onResume={resumeAll}
+                onPointerPause={pausePointer}
+                onPointerRelease={releasePointer}
+                onFocusPause={pauseFocus}
+                onFocusRelease={releaseFocus}
             />
         </ToastContext.Provider>
     );
