@@ -48,6 +48,19 @@ afterEach((): void => {
     document.body.innerHTML = '';
 });
 
+// The row the listbox cursor points at, resolved through aria-activedescendant.
+function activeRow(listbox: HTMLElement): HTMLElement {
+    const id: string | null = listbox.getAttribute('aria-activedescendant');
+    if (id === null) {
+        throw new Error('expected the listbox to expose aria-activedescendant');
+    }
+    const element: HTMLElement | null = document.getElementById(id);
+    if (element === null) {
+        throw new Error(`expected a rendered element for active row ${id}`);
+    }
+    return element;
+}
+
 type HarnessProps = Readonly<{
     items?: readonly Planet[];
     initialQuery?: string;
@@ -191,5 +204,38 @@ describe('SearchableList', (): void => {
 
         await user.click(screen.getByRole('option', { name: 'Mars' }));
         expect(onSelectedKeyChange).not.toHaveBeenCalled();
+    });
+
+    it('keeps the active cursor on the same item when the filter narrows the list', async (): Promise<void> => {
+        const user: UserEvent = userEvent.setup();
+        render(<Harness />);
+
+        const listbox: HTMLElement = screen.getByRole('listbox');
+        listbox.focus();
+        // Move the cursor onto Venus (index 1 of Mercury/Venus/Earth/Mars).
+        await user.keyboard('{ArrowDown}');
+        expect(activeRow(listbox)).toHaveTextContent('Venus');
+
+        // "s" keeps Venus and Mars but drops Mercury/Earth, so Venus moves from
+        // index 1 to index 0; the identity cursor follows the item id, not the
+        // slot it used to occupy.
+        await user.type(screen.getByRole('searchbox'), 's');
+        expect(activeRow(screen.getByRole('listbox'))).toHaveTextContent('Venus');
+    });
+
+    it('resets the active cursor to the top when the active item is filtered out', async (): Promise<void> => {
+        const user: UserEvent = userEvent.setup();
+        render(<Harness />);
+
+        const listbox: HTMLElement = screen.getByRole('listbox');
+        listbox.focus();
+        // Move the cursor to Mars (the last item).
+        await user.keyboard('{End}');
+        expect(activeRow(listbox)).toHaveTextContent('Mars');
+
+        // "e" drops Mars entirely, so the cursor cannot follow its id and resets
+        // to the first surviving row (Mercury).
+        await user.type(screen.getByRole('searchbox'), 'e');
+        expect(activeRow(screen.getByRole('listbox'))).toHaveTextContent('Mercury');
     });
 });

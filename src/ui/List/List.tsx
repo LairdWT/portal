@@ -129,9 +129,49 @@ export function List<Item>(props: ListProps<Item>): ReactElement {
         Dispatch<SetStateAction<number>>,
     ] = useState<number>(0);
 
+    // Whether the listbox root currently holds DOM focus. The active-row ring is
+    // gated on this so an interactive List shows no permanent cursor ring while
+    // unfocused (DataTable's roving cursor is likewise invisible until the user
+    // engages); the ring appears on focus and clears on blur.
+    const [isFocused, setIsFocused]: [boolean, Dispatch<SetStateAction<boolean>>] =
+        useState<boolean>(false);
+
     const isInteractive: boolean = selectionMode !== ESelectionMode.None;
     const isEmpty: boolean = items.length === 0;
     const lastIndex: number = items.length - 1;
+
+    // Identity-based active cursor. Hold the item array the cursor was last
+    // resolved against; when the consumer swaps in a new array (e.g. a filter
+    // narrows the list) remap the raw index so the highlight follows the same
+    // item id instead of a fixed slot, and reset to the top when that id is gone.
+    // React's "adjust state during render" pattern (previous items held in state,
+    // an in-render setState remaps or resets), matching useListboxNavigation, so
+    // the correction lands before paint with no effect round-trip or ref read.
+    const [previousItems, setPreviousItems]: [
+        readonly Item[],
+        Dispatch<SetStateAction<readonly Item[]>>,
+    ] = useState<readonly Item[]>(items);
+    if (previousItems !== items) {
+        setPreviousItems(items);
+        if (isInteractive) {
+            const priorIndex: number = Math.min(
+                Math.max(rawActiveIndex, 0),
+                previousItems.length - 1,
+            );
+            const priorItem: Item | undefined = previousItems[priorIndex];
+            if (priorItem === undefined) {
+                setRawActiveIndex(0);
+            } else {
+                const priorKey: string = getItemKey(priorItem, priorIndex);
+                const nextIndex: number = items.findIndex(
+                    (candidate: Item, candidateIndex: number): boolean =>
+                        getItemKey(candidate, candidateIndex) === priorKey,
+                );
+                setRawActiveIndex(nextIndex >= 0 ? nextIndex : 0);
+            }
+        }
+    }
+
     const activeIndex: number = isEmpty
         ? -1
         : Math.min(Math.max(rawActiveIndex, 0), lastIndex);
@@ -355,6 +395,18 @@ export function List<Item>(props: ListProps<Item>): ReactElement {
         }
     }
 
+    // The listbox is a single focusable root (the roving cursor is exposed through
+    // aria-activedescendant, not real per-row focus), so root focus/blur exactly
+    // tracks whether the list is engaged. No manual listener is attached, so these
+    // synthetic handlers need no cleanup.
+    function handleFocus(): void {
+        setIsFocused(true);
+    }
+
+    function handleBlur(): void {
+        setIsFocused(false);
+    }
+
     const rootClassName: string = [toneStyles.toneScope, styles.root]
         .filter((entry: string | undefined): entry is string => entry !== undefined)
         .join(' ');
@@ -421,8 +473,10 @@ export function List<Item>(props: ListProps<Item>): ReactElement {
                 className={styles.row}
                 style={rowStyle}
                 aria-selected={selected}
+                aria-setsize={items.length}
+                aria-posinset={index + 1}
                 data-state={selected ? EListRowState.Selected : EListRowState.Idle}
-                data-active={active ? 'true' : undefined}
+                data-active={active && isFocused ? 'true' : undefined}
                 data-enabled={resolvedEnabled}
                 data-index={index}
                 onPointerDown={handleRowPointerDown}
@@ -521,6 +575,8 @@ export function List<Item>(props: ListProps<Item>): ReactElement {
             data-enabled={resolvedEnabled}
             data-motion={motion}
             onKeyDown={handleKeyDown}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
         >
             {body}
         </div>

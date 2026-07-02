@@ -1,4 +1,4 @@
-import { render, type RenderResult, screen } from '@testing-library/react';
+import { act, render, type RenderResult, screen } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import {
     type Dispatch,
@@ -371,6 +371,67 @@ describe('List', (): void => {
         listbox.focus();
         await user.keyboard('{End}');
         expect(activeRow(listbox)).toHaveTextContent('Row 4999');
+    });
+
+    it('exposes absolute aria-setsize/aria-posinset on every windowed option', (): void => {
+        const items: readonly string[] = makeRows(50);
+        render(<Harness items={items} selectionMode={ESelectionMode.Single} />);
+
+        const options: HTMLElement[] = screen.getAllByRole('option');
+        // The list is windowed: only a slice of the 50 rows is mounted.
+        expect(options.length).toBeLessThan(50);
+        for (const option of options) {
+            const index: number = Number(option.getAttribute('data-index'));
+            // setsize is the TOTAL item count (not the rendered slice size) and
+            // posinset is the 1-based ABSOLUTE index, so AT announces "N of 50"
+            // instead of a within-slice position.
+            expect(option).toHaveAttribute('aria-setsize', '50');
+            expect(option).toHaveAttribute('aria-posinset', String(index + 1));
+        }
+    });
+
+    it('keeps absolute posinset on the active row forced into the DOM after End', async (): Promise<void> => {
+        const items: readonly string[] = makeRows(50);
+        const user: UserEvent = userEvent.setup();
+        render(<Harness items={items} selectionMode={ESelectionMode.Single} />);
+
+        const listbox: HTMLElement = screen.getByRole('listbox');
+        listbox.focus();
+        await user.keyboard('{End}');
+
+        // The last row scrolled out of the initial window but is forced into the
+        // DOM for aria-activedescendant; its posinset is the absolute position
+        // (50 of 50), never a window-slice offset.
+        const active: HTMLElement = activeRow(listbox);
+        expect(active).toHaveTextContent('Row 49');
+        expect(active).toHaveAttribute('aria-posinset', '50');
+        expect(active).toHaveAttribute('aria-setsize', '50');
+    });
+
+    it('draws the active-row ring only while the listbox holds focus', (): void => {
+        render(<Harness selectionMode={ESelectionMode.Single} />);
+
+        const listbox: HTMLElement = screen.getByRole('listbox');
+        // Idle (unfocused): the cursor exists logically but the ring attribute is
+        // absent, so there is no permanent ring on row 0 while the list is idle.
+        expect(screen.getByRole('option', { name: 'Apple' })).not.toHaveAttribute(
+            'data-active',
+        );
+
+        act((): void => {
+            listbox.focus();
+        });
+        expect(screen.getByRole('option', { name: 'Apple' })).toHaveAttribute(
+            'data-active',
+            'true',
+        );
+
+        act((): void => {
+            listbox.blur();
+        });
+        expect(screen.getByRole('option', { name: 'Apple' })).not.toHaveAttribute(
+            'data-active',
+        );
     });
 
     it('applies an explicit id to the interactive listbox root', (): void => {
