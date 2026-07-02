@@ -4,8 +4,8 @@ import type { EEnabledState } from '../../state/state';
 // Props for the Thumbpad control. A RELATIVE delta surface (camera-look /
 // trackpad style). It reports the incremental movement since the previous
 // pointer sample as a rect-normalized Axis2D delta and does NOT self-center to a
-// fixed origin. A larger BACK and a FRONT thumb layer show a parallax travel
-// under the finger and ease home when a pointer gesture ends. Keyboard and
+// fixed origin. A single visible thumb layer tracks the travel under the
+// finger and snaps home when a pointer gesture ends. Keyboard and
 // assistive-tech input comes from two paired, visually hidden range sliders (one
 // per axis) whose value tracks the look offset; each slider change emits a
 // relative delta step.

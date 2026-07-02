@@ -154,7 +154,7 @@
 }
 
 .chevron:active:not(:disabled) {
-    transform: scale(0.97);
+    transform: scale(var(--portal-press-scale));
 }
 
 /* Token-drawn disclosure chevron. The shared .chevronGlyph points DOWN by

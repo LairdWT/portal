@@ -51,7 +51,7 @@
 }
 
 .tile:active:not(:disabled) {
-    transform: scale(0.97);
+    transform: scale(var(--portal-press-scale));
 }
 
 .tile[data-state='selected'] {

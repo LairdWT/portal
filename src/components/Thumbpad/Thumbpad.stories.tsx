@@ -30,7 +30,7 @@ export const RelativeDelta: Story = {
 };
 
 // Keyboard / assistive tech: Tab to one of the hidden per-axis sliders and arrow
-// it; each change emits a relative delta step and moves the parallax offset.
+// it; each change emits a relative delta step and moves the thumb offset.
 export const Keyboard: Story = {
     args: {
         label: 'Look thumbpad (keyboard)',

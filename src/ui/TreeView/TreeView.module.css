@@ -128,7 +128,7 @@
 }
 
 .treeitem[data-enabled='enabled']:active > .rowContent {
-    transform: scale(0.99);
+    transform: scale(var(--portal-press-scale));
 }
 
 /* The disclosure control: a 3rem touch box (the touch floor applies to the

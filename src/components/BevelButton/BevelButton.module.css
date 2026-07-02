@@ -53,7 +53,7 @@
 }
 
 .bevel[data-pressed='pressed'] {
-    transform: scale(0.97);
+    transform: scale(var(--portal-press-scale));
 
     /* Pressed reads as recessed metal: the face darkens to the steel end of the
      * ramp while the animated ring carries over (the background clip persists). */
@@ -81,7 +81,7 @@
     margin-inline-end: calc(-1 * var(--portal-letter-spacing-wide));
     font-family: var(--portal-font-sans);
     font-size: var(--portal-action-label-size, var(--portal-size-text-lg));
-    font-weight: 900;
+    font-weight: var(--portal-weight-label-bold);
     line-height: var(--portal-line-height-tight);
     letter-spacing: var(--portal-letter-spacing-wide);
     text-align: center;

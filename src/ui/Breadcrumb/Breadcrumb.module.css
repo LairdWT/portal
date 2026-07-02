@@ -131,7 +131,7 @@ button.crumbLabel:hover:not(:disabled) {
 }
 
 button.crumbLabel:active:not(:disabled) {
-    transform: scale(0.97);
+    transform: scale(var(--portal-press-scale));
 }
 
 /*

@@ -120,7 +120,7 @@
 }
 
 .divider[data-active='true'] .handle {
-    transform: scale(0.97);
+    transform: scale(var(--portal-press-scale));
 }
 
 @media (prefers-reduced-motion: no-preference) {

@@ -149,7 +149,7 @@
 
 /* Transform-only press feedback - reduced-motion safe, so OUTSIDE the query. */
 .input:active:not(:disabled) + .box {
-    transform: scale(0.97);
+    transform: scale(var(--portal-press-scale));
 }
 
 @media (prefers-reduced-motion: no-preference) {

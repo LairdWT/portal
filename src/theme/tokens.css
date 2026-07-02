@@ -189,6 +189,7 @@
     --portal-hud-glow: var(--portal-tone-glow);
     --portal-weight-label-bold: 900;
     --portal-weight-label-strong: 700;
+    --portal-weight-label-medium: 600; /* medium-emphasis labels, above body */
 
     /* Stacking. The overlay layer for portal-rendered surfaces (Popover and the
      * Tooltip/Menu/Select/Dialog overlays built on it) so they sit above page

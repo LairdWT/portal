@@ -75,7 +75,7 @@
 .value {
     margin: 0;
     font-size: var(--portal-size-text-md);
-    font-weight: 700;
+    font-weight: var(--portal-weight-label-strong);
     color: var(--portal-color-text-0);
     font-variant-numeric: tabular-nums;
 }

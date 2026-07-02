@@ -85,7 +85,7 @@
 }
 
 .item:active:not(:disabled) {
-    transform: scale(0.98);
+    transform: scale(var(--portal-press-scale));
 }
 
 .item[data-state='active'] {

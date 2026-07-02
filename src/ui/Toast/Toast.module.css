@@ -82,7 +82,7 @@
 
 .title {
     display: block;
-    font-weight: 600;
+    font-weight: var(--portal-weight-label-medium);
 }
 
 .message {

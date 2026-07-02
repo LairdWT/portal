@@ -26,7 +26,7 @@
 .title {
     color: var(--portal-color-text-0);
     font-size: var(--portal-size-text-sm);
-    font-weight: 600;
+    font-weight: var(--portal-weight-label-medium);
     line-height: var(--portal-line-height-tight);
 }
 

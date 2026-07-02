@@ -65,7 +65,7 @@
 .label {
     composes: wideLabel from '../../theme/surfaces.module.css';
     font-size: var(--portal-size-text-sm);
-    font-weight: 700;
+    font-weight: var(--portal-weight-label-strong);
     color: var(--portal-color-text-0);
 }
 

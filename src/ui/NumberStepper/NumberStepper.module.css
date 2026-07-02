@@ -95,7 +95,7 @@
 }
 
 .key:active:not(:disabled) {
-    transform: scale(0.97);
+    transform: scale(var(--portal-press-scale));
 
     /* Pressed reads as recessed steel: the face darkens to the steel end of the
      * metal ramp while the ring carries over (the clip persists from the base

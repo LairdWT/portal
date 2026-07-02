@@ -1,14 +1,14 @@
 /*
  * Thumbpad. Relative (camera-look / trackpad) surface. The host element carries
  * the transient --portal-pad-x / --portal-pad-y custom properties (written by the
- * component) so the two stacked parallax layers below it inherit and translate
- * from the same offset at different depth multipliers. The offset eases back to
- * centre when the gesture ends. The control reports incremental deltas, not an
- * absolute axis. Layout is intrinsic; no fixed pixel sizing.
+ * component); a single visible thumb layer inherits them and is positioned from
+ * that offset. The control reports incremental deltas, not an absolute axis. On
+ * gesture end the offset resets to centre with no ease-back. Layout is intrinsic;
+ * no fixed pixel sizing.
  *
- * Reduced motion: the only animation is the layers' transform transition, which
- * the @media (prefers-reduced-motion: reduce) block fully disables. There is no
- * JS-driven animation, so the component adds no useReducedMotion call.
+ * There is no transition and no JS-driven animation - the thumb snaps to the live
+ * offset - so there is nothing for reduced motion to gate and the component adds
+ * no useReducedMotion call.
  */
 
 .base {
@@ -64,8 +64,8 @@
     touch-action: none;
 }
 
-/* FRONT parallax layer. Translates from the host-inherited offset at the larger
- * multiplier so it leads the BACK layer for depth, mirroring ControllerPad. */
+/* The single visible thumb layer: positioned from the host-inherited offset
+ * (--portal-pad-x/y). No transition, so it snaps to the live offset. */
 .thumb {
     composes: toneScope from '../../ui/tone.module.css';
     background: var(--portal-tone-accent);
@@ -84,15 +84,8 @@
     pointer-events: none;
 }
 
-/* BACK parallax layer. Larger and translated at the smaller multiplier so it
- * trails the FRONT layer. */
+/* Vestigial second layer, kept display:none (the design renders a single visible
+ * marker); the element is still emitted by the component but never painted. */
 .thumbShadow {
     display: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .thumb,
-    .thumbShadow {
-        transition: none;
-    }
 }

@@ -31,12 +31,12 @@ export function Thumbpad({
     const axisYInputRef: RefObject<HTMLInputElement | null> =
         useRef<HTMLInputElement | null>(null);
     // Accumulated, unit-circle-clamped look offset. Shared by the pointer path,
-    // the keyboard sliders, and the parallax layers so all three stay in sync.
+    // the keyboard sliders, and the thumb layer so all three stay in sync.
     const offsetRef: RefObject<Axis2D> = useRef<Axis2D>({ x: 0, y: 0 });
     const isDisabled: boolean = resolvedEnabled === EEnabledState.Disabled;
 
-    // Write the offset onto the HOST element so both stacked parallax layers
-    // inherit --portal-pad-x / --portal-pad-y and translate at their own depth.
+    // Write the offset onto the HOST element so the thumb layer inherits
+    // --portal-pad-x / --portal-pad-y and translates with the gesture.
     const writeHostOffset: (offset: Axis2D) => void = useCallback(
         (offset: Axis2D): void => {
             const host: HTMLDivElement | null = hostRef.current;
@@ -74,7 +74,7 @@ export function Thumbpad({
         [],
     );
 
-    // Move the shared offset (parallax + sliders) to a new clamped position and
+    // Move the shared offset (thumb + sliders) to a new clamped position and
     // emit the relative delta that produced it.
     // Commit the visual offset and the public onDelta callback. Emission is
     // owned by the axis control seam: the pointer path emits via the hook after

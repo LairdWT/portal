@@ -1,8 +1,10 @@
 /*
  * Marquee - a machined-HUD readout band whose over-long content scrolls past a
  * fixed-width clip. Consumes only --portal-* / --portal-tone-* tokens and the
- * shared surfaces.module.css utilities (via composes); zero literal colors and
- * zero authored fixed-px layout (the only measured value is the JS-computed
+ * shared surfaces.module.css utilities (via composes); the sole literal color is
+ * the mask-image 'black' alpha stop (mask reads alpha only, not a themable color;
+ * see the .viewport rule) and there is zero authored fixed-px layout (the only
+ * measured value is the JS-computed
  * inline --portal-marquee-duration; the gap is a consumer token via
  * --portal-marquee-gap). Logical properties throughout.
  *
@@ -29,6 +31,9 @@
     min-block-size: var(--portal-touch-target-min);
     padding-inline: var(--portal-space-5);
     overflow: hidden;
+
+    /* mask-image reads only the alpha channel; black is the canonical
+     * fully-opaque stop, not a themable color. */
     mask-image: linear-gradient(
         to right,
         transparent 0,
@@ -107,7 +112,7 @@
 }
 
 .control:active:not(:disabled) {
-    transform: scale(0.97);
+    transform: scale(var(--portal-press-scale));
 }
 
 /* Local token-drawn play/pause glyph on a decorative aria-hidden span. The

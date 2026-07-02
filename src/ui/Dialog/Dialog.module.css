@@ -119,7 +119,7 @@
     margin: 0;
     color: var(--portal-color-text-0);
     font-size: var(--portal-size-text-lg);
-    font-weight: 600;
+    font-weight: var(--portal-weight-label-medium);
     line-height: var(--portal-line-height-tight);
 }
 
@@ -177,7 +177,7 @@
     border-radius: var(--portal-bevel-2);
     font-family: inherit;
     font-size: var(--portal-size-text-md);
-    font-weight: 600;
+    font-weight: var(--portal-weight-label-medium);
     cursor: pointer;
     touch-action: manipulation;
 }
@@ -207,5 +207,5 @@
 
 .actionPrimary:active,
 .actionSecondary:active {
-    transform: scale(0.97);
+    transform: scale(var(--portal-press-scale));
 }

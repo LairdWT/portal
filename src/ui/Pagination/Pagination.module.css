@@ -102,7 +102,7 @@
 .control:active:not(:disabled),
 .page:active:not(:disabled) {
     background-color: var(--portal-tone-fill);
-    transform: scale(0.97);
+    transform: scale(var(--portal-press-scale));
 }
 
 .page[data-state='current'] {

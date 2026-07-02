@@ -59,7 +59,7 @@
 /* Transform-only press feedback is reduced-motion safe, so it stays outside the
  * motion query (matching SegmentedControl). */
 .mark:active:not(:disabled) {
-    transform: scale(0.97);
+    transform: scale(var(--portal-press-scale));
 }
 
 /*

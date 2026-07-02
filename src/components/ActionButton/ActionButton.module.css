@@ -61,7 +61,7 @@
 }
 
 .action[data-pressed='pressed'] {
-    transform: scale(0.97);
+    transform: scale(var(--portal-press-scale));
 
     /* Only the fill image changes on press; the metal border layer and the
      * background clip, size, and position carry over so the sheen continues. */
@@ -90,7 +90,7 @@
      * button by setting --portal-action-label-size; otherwise the static text
      * token applies. */
     font-size: var(--portal-action-label-size, var(--portal-size-text-md));
-    font-weight: 700;
+    font-weight: var(--portal-weight-label-strong);
     line-height: var(--portal-line-height-tight);
     letter-spacing: var(--portal-letter-spacing-wide);
     text-align: center;
