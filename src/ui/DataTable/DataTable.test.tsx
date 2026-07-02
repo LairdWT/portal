@@ -7,7 +7,15 @@ import {
     type SetStateAction,
     useState,
 } from 'react';
-import { afterEach, describe, expect, it, type Mock, vi } from 'vitest';
+import {
+    afterEach,
+    describe,
+    expect,
+    it,
+    type Mock,
+    type MockInstance,
+    vi,
+} from 'vitest';
 
 import { EEnabledState } from '../../state/state';
 import { ESelectionMode } from '../selectionMode';
@@ -27,6 +35,32 @@ const COLUMNS: readonly TableColumn[] = [
 
 function renderCell(context: TableCellContext): ReactNode {
     return `${context.columnKey}-${String(context.rowIndex)}`;
+}
+
+const ROW_HEIGHT: number = 48;
+const VIEWPORT_ROWS: number = 10;
+const VIEWPORT_HEIGHT: number = ROW_HEIGHT * VIEWPORT_ROWS;
+
+// jsdom performs no layout, so a scroll viewport reports clientHeight 0 and the
+// virtual window collapses to the overscan band, which hides the page-step math.
+// Stub the measured viewport height and a fixed scrollTop (get/set accessors that
+// live on Element.prototype) so useVirtualWindow yields a realistic window from
+// its mount layout effect. Returns a restore closure that removes only its spies.
+function stubViewport(scrollTop: number): () => void {
+    const clientHeightSpy: MockInstance<() => number> = vi
+        .spyOn(Element.prototype, 'clientHeight', 'get')
+        .mockReturnValue(VIEWPORT_HEIGHT);
+    const scrollTopGetSpy: MockInstance<() => number> = vi
+        .spyOn(Element.prototype, 'scrollTop', 'get')
+        .mockReturnValue(scrollTop);
+    const scrollTopSetSpy: MockInstance<(value: number) => void> = vi
+        .spyOn(Element.prototype, 'scrollTop', 'set')
+        .mockImplementation((): void => undefined);
+    return (): void => {
+        clientHeightSpy.mockRestore();
+        scrollTopGetSpy.mockRestore();
+        scrollTopSetSpy.mockRestore();
+    };
 }
 
 afterEach((): void => {
@@ -482,5 +516,51 @@ describe('DataTable', (): void => {
             col: '3',
             rowIndex: '5001',
         });
+    });
+
+    it('pages a full viewport down from the very top', async (): Promise<void> => {
+        const restore: () => void = stubViewport(0);
+        try {
+            const user: UserEvent = userEvent.setup();
+            render(<Harness rowCount={100} />);
+
+            const grid: HTMLElement = screen.getByRole('grid');
+            grid.focus();
+            // Seat the cursor on the first body row.
+            await user.keyboard('{ArrowDown}');
+            expect(activeInfo(grid).rowIndex).toBe('2');
+
+            // PageDown from the very top jumps a full viewport (VIEWPORT_ROWS - 1
+            // = 9 rows, landing on aria-rowindex 11). At the clamped top the upper
+            // overscan band is absent, so the old fixed 2 * overscan subtraction
+            // under-jumped to aria-rowindex 7.
+            await user.keyboard('{PageDown}');
+            expect(activeInfo(grid).rowIndex).toBe('11');
+        } finally {
+            restore();
+        }
+    });
+
+    it('pages a full viewport down from a mid-scroll position', async (): Promise<void> => {
+        const restore: () => void = stubViewport(40 * ROW_HEIGHT);
+        try {
+            const user: UserEvent = userEvent.setup();
+            render(
+                <Harness rowCount={100} selectionMode={ESelectionMode.Single} />,
+            );
+
+            const grid: HTMLElement = screen.getByRole('grid');
+            // The window is scrolled to the middle (rows ~36..53 mounted); click a
+            // visible row to seat the cursor consistently with the viewport.
+            await user.click(screen.getByRole('rowheader', { name: 'name-40' }));
+            expect(activeInfo(grid).rowIndex).toBe('42');
+
+            // A full-viewport page step (9 rows) still applies mid-scroll, where
+            // both overscan bands are present: row 40 -> 49 (aria-rowindex 51).
+            await user.keyboard('{PageDown}');
+            expect(activeInfo(grid).rowIndex).toBe('51');
+        } finally {
+            restore();
+        }
     });
 });

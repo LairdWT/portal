@@ -360,14 +360,20 @@ export function DataTable(props: DataTableProps): ReactElement {
         // The first key press with no visited cell establishes the cursor at the
         // header origin, exactly the seed the prior header-seeded state used.
         const current: ActiveCell = activeCell ?? HEADER_ORIGIN;
-        // Page by the VISIBLE row count, not the rendered window: endIndex -
-        // startIndex includes the overscan band (up to 2 * overscan extra rows),
-        // so subtracting it back yields a one-viewport jump instead of an
-        // overscan-inflated overshoot.
-        const visibleRows: number =
-            virtualWindow.endIndex -
-            virtualWindow.startIndex -
-            2 * (overscan ?? OVERSCAN_DEFAULT);
+        // Page by the VISIBLE row count, not the rendered window. The window
+        // carries an overscan band above and below the viewport, but at the
+        // clamped top or bottom of the scroll range one band is truncated
+        // (startIndex floors at 0, endIndex ceils at rowCount). Subtract only the
+        // overscan actually present on each side, so the first PageDown from the
+        // very top jumps a full viewport instead of the half-viewport the old
+        // fixed 2 * overscan subtraction produced.
+        const over: number = overscan ?? OVERSCAN_DEFAULT;
+        const topPad: number = Math.min(over, virtualWindow.startIndex);
+        const bottomPad: number = Math.min(over, rowCount - virtualWindow.endIndex);
+        const visibleRows: number = Math.max(
+            1,
+            virtualWindow.endIndex - virtualWindow.startIndex - topPad - bottomPad,
+        );
         const pageStep: number = Math.max(1, visibleRows - 1);
         switch (event.key) {
             case 'ArrowDown': {
