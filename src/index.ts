@@ -12,6 +12,8 @@ export {
     type DefaultPresetDescriptors,
     type SignalForwardProps,
 } from './components/ControlSurface/ControlSurface.types';
+export { Dial } from './components/Dial/Dial';
+export { type DialProps } from './components/Dial/Dial.types';
 export { DPad } from './components/DPad/DPad';
 export {
     type DPadProps,
@@ -269,6 +271,8 @@ export {
     ECommandRowKind,
 } from './ui/CommandPalette/CommandPalette.types';
 export { type FuzzyMatch, fuzzyMatch } from './ui/CommandPalette/fuzzyMatch';
+export { Cooldown } from './ui/Cooldown/Cooldown';
+export { type CooldownProps } from './ui/Cooldown/Cooldown.types';
 export { CTA } from './ui/CTA/CTA';
 export {
     type CtaButtonType,
@@ -326,6 +330,8 @@ export {
     EFileRejection,
     type FileUploadProps,
 } from './ui/FileUpload/FileUpload.types';
+export { Gauge } from './ui/Gauge/Gauge';
+export { type GaugeBand, type GaugeProps } from './ui/Gauge/Gauge.types';
 export { KeyValue } from './ui/KeyValue/KeyValue';
 export {
     EKeyValueOverflow,

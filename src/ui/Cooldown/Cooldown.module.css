@@ -1,0 +1,113 @@
+/*
+ * Cooldown. A clockwise-unwinding radial scrim over arbitrary children: the
+ * transparent wedge grows from 12 o'clock as the cooldown elapses, with a
+ * toned leading-edge line riding the reveal boundary, and a one-shot ready
+ * flash when a live countdown completes.
+ *
+ * PAINT EXCEPTION (documented): the reveal animates the registered
+ * --portal-cooldown-angle custom property (tokens.css), which repaints the
+ * conic scrim per frame. This is the counterpart to the Spinner rule that
+ * INFINITE rotation must be a transform: a cooldown sweep encodes a FRACTION,
+ * not a rotation - no transform can unwind a conic wedge - and the animation
+ * is one-shot and bounded by the remaining time, the same budget as the
+ * tokens.css metal sheen that animates the sibling registered angle. Under
+ * reduced motion there is no animation at all: the scrim is static per tick
+ * and a numeric countdown carries the remainder.
+ */
+
+.root {
+    composes: toneScope from '../tone.module.css';
+    position: relative;
+    display: inline-grid;
+}
+
+.content {
+    grid-area: 1 / 1;
+}
+
+/* The unwinding scrim (the Dialog backdrop mix). It never intercepts input:
+ * disabling the wrapped control while cooling is the consumer's contract. */
+.scrim {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    background: conic-gradient(
+        from 0deg,
+        transparent 0deg var(--portal-cooldown-angle),
+        color-mix(in oklab, var(--portal-color-bg-0) 72%, transparent)
+            var(--portal-cooldown-angle) 360deg
+    );
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .scrim {
+        animation: portal-cooldown-reveal var(--portal-cooldown-duration, 0ms)
+            linear forwards;
+    }
+}
+
+/* Keyword-only block (the tokens.css metal-sheen precedent): the implicit
+ * `from` is the element's inline start angle. */
+@keyframes portal-cooldown-reveal {
+    to {
+        --portal-cooldown-angle: 360deg;
+    }
+}
+
+/* The toned leading edge of the reveal: a thin radial line from the center to
+ * the rim, rotating with the same animated angle. */
+.edge {
+    position: absolute;
+    inset: 0;
+    transform: rotate(var(--portal-cooldown-angle));
+}
+
+.edge::after {
+    content: '';
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: calc(50% - var(--portal-border-thickness-thin));
+    inline-size: calc(var(--portal-border-thickness-thin) * 2);
+    block-size: 50%;
+    background: var(--portal-tone-accent);
+    box-shadow: 0 0 var(--portal-space-1) var(--portal-tone-glow);
+}
+
+/* The reduced-motion numeric countdown (console mono, AA text). */
+.count {
+    font-family: var(--portal-font-mono);
+    font-weight: var(--portal-weight-label-bold);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--portal-size-text-lg);
+    color: var(--portal-color-text-0);
+}
+
+/* One ready flash when a LIVE countdown completes. data-flash is set only by
+ * the component's own completion, never on mounting an already-ready tile,
+ * so a loaded hotbar does not pulse in unison. */
+@media (prefers-reduced-motion: no-preference) {
+    .root[data-flash='true']::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0;
+        animation: portal-cooldown-flash var(--portal-duration-ui-base)
+            var(--portal-easing-standard);
+    }
+}
+
+@keyframes portal-cooldown-flash {
+    0% {
+        opacity: 1;
+        box-shadow: 0 0 var(--portal-space-4) var(--portal-tone-glow-strong);
+    }
+
+    100% {
+        opacity: 0;
+        box-shadow: 0 0 var(--portal-space-2) transparent;
+    }
+}

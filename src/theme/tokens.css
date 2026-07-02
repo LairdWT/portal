@@ -11,6 +11,15 @@
     inherits: false;
 }
 
+/* Registered so the Cooldown reveal angle interpolates as a real angle: the
+ * one-shot unwind keyframe animates this property from the remaining-fraction
+ * angle to a full turn (a bounded paint exception - see Cooldown.module.css). */
+@property --portal-cooldown-angle {
+    syntax: '<angle>';
+    initial-value: 360deg;
+    inherits: true;
+}
+
 :root {
     color-scheme: dark;
 

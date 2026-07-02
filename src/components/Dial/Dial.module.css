@@ -1,0 +1,108 @@
+/*
+ * Dial. A rotary game-input knob: a machined metal face inside a toned
+ * conic-gradient sweep ring (the Spinner's annulus mask technique) whose fill
+ * tracks --portal-dial-fill across the shared 270-degree instrument sweep.
+ * The indicator mark rotates with a compositor-cheap transform (reduced-motion
+ * gated transition for keyboard steps; a live twist re-renders per sample and
+ * needs no transition). Tokens only; tone drives the ring, mark, and glow -
+ * never AA-critical text.
+ */
+
+.dial {
+    composes: toneScope from '../../ui/tone.module.css';
+
+    --portal-dial-fill: 0;
+    --portal-dial-size: calc(var(--portal-touch-target-min) * 2);
+    --portal-dial-angle: calc(-135deg + var(--portal-dial-fill) * 270deg);
+
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--portal-space-2);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+    font-size: var(--portal-size-text-md);
+    user-select: none;
+}
+
+.label {
+    color: var(--portal-color-text-1);
+    line-height: var(--portal-line-height-tight);
+    letter-spacing: var(--portal-letter-spacing-wide);
+}
+
+.shell {
+    position: relative;
+    inline-size: var(--portal-dial-size);
+    block-size: var(--portal-dial-size);
+}
+
+/* The sweep ring: a conic fill from the sweep start, masked to an annulus
+ * (the Spinner technique). The 270..360deg span is the dial's bottom gap. */
+.ring {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--portal-radius-pill);
+    background: conic-gradient(
+        from -135deg,
+        var(--portal-tone-accent) 0deg calc(var(--portal-dial-fill) * 270deg),
+        var(--portal-color-surface-1) calc(var(--portal-dial-fill) * 270deg) 270deg,
+        transparent 270deg 360deg
+    );
+    mask: radial-gradient(
+        farthest-side,
+        transparent calc(100% - var(--portal-space-2)),
+        black
+            calc(100% - var(--portal-space-2) + var(--portal-border-thickness-thin))
+    );
+    filter: drop-shadow(0 0 var(--portal-space-2) var(--portal-tone-glow));
+}
+
+/* The machined knob face: the single interactive element (role=slider). The
+ * inset keeps clear air between the face and the sweep ring. */
+.knob {
+    composes: metalFace from '../../theme/surfaces.module.css';
+    position: absolute;
+    inset: var(--portal-space-3);
+    border: var(--portal-hud-edge-width) solid var(--portal-tone-border);
+    border-radius: var(--portal-radius-pill);
+    cursor: grab;
+    touch-action: none;
+}
+
+.knob:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: var(--portal-space-1);
+}
+
+.knob[aria-disabled='true'] {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+/* The rotating carrier for the indicator tick. The carrier spans the face and
+ * rotates as one; the tick is its 12-o'clock pseudo-element. */
+.mark {
+    position: absolute;
+    inset: 0;
+    display: block;
+    transform: rotate(var(--portal-dial-angle));
+}
+
+.mark::after {
+    content: '';
+    position: absolute;
+    inset-block-start: var(--portal-space-1);
+    inset-inline-start: calc(50% - var(--portal-border-thickness-normal));
+    inline-size: calc(var(--portal-border-thickness-normal) * 2);
+    block-size: var(--portal-space-3);
+    background: var(--portal-tone-accent);
+    box-shadow: 0 0 var(--portal-space-1) var(--portal-tone-glow);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .mark {
+        transition: transform var(--portal-duration-frame-fast)
+            var(--portal-easing-standard);
+    }
+}

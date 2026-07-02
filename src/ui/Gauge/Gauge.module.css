@@ -1,0 +1,120 @@
+/*
+ * Gauge. A machined-HUD radial arc meter in the Chart-family chrome: the
+ * beveled angular frame, the tracked caption, and a 270-degree dial whose gap
+ * sits at the bottom. The fill arc shares the track's path (normalized
+ * pathLength 100) and is revealed by a stroke dash driven from the
+ * --portal-gauge-fill custom property, so a value change sweeps the arc via a
+ * CSS transition (reduced-motion gated; the resting state is static). Arc
+ * stroke widths are viewBox user units - geometry constants like the path
+ * coordinates, scaling with the dial - while the frame chrome uses tokens.
+ * Tone drives the arc, edge, and glow ONLY; the readout stays text-0 (AA).
+ */
+
+.root {
+    composes: beveled from '../../theme/surfaces.module.css';
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-2);
+    margin: 0;
+    padding-block: var(--portal-space-3);
+    padding-inline: var(--portal-space-4);
+    border: var(--portal-hud-edge-width) solid var(--portal-tone-border);
+    border-radius: var(--portal-bevel-3);
+    background-color: var(--portal-color-surface-0);
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+}
+
+/* The tracked caption above the dial (the Chart family's inline wide-label
+ * recipe; .wideLabel cannot be composed under the value-keyword-case rule). */
+.caption {
+    color: var(--portal-color-text-1);
+    font-size: var(--portal-size-text-sm);
+    line-height: var(--portal-line-height-tight);
+    letter-spacing: var(--portal-letter-spacing-wide);
+}
+
+/* The dial square: the SVG keeps its intrinsic 1:1 viewBox ratio and the
+ * readout centers over it. */
+.body {
+    position: relative;
+}
+
+.dial {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+    aspect-ratio: 1;
+}
+
+/* The recessed channel the fill sweeps over. */
+.track {
+    fill: none;
+    stroke: var(--portal-color-surface-1);
+    stroke-width: 7;
+}
+
+/* The toned fill arc: the same path as the track, revealed by the normalized
+ * dash. The trailing 100 keeps the remainder of the (pathLength-normalized)
+ * arc as gap. */
+.arcFill {
+    fill: none;
+    stroke: var(--portal-tone-accent);
+    stroke-width: 7;
+    stroke-dasharray: calc(var(--portal-gauge-fill, 0) * 100) 100;
+    filter: drop-shadow(0 0 var(--portal-space-2) var(--portal-tone-glow));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .arcFill {
+        transition: stroke-dasharray var(--portal-duration-ui-base)
+            var(--portal-easing-standard);
+    }
+}
+
+/* The thin band ring outside the track (the tachometer redline). Untyped
+ * bands take the tone accent; status keys the universal tokens. */
+.band {
+    fill: none;
+    stroke: var(--portal-tone-accent);
+    stroke-width: 3;
+}
+
+.band[data-status='danger'] {
+    stroke: var(--portal-color-danger);
+}
+
+.band[data-status='success'] {
+    stroke: var(--portal-color-success);
+}
+
+/* The centered readout over the dial. Decorative pointer-wise; the ARIA meter
+ * value lives on this element. */
+.readout {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    pointer-events: none;
+}
+
+/* The console-telemetry number (the StatTile value recipe). */
+.value {
+    font-family: var(--portal-font-mono);
+    font-weight: var(--portal-weight-label-bold);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--portal-size-font-medium);
+    line-height: var(--portal-line-height-tight);
+    color: var(--portal-color-text-0);
+}
+
+.unit {
+    font-family: var(--portal-font-sans);
+    font-size: var(--portal-size-text-sm);
+    font-weight: var(--portal-weight-label-strong);
+    color: var(--portal-color-text-1);
+}
