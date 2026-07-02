@@ -295,9 +295,14 @@ export function RadialCore({
     );
     const hubStyle: CSSProperties = {
         [HUB_CLIP_PROPERTY]: hub.clipPath,
+    };
+    // The hub fraction rides the PANEL so both the hub sizing and the
+    // collapsible form's rest-state box (which collapses to exactly the hub
+    // footprint) resolve it; custom properties inherit down to the hub.
+    const panelStyle: CSSProperties = {
+        ...toneProperties(tone),
         [HUB_FRACTION_PROPERTY]: hub.sizeFraction,
     };
-    const panelStyle: CSSProperties = toneProperties(tone);
 
     // The panel itself is shared by both forms: the overlay wraps it in the
     // backdrop + positioner and portals it; the collapsible form renders it

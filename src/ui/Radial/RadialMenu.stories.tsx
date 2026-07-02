@@ -18,6 +18,17 @@ const ACTION_ITEMS: readonly RadialItem[] = [
     { id: 'flee', label: 'Flee' },
     { id: 'wait', label: 'Wait' },
     { id: 'scan', label: 'Scan' },
+    // A second page's worth, so the paged story can run a full eight-sided
+    // wheel across two pages (earlier stories slice from the front and are
+    // unaffected).
+    { id: 'guard', label: 'Guard' },
+    { id: 'sneak', label: 'Sneak' },
+    { id: 'trade', label: 'Trade' },
+    { id: 'rest', label: 'Rest' },
+    { id: 'craft', label: 'Craft' },
+    { id: 'map', label: 'Map' },
+    { id: 'journal', label: 'Journal' },
+    { id: 'camp', label: 'Camp' },
 ];
 
 const CENTER_ACTIONS: readonly ERadialAction[] = [
@@ -170,17 +181,19 @@ export const IconSections: Story = {
 };
 
 // More items than sides: the center previous/next actions page through them
-// (wrapping), with the wedge entrance replaying per page.
+// (wrapping), with the wedge entrance replaying per page. The full
+// eight-sided wheel is the default presentation, paging sixteen items.
 export const Paged: Story = {
     args: {
-        sides: 4,
-        itemCount: 8,
+        sides: 8,
+        itemCount: 16,
         centerActions: [ERadialAction.Previous, ERadialAction.Next],
     },
 };
 
-// The collapsible inline form: the hub persists as the open/close toggle
-// (wearing the shared toggle chip) and the wedges fan out around it in place.
+// The collapsible inline form: the hub itself is the themed open/close
+// toggle (a tone plus that rotates into a cross), the box grows from the
+// hub footprint to the full ring, and the wedges fan out around it in place.
 function CollapsibleRadialDemo(): ReactElement {
     const [open, setOpen]: [boolean, Dispatch<SetStateAction<boolean>>] =
         useState<boolean>(false);

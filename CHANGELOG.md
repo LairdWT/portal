@@ -6,6 +6,18 @@ based on Keep a Changelog, and the project follows Semantic Versioning with the
 
 ## [Unreleased]
 
+### Changed
+
+- Collapsible RadialMenu rest state redesigned: the hub face itself is the
+  toggle and stays on the theme ramp - its mark is now a themed tone-accent
+  plus (rotating into the cancel-cross while open) instead of the metal
+  toggle chip. The inline box now collapses to exactly the hub footprint at
+  rest and ANIMATES its growth to the full ring on expand (the wedges bloom
+  with the percentage-based geometry; reduced motion snaps). The `Paged`
+  story now presents the default eight-sided wheel paging sixteen items
+  (was a four-sided demo). `surfaces.module.css` `plusGlyph` gains size and
+  weight knobs (defaults unchanged).
+
 ### Added
 
 - Micro-interaction "juice" pass across the interactive catalogue, every

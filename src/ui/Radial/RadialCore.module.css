@@ -110,11 +110,34 @@
 }
 
 /* The collapsible (inline disclosure) form: the panel sits in normal flow
- * instead of the portaled overlay positioner. Its hub persists as the
- * collapsed state, so the box keeps its full size and only the wedges come
- * and go inside it. */
+ * instead of the portaled overlay positioner. At rest the box IS the hub -
+ * the collapsed toggle claims only its own footprint - and it grows to the
+ * full ring while open (and while the close animation folds the wedges back
+ * in, so they never overflow a shrinking box). */
 .panel[data-overlay='false'] {
     display: inline-block;
+    inline-size: calc(var(--radial-size) * var(--radial-hub-fraction));
+    block-size: calc(var(--radial-size) * var(--radial-hub-fraction));
+}
+
+.panel[data-overlay='false'][data-state='open'],
+.panel[data-overlay='false'][data-state='closing'] {
+    inline-size: var(--radial-size);
+    block-size: var(--radial-size);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    /* A deliberate layout transition (the Accordion grid-rows class of
+     * exception): an inline disclosure box has to actually grow and push
+     * its neighbours, which no transform can express. The wedge and hub
+     * geometry is percentage-based, so the ring blooms with the box. */
+    .panel[data-overlay='false'][data-motion='full'] {
+        transition:
+            inline-size var(--portal-duration-ui-base)
+                var(--portal-easing-emphasized),
+            block-size var(--portal-duration-ui-base)
+                var(--portal-easing-emphasized);
+    }
 }
 
 /* Shared face layers, defined per variant so the state rules can restack
@@ -497,17 +520,30 @@
     pointer-events: none;
 }
 
-/* The collapsible toggle's mark: the shared universal toggle chip (the
- * TreeView twisty, promoted), scaled up to carry the hub face alone. Points
- * right while collapsed, rotates down when expanded. */
+/* The collapsible toggle's mark: a themed plus drawn from the shared glyph
+ * on the tone accent with the same self-colored bloom as the action symbols.
+ * Deliberately NOT the metal toggle chip - the hub face itself is the toggle
+ * and stays on the theme ramp. It reads "+" (expand) while collapsed and
+ * rotates into the cancel-cross "x" while open. */
 .hubToggleGlyph {
-    composes: toggleChip from '../../theme/surfaces.module.css';
+    composes: plusGlyph from '../../theme/surfaces.module.css';
 
-    --portal-toggle-chip-size: var(--portal-space-6);
+    --portal-plus-size: var(--portal-space-6);
+    --portal-plus-weight: var(--portal-border-thickness-normal);
+
+    color: var(--portal-tone-accent);
+    filter: drop-shadow(0 0 var(--portal-space-2) currentcolor);
 }
 
 .hubToggleGlyph[data-expanded='true'] {
-    --portal-toggle-chip-rotate: 45deg;
+    transform: rotate(45deg);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .hubToggleGlyph {
+        transition: transform var(--portal-duration-ui-base)
+            var(--portal-easing-emphasized);
+    }
 }
 
 /* The symbol answers the pointer: it swells on hover and dips on press. */
