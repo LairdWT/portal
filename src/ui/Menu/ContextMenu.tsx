@@ -51,6 +51,17 @@ export function ContextMenu(props: ContextMenuProps): ReactElement {
     const anchorRef: RefObject<HTMLDivElement | null> =
         useRef<HTMLDivElement | null>(null);
 
+    // The element focused at open time. Popover's own restore captures
+    // document.activeElement in an effect that runs AFTER the MenuList
+    // auto-focus effect has already moved focus into the menu, so it snapshots
+    // a menu item that is detached by close time and the restore no-ops,
+    // stranding focus on <body>. Capturing here, inside the open handlers
+    // (before any focus moves), feeds MenuSurface's onCloseFocusAnchor the real
+    // opener - the same contract MenuBar fulfils with focusActiveButton.
+    const openerRef: RefObject<HTMLElement | null> = useRef<HTMLElement | null>(
+        null,
+    );
+
     const [open, setOpen]: [boolean, Dispatch<SetStateAction<boolean>>] =
         useState<boolean>(false);
     const [coords, setCoords]: [
@@ -69,6 +80,10 @@ export function ContextMenu(props: ContextMenuProps): ReactElement {
 
         function handleContextMenu(event: MouseEvent): void {
             event.preventDefault();
+            openerRef.current =
+                document.activeElement instanceof HTMLElement
+                    ? document.activeElement
+                    : null;
             setCoords({ top: event.clientY, left: event.clientX });
             setOpen(true);
         }
@@ -88,6 +103,10 @@ export function ContextMenu(props: ContextMenuProps): ReactElement {
                 return;
             }
             const rect: DOMRect = source.getBoundingClientRect();
+            openerRef.current =
+                document.activeElement instanceof HTMLElement
+                    ? document.activeElement
+                    : null;
             setCoords({ top: rect.top, left: rect.left });
             setOpen(true);
         }
@@ -102,6 +121,20 @@ export function ContextMenu(props: ContextMenuProps): ReactElement {
 
     function handleOpenChange(next: boolean): void {
         setOpen(next);
+    }
+
+    // Escape/activation closes route here via MenuSurface.closeTree; outside
+    // clicks keep Popover's guarded restore instead, so a click that focuses
+    // other content is never overridden.
+    function focusOpener(): void {
+        const opener: HTMLElement | null = openerRef.current;
+        if (opener === null) {
+            return;
+        }
+        if (!opener.isConnected) {
+            return;
+        }
+        opener.focus();
     }
 
     const anchorStyle: CSSProperties = {
@@ -125,6 +158,7 @@ export function ContextMenu(props: ContextMenuProps): ReactElement {
                 anchorRef={anchorRef}
                 placement={EPopoverPlacement.Bottom}
                 tone={tone}
+                onCloseFocusAnchor={focusOpener}
                 {...(label !== undefined ? { label } : {})}
                 {...(labelledBy !== undefined ? { labelledBy } : {})}
             />
