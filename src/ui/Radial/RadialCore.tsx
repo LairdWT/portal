@@ -24,7 +24,7 @@ import {
     type RadialItem,
 } from './Radial.types';
 import styles from './RadialCore.module.css';
-import { radialSectionAngles } from './radialGeometry';
+import { type RadialWedge, radialWedges } from './radialGeometry';
 
 // Human-readable accessible name for each hub action, announced to assistive
 // tech through aria-label (the glyphs are decorative and aria-hidden).
@@ -45,14 +45,22 @@ const ACTION_GLYPH_CLASS: Readonly<Record<ERadialAction, string | undefined>> = 
     [ACTION.Next]: styles.glyphNext,
 };
 
-// The hub grid caps at four actions (2x2). Slice defensively so an over-long
-// centerActions array can never spill a third row.
+// The hub button area caps at four actions (the 2x2 grid). Slice defensively
+// so an over-long centerActions array can never spill a third row.
 const MAX_CENTER_ACTIONS: number = 4;
 
-// Per-slot custom properties driving the CSS geometry. String-typed (not string
-// literals) so the computed keys satisfy the CSSProperties index signature, the
-// same pattern tone.ts and Slider use for --portal-* inline custom properties.
-const ANGLE_PROPERTY: string = '--radial-angle';
+// Per-wedge custom properties driving the CSS geometry: the wedge clip
+// silhouette, the rim-inset face, the label anchor / transform origin, the
+// entrance-motion start offset, and the stagger index. String-typed (not
+// string literals) so the computed keys satisfy the CSSProperties index
+// signature, the same pattern tone.ts and Slider use for --portal-* inline
+// custom properties.
+const CLIP_PROPERTY: string = '--radial-clip';
+const FACE_CLIP_PROPERTY: string = '--radial-face-clip';
+const ANCHOR_X_PROPERTY: string = '--radial-anchor-x';
+const ANCHOR_Y_PROPERTY: string = '--radial-anchor-y';
+const ENTER_X_PROPERTY: string = '--radial-enter-x';
+const ENTER_Y_PROPERTY: string = '--radial-enter-y';
 const INDEX_PROPERTY: string = '--radial-index';
 
 export function RadialCore({
@@ -116,12 +124,13 @@ export function RadialCore({
     const motion: EOverlayMotion = prefersReducedMotion
         ? EOverlayMotion.Reduced
         : EOverlayMotion.Full;
-    const angles: readonly number[] = radialSectionAngles(sides);
+    const wedges: readonly RadialWedge[] = radialWedges(sides);
     const visibleItems: readonly RadialItem[] = items.slice(0, sides);
-    const hubActions: readonly ERadialAction[] = centerActions.slice(
-        0,
-        MAX_CENTER_ACTIONS,
-    );
+    // Dedupe (a repeated action would collide on key and read twice) before
+    // capping to the 2x2 grid.
+    const hubActions: readonly ERadialAction[] = Array.from(
+        new Set(centerActions),
+    ).slice(0, MAX_CENTER_ACTIONS);
     const panelStyle: CSSProperties = toneProperties(tone);
 
     return createPortal(
@@ -145,9 +154,23 @@ export function RadialCore({
                     data-motion={motion}
                 >
                     {visibleItems.map(
-                        (item: RadialItem, index: number): ReactElement => {
-                            const slotStyle: CSSProperties = {
-                                [ANGLE_PROPERTY]: `${String(angles[index] ?? 0)}deg`,
+                        (item: RadialItem, index: number): ReactElement | null => {
+                            const wedge: RadialWedge | undefined = wedges[index];
+                            if (wedge === undefined) {
+                                // Unreachable: visibleItems is capped to
+                                // `sides` and radialWedges returns one wedge
+                                // per side. Guarded so a geometry regression
+                                // can never render an unclipped panel-sized
+                                // button.
+                                return null;
+                            }
+                            const wedgeStyle: CSSProperties = {
+                                [CLIP_PROPERTY]: wedge.clipPath,
+                                [FACE_CLIP_PROPERTY]: wedge.faceClipPath,
+                                [ANCHOR_X_PROPERTY]: wedge.anchorX,
+                                [ANCHOR_Y_PROPERTY]: wedge.anchorY,
+                                [ENTER_X_PROPERTY]: wedge.enterX,
+                                [ENTER_Y_PROPERTY]: wedge.enterY,
                                 [INDEX_PROPERTY]: index,
                             };
                             const iconNode: ReactNode =
@@ -160,52 +183,55 @@ export function RadialCore({
                                     </span>
                                 ) : null;
                             return (
-                                <div
+                                <button
                                     key={item.id}
-                                    className={styles.slot}
-                                    style={slotStyle}
+                                    type="button"
+                                    className={styles.section}
+                                    style={wedgeStyle}
+                                    aria-label={item.label}
+                                    disabled={disabled || item.disabled === true}
+                                    data-segment={item.id}
+                                    onClick={(): void => {
+                                        handleSectionClick(item, index);
+                                    }}
                                 >
-                                    <button
-                                        type="button"
-                                        className={styles.section}
-                                        aria-label={item.label}
-                                        disabled={
-                                            disabled || item.disabled === true
-                                        }
-                                        data-segment={item.id}
-                                        onClick={(): void => {
-                                            handleSectionClick(item, index);
-                                        }}
-                                    >
+                                    <span className={styles.sectionBody}>
                                         {iconNode}
                                         <span className={styles.sectionLabel}>
                                             {item.label}
                                         </span>
-                                    </button>
-                                </div>
+                                    </span>
+                                </button>
                             );
                         },
                     )}
                     <div className={styles.hub} data-count={hubActions.length}>
-                        {hubActions.map(
-                            (action: ERadialAction): ReactElement => (
-                                <button
-                                    key={action}
-                                    type="button"
-                                    className={styles.hubButton}
-                                    aria-label={ACTION_LABELS[action]}
-                                    data-action={action}
-                                    disabled={disabled}
-                                    onClick={(): void => {
-                                        handleActionClick(action);
-                                    }}
-                                >
-                                    <span
-                                        className={ACTION_GLYPH_CLASS[action]}
-                                        aria-hidden="true"
-                                    />
-                                </button>
-                            ),
+                        {hubActions.length === 0 ? (
+                            // The 0-action hub is a non-interactive beveled
+                            // panel: the machined center face with no button
+                            // semantics.
+                            <div className={styles.hubPanel} aria-hidden="true" />
+                        ) : (
+                            hubActions.map(
+                                (action: ERadialAction): ReactElement => (
+                                    <button
+                                        key={action}
+                                        type="button"
+                                        className={styles.hubButton}
+                                        aria-label={ACTION_LABELS[action]}
+                                        data-action={action}
+                                        disabled={disabled}
+                                        onClick={(): void => {
+                                            handleActionClick(action);
+                                        }}
+                                    >
+                                        <span
+                                            className={ACTION_GLYPH_CLASS[action]}
+                                            aria-hidden="true"
+                                        />
+                                    </button>
+                                ),
+                            )
                         )}
                     </div>
                 </div>

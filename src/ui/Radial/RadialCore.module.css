@@ -1,18 +1,33 @@
 /*
- * RadialCore - the shared surface behind RadialMenu (Tier-2 beveled HUD) and
- * RadialPad (Tier-1 brushed-metal controller). The backdrop and ring are
+ * RadialCore - the shared surface behind RadialMenu (Tier-2 machined HUD) and
+ * RadialPad (Tier-1 brushed-metal controller). The backdrop and radial are
  * portaled into the shared overlay root and sit on the overlay stacking layer
- * via the --portal-z-overlay token (never an inline z-index literal). The ring
- * is a square positioning field: the center hub sits at its middle and one
- * section slot radiates to each polygon edge. Every value resolves from a
- * --portal-* / --portal-tone-* token; the only inline values are the per-slot
- * --radial-angle / --radial-index the component computes from the side count.
- * Section slots are placed by rotating to their edge angle, translating outward
- * by the shared rest distance, then un-rotating so the button stays upright.
- * Entrance motion (sections sliding out from each edge, the hub scaling in, the
- * backdrop fading) is gated behind BOTH the reduced-motion media query and the
- * data-motion attribute the component sets. Tone drives the section/hub edge and
- * glow only; the hub symbol colors are the fixed status tokens.
+ * via the --portal-z-overlay token (never an inline z-index literal).
+ *
+ * Geometry: the panel is a square positioning field. Every section button
+ * spans the WHOLE panel and is cut down to its wedge by the clip-path polygon
+ * the component computes (radialGeometry.ts) - the annular slice between the
+ * outer flat-top N-gon and the inner N-gon hole that clears the center hub.
+ * Because all wedges share the panel box, one continuous gradient paints
+ * across the assembled ring: the button's own background shows through the
+ * rim (the sliver between --radial-clip and the inset --radial-face-clip) as
+ * a machined metal edge, and the ::before face fills the wedge interior. The
+ * clip polygons are physical coordinates, so the label anchors use physical
+ * top/left on purpose (the Window physical-anchor precedent): the radial is
+ * rotationally symmetric and must not mirror under dir=rtl.
+ *
+ * Center hub: a beveled square that IS the button area - 0 actions render a
+ * non-interactive machined panel, 1 fills the whole bevel, 2 splits it with a
+ * vertical seam, 4 forms a 2x2 grid. The container paints the metal; the
+ * HUD-edge-width padding and gap read as the rim and the machined seams. Its
+ * size is derived so a 2x2 cell lands exactly on the 3rem touch floor.
+ *
+ * Motion (gated behind BOTH the reduced-motion media query and the
+ * data-motion attribute): each wedge emerges from the panel center out to its
+ * edge with a per-index stagger, the hub scales in, the backdrop fades.
+ * Every value resolves from a --portal-* / --portal-tone-* token; the only
+ * inline values are the per-wedge custom properties computed from the side
+ * count.
  */
 
 .backdrop {
@@ -37,79 +52,164 @@
     pointer-events: none;
 }
 
-/* The ring / focus container (role="dialog"). Transparent: the section buttons
- * and center hub ARE the visible surface, floating over the dimmed backdrop. The
- * radial sizing ladder derives entirely from the touch floor and the spacing
- * scale, so there is no authored pixel geometry. */
+/* The radial field (role="dialog"). Transparent itself: the wedges and hub ARE
+ * the visible surface, floating over the dimmed backdrop, so the depth shadow
+ * and tone glow ride a filter that follows the composite silhouette. The size
+ * floor keeps every 8-sided wedge above the 3rem touch target at the smallest
+ * panel; the hub derivation below makes a 2x2 hub cell exactly the floor. */
 .panel {
     composes: toneScope from '../tone.module.css';
 
-    --radial-section: var(--portal-touch-target-min);
-    --radial-hub: calc(var(--portal-touch-target-min) * 2 + var(--portal-space-2));
-    --radial-gap: var(--portal-space-5);
-    --radial-distance-rest: calc(
-        var(--radial-hub) / 2 + var(--radial-gap) + var(--radial-section) / 2
-    );
-    --radial-size: calc(
-        (var(--radial-distance-rest) + var(--radial-section) / 2) * 2
+    --radial-size: clamp(19.5rem, 80vmin, 26rem);
+
+    /* The hub tracks the panel so the center-to-ring proportion holds across
+     * the clamp range, with a hard floor at which a 2x2 hub cell is exactly
+     * the 3rem touch target (2 cells + the rim padding and seam gap). */
+    --radial-hub: max(
+        calc(var(--portal-touch-target-min) * 2 + var(--portal-hud-edge-width) * 3),
+        calc(var(--radial-size) * 0.3)
     );
 
+    /* The panel box stays pointer-transparent: only the wedges and the hub
+     * (below) take pointer events, so a click in the moat or outside the
+     * N-gon's corners falls through to the backdrop and dismisses - matching
+     * the visible shape, not the square bounding box. */
     position: relative;
     inline-size: var(--radial-size);
     block-size: var(--radial-size);
-    pointer-events: auto;
+    pointer-events: none;
     color: var(--portal-color-text-0);
     font-family: var(--portal-font-sans);
+    filter: drop-shadow(0 0 var(--portal-space-4) var(--portal-tone-glow))
+        drop-shadow(
+            0 var(--portal-space-2) var(--portal-space-5)
+                color-mix(in oklab, var(--portal-color-bg-0) 60%, transparent)
+        );
+    user-select: none;
 }
 
 .panel:focus-visible {
     outline: none;
 }
 
-/* One slot per edge, centered on the ring and pushed outward to its edge. The
- * upright button rides inside; the rotate/translate/counter-rotate keeps it
- * axis-aligned at every angle. */
-.slot {
+/* One wedge per section. The button covers the full panel and the clip-path
+ * cuts it down to its wedge - hit testing follows the clip, so only the wedge
+ * is interactive. The transform origin sits on the wedge's own visual center
+ * so the press scale recesses the wedge in place. */
+.section {
     position: absolute;
-    inset-block-start: 50%;
-    inset-inline-start: 50%;
-    inline-size: var(--radial-section);
-    block-size: var(--radial-section);
-    transform: translate(-50%, -50%) rotate(var(--radial-angle))
-        translateY(calc(-1 * var(--radial-distance-rest)))
-        rotate(calc(-1 * var(--radial-angle)));
+    inset: 0;
+    margin: 0;
+    padding: 0;
+    border: none;
+    appearance: none;
+    background: none;
+    clip-path: var(--radial-clip);
+    transform-origin: var(--radial-anchor-x) var(--radial-anchor-y);
+    color: var(--portal-color-text-0);
+    font-family: inherit;
+    pointer-events: auto;
+    cursor: pointer;
+    touch-action: manipulation;
 }
 
-.section {
-    composes: beveled from '../../theme/surfaces.module.css';
+/* The wedge face, inset from the silhouette so the button background shows
+ * through as the machined rim. */
+.section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    clip-path: var(--radial-face-clip);
+}
+
+.section:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Menu (Tier-2): the static machined metal edge around a HUD fill face - the
+ * modal-surface treatment (metalEdge), not the animated controller ring. */
+.panel[data-variant='menu'] .section {
+    background: var(--portal-gradient-metal);
+}
+
+/* Controller (Tier-1): the conic metal ring as the rim - centered on the
+ * panel, so the assembled rims read as one machined ring - around a brushed
+ * key face, matching DPad / BevelButton. Dark text keeps AA contrast over the
+ * light metal. */
+.panel[data-variant='controller'] .section {
+    background: var(--portal-gradient-metal-ring);
+    color: var(--portal-color-bg-0);
+}
+
+/* Outlines cannot trace a clip-path, so focus swaps the rim to the focus
+ * color and adds a silhouette glow - the clipped-shape focus idiom. */
+.panel .section:focus-visible {
+    outline: none;
+    background: var(--portal-color-focus);
+    filter: drop-shadow(0 0 var(--portal-space-2) var(--portal-color-focus));
+}
+
+.panel .section:hover:not(:disabled) {
+    filter: drop-shadow(0 0 var(--portal-space-2) var(--portal-tone-glow-strong));
+}
+
+.panel .section:active:not(:disabled) {
+    transform: scale(var(--portal-press-scale));
+}
+
+.panel[data-variant='controller'] .section:active:not(:disabled) {
+    color: var(--portal-color-text-0);
+}
+
+/* Face fills, lowest to highest state. The menu face is a solid color (so
+ * hover can transition); the controller face is the shared brushed ramp,
+ * which - because every wedge shares the panel box - reads as one continuous
+ * brushed sheet across the ring. */
+.panel[data-variant='menu'] .section::before {
+    background-color: var(--portal-hud-fill);
+}
+
+.panel[data-variant='controller'] .section::before {
+    background: var(--portal-gradient-metal);
+}
+
+.panel[data-variant='menu'] .section:hover:not(:disabled)::before {
+    background-color: var(--portal-tone-fill);
+}
+
+.panel[data-variant='menu'] .section:active:not(:disabled)::before {
+    background-color: color-mix(
+        in oklab,
+        var(--portal-tone-fill),
+        var(--portal-color-bg-0) 25%
+    );
+}
+
+/* Pressed controller wedge reads as recessed metal: the face darkens to the
+ * steel end of the ramp, matching BevelButton's pressed treatment. */
+.panel[data-variant='controller'] .section:active:not(:disabled)::before {
+    background: linear-gradient(
+        160deg,
+        var(--portal-color-metal-0) 0%,
+        var(--portal-color-metal-1) 55%,
+        var(--portal-color-metal-0) 100%
+    );
+}
+
+/* Label cluster pinned to the wedge's visual center. Physical top/left on
+ * purpose: the clip polygons are physical, so the anchor must not flip under
+ * dir=rtl. Non-interactive - the wedge button owns the hit area. */
+.sectionBody {
+    position: absolute;
+    top: var(--radial-anchor-y);
+    left: var(--radial-anchor-x);
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
     gap: var(--portal-space-1);
-    inline-size: 100%;
-    block-size: 100%;
-    min-inline-size: var(--portal-touch-target-min);
-    min-block-size: var(--portal-touch-target-min);
-    padding: var(--portal-space-1);
-    border: var(--portal-border-thickness-thin) solid
-        var(--portal-color-border-accent);
-    border-radius: var(--portal-bevel-2);
-    background-color: color-mix(
-        in oklab,
-        var(--portal-color-surface-0),
-        var(--portal-color-text-1) 14%
-    );
-    box-shadow:
-        0 0 var(--portal-space-3) var(--portal-tone-glow),
-        0 var(--portal-space-1) var(--portal-space-3)
-            color-mix(in oklab, var(--portal-color-bg-0) 60%, transparent);
-    color: var(--portal-color-text-0);
-    font-family: inherit;
-    font-size: var(--portal-size-text-sm);
-    line-height: var(--portal-line-height-tight);
-    cursor: pointer;
-    touch-action: manipulation;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
 }
 
 .sectionIcon {
@@ -121,93 +221,92 @@
 .sectionLabel {
     max-inline-size: 100%;
     overflow: hidden;
+    font-size: var(--portal-size-text-sm);
+    font-weight: var(--portal-weight-label-medium);
+    line-height: var(--portal-line-height-tight);
     text-align: center;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.section:focus-visible {
-    outline: var(--portal-border-thickness-thin) solid var(--portal-color-focus);
-    outline-offset: var(--portal-space-1);
+/* Label budget per side count: the wedge chord narrows as sides increase. */
+.panel[data-sides='4'] .sectionBody {
+    max-inline-size: calc(var(--radial-size) * 0.3);
 }
 
-.section:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+.panel[data-sides='6'] .sectionBody {
+    max-inline-size: calc(var(--radial-size) * 0.24);
 }
 
-.section:hover:not(:disabled) {
-    border-color: var(--portal-tone-border);
-    box-shadow: 0 0 var(--portal-space-2) var(--portal-tone-glow);
+.panel[data-sides='8'] .sectionBody {
+    max-inline-size: calc(var(--radial-size) * 0.19);
 }
 
-.section:active:not(:disabled) {
-    transform: scale(var(--portal-press-scale));
-}
-
-/* Controller variant: the brushed-metal key face inside the animated metal ring,
- * matching DPad / BevelButton. Dark text keeps AA contrast over the light metal. */
-.panel[data-variant='controller'] .section {
-    border-color: transparent;
-    background:
-        var(--portal-gradient-metal) padding-box,
-        var(--portal-gradient-metal-ring) border-box;
-    color: var(--portal-color-bg-0);
-}
-
-/* The beveled center button area. Holds the 2x2 action grid (or nothing, for a
- * 0-button hub). Sits above the section slots at the exact ring center. */
+/* The beveled center button area. The container paints the metal; the
+ * HUD-edge-width padding and gap are the rim and the machined seams between
+ * the action faces. overflow: hidden clips the rectangular faces to the
+ * beveled corners. Grid math: a 2x2 cell is exactly
+ * (hub - 2*padding - gap) / 2 = the 3rem touch floor. */
 .hub {
     composes: beveled from '../../theme/surfaces.module.css';
     position: absolute;
     inset-block-start: 50%;
     inset-inline-start: 50%;
+    box-sizing: border-box;
     display: grid;
-    grid-template-columns: repeat(2, auto);
-    place-content: center;
-    place-items: center;
-    gap: var(--portal-space-2);
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: 1fr;
+    gap: var(--portal-hud-edge-width);
     inline-size: var(--radial-hub);
     block-size: var(--radial-hub);
-    padding: var(--portal-space-2);
-    border: var(--portal-border-thickness-thin) solid
-        var(--portal-color-border-accent);
+    padding: var(--portal-hud-edge-width);
     border-radius: var(--portal-bevel-3);
-    background-color: color-mix(
-        in oklab,
-        var(--portal-color-surface-0),
-        var(--portal-color-text-1) 14%
-    );
-    box-shadow:
-        0 0 var(--portal-space-3) var(--portal-tone-glow),
-        0 var(--portal-space-1) var(--portal-space-3)
-            color-mix(in oklab, var(--portal-color-bg-0) 60%, transparent);
+    overflow: hidden;
     transform: translate(-50%, -50%);
+    pointer-events: auto;
 }
 
-/* A single action centers rather than sitting in a left grid cell. */
+/* 0 = one non-interactive panel cell, 1 = one full-bevel button. */
+.hub[data-count='0'],
 .hub[data-count='1'] {
-    grid-template-columns: auto;
+    grid-template-columns: 1fr;
+}
+
+.panel[data-variant='menu'] .hub {
+    background: var(--portal-gradient-metal);
 }
 
 .panel[data-variant='controller'] .hub {
-    border-color: transparent;
-    background:
-        var(--portal-gradient-metal) padding-box,
-        var(--portal-gradient-metal-ring) border-box;
+    background: var(--portal-gradient-metal-ring);
 }
 
+/* The 0-action hub face: the machined center panel, no button semantics. */
+.hubPanel {
+    inline-size: 100%;
+    block-size: 100%;
+}
+
+.panel[data-variant='menu'] .hubPanel {
+    background-color: var(--portal-hud-fill);
+}
+
+.panel[data-variant='controller'] .hubPanel {
+    background-color: var(--portal-color-bg-1);
+}
+
+/* Hub action faces stay dark in BOTH variants so the status-colored symbols
+ * (success check, danger cross, accent triangles) keep their legibility; the
+ * controller's metal identity comes from the rim and seams around them. */
 .hubButton {
-    composes: beveled from '../../theme/surfaces.module.css';
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    inline-size: var(--portal-touch-target-min);
-    block-size: var(--portal-touch-target-min);
+    inline-size: 100%;
+    block-size: 100%;
+    margin: 0;
     padding: 0;
-    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
-    border-radius: var(--portal-bevel-1);
-    background-color: transparent;
+    border: none;
+    appearance: none;
     color: var(--portal-color-text-0);
     cursor: pointer;
     touch-action: manipulation;
@@ -215,7 +314,7 @@
 
 .hubButton:focus-visible {
     outline: var(--portal-border-thickness-thin) solid var(--portal-color-focus);
-    outline-offset: calc(-1 * var(--portal-border-thickness-thin));
+    outline-offset: calc(-1 * var(--portal-border-thickness-normal));
 }
 
 .hubButton:disabled {
@@ -223,18 +322,26 @@
     cursor: not-allowed;
 }
 
-.hubButton:hover:not(:disabled) {
-    border-color: var(--portal-tone-border);
+.panel[data-variant='menu'] .hubButton {
+    background-color: var(--portal-hud-fill);
 }
 
-.hubButton:active:not(:disabled) {
+.panel[data-variant='controller'] .hubButton {
+    background-color: var(--portal-color-bg-1);
+}
+
+.panel .hubButton:hover:not(:disabled) {
+    background-color: var(--portal-tone-fill);
+}
+
+.panel .hubButton:active:not(:disabled) {
     transform: scale(var(--portal-press-scale));
 }
 
-/* On the controller's metal hub, a dark face keeps the light symbols legible.
- * Placed after the base pseudo-class rules so specificity never descends. */
-.panel[data-variant='controller'] .hubButton {
-    background-color: var(--portal-color-bg-1);
+/* 2 actions sit on one row, so the split is the vertical seam. A stray count
+ * of 3 keeps the 2x2 shape with the last action spanning the bottom row. */
+.hub[data-count='3'] .hubButton:nth-child(3) {
+    grid-column: 1 / -1;
 }
 
 /* Center symbols: reuse the shared drawn glyphs and pin the recognisable status
@@ -266,21 +373,43 @@
     color: var(--portal-color-accent-highlight);
 }
 
-/* Motion - reduced-motion gated. Sections slide out from the center to each edge
- * with a per-index stagger; the hub scales in; the backdrop fades. In the resting
- * / reduced state the slots already sit at their rest distance (no animation). */
+/* Motion - reduced-motion gated. Each wedge starts pulled toward the panel
+ * center (its per-wedge --radial-enter-* offset) and slides out to rest at
+ * its edge with a per-index stagger; the hub scales in; the backdrop fades.
+ * Fill mode is backwards (not both): the from-state holds through each
+ * wedge's stagger delay, and after the run the animation releases the
+ * transform so the press scale works. In the resting / reduced state the
+ * wedges already sit clipped at their edges (no animation). */
 @media (prefers-reduced-motion: no-preference) {
-    .panel[data-motion='full'] .slot {
-        animation: portal-radial-out var(--portal-duration-ui-base)
-            var(--portal-easing-emphasized) both;
+    .section {
+        transition:
+            filter var(--portal-duration-ui-fast) var(--portal-easing-standard),
+            transform var(--portal-duration-ui-fast) var(--portal-easing-standard);
+    }
+
+    .section::before {
+        transition: background-color var(--portal-duration-ui-fast)
+            var(--portal-easing-standard);
+    }
+
+    .hubButton {
+        transition:
+            background-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard),
+            transform var(--portal-duration-ui-fast) var(--portal-easing-standard);
+    }
+
+    .panel[data-motion='full'] .section {
+        animation: portal-radial-section-in var(--portal-duration-ui-base)
+            var(--portal-easing-emphasized) backwards;
         animation-delay: calc(
-            var(--radial-index) * var(--portal-duration-ui-fast) / 4
+            var(--radial-index) * var(--portal-duration-ui-fast) / 3
         );
     }
 
     .panel[data-motion='full'] .hub {
-        animation: portal-radial-hub var(--portal-duration-ui-base)
-            var(--portal-easing-emphasized) both;
+        animation: portal-radial-hub-in var(--portal-duration-ui-base)
+            var(--portal-easing-emphasized) backwards;
     }
 
     .backdrop[data-motion='full'] {
@@ -289,25 +418,23 @@
     }
 }
 
-@keyframes portal-radial-out {
+@keyframes portal-radial-section-in {
     from {
         opacity: 0;
-        transform: translate(-50%, -50%) rotate(var(--radial-angle)) translateY(0)
-            rotate(calc(-1 * var(--radial-angle))) scale(0.4);
+        transform: translate(var(--radial-enter-x), var(--radial-enter-y))
+            scale(0.9);
     }
 
     to {
         opacity: 1;
-        transform: translate(-50%, -50%) rotate(var(--radial-angle))
-            translateY(calc(-1 * var(--radial-distance-rest)))
-            rotate(calc(-1 * var(--radial-angle))) scale(1);
+        transform: translate(0, 0) scale(1);
     }
 }
 
-@keyframes portal-radial-hub {
+@keyframes portal-radial-hub-in {
     from {
         opacity: 0;
-        transform: translate(-50%, -50%) scale(0.6);
+        transform: translate(-50%, -50%) scale(0.7);
     }
 
     to {

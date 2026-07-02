@@ -132,6 +132,42 @@ describe('RadialMenu', (): void => {
         expect(onClose).toHaveBeenCalledTimes(1);
     });
 
+    it('renders no hub buttons when no center actions are requested', (): void => {
+        render(
+            <RadialMenu
+                open
+                onClose={noop}
+                label="Actions"
+                items={ITEMS}
+                onSelect={noop}
+                sides={4}
+            />,
+        );
+        // Only the four section wedges are interactive; the 0-action hub is a
+        // non-interactive panel.
+        expect(screen.getAllByRole('button')).toHaveLength(4);
+        expect(screen.queryByRole('button', { name: 'Confirm' })).toBeNull();
+    });
+
+    it('dedupes repeated center actions', (): void => {
+        render(
+            <RadialMenu
+                open
+                onClose={noop}
+                label="Actions"
+                items={ITEMS}
+                onSelect={noop}
+                centerActions={[
+                    ERadialAction.Confirm,
+                    ERadialAction.Confirm,
+                    ERadialAction.Cancel,
+                ]}
+            />,
+        );
+        expect(screen.getAllByRole('button', { name: 'Confirm' })).toHaveLength(1);
+        expect(screen.getAllByRole('button', { name: 'Cancel' })).toHaveLength(1);
+    });
+
     it('dismisses on the Escape key', async (): Promise<void> => {
         const user: UserEvent = userEvent.setup();
         const onClose: Mock = vi.fn();

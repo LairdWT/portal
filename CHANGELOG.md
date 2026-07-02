@@ -4,6 +4,30 @@ All notable changes to this project are documented in this file. The format is
 based on Keep a Changelog, and the project follows Semantic Versioning with the
 0.x caveat that, before 1.0, a minor version may carry a breaking change.
 
+## [Unreleased]
+
+### Changed
+
+- `RadialMenu` / `RadialPad` rebuilt to the intended radial geometry; the
+  public API is unchanged. Sections are now true wedges - clip-path slices of
+  the flat-top N-gon between its outer edge and the inner hub hole, computed
+  by the unit-tested geometry module - instead of small detached square
+  buttons, so the assembled sections read as the octagon / hexagon / square
+  itself and labels no longer truncate. The center hub now implements the
+  button-area contract literally: 0 actions render a non-interactive beveled
+  panel, 1 fills the whole bevel, 2 split it with a vertical seam, 4 form a
+  2x2 grid whose cells land exactly on the 3rem touch floor (repeated actions
+  dedupe). Styling now follows the tier canon: menu wedges are HUD-fill faces
+  behind a static machined-metal rim (Tier 2), controller wedges are one
+  continuous brushed-metal sheet inside the conic metal ring with dark
+  engraved labels (Tier 1, matching `DPad` / `BevelButton`); hub faces stay
+  dark in both variants so the status-colored symbols keep their legibility.
+  The staggered edge-emergence entrance now visibly plays (each wedge slides
+  from the center out to its edge while the hub scales in; reduced-motion
+  gated as before), and clicks in the moat between hub and ring - or outside
+  the N-gon's corners - fall through to the backdrop and dismiss instead of
+  being swallowed by the square panel box.
+
 ## [1.4.0] - 2026-07-02
 
 All public-API changes are additive-optional; the freeze holds.
