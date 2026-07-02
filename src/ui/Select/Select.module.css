@@ -91,14 +91,11 @@
  * aria-expanded carry the open state.
  */
 .arrow {
+    composes: chevronGlyph from '../../theme/surfaces.module.css';
     flex: 0 0 auto;
-    inline-size: var(--portal-space-3);
-    block-size: var(--portal-space-3);
-    border-inline-end: var(--portal-border-thickness-thin) solid
-        var(--portal-tone-accent);
-    border-block-end: var(--portal-border-thickness-thin) solid
-        var(--portal-tone-accent);
-    transform: rotate(45deg);
+    color: var(--portal-tone-accent);
+
+    --portal-chevron-size: var(--portal-space-3);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -109,7 +106,7 @@
 }
 
 .trigger[data-open='true'] .arrow {
-    transform: rotate(-135deg);
+    --portal-chevron-rotate: -135deg;
 }
 
 .clear {
@@ -142,32 +139,12 @@
     color: var(--portal-color-text-0);
 }
 
-/* The clear glyph: two token-thick bars crossed into an X. Decorative; the
- * button's aria-label carries the meaning. */
+/* The clear glyph: the shared token-drawn cross. Decorative; the button's
+ * aria-label carries the meaning. */
 .clearGlyph {
-    position: relative;
-    inline-size: var(--portal-space-3);
-    block-size: var(--portal-space-3);
-}
+    composes: crossGlyph from '../../theme/surfaces.module.css';
 
-.clearGlyph::before,
-.clearGlyph::after {
-    content: '';
-    position: absolute;
-    inset-block-start: 50%;
-    inset-inline-start: 0;
-    inline-size: 100%;
-    block-size: var(--portal-border-thickness-thin);
-    background-color: currentcolor;
-    border-radius: var(--portal-radius-pill);
-}
-
-.clearGlyph::before {
-    transform: translateY(-50%) rotate(45deg);
-}
-
-.clearGlyph::after {
-    transform: translateY(-50%) rotate(-45deg);
+    --portal-cross-size: var(--portal-space-3);
 }
 
 .option {
@@ -190,7 +167,7 @@
 }
 
 .option[data-selected='true'] {
-    font-weight: 600;
+    font-weight: var(--portal-weight-label-medium);
 }
 
 /* A check shape marks the selected option as a non-color-only redundancy

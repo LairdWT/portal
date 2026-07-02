@@ -222,30 +222,12 @@
     color: var(--portal-color-text-0);
 }
 
+/* The clear glyph: the shared token-drawn cross. Decorative; the button's
+ * aria-label carries the meaning. */
 .clearGlyph {
-    position: relative;
-    inline-size: var(--portal-space-3);
-    block-size: var(--portal-space-3);
-}
+    composes: crossGlyph from '../../theme/surfaces.module.css';
 
-.clearGlyph::before,
-.clearGlyph::after {
-    content: '';
-    position: absolute;
-    inset-block-start: 50%;
-    inset-inline-start: 0;
-    inline-size: 100%;
-    block-size: var(--portal-border-thickness-thin);
-    background-color: currentcolor;
-    border-radius: var(--portal-radius-pill);
-}
-
-.clearGlyph::before {
-    transform: translateY(-50%) rotate(45deg);
-}
-
-.clearGlyph::after {
-    transform: translateY(-50%) rotate(-45deg);
+    --portal-cross-size: var(--portal-space-3);
 }
 
 /* The scroll viewport. Bounded by the panel's max-block-size so a large corpus
@@ -372,7 +354,7 @@
  * highlight token (never a tone-derived colour, which is not AA-guaranteed). */
 .match {
     color: var(--portal-color-accent-highlight);
-    font-weight: 600;
+    font-weight: var(--portal-weight-label-medium);
 }
 
 /* The trailing shortcut chip: a small beveled machined-key tag, aria-hidden. */

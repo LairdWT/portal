@@ -56,7 +56,12 @@ global preference where they conflict.
 ## Accessibility
 
 - Custom interactive elements carry role, label, and disabled state semantics.
-- Minimum touch target of 48px (`--portal-touch-target-min: 3rem`).
+- Minimum touch target of 48px (`--portal-touch-target-min: 3rem`). Ratified
+  exception: the shared compact header/panel controls (`surfaces.module.css`
+  `.compactControl`) restore the 3rem floor on the block axis via a transparent
+  `::after` but keep a 2rem inline hit width so adjacent controls (e.g. a Window's
+  minimize/maximize/close cluster) stay separately hittable; 2rem (32px) still
+  clears the WCAG 2.5.8 (Target Size, Minimum) 24px floor.
 - No hover-only interactions.
 - Reduced motion: gate all animation behind `useReducedMotion` and
   `@media (prefers-reduced-motion: reduce)`.

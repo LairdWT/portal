@@ -73,7 +73,12 @@
  * control sits with breathing room - with the touch target restored to the 3rem
  * floor by a transparent block-axis ::after. One subtle beveled box, hover/focus/
  * active/disabled treatment shared so every panel's controls read identically.
- * Consumers add only context (e.g. margin to push a close to the inline end). */
+ * Consumers add only context (e.g. margin to push a close to the inline end).
+ *
+ * The ::after restores the 3rem floor on the BLOCK axis only; the inline hit
+ * width stays 2rem on purpose so adjacent compact controls (e.g. the Window
+ * minimize/maximize/close cluster) keep separate, non-overlapping hit areas.
+ * 2rem (32px) still clears the WCAG 2.5.8 (Target Size, Minimum) 24px floor. */
 .compactControl {
     composes: beveled;
     position: relative;
@@ -164,11 +169,12 @@
 
 /* Token-drawn disclosure chevron (a corner of two borders on currentColor).
  * Points down by default (expanded); rotate via --portal-chevron-rotate (e.g.
- * -45deg for a collapsed/right state). Shared by Accordion, Drawer and any
- * disclosure toggle so none falls back to an ASCII '[v]'/'[>]'. */
+ * -45deg for a collapsed/right state). Size via --portal-chevron-size (default
+ * var(--portal-space-2)). Shared by Accordion, Drawer and any disclosure toggle
+ * so none falls back to an ASCII '[v]'/'[>]'. */
 .chevronGlyph {
-    inline-size: var(--portal-space-2);
-    block-size: var(--portal-space-2);
+    inline-size: var(--portal-chevron-size, var(--portal-space-2));
+    block-size: var(--portal-chevron-size, var(--portal-space-2));
     border-inline-end: var(--portal-border-thickness-thin) solid currentcolor;
     border-block-end: var(--portal-border-thickness-thin) solid currentcolor;
     transform: rotate(var(--portal-chevron-rotate, 45deg));

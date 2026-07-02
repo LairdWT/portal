@@ -156,14 +156,11 @@
 /* Submenu arrow: a token-drawn chevron pointing toward the inline-end fly-out.
  * Decorative; aria-haspopup + aria-expanded on the row carry the meaning. */
 .chevron {
+    composes: chevronGlyph from '../../theme/surfaces.module.css';
     flex: 0 0 auto;
-    inline-size: var(--portal-space-2);
-    block-size: var(--portal-space-2);
-    border-inline-end: var(--portal-border-thickness-thin) solid
-        var(--portal-tone-accent);
-    border-block-end: var(--portal-border-thickness-thin) solid
-        var(--portal-tone-accent);
-    transform: rotate(-45deg);
+    color: var(--portal-tone-accent);
+
+    --portal-chevron-rotate: -45deg;
 }
 
 /* A non-interactive hairline rule between groups of rows. */
