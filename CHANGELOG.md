@@ -4,6 +4,77 @@ All notable changes to this project are documented in this file. The format is
 based on Keep a Changelog, and the project follows Semantic Versioning with the
 0.x caveat that, before 1.0, a minor version may carry a breaking change.
 
+## [Unreleased]
+
+A remediation pass keyed off the post-1.2.0 deep review. All public-API changes
+are additive-optional; the freeze holds.
+
+### Added
+
+- `DPad` gains an opt-in `directionSignals` prop. When set, `onSignal` emits
+  per-direction digital signals on every transition (a `Release` for the
+  previous direction, then a `Press` for the next, with ids suffixed
+  `pad.up` / `pad.up-right` style), so a wire consumer can reconstruct the pad
+  state. The default emission is unchanged and pinned by test.
+- `EWindowFrame` is exported from the root barrel, joining its three sibling
+  `Window` enums (it already typed the public `frame` prop).
+- New `--portal-weight-label-medium` (600) token completes the label-weight
+  ladder (mirrored nowhere; CSS-only like its siblings).
+- The API freeze now also guards type exports: a new barrel type contract makes
+  removing any `export { type ... }` from `index.ts` a compile error
+  (additions stay free - the freeze is additive-optional).
+
+### Fixed
+
+- Stacked overlays no longer collapse together. Focus traps and dismiss
+  listeners coordinate through shared layer stacks: only the topmost trap owns
+  Tab (a `ConfirmDialog` over a `Dialog` no longer bounces focus forever), and
+  one Escape or outside press peels one layer instead of closing the stack.
+- Button presses are owned by a single pointer: a second touch on the same
+  control can no longer double-emit `Press` or end another finger's held press
+  (`useDigitalPress`, ActionButton/BevelButton/ControlSurface).
+- Toast auto-dismiss pause tracks its two sources independently; with both
+  hover and focus engaged, ending either no longer restarts the timers out
+  from under the other.
+- The virtualized `List` announces absolute option positions
+  (`aria-setsize`/`aria-posinset`), follows item identity when a filter
+  changes the list under the cursor, and shows its active ring only while
+  focused.
+- `DataTable` PageUp/PageDown moves a full viewport at the clamped top and
+  bottom of the scroll range (was under-jumping by the missing overscan band).
+- The `Drawer` resize handle is a `role="separator"` window splitter (matching
+  `SplitPane`) and always announces a complete, meaningful value triplet plus
+  `aria-valuetext` in pixels - an unbounded drawer no longer reads raw pixels
+  against ARIA's implied maximum of 100.
+- `Window` anchors its frame and compass resize handles physically so RTL
+  documents no longer render a dragged window off-screen or flip the handle
+  compass; a new RTL story documents the contract.
+- A keyboard-opened `ContextMenu` returns focus to its opener on Escape
+  instead of stranding focus on `body`; ContextMenu and MenuBar gain dedicated
+  keyboard-path test files.
+- `DPad` no longer compounds its center dead zone (the direction resolver
+  re-checked the already-rescaled magnitude, swallowing raw inputs below
+  ~0.36).
+- AA-critical text stays off the tone seed: `Text`'s accent role and the ghost
+  `CTA`'s hover/active label now use the AA-safe accent-highlight token.
+- `usePointerControl` / `useRelativePointerControl` release a still-held
+  pointer capture on unmount, matching `usePointerDrag`.
+
+### Changed
+
+- Internal hygiene, no visual change (before/after captures byte-identical):
+  press feedback and font weights reference their tokens everywhere
+  (`--portal-press-scale`, `--portal-weight-label-*`); Select, SearchBox,
+  CommandPalette, and Menu compose the shared `.crossGlyph`/`.chevronGlyph`
+  utilities instead of hand-rolling them (the shared chevron gains a
+  `--portal-chevron-size` knob); `InputBinding`'s composite-key NUL separator
+  is an escape sequence so git diffs the module as text; the orphaned,
+  never-exported `CanvasDevtools` file is removed.
+- `CodingStandards.md` ratifies the `.compactControl` geometry: the transparent
+  extender restores the 3rem touch floor on the block axis only, keeping
+  adjacent compact controls' hit areas separated (2rem inline width, above the
+  WCAG 2.5.8 minimum).
+
 ## [1.2.0] - 2026-06-30
 
 Additive features plus a large visual-consistency pass over the component
