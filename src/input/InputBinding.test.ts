@@ -101,6 +101,27 @@ describe('InputBindingRegistry', (): void => {
         expect(conflicts).toHaveLength(0);
     });
 
+    it('never collides distinct pairs whose ids contain the visual separator', (): void => {
+        // The composite conflict key joins id and context with NUL, so ids or
+        // contexts containing printable separators (spaces) cannot alias each
+        // other the way a printable join character would allow.
+        const conflicts: readonly FBindingConflict[] = detectConflicts([
+            { inputId: 'a', actionId: 'x.one', context: 'b c' },
+            { inputId: 'a b', actionId: 'x.two', context: 'c' },
+        ]);
+
+        expect(conflicts).toHaveLength(0);
+    });
+
+    it('keeps an explicit empty-string context distinct from the global scope', (): void => {
+        const conflicts: readonly FBindingConflict[] = detectConflicts([
+            { inputId: 'select', actionId: 'ui.confirm' },
+            { inputId: 'select', actionId: 'ship.deploy', context: '' },
+        ]);
+
+        expect(conflicts).toHaveLength(0);
+    });
+
     it('round-trips through serializeBindings and createRegistry', (): void => {
         const registry: IInputBindingRegistry = createRegistry([
             { inputId: 'fire', actionId: 'weapon.primary' },
