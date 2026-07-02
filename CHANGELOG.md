@@ -4,30 +4,6 @@ All notable changes to this project are documented in this file. The format is
 based on Keep a Changelog, and the project follows Semantic Versioning with the
 0.x caveat that, before 1.0, a minor version may carry a breaking change.
 
-## [Unreleased]
-
-### Changed
-
-- `RadialMenu` / `RadialPad` rebuilt to the intended radial geometry; the
-  public API is unchanged. Sections are now true wedges - clip-path slices of
-  the flat-top N-gon between its outer edge and the inner hub hole, computed
-  by the unit-tested geometry module - instead of small detached square
-  buttons, so the assembled sections read as the octagon / hexagon / square
-  itself and labels no longer truncate. The center hub now implements the
-  button-area contract literally: 0 actions render a non-interactive beveled
-  panel, 1 fills the whole bevel, 2 split it with a vertical seam, 4 form a
-  2x2 grid whose cells land exactly on the 3rem touch floor (repeated actions
-  dedupe). Styling now follows the tier canon: menu wedges are HUD-fill faces
-  behind a static machined-metal rim (Tier 2), controller wedges are one
-  continuous brushed-metal sheet inside the conic metal ring with dark
-  engraved labels (Tier 1, matching `DPad` / `BevelButton`); hub faces stay
-  dark in both variants so the status-colored symbols keep their legibility.
-  The staggered edge-emergence entrance now visibly plays (each wedge slides
-  from the center out to its edge while the hub scales in; reduced-motion
-  gated as before), and clicks in the moat between hub and ring - or outside
-  the N-gon's corners - fall through to the backdrop and dismiss instead of
-  being swallowed by the square panel box.
-
 ## [1.4.0] - 2026-07-02
 
 All public-API changes are additive-optional; the freeze holds.
@@ -35,16 +11,30 @@ All public-API changes are additive-optional; the freeze holds.
 ### Added
 
 - `RadialMenu` (generic UI) and `RadialPad` (game-input controller) - an
-  octagonal radial with 4-, 6-, and 8-sided variants. Selectable sections fan
-  out from each polygon edge with a staggered entrance, around a beveled center
-  hub that holds 0, 1, 2, or 4 action buttons (`confirm` / `cancel` / `next` /
-  `previous`) laid out as a 2x2 grid of centered drawn symbols. Both are
-  open/close modal overlays that reuse the shared overlay root, focus trap, and
-  dismiss primitives; `RadialMenu` selects by `onSelect(id)`, `RadialPad` emits
-  a per-target Digital `InputSignal` pulse (id-suffixed like `DPad`, e.g.
-  `radial.section-0` / `radial.confirm`) alongside its raw callbacks. New
-  `ERadialAction` value export and `RadialItem` / `RadialMenuProps` /
-  `RadialPadProps` / `RadialSides` type exports.
+  octagonal radial with 4-, 6-, and 8-sided variants. The sections are true
+  wedges: clip-path slices of the flat-top N-gon between its outer edge and
+  the inner hub hole, computed by a unit-tested geometry module, so the
+  assembled sections read as the octagon / hexagon / square itself. They
+  emerge from the center out to their edges with a staggered entrance
+  (reduced-motion gated). The beveled center hub IS the button area: 0
+  actions render a non-interactive machined panel, 1 fills the whole bevel,
+  2 split it with a vertical seam, and 4 form a 2x2 grid of centered drawn
+  symbols (`confirm` / `cancel` / `next` / `previous`) whose cells land
+  exactly on the 3rem touch floor (repeated actions dedupe). Styling follows
+  the tier canon: menu wedges are HUD-fill faces behind a static
+  machined-metal rim (Tier 2); controller wedges are one continuous
+  brushed-metal sheet inside the conic metal ring with dark engraved labels
+  (Tier 1, matching `DPad` / `BevelButton`); hub faces stay dark in both
+  variants so the status-colored symbols keep their legibility. Hit testing
+  follows the visible shape - clicks in the moat between hub and ring, or
+  outside the N-gon's corners, fall through to the backdrop and dismiss.
+  Both are open/close modal overlays that reuse the shared overlay root,
+  focus trap, and dismiss primitives; `RadialMenu` selects by
+  `onSelect(id)`, `RadialPad` emits a per-target Digital `InputSignal` pulse
+  (id-suffixed like `DPad`, e.g. `radial.section-0` / `radial.confirm`)
+  alongside its raw callbacks. New `ERadialAction` value export and
+  `RadialItem` / `RadialMenuProps` / `RadialPadProps` / `RadialSides` type
+  exports.
 - Two shared drawn glyphs in `surfaces.module.css`: `checkGlyph` (confirm tick)
   and `triangleGlyph` (rotatable equilateral triangle for next/previous), so the
   radial symbols reuse the same token-drawn glyph system as the existing
