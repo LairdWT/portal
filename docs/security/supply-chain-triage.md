@@ -138,8 +138,9 @@ pnpm why three
 E. No known CVEs (expect: "No known vulnerabilities found"):
 pnpm audit
 
-F. r3f-perf is dev-overlay only (expect: only src/r3f/CanvasDevtools.tsx,
-which documents that it is stripped from the published build):
+F. r3f-perf is unreferenced by library source (expect: no matches; the
+CanvasDevtools dev overlay that lazy-imported it was removed as orphan code
+after 1.2.0, and the devDependency remains only for potential local tooling):
 rg -n "r3f-perf" src/
 
 G. socket.yml does not disable any alert class (expect: no issueRules KEY)
