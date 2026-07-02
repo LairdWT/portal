@@ -170,6 +170,31 @@ function InlineHarness(props: InlineHarnessProps): ReactElement {
     );
 }
 
+// An inline drawer with a minSize floor but NO maxSize, so the resize model is
+// unbounded (hasMax === false) - the effective ARIA max falls back to the viewport
+// extent rather than a raw px against ARIA's implied 100.
+function UnboundedInlineHarness(): ReactElement {
+    const [size, setSize]: [number, Dispatch<SetStateAction<number>>] =
+        useState<number>(300);
+    return (
+        <Drawer
+            mode={EDrawerMode.Inline}
+            edge={EDrawerEdge.InlineStart}
+            title="Inspector"
+            label="Inspector panel"
+            resizable
+            size={size}
+            minSize={100}
+            resizeLabel="Resize inspector"
+            onSizeChange={(next: number): void => {
+                setSize(next);
+            }}
+        >
+            <p>body content</p>
+        </Drawer>
+    );
+}
+
 describe('Drawer inline mode', (): void => {
     it('renders a named complementary landmark by default', (): void => {
         render(<InlineHarness />);
@@ -225,25 +250,48 @@ describe('Drawer inline mode', (): void => {
 // ----- Resize splitter ---------------------------------------------------
 
 describe('Drawer resize splitter', (): void => {
-    it('renders a window-splitter wired to the body with size ARIA', (): void => {
+    it('renders a window-splitter wired to the body with the bounded size ARIA', (): void => {
         render(<InlineHarness resizable />);
-        const handle: HTMLElement = screen.getByRole('slider', {
+        const handle: HTMLElement = screen.getByRole('separator', {
             name: 'Resize inspector',
         });
         expect(handle).toHaveAttribute('aria-orientation', 'vertical');
         expect(handle).toHaveAttribute('aria-valuenow', '300');
         expect(handle).toHaveAttribute('aria-valuemin', '200');
         expect(handle).toHaveAttribute('aria-valuemax', '500');
+        expect(handle).toHaveAttribute('aria-valuetext', '300 pixels');
         const body: HTMLElement | null =
             screen.getByText('body content').parentElement;
         expect(handle.getAttribute('aria-controls')).toBe(body?.id);
+    });
+
+    it('always emits a sane value triplet and valuetext when unbounded', (): void => {
+        render(<UnboundedInlineHarness />);
+        const handle: HTMLElement = screen.getByRole('separator', {
+            name: 'Resize inspector',
+        });
+        // No author maxSize, so the effective ARIA max is the viewport extent
+        // (floored to the current size in the non-layout test environment), never
+        // ARIA's implied 0..100. The triplet stays ordered and valuetext is present.
+        const valueNow: number = Number(handle.getAttribute('aria-valuenow'));
+        const valueMin: number = Number(handle.getAttribute('aria-valuemin'));
+        const valueMax: number = Number(handle.getAttribute('aria-valuemax'));
+        expect(handle).toHaveAttribute('aria-valuemax');
+        expect(handle).toHaveAttribute('aria-orientation', 'vertical');
+        expect(valueMin).toBe(100);
+        expect(valueMax).toBeGreaterThanOrEqual(valueNow);
+        expect(valueNow).toBeGreaterThanOrEqual(valueMin);
+        expect(handle).toHaveAttribute(
+            'aria-valuetext',
+            `${String(valueNow)} pixels`,
+        );
     });
 
     it('steps the size with the Arrow keys and jumps with Home/End', (): void => {
         const onSizeChange: (size: number) => void =
             vi.fn<(size: number) => void>();
         render(<InlineHarness resizable onSizeChange={onSizeChange} />);
-        const handle: HTMLElement = screen.getByRole('slider');
+        const handle: HTMLElement = screen.getByRole('separator');
 
         fireEvent.keyDown(handle, { key: 'ArrowRight' });
         expect(onSizeChange).toHaveBeenLastCalledWith(316);
@@ -259,7 +307,7 @@ describe('Drawer resize splitter', (): void => {
         const onSizeChange: (size: number) => void =
             vi.fn<(size: number) => void>();
         render(<InlineHarness resizable onSizeChange={onSizeChange} />);
-        const handle: HTMLElement = screen.getByRole('slider');
+        const handle: HTMLElement = screen.getByRole('separator');
 
         fireEvent.pointerDown(handle, {
             button: 0,
@@ -306,7 +354,7 @@ describe('Drawer disabled', (): void => {
         });
         expect(chevron).toBeDisabled();
 
-        const handle: HTMLElement = screen.getByRole('slider');
+        const handle: HTMLElement = screen.getByRole('separator');
         expect(handle).toHaveAttribute('tabindex', '-1');
         expect(handle).toHaveAttribute('data-disabled');
 

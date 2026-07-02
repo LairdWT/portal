@@ -1,6 +1,6 @@
 /*
  * Drawer is intentionally an EDGE-DOCKED panel: it resizes only along its dock
- * axis (a single role=slider grip), and its cross axis is pinned to the
+ * axis (a single role=separator grip), and its cross axis is pinned to the
  * viewport. Free two-axis resize from any edge or corner is a different
  * contract, served by the Window component (8 edge/corner handles, role=dialog,
  * keyboard resize) - reach for Window when a floating, freely-resizable panel is
@@ -114,6 +114,21 @@ function sizeStyle(edge: EDrawerEdge, size: number): CSSProperties {
     return { blockSize: `${String(size)}px` };
 }
 
+// The viewport extent (CSS px) along an edge's resize axis, read from the
+// document element. An edge-docked drawer can never grow past this, so an
+// unbounded resize uses it as the effective ARIA maximum. Returns 0 when there is
+// no document (SSR), letting the caller floor the ceiling at the current size
+// instead of throwing.
+function viewportExtentForEdge(edge: EDrawerEdge): number {
+    if (typeof document === 'undefined') {
+        return 0;
+    }
+    if (edgeAxis(edge) === 'x') {
+        return document.documentElement.clientWidth;
+    }
+    return document.documentElement.clientHeight;
+}
+
 // Render the header-strip title at the configured heading level. The level is
 // constrained to 2..6 by the prop type, so the switch is exhaustive and never
 // interpolates a tag name from a string.
@@ -187,7 +202,7 @@ function DrawerResizeHandle(props: DrawerResizeHandleProps): ReactElement {
     // it so a controlled re-render mid-drag never drifts the origin.
     const startSizeRef: RefObject<number> = useRef<number>(model.size);
 
-    const { onPointerDown }: PointerDragBinding<HTMLDivElement> =
+    const dragBinding: PointerDragBinding<HTMLDivElement> =
         usePointerDrag<HTMLDivElement>({
             disabled,
             axisLock: edgeAxis(edge),
@@ -234,34 +249,59 @@ function DrawerResizeHandle(props: DrawerResizeHandleProps): ReactElement {
         onSizeChange?.(next);
     }
 
-    // The resize grip. The WAI-ARIA Window Splitter pattern wants a focusable
-    // role="separator", but aria-query gives `separator` no widget super-class, so
-    // jsx-a11y models a focusable separator as non-interactive and rejects handlers
-    // on it BOTH ways (noninteractive-element-interactions on a div, and
-    // interactive-element-to-noninteractive-role on a button). Portal forbids every
-    // eslint-disable, so the grip uses the interactive role="slider" instead - a
-    // superset that still exposes aria-orientation + aria-valuenow/min/max and the
-    // full Arrow / Home / End / Enter keyboard, and which jsx-a11y accepts on a div.
-    // This is the one deliberate divergence from the plan's role="separator".
+    // The size ARIA reports against an EFFECTIVE maximum. A bounded drawer uses its
+    // author maxSize; an unbounded one has no author ceiling, but an edge-docked
+    // panel can never grow past the viewport extent along its resize axis, so that
+    // extent (captured at render) is the ARIA ceiling. The helper returns 0 with no
+    // layout (SSR / jsdom), so the ceiling is floored at the current size: a
+    // reported max must never fall below the value it bounds.
+    const viewportExtent: number = viewportExtentForEdge(edge);
+    const effectiveMax: number = model.hasMax
+        ? model.maxSize
+        : Math.max(viewportExtent, model.size);
+
+    // ALWAYS emit the full value triplet: an unbounded grip would otherwise
+    // announce raw px against ARIA's implied 0..100. valuenow is clamped into
+    // [min, effectiveMax] for the ARIA report ONLY - drag / key resize still reads
+    // the unclamped model.size.
+    const ariaValueMin: number = Math.round(model.minSize);
+    const ariaValueMax: number = Math.round(effectiveMax);
+    const ariaValueNow: number = Math.round(
+        clampSize(model.size, model.minSize, effectiveMax),
+    );
+    // Spoken value in absolute pixels, meaningful regardless of any CSS scale on
+    // the panel (mirrors Slider's aria-valuetext).
+    const ariaValueText: string = `${String(ariaValueNow)} pixels`;
+
+    // The operable handlers are applied as a single spread binding. role="separator"
+    // is the APG Window Splitter's focusable, operable widget, but aria-query models
+    // separator as structure-only (non-interactive), so jsx-a11y would flag literal
+    // handler attributes on it. Spreading the pointer-down + key-down handlers
+    // through the same binding pattern usePointerDrag returns keeps the canonical
+    // role and the full Arrow / Home / End / Enter keyboard without an
+    // eslint-disable - the exact pattern SplitPane's divider uses, which disproves
+    // the earlier role="slider" workaround this replaces.
+    const separatorHandlers: PointerDragBinding<HTMLDivElement> & {
+        onKeyDown: (event: KeyboardEvent<HTMLDivElement>) => void;
+    } = { ...dragBinding, onKeyDown: handleKeyDown };
+
     return (
         <div
             id={handleId}
-            role="slider"
+            role="separator"
             className={styles.handle}
             tabIndex={disabled ? -1 : 0}
             aria-orientation={edgeOrientation(edge)}
             aria-controls={controlsId}
             aria-label={label}
-            aria-valuenow={Math.round(model.size)}
-            aria-valuemin={Math.round(model.minSize)}
+            aria-valuenow={ariaValueNow}
+            aria-valuemin={ariaValueMin}
+            aria-valuemax={ariaValueMax}
+            aria-valuetext={ariaValueText}
             aria-disabled={disabled ? true : undefined}
-            {...(model.hasMax
-                ? { 'aria-valuemax': Math.round(model.maxSize) }
-                : {})}
             data-edge={edge}
             data-disabled={disabled ? '' : undefined}
-            onPointerDown={onPointerDown}
-            onKeyDown={handleKeyDown}
+            {...separatorHandlers}
         />
     );
 }
