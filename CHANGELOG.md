@@ -21,16 +21,18 @@ All public-API changes are additive-optional; the freeze holds.
 
 ### Changed
 
-- Radial center hub redesigned. It is now the same flat-top N-gon as the ring
-  (square for 4 wedges, hexagon for 6, octagon for 8) with chamfered
-  vertices - the polygon rendering of the corner-shape bevel identity - so
-  hub and ring read as one machined assembly with a uniform moat. The action
+- Radial center hub redesigned. It is now EXACTLY the ring's inner-hole
+  flat-top N-gon (square for 4 wedges, hexagon for 6, octagon for 8) - no
+  extra vertex chamfer, which would read as a double bevel and widen the
+  moat at the corners - so hub and ring stay parallel everywhere. The action
   cells are clip-polygon slices of the hub face (0 = non-interactive panel,
   1 = the whole face, 2 = vertical split, 4 = 2x2 grid) instead of grid
-  rectangles sheared by an overflow corner. The hub is themed rather than
-  metallic: an accent-highlight/tone rim over tone-fill faces. Confirm is
-  now a bold success-green ring (was a check) and cancel a bold danger-red
-  cross; next/previous keep their accent triangles; all four carry a soft
+  rectangles sheared by an overflow corner, and each glyph anchors on its
+  cell's area (shoelace) centroid - the perceived middle of the visible
+  cell, not the vertex average. The hub is themed rather than metallic: an
+  accent-highlight/tone rim over tone-fill faces. Confirm is now a bold
+  success-green ring (was a check) and cancel a bold danger-red cross;
+  next/previous keep their accent triangles; all four carry a soft
   self-colored bloom.
 - Radial open/close is now stateful and animated both ways: opening staggers
   the wedges outward from the center while the hub and backdrop only fade;
@@ -50,7 +52,14 @@ All public-API changes are additive-optional; the freeze holds.
   metal keys on the controller). The hub size is derived by the geometry
   module so its apothem sits exactly one wedge-seam width inside the ring's
   hole: the moat around the hub is the same machined seam that separates
-  the wedges, and the action cells gain the reclaimed room.
+  the wedges, and the action cells gain the reclaimed room. The inner hole
+  is pulled in per side count to the 2x2 touch-floor limit, so the wedges
+  deepen and the center reads smaller.
+- Radial interaction juice (reduced-motion honored throughout): wedges lift
+  a step outward along their own radial direction on hover with a tone
+  glow; hub symbols swell on hover and dip on press; the activated wedge or
+  action plays a selection flash - it pops and burns off while its siblings
+  collapse; the backdrop gains a soft depth-of-field blur.
 - Radial wedge labels size to an explicit per-side-count budget (not a max
   over shrink-to-fit), so the label box can never be squeezed by
   absolute-positioning width rules; the ellipsis fires only when the text

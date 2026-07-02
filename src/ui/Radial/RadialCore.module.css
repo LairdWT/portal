@@ -18,10 +18,10 @@
  * top/left on purpose (the Window physical-anchor precedent): the radial is
  * rotationally symmetric and must not mirror under dir=rtl.
  *
- * Center hub: the SAME flat-top N-gon as the ring's hole (square for 4,
- * hexagon for 6, octagon for 8) with chamfered vertices - the polygon
- * rendering of the corner-shape bevel identity - so hub and ring read as one
- * machined assembly with a uniform moat. The hub is themed, not metallic:
+ * Center hub: EXACTLY the ring's inner-hole N-gon (square for 4, hexagon for
+ * 6, octagon for 8) - no extra vertex chamfer, which would read as a second
+ * bevel - so hub and ring stay parallel and the moat is uniform everywhere,
+ * corners included. The hub is themed, not metallic:
  * its rim carries the accent-highlight/tone ramp and its action cells sit on
  * the tone fill, so the bold status symbols (green confirm ring, red cancel
  * cross, accent triangles) own the center. Cell clip polygons implement the
@@ -47,6 +47,10 @@
         var(--portal-color-bg-0) 72%,
         transparent
     );
+
+    /* Soft depth-of-field on the page behind the radial. A static effect,
+     * not motion, so it is not reduced-motion gated. */
+    backdrop-filter: blur(4px);
 }
 
 .positioner {
@@ -208,8 +212,15 @@
     filter: drop-shadow(0 0 var(--portal-space-2) var(--portal-color-focus));
 }
 
+/* Hover lifts the wedge a step outward along its own radial direction (the
+ * enter vector points inward, so a negative fraction of it points out) with
+ * a tone glow; pressing recesses it back through the press scale. */
 .panel .section:hover:not(:disabled) {
     filter: drop-shadow(0 0 var(--portal-space-2) var(--portal-tone-glow-strong));
+    transform: translate(
+        calc(var(--radial-enter-x) / -8),
+        calc(var(--radial-enter-y) / -8)
+    );
 }
 
 .panel .section:active:not(:disabled) {
@@ -218,6 +229,12 @@
 
 .panel[data-variant='controller'] .section:active:not(:disabled) {
     color: var(--portal-color-text-0);
+}
+
+/* The activated target holds a strong glow through the collapse (its flash
+ * animation lives in the motion block below). */
+.panel[data-state='closing'] .section[data-activated='true'] {
+    filter: drop-shadow(0 0 var(--portal-space-3) var(--portal-tone-glow-strong));
 }
 
 /* Face fills, lowest to highest state. Layer stacks come from the variant's
@@ -458,6 +475,10 @@
     transform: scale(var(--portal-press-scale));
 }
 
+.panel[data-state='closing'] .hubButton[data-activated='true'] {
+    filter: drop-shadow(0 0 var(--portal-space-3) var(--portal-tone-glow-strong));
+}
+
 /* Glyph holder pinned to the cell anchor (physical, like the wedge labels). */
 .hubGlyphAnchor {
     position: absolute;
@@ -466,6 +487,15 @@
     display: inline-flex;
     transform: translate(-50%, -50%);
     pointer-events: none;
+}
+
+/* The symbol answers the pointer: it swells on hover and dips on press. */
+.panel .hubButton:hover:not(:disabled) .hubGlyphAnchor {
+    transform: translate(-50%, -50%) scale(1.15);
+}
+
+.panel .hubButton:active:not(:disabled) .hubGlyphAnchor {
+    transform: translate(-50%, -50%) scale(0.92);
 }
 
 /* Center symbols: bold status-colored marks with a soft self-colored bloom.
@@ -527,6 +557,11 @@
             transform var(--portal-duration-ui-fast) var(--portal-easing-standard);
     }
 
+    .hubGlyphAnchor {
+        transition: transform var(--portal-duration-ui-fast)
+            var(--portal-easing-emphasized);
+    }
+
     .panel[data-motion='full'][data-state='open'] .section {
         animation: portal-radial-section-in var(--portal-duration-ui-base)
             var(--portal-easing-emphasized) backwards;
@@ -558,6 +593,19 @@
     .backdrop[data-motion='full'][data-state='closing'] {
         animation: portal-radial-fade-out var(--portal-duration-ui-base)
             var(--portal-easing-standard) forwards;
+    }
+
+    /* Selection flash: the activated target pops outward and burns off while
+     * its siblings collapse - the click's answer. Slightly longer than the
+     * collapse so it lingers; the unmount is keyed on the siblings'
+     * section-out end (with the timer backstop), so the flash never delays
+     * the close. */
+    .panel[data-motion='full'][data-state='closing']
+        .section[data-activated='true'],
+    .panel[data-motion='full'][data-state='closing']
+        .hubButton[data-activated='true'] {
+        animation: portal-radial-selected var(--portal-duration-ui-slow)
+            var(--portal-easing-emphasized) forwards;
     }
 }
 
@@ -604,5 +652,22 @@
 
     to {
         opacity: 0;
+    }
+}
+
+@keyframes portal-radial-selected {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    35% {
+        opacity: 1;
+        transform: scale(1.06);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(1.1);
     }
 }

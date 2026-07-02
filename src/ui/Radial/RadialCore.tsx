@@ -128,13 +128,25 @@ export function RadialCore({
         Dispatch<SetStateAction<ERadialPhase>>,
     ] = useState<ERadialPhase>(open ? ERadialPhase.Open : ERadialPhase.Closed);
 
+    // The most recently activated target ('section:<id>' / 'action:<name>' -
+    // prefixed so a section id can never collide with an action name). While
+    // the surface is closing, the activated target plays the selection flash
+    // instead of the plain collapse.
+    const [activated, setActivated]: [
+        string | null,
+        Dispatch<SetStateAction<string | null>>,
+    ] = useState<string | null>(null);
+
     // Follow the `open` prop through the render-phase derived-state pattern
     // ("adjusting state when a prop changes"), not an effect: the phase moves
     // to Closing on the very render where `open` flips false, so the surface
     // never unmounts for a frame before the collapse plays. Under reduced
     // motion the close settles immediately - Closing exists only to animate.
+    // Every (re)open clears the previous selection so a later Escape-close
+    // cannot replay a stale flash.
     if (open && phase !== ERadialPhase.Open) {
         setPhase(ERadialPhase.Open);
+        setActivated(null);
     }
     if (!open && phase === ERadialPhase.Open) {
         setPhase(prefersReducedMotion ? ERadialPhase.Closed : ERadialPhase.Closing);
@@ -195,6 +207,7 @@ export function RadialCore({
                 if (disabled || item.disabled === true) {
                     return;
                 }
+                setActivated(`section:${item.id}`);
                 onActivateSection(item, index);
             },
             [disabled, onActivateSection],
@@ -205,6 +218,7 @@ export function RadialCore({
             if (disabled) {
                 return;
             }
+            setActivated(`action:${action}`);
             onActivateAction(action);
         },
         [disabled, onActivateAction],
@@ -312,6 +326,11 @@ export function RadialCore({
                                     aria-label={item.label}
                                     disabled={disabled || item.disabled === true}
                                     data-segment={item.id}
+                                    data-activated={
+                                        activated === `section:${item.id}`
+                                            ? 'true'
+                                            : undefined
+                                    }
                                     onClick={(): void => {
                                         handleSectionClick(item, index);
                                     }}
@@ -373,6 +392,11 @@ export function RadialCore({
                                             style={cellStyle}
                                             aria-label={ACTION_LABELS[action]}
                                             data-action={action}
+                                            data-activated={
+                                                activated === `action:${action}`
+                                                    ? 'true'
+                                                    : undefined
+                                            }
                                             disabled={disabled}
                                             onClick={(): void => {
                                                 handleActionClick(action);

@@ -5,10 +5,11 @@
 // N-gon hole - expressed as a clip-path polygon over the full panel box, plus
 // a rim-inset face polygon (the machined edge), the label anchor point, and
 // the entrance-motion vector. The hub is the matching flat-top N-gon (square
-// hub for 4 wedges, hexagon for 6, octagon for 8) with its vertices chamfered
-// in the library's beveled-corner idiom, split into 1, 2 (vertical seam), or
-// 4 (2x2) action cells. Kept separate so the math is unit testable on its own
-// and shared byte-for-byte between the menu and controller variants.
+// hub for 4 wedges, hexagon for 6, octagon for 8) - the exact shape of the
+// ring's hole, so the moat between them is uniform - split into 1, 2
+// (vertical seam), or 4 (2x2) action cells. Kept separate so the math is unit
+// testable on its own and shared byte-for-byte between the menu and
+// controller variants.
 
 // Supported polygon side counts. A radial has one section wedge per edge, so
 // the side count is also the maximum section count. Modeled as a numeric
@@ -79,9 +80,9 @@ const OUTER_RADIUS_FRACTION: number = 0.98;
 // square hub needs the largest hole because a square's apothem is the
 // smallest fraction of its circumradius.
 const INNER_RADIUS_FRACTION: Readonly<Record<RadialSides, number>> = {
-    4: 0.54,
+    4: 0.49,
     6: 0.39,
-    8: 0.41,
+    8: 0.37,
 };
 
 // Half of the LINEAR gap between adjacent wedges, in unit space. The seam is
@@ -99,12 +100,6 @@ const RIM_INSET_FRACTION: number = 0.012;
 // before the entrance animation slides it out to rest at its edge (and back
 // in when closing).
 const ENTER_DISTANCE_PERCENT: number = 8;
-
-// Chamfer length cut from each hub vertex along both adjoining edges, in hub
-// unit space. This is the polygon analogue of the library's corner-shape
-// bevel: every hub corner is a straight machined cut, matching the beveled
-// corner identity at the hub's rendered size instead of a raw sharp vertex.
-const HUB_CHAMFER_FRACTION: number = 0.1;
 
 // Hub rim thickness in hub unit space (~2px at the hub's rendered size): the
 // cells are inset by this amount so the hub background shows through as the
@@ -189,8 +184,8 @@ function polygonPath(points: readonly Point[]): string {
     return `polygon(${coordinates})`;
 }
 
-// Vertex-average centroid: exact enough to anchor a glyph inside the convex
-// hub cells and wedge shapes this module produces.
+// Vertex-average centroid: used only to orient the inward normals while
+// offsetting edges (any interior point works for that).
 function polygonCentroid(points: readonly Point[]): Point {
     const count: number = points.length;
     if (count === 0) {
@@ -203,6 +198,32 @@ function polygonCentroid(points: readonly Point[]): Point {
         y:
             points.reduce((sum: number, point: Point): number => sum + point.y, 0) /
             count,
+    };
+}
+
+// Shoelace (area-weighted) centroid: the true visual center of a polygon.
+// Glyph anchors use this, NOT the vertex average - a clipped cell has more
+// vertices along its cut edges, so averaging vertices would drag the anchor
+// toward them and the glyph would sit off the perceived middle of the cell.
+function polygonAreaCentroid(points: readonly Point[]): Point {
+    const count: number = points.length;
+    let doubleArea: number = 0;
+    let momentX: number = 0;
+    let momentY: number = 0;
+    for (let index: number = 0; index < count; index += 1) {
+        const current: Point = points[index] ?? { x: 0, y: 0 };
+        const next: Point = points[(index + 1) % count] ?? current;
+        const cross: number = current.x * next.y - next.x * current.y;
+        doubleArea += cross;
+        momentX += (current.x + next.x) * cross;
+        momentY += (current.y + next.y) * cross;
+    }
+    if (Math.abs(doubleArea) < PARALLEL_EPSILON) {
+        return polygonCentroid(points);
+    }
+    return {
+        x: momentX / (3 * doubleArea),
+        y: momentY / (3 * doubleArea),
     };
 }
 
@@ -396,10 +417,11 @@ function hubSizeFraction(sides: RadialSides): number {
     return (hubApothem * hubVertexExtent(sides)) / Math.cos(halfStep);
 }
 
-// The hub outline: the same flat-top N-gon as the ring's inner hole, scaled
-// uniformly to fit the square hub box (a hexagon letterboxes vertically), with
-// every vertex chamfered - the polygon rendering of the library's beveled
-// corner identity.
+// The hub outline: EXACTLY the ring's inner-hole N-gon (flat-top, same
+// orientation), scaled uniformly to fit the square hub box (a hexagon
+// letterboxes vertically). Deliberately un-chamfered: the hole has plain
+// vertices, so any extra corner cut on the hub would read as a second bevel
+// and widen the moat at the corners - hub and hole stay parallel everywhere.
 function hubOutline(sides: RadialSides): readonly Point[] {
     const step: number = FULL_TURN_DEGREES / sides;
     const vertices: Point[] = [];
@@ -407,41 +429,16 @@ function hubOutline(sides: RadialSides): readonly Point[] {
         vertices.push(polarPoint(1, (index + 0.5) * step));
     }
     const maxExtent: number = hubVertexExtent(sides);
-    const scaled: readonly Point[] = vertices.map(
+    return vertices.map(
         (point: Point): Point => ({
             x: point.x / maxExtent,
             y: point.y / maxExtent,
         }),
     );
-    const chamfered: Point[] = [];
-    const count: number = scaled.length;
-    for (let index: number = 0; index < count; index += 1) {
-        const vertex: Point = scaled[index] ?? { x: 0, y: 0 };
-        const previous: Point = scaled[(index + count - 1) % count] ?? vertex;
-        const next: Point = scaled[(index + 1) % count] ?? vertex;
-        const fromPrevious: number = Math.hypot(
-            vertex.x - previous.x,
-            vertex.y - previous.y,
-        );
-        const toNext: number = Math.hypot(next.x - vertex.x, next.y - vertex.y);
-        chamfered.push({
-            x:
-                vertex.x -
-                ((vertex.x - previous.x) / fromPrevious) * HUB_CHAMFER_FRACTION,
-            y:
-                vertex.y -
-                ((vertex.y - previous.y) / fromPrevious) * HUB_CHAMFER_FRACTION,
-        });
-        chamfered.push({
-            x: vertex.x + ((next.x - vertex.x) / toNext) * HUB_CHAMFER_FRACTION,
-            y: vertex.y + ((next.y - vertex.y) / toNext) * HUB_CHAMFER_FRACTION,
-        });
-    }
-    return chamfered;
 }
 
 function toHubCell(points: readonly Point[]): RadialHubCell {
-    const centroid: Point = polygonCentroid(points);
+    const centroid: Point = polygonAreaCentroid(points);
     return {
         clipPath: polygonPath(points),
         anchorX: formatCoordinate(centroid.x),

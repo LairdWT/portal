@@ -241,11 +241,13 @@ describe('resolveRadialSides', (): void => {
 });
 
 describe('radialHubGeometry', (): void => {
-    it('matches the ring: a chamfered N-gon outline per side count', (): void => {
+    it('matches the ring: the exact hole N-gon per side count', (): void => {
         for (const sides of ALL_SIDES) {
             const hub: RadialHubGeometry = radialHubGeometry(sides, 4);
-            // Every vertex is chamfered into two, so the outline has 2N points.
-            expect(polygonPoints(hub.clipPath)).toHaveLength(sides * 2);
+            // The hub outline is the plain hole polygon - one point per
+            // vertex, no extra chamfer cuts (a second bevel would misalign
+            // the hub with the wedges).
+            expect(polygonPoints(hub.clipPath)).toHaveLength(sides);
             for (const point of polygonPoints(hub.clipPath)) {
                 expect(point.x).toBeGreaterThanOrEqual(0);
                 expect(point.x).toBeLessThanOrEqual(100);

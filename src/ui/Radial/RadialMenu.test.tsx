@@ -217,6 +217,30 @@ describe('RadialMenu', (): void => {
         expect(bravo.textContent).toContain('Bravo');
     });
 
+    it('marks the activated section so the collapse can flash it', async (): Promise<void> => {
+        const user: UserEvent = userEvent.setup();
+        render(
+            <RadialMenu
+                open
+                onClose={noop}
+                label="Actions"
+                items={ITEMS}
+                onSelect={noop}
+                sides={4}
+            />,
+        );
+        const alpha: HTMLElement = screen.getByRole('button', { name: 'Alpha' });
+        expect(alpha.getAttribute('data-activated')).toBeNull();
+        await user.click(alpha);
+        expect(alpha.getAttribute('data-activated')).toBe('true');
+        // Only the activated target carries the marker.
+        expect(
+            screen
+                .getByRole('button', { name: 'Bravo' })
+                .getAttribute('data-activated'),
+        ).toBeNull();
+    });
+
     it('renders no hub buttons when no center actions are requested', (): void => {
         render(
             <RadialMenu
