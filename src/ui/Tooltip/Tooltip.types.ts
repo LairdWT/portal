@@ -13,9 +13,13 @@ import { type Toned } from '../tone';
 // bubble appears on pointer-enter AND focus and hides on pointer-leave, blur, or
 // Escape - it is never hover-only, so keyboard users get the same help. `placement`
 // is the preferred side (default Top). `openDelayMs` / `closeDelayMs` debounce the
-// show/hide; both default to 0 (immediate) and are cleared on unmount. `tone`
-// flows through the shared tone scope. The Tooltip neither traps nor restores
-// focus: it only describes the still-focused trigger.
+// show/hide and are cleared on unmount. `openDelayMs` defaults to 0 (the bubble
+// shows immediately); `closeDelayMs` defaults to 120ms (the hover-bridge close
+// delay), NOT 0 - that grace period lets the pointer cross the Popover offset gap
+// to reach the bubble and keep it open, satisfying the WCAG 1.4.13 hoverable
+// requirement; keyboard blur takes the same path where the delay is imperceptible.
+// `tone` flows through the shared tone scope. The Tooltip neither traps nor
+// restores focus: it only describes the still-focused trigger.
 export type TooltipProps = Readonly<{
     children: ReactElement;
     content: ReactNode;

@@ -7,8 +7,14 @@
 // stacking of its own.
 //
 // This module is internal infra and is deliberately NOT re-exported from the
-// package barrel. Callers acquire the root from an effect, never during render,
-// because creating and appending the element is a DOM side effect.
+// package barrel. ensureOverlayRoot is idempotent - it looks up the singleton by
+// its marker attribute and only creates the element when none exists - so the
+// sanctioned acquisition pattern is a useState lazy initializer (see Popover,
+// Dialog, CommandPalette, and ToastProvider): the find-or-create runs once on
+// mount and StrictMode's double invocation of the initializer never duplicates
+// the root precisely BECAUSE the accessor is idempotent. Unconditional direct DOM
+// mutation in a render body otherwise remains forbidden; only this idempotent
+// accessor is allowed to run during the lazy-initializer phase.
 
 export const OVERLAY_ROOT_ATTRIBUTE: string = 'data-portal-overlay-root';
 
