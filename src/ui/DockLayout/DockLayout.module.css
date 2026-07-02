@@ -1,0 +1,249 @@
+/*
+ * DockLayout. The docking manager chrome: a bordered dock region holding the
+ * SplitPane/DockGroup tree, translucent dashed edge zones that light up
+ * while a grip drag is live (logical inset properties, so the zones mirror
+ * under RTL exactly like the hit testing), and the group frames that glow as
+ * drop targets. Floating panels are portal-rendered Windows and carry their
+ * own chrome. Tokens only; tone drives zone/target accents, never text.
+ */
+
+.root {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: var(--portal-space-2);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-bevel-3);
+    background-color: var(--portal-color-bg-1);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+}
+
+/* The definite-height host the tree fills (SplitPane sizes at 100%). */
+.tree {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-block-size: 0;
+}
+
+.tree > * {
+    flex: 1 1 auto;
+    min-block-size: 0;
+}
+
+/* One tab group: header rail + active panel body. */
+.group {
+    composes: beveled from '../../theme/surfaces.module.css';
+    display: flex;
+    flex-direction: column;
+    block-size: 100%;
+    min-block-size: 0;
+    min-inline-size: 0;
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-bevel-2);
+    background-color: var(--portal-color-surface-0);
+    overflow: hidden;
+}
+
+/* The hovered drop target under a live grip drag. */
+.group[data-drop='true'] {
+    border-color: var(--portal-tone-accent);
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow-strong);
+}
+
+.groupBar {
+    display: flex;
+    align-items: center;
+    gap: var(--portal-space-1);
+    padding-inline: var(--portal-space-2);
+    border-block-end: var(--portal-border-thickness-thin) solid
+        var(--portal-color-metal-2);
+}
+
+/* The tabs rail is the SHRINKING element: it scrolls inside itself so the
+ * grip and menu keys can never be pushed past the group's clipped edge. */
+.groupTabs {
+    flex: 1 1 0;
+    min-inline-size: 0;
+    overflow-x: auto;
+}
+
+/* The shared compact chassis for the grip and menu keys - never shrinks,
+ * never clips. */
+.grip,
+.menuKey {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: var(--portal-touch-target-min);
+    min-block-size: var(--portal-touch-target-min);
+    border: 0;
+    border-radius: var(--portal-bevel-1);
+    background-color: transparent;
+    color: var(--portal-color-text-1);
+    appearance: none;
+    cursor: pointer;
+}
+
+.grip {
+    cursor: grab;
+    touch-action: none;
+}
+
+.grip:hover,
+.menuKey:hover {
+    background-color: var(--portal-color-surface-1);
+}
+
+.grip:focus-visible,
+.menuKey:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: calc(-1 * var(--portal-border-thickness-normal));
+}
+
+/* Three machined grab bars. */
+.gripGlyph {
+    inline-size: var(--portal-space-3);
+    block-size: var(--portal-space-3);
+    background: repeating-linear-gradient(
+        to bottom,
+        var(--portal-color-text-1) 0 var(--portal-border-thickness-normal),
+        transparent var(--portal-border-thickness-normal) var(--portal-space-1)
+    );
+}
+
+/* A vertical three-dot menu mark. */
+.menuGlyph {
+    inline-size: var(--portal-space-1);
+    block-size: var(--portal-space-1);
+    border-radius: var(--portal-radius-pill);
+    background-color: var(--portal-color-text-1);
+    box-shadow:
+        0 calc(-1 * var(--portal-space-2)) 0 0 var(--portal-color-text-1),
+        0 var(--portal-space-2) 0 0 var(--portal-color-text-1);
+}
+
+.body {
+    flex: 1 1 auto;
+    min-block-size: 0;
+    padding: var(--portal-space-3);
+    overflow: auto;
+}
+
+.body:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: calc(-1 * var(--portal-border-thickness-normal));
+}
+
+/* The dashed drop zones, shown only while a grip drag is live. Logical
+ * insets keep the zones aligned with the RTL-mirrored hit testing. */
+.zones {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.zone {
+    position: absolute;
+    border: var(--portal-border-thickness-thin) dashed var(--portal-tone-border);
+    border-radius: var(--portal-bevel-2);
+    background-color: color-mix(
+        in oklab,
+        var(--portal-tone-accent) 8%,
+        transparent
+    );
+    opacity: 0.4;
+}
+
+.zone[data-active='true'] {
+    border-style: solid;
+    border-color: var(--portal-tone-accent);
+    background-color: color-mix(
+        in oklab,
+        var(--portal-tone-accent) 16%,
+        transparent
+    );
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow);
+    opacity: 1;
+}
+
+.zone[data-edge='inline-start'] {
+    inset-block: 0;
+    inset-inline-start: 0;
+    inline-size: 20%;
+}
+
+.zone[data-edge='inline-end'] {
+    inset-block: 0;
+    inset-inline-end: 0;
+    inline-size: 20%;
+}
+
+.zone[data-edge='block-start'] {
+    inset-block-start: 0;
+    inset-inline: 0;
+    block-size: 20%;
+}
+
+.zone[data-edge='block-end'] {
+    inset-block-end: 0;
+    inset-inline: 0;
+    block-size: 20%;
+}
+
+/* The dock-back affordance in a floating Window's title bar: a small framed
+ * square reading as "return to the dock". */
+.dockBackKey {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: var(--portal-space-6);
+    min-block-size: var(--portal-space-6);
+    border: 0;
+    border-radius: var(--portal-bevel-1);
+    background-color: transparent;
+    color: var(--portal-color-text-1);
+    appearance: none;
+    cursor: pointer;
+}
+
+.dockBackKey:hover {
+    background-color: var(--portal-color-surface-1);
+}
+
+.dockBackKey:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: calc(-1 * var(--portal-border-thickness-normal));
+}
+
+.dockBackGlyph {
+    inline-size: var(--portal-space-3);
+    block-size: var(--portal-space-3);
+    border: var(--portal-border-thickness-normal) solid var(--portal-color-text-1);
+    border-radius: var(--portal-bevel-1);
+    box-shadow: inset 0 0 0 var(--portal-border-thickness-thin)
+        var(--portal-color-surface-0);
+}
+
+/* The empty dock (Chart's empty-state recipe). */
+.empty {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    color: var(--portal-color-text-1);
+    font-size: var(--portal-size-text-sm);
+    font-style: italic;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .group {
+        transition:
+            border-color var(--portal-duration-ui-base)
+                var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ui-base) var(--portal-easing-standard);
+    }
+}

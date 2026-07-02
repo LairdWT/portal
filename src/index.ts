@@ -315,6 +315,29 @@ export {
     type SecretPromptOptions,
 } from './ui/Dialog/Dialog.types';
 export { PromptDialog } from './ui/Dialog/PromptDialog';
+export { DockLayout } from './ui/DockLayout/DockLayout';
+export {
+    type DockFloatingPanel,
+    type DockLayoutProps,
+    type DockLayoutState,
+    type DockNode,
+    type DockPanelDef,
+    type DockSplitNode,
+    type DockTabsNode,
+    EDockEdge,
+    EDockNodeKind,
+} from './ui/DockLayout/DockLayout.types';
+export {
+    dockAtEdge,
+    dockedPanelIds,
+    dockIntoGroup,
+    floatPanel,
+    layoutPanelIds,
+    moveFloating,
+    removePanel,
+    setActiveTab,
+    setFraction,
+} from './ui/DockLayout/dockMath';
 export { Drawer } from './ui/Drawer/Drawer';
 export {
     type DrawerHeadingLevel,
