@@ -7,6 +7,15 @@ Fiber presentation surface.
 
 ## Demo
 
+![Portal RadialMenu: an octagonal radial menu of eight machined wedge sections (Attack, Defend, Item, Magic, Talk, Flee, Wait, Scan) around an octagonal center hub carrying a bold green confirm ring, a red cancel cross, and previous/next triangles, all framed in a lit accent rim over dark HUD glass.](https://raw.githubusercontent.com/LairdWT/portal/main/docs/portal-radial-menu.png)
+
+The `RadialMenu` above is the flagship control: true wedge-shaped sections
+computed as clip-path geometry around a center hub that holds 0, 1, 2, or 4
+drawn action symbols, with staggered open/close animation, paging through the
+center previous/next actions, and an inline collapsible form whose hub
+persists as the toggle. Its Tier-1 sibling `RadialPad` shares the same
+geometry and emits per-section input signals.
+
 ![Portal mobile controller: a beveled HUD readout band over a deep shader backdrop, and a metal-trimmed deck holding Start and Select keys, an analog stick, and an A/B/X/Y action grid. The live Storybook adds an animated distort orb over an interactive rippleGrid shader.](https://raw.githubusercontent.com/LairdWT/portal/main/docs/portal-controller.png)
 
 Live, interactive Storybook (every control, the controller showcase with the
@@ -53,18 +62,52 @@ ESM enabled, and a TypeScript `moduleResolution` of `bundler`, `node16`, or
 ## Usage
 
 Import components from the package root and load the stylesheet once at your
-application entry point:
+application entry point. The flagship `RadialMenu` in a few lines - an
+octagonal action wheel with a confirm/cancel hub:
 
 ```tsx
-import { type ReactElement } from 'react';
+import { type ReactElement, useState } from 'react';
 
-import { CTA } from '@laird-wt/portal';
+import { ERadialAction, RadialMenu } from '@laird-wt/portal';
 import '@laird-wt/portal/styles.css';
 
 export function Example(): ReactElement {
-    return <CTA onClick={() => undefined}>Press</CTA>;
+    const [open, setOpen] = useState(false);
+    return (
+        <>
+            <button type="button" onClick={() => setOpen(true)}>
+                Battle actions
+            </button>
+            <RadialMenu
+                open={open}
+                onClose={() => setOpen(false)}
+                label="Battle actions"
+                sides={8}
+                items={[
+                    { id: 'attack', label: 'Attack' },
+                    { id: 'defend', label: 'Defend' },
+                    { id: 'item', label: 'Item' },
+                    { id: 'magic', label: 'Magic' },
+                    { id: 'talk', label: 'Talk' },
+                    { id: 'flee', label: 'Flee' },
+                    { id: 'wait', label: 'Wait' },
+                    { id: 'scan', label: 'Scan' },
+                ]}
+                centerActions={[ERadialAction.Confirm, ERadialAction.Cancel]}
+                onSelect={(id) => console.log('selected', id)}
+            />
+        </>
+    );
 }
 ```
+
+The radial also pages: pass more items than sides plus the
+`ERadialAction.Previous` / `ERadialAction.Next` center actions and the wheel
+pages through them. Pass `collapsible` (with `onOpen`) for the inline
+disclosure form - the center hub stays mounted as the open/close toggle and
+the wedges fan out around it in place. Sections take an optional `icon`
+(with `iconOnly` for pure glyph keys), and every mode honors the user's
+reduced-motion preference.
 
 The optional 3D surface lives behind a separate entry point. Mount it inside a
 React Three Fiber `<Canvas>` (the 3D peers above must be installed):
@@ -182,7 +225,8 @@ so it suits any React UI, not only game input. It spans, among others:
   `ColorPicker`, `Toggle`.
 - Data and navigation: `List` / `SearchableList`, `DataTable`, `TreeView`,
   `Accordion`, `Tabs`, `Breadcrumb`, `Pagination`, `NavRail`,
-  `Menu` / `MenuBar` / `ContextMenu`, `CommandPalette`.
+  `Menu` / `MenuBar` / `ContextMenu`, `CommandPalette`, `RadialMenu` (the
+  flagship radial action wheel; `RadialPad` is its game-input sibling).
 - Surfaces and overlays: `Panel`, `ReadoutPanel`, `Section`, `Dialog`,
   `Drawer`, `Popover`, `Tooltip`, `Toast`, `Window`, `SplitPane`.
 - Display and feedback: `Text`, `Badge`, `Chip`, `StatPill`, `StatTile`,
