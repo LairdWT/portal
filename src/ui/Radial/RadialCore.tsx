@@ -29,8 +29,10 @@ import {
     type RadialHubCell,
     type RadialHubGeometry,
     radialHubGeometry,
+    type RadialSides,
     type RadialWedge,
     radialWedges,
+    resolveRadialSides,
 } from './radialGeometry';
 
 // Human-readable accessible name for each hub action, announced to assistive
@@ -96,6 +98,7 @@ const ENTER_X_PROPERTY: string = '--radial-enter-x';
 const ENTER_Y_PROPERTY: string = '--radial-enter-y';
 const INDEX_PROPERTY: string = '--radial-index';
 const HUB_CLIP_PROPERTY: string = '--radial-hub-clip';
+const HUB_FRACTION_PROPERTY: string = '--radial-hub-fraction';
 const CELL_CLIP_PROPERTY: string = '--radial-cell-clip';
 
 export function RadialCore({
@@ -221,15 +224,26 @@ export function RadialCore({
     // which `open` flips true - before the phase effect runs - already
     // renders as open.
     const state: ERadialPhase = open ? ERadialPhase.Open : ERadialPhase.Closing;
-    const wedges: readonly RadialWedge[] = radialWedges(sides);
-    const visibleItems: readonly RadialItem[] = items.slice(0, sides);
+    // Normalize once at the render choke point: every consumer below (wedge
+    // geometry, item cap, hub geometry, the data-sides CSS hook) sees only a
+    // supported side count, so an out-of-range runtime value can never
+    // produce NaN clip polygons or an unmatched label-budget rule.
+    const resolvedSides: RadialSides = resolveRadialSides(sides);
+    const wedges: readonly RadialWedge[] = radialWedges(resolvedSides);
+    const visibleItems: readonly RadialItem[] = items.slice(0, resolvedSides);
     // Dedupe (a repeated action would collide on key and read twice) before
     // capping to the 2x2 grid.
     const hubActions: readonly ERadialAction[] = Array.from(
         new Set(centerActions),
     ).slice(0, MAX_CENTER_ACTIONS);
-    const hub: RadialHubGeometry = radialHubGeometry(sides, hubActions.length);
-    const hubStyle: CSSProperties = { [HUB_CLIP_PROPERTY]: hub.clipPath };
+    const hub: RadialHubGeometry = radialHubGeometry(
+        resolvedSides,
+        hubActions.length,
+    );
+    const hubStyle: CSSProperties = {
+        [HUB_CLIP_PROPERTY]: hub.clipPath,
+        [HUB_FRACTION_PROPERTY]: hub.sizeFraction,
+    };
     const panelStyle: CSSProperties = toneProperties(tone);
 
     return createPortal(
@@ -250,7 +264,7 @@ export function RadialCore({
                     className={styles.panel}
                     style={panelStyle}
                     data-variant={variant}
-                    data-sides={sides}
+                    data-sides={resolvedSides}
                     data-motion={motion}
                     data-state={state}
                 >

@@ -20,8 +20,10 @@ import {
     type ERadialAction,
     ERadialVariant,
     type RadialItem,
+    type RadialSides,
 } from '../../ui/Radial/Radial.types';
 import { RadialCore } from '../../ui/Radial/RadialCore';
+import { resolveRadialSides } from '../../ui/Radial/radialGeometry';
 import type { RadialPadProps } from './RadialPad.types';
 
 // Every center action, in the fixed order the per-target signal sources are
@@ -56,6 +58,10 @@ export function RadialPad({
     const resolvedEnabled: EEnabledState = useResolvedEnabled(enabled);
     const isDisabled: boolean = resolvedEnabled === EEnabledState.Disabled;
 
+    // Normalize like RadialCore does, so the pre-built per-section sources
+    // always match the wedges the core actually renders.
+    const resolvedSides: RadialSides = resolveRadialSides(sides);
+
     // Pad-level emit surface, used as the fallback when no per-target source
     // exists (no descriptor / onSignal wired).
     const { emitDigital }: EmitBinding = useEmitBinding(descriptor, onSignal);
@@ -84,7 +90,7 @@ export function RadialPad({
                 ? descriptor.id
                 : `${idNamespace}.${descriptor.id}`;
         const keys: string[] = [];
-        for (let index: number = 0; index < sides; index += 1) {
+        for (let index: number = 0; index < resolvedSides; index += 1) {
             keys.push(sectionKey(index));
         }
         for (const action of ALL_ACTIONS) {
@@ -105,7 +111,7 @@ export function RadialPad({
             );
         }
         return sources;
-    }, [descriptor, resolvedOnSignal, idNamespace, timeProvider, sides]);
+    }, [descriptor, resolvedOnSignal, idNamespace, timeProvider, resolvedSides]);
 
     // A momentary select: Press immediately followed by Release. Falls back to a
     // pad-level pulse when the target has no dedicated source.
@@ -148,7 +154,7 @@ export function RadialPad({
             open={open}
             onClose={onClose}
             label={label}
-            sides={sides}
+            sides={resolvedSides}
             items={sections}
             centerActions={centerActions}
             variant={ERadialVariant.Controller}

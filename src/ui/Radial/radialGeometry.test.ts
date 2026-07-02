@@ -6,6 +6,7 @@ import {
     type RadialSides,
     type RadialWedge,
     radialWedges,
+    resolveRadialSides,
 } from './radialGeometry';
 
 const ALL_SIDES: readonly RadialSides[] = [4, 6, 8];
@@ -222,6 +223,23 @@ describe('radialWedges', (): void => {
     });
 });
 
+describe('resolveRadialSides', (): void => {
+    it('passes supported counts through unchanged', (): void => {
+        expect(resolveRadialSides(4)).toBe(4);
+        expect(resolveRadialSides(6)).toBe(6);
+        expect(resolveRadialSides(8)).toBe(8);
+    });
+
+    it('normalizes out-of-range counts onto the supported geometry', (): void => {
+        expect(resolveRadialSides(0)).toBe(4);
+        expect(resolveRadialSides(3)).toBe(4);
+        expect(resolveRadialSides(5)).toBe(6);
+        expect(resolveRadialSides(7)).toBe(8);
+        expect(resolveRadialSides(12)).toBe(8);
+        expect(resolveRadialSides(Number.NaN)).toBe(8);
+    });
+});
+
 describe('radialHubGeometry', (): void => {
     it('matches the ring: a chamfered N-gon outline per side count', (): void => {
         for (const sides of ALL_SIDES) {
@@ -258,6 +276,20 @@ describe('radialHubGeometry', (): void => {
         expect(percentValue(grid.cells[0]?.anchorY ?? '')).toBeLessThan(50);
         expect(percentValue(grid.cells[3]?.anchorX ?? '')).toBeGreaterThan(50);
         expect(percentValue(grid.cells[3]?.anchorY ?? '')).toBeGreaterThan(50);
+    });
+
+    it('sizes the hub so its moat matches the wedge seam width', (): void => {
+        for (const sides of ALL_SIDES) {
+            const fraction: number = Number.parseFloat(
+                radialHubGeometry(sides, 4).sizeFraction,
+            );
+            // The hub fills its hole up to a seam-width moat: roughly a third
+            // of the panel for every side count, and always clear of the
+            // 2x2 touch floor at the panel's minimum size (19.5rem * 0.36 >
+            // 2 * 3rem + seams).
+            expect(fraction).toBeGreaterThan(0.3);
+            expect(fraction).toBeLessThan(0.4);
+        }
     });
 
     it('clamps a stray action count into the 2x2 grid', (): void => {

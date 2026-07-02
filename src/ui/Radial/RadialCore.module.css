@@ -71,9 +71,16 @@
     composes: toneScope from '../tone.module.css';
 
     --radial-size: clamp(19.5rem, 80vmin, 26rem);
-    --radial-hub: max(
-        calc(var(--portal-touch-target-min) * 2 + var(--portal-hud-edge-width) * 3),
-        calc(var(--radial-size) * 0.26)
+
+    /* The themed machined rim shared by the hub and both wedge variants, so
+     * the whole assembly reads as one lit frame (highlight/tone ramp - never
+     * the metallic outline). */
+    --radial-rim: linear-gradient(
+        155deg,
+        var(--portal-color-accent-highlight),
+        var(--portal-tone-edge) 45%,
+        var(--portal-tone-accent) 85%,
+        var(--portal-color-accent-highlight)
     );
 
     /* The panel box stays pointer-transparent: only the wedges and the hub
@@ -114,13 +121,14 @@
     );
     --radial-face-base: radial-gradient(
         circle closest-side at 50% 50%,
+        color-mix(in oklab, var(--portal-tone-fill) 40%, var(--portal-color-bg-0))
+            30%,
         color-mix(
                 in oklab,
-                var(--portal-color-accent-shadow) 72%,
-                var(--portal-color-bg-0)
+                var(--portal-tone-fill) 20%,
+                var(--portal-color-surface-0)
             )
-            30%,
-        var(--portal-color-surface-0) 68%,
+            68%,
         color-mix(
                 in oklab,
                 var(--portal-tone-accent) 24%,
@@ -173,18 +181,17 @@
     cursor: not-allowed;
 }
 
-/* Menu (Tier-2): the static machined metal edge - the modal-surface treatment
- * (metalEdge), not the animated controller ring. */
+/* Both variants wear the SAME themed rim as the hub, so wedges and center
+ * read as one assembly; the variants differ only in their faces (HUD glass
+ * for the menu, brushed metal keys for the controller). */
 .panel[data-variant='menu'] .section {
-    background: var(--portal-gradient-metal);
+    background: var(--radial-rim);
 }
 
-/* Controller (Tier-1): the conic metal ring as the rim - centered on the
- * panel, so the assembled rims read as one machined ring - around a brushed
- * key face, matching DPad / BevelButton. Dark text keeps AA contrast over the
- * light metal. */
+/* Controller (Tier-1): dark text keeps AA contrast over the light metal key
+ * face. */
 .panel[data-variant='controller'] .section {
-    background: var(--portal-gradient-metal-ring);
+    background: var(--radial-rim);
     color: var(--portal-color-bg-0);
 }
 
@@ -305,17 +312,22 @@
     font-weight: var(--portal-weight-label-strong);
 }
 
-/* Label budget per side count: the wedge chord narrows as sides increase. */
+/* Label budget per side count: the wedge chord narrows as sides increase.
+ * An EXPLICIT inline size (not a max) on purpose: the label box is always
+ * exactly the budget - centered on the anchor with the text centered inside
+ * it - so its width can never be squeezed by absolute-position shrink-to-fit
+ * quirks, and the ellipsis fires only when the text truly exceeds the wedge's
+ * room. */
 .panel[data-sides='4'] .sectionBody {
-    max-inline-size: calc(var(--radial-size) * 0.34);
+    inline-size: calc(var(--radial-size) * 0.36);
 }
 
 .panel[data-sides='6'] .sectionBody {
-    max-inline-size: calc(var(--radial-size) * 0.28);
+    inline-size: calc(var(--radial-size) * 0.3);
 }
 
 .panel[data-sides='8'] .sectionBody {
-    max-inline-size: calc(var(--radial-size) * 0.22);
+    inline-size: calc(var(--radial-size) * 0.24);
 }
 
 /* The center hub: the chamfered N-gon, clipped by the geometry the component
@@ -323,19 +335,17 @@
  * hub is deliberately NOT metallic); the rim-inset action cells sit on top,
  * so the ~2px reveal and the seams between cells read as the machined edge. */
 .hub {
+    /* Sized by the geometry module (--radial-hub-fraction) so the hub's
+     * apothem sits exactly one wedge-seam width inside the ring's hole: the
+     * moat around the hub is the same machined seam as between the wedges.
+     * At the panel floor this still keeps a 2x2 cell above the touch target. */
     position: absolute;
     inset-block-start: 50%;
     inset-inline-start: 50%;
-    inline-size: var(--radial-hub);
-    block-size: var(--radial-hub);
+    inline-size: calc(var(--radial-size) * var(--radial-hub-fraction));
+    block-size: calc(var(--radial-size) * var(--radial-hub-fraction));
     clip-path: var(--radial-hub-clip);
-    background: linear-gradient(
-        155deg,
-        var(--portal-color-accent-highlight),
-        var(--portal-tone-edge) 45%,
-        var(--portal-tone-accent) 85%,
-        var(--portal-color-accent-highlight)
-    );
+    background: var(--radial-rim);
     transform: translate(-50%, -50%);
     pointer-events: auto;
 }

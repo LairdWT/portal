@@ -91,6 +91,12 @@ const meta: Meta<typeof RadialPadDemo> = {
     component: RadialPadDemo,
     parameters: { layout: 'fullscreen' },
     args: { sides: 8, enabled: EEnabledState.Enabled },
+    // `sides` is the RadialSides union, not a free number: the control offers
+    // exactly the supported polygon counts (the component also normalizes any
+    // out-of-range runtime value onto them).
+    argTypes: {
+        sides: { control: { type: 'inline-radio' }, options: [4, 6, 8] },
+    },
 };
 
 export default meta;

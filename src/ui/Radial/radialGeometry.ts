@@ -40,12 +40,14 @@ export type RadialHubCell = Readonly<{
     anchorY: string;
 }>;
 
-// The center hub: the chamfered N-gon outline (the rim silhouette) and the
-// rim-inset action cells. A count of 0 still returns one cell - the
-// non-interactive center panel face.
+// The center hub: the chamfered N-gon outline (the rim silhouette), the
+// rim-inset action cells, and the hub box size as a fraction of the panel.
+// A count of 0 still returns one cell - the non-interactive center panel
+// face.
 export type RadialHubGeometry = Readonly<{
     clipPath: string;
     cells: readonly RadialHubCell[];
+    sizeFraction: string;
 }>;
 
 // An x/y pair in unit space: the box center is the origin and 1 is half the
@@ -124,6 +126,24 @@ const COORDINATE_PRECISION: number = 1000;
 // Guard for parallel-line intersection; adjacent polygon edges are never
 // parallel, so this only defends against degenerate inputs.
 const PARALLEL_EPSILON: number = 1e-9;
+
+// Normalizes an arbitrary runtime side count onto the supported geometry.
+// The compile-time type already restricts `sides` to 4 | 6 | 8, but values
+// can arrive from untyped surfaces (Storybook controls, JS consumers); an
+// unsupported count would otherwise produce NaN clip polygons and an
+// unclipped render. Non-finite input falls back to the octagon default.
+export function resolveRadialSides(sides: number): RadialSides {
+    if (!Number.isFinite(sides)) {
+        return 8;
+    }
+    if (sides <= 4) {
+        return 4;
+    }
+    if (sides <= 6) {
+        return 6;
+    }
+    return 8;
+}
 
 // Point at `radius` in the direction `angleDegrees`, measured clockwise from
 // straight up (screen coordinates: +y is down), matching the section-0-at-top
@@ -351,6 +371,31 @@ export function radialWedges(sides: RadialSides): readonly RadialWedge[] {
     return wedges;
 }
 
+// Largest axis extent of the unit-circumradius hub N-gon; the polygon is
+// scaled by its inverse so it fits the square hub box (a hexagon letterboxes
+// vertically).
+function hubVertexExtent(sides: RadialSides): number {
+    const step: number = FULL_TURN_DEGREES / sides;
+    let maxExtent: number = 0;
+    for (let index: number = 0; index < sides; index += 1) {
+        const vertex: Point = polarPoint(1, (index + 0.5) * step);
+        maxExtent = Math.max(maxExtent, Math.abs(vertex.x), Math.abs(vertex.y));
+    }
+    return maxExtent;
+}
+
+// Hub box size as a fraction of the panel. The hub polygon's apothem lands
+// exactly one wedge-seam width inside the ring's inner hole (the hub and the
+// hole are the same flat-top N-gon, so their edges are parallel and the moat
+// is uniform): the gap around the hub reads as the same machined seam that
+// separates the wedges, not a void.
+function hubSizeFraction(sides: RadialSides): number {
+    const halfStep: number = ((FULL_TURN_DEGREES / sides) * RADIANS_PER_DEGREE) / 2;
+    const holeApothem: number = INNER_RADIUS_FRACTION[sides] * Math.cos(halfStep);
+    const hubApothem: number = holeApothem - 2 * SEAM_HALF_FRACTION;
+    return (hubApothem * hubVertexExtent(sides)) / Math.cos(halfStep);
+}
+
 // The hub outline: the same flat-top N-gon as the ring's inner hole, scaled
 // uniformly to fit the square hub box (a hexagon letterboxes vertically), with
 // every vertex chamfered - the polygon rendering of the library's beveled
@@ -361,11 +406,7 @@ function hubOutline(sides: RadialSides): readonly Point[] {
     for (let index: number = 0; index < sides; index += 1) {
         vertices.push(polarPoint(1, (index + 0.5) * step));
     }
-    const maxExtent: number = vertices.reduce(
-        (max: number, point: Point): number =>
-            Math.max(max, Math.abs(point.x), Math.abs(point.y)),
-        0,
-    );
+    const maxExtent: number = hubVertexExtent(sides);
     const scaled: readonly Point[] = vertices.map(
         (point: Point): Point => ({
             x: point.x / maxExtent,
@@ -496,5 +537,6 @@ export function radialHubGeometry(
     return {
         clipPath: polygonPath(outline),
         cells: hubCellsForLayout(face, layout).map(toHubCell),
+        sizeFraction: String(roundCoordinate(hubSizeFraction(sides))),
     };
 }

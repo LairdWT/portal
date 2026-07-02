@@ -43,8 +43,23 @@ All public-API changes are additive-optional; the freeze holds.
   (unit-tested).
 - Radial depth pass: menu wedge faces carry a center-dark radial wash with a
   tone rim-light and the shared scanline texture; controller faces recess
-  the brushed ramp behind a center vignette; the hub tracks the panel size
-  and reads smaller relative to the wedges.
+  the brushed ramp behind a center vignette.
+- Radial cohesion pass: the wedges and the hub wear the SAME themed
+  highlight/tone rim, so ring and center read as one lit machined assembly
+  (variants differ only in their faces - HUD glass on the menu, brushed
+  metal keys on the controller). The hub size is derived by the geometry
+  module so its apothem sits exactly one wedge-seam width inside the ring's
+  hole: the moat around the hub is the same machined seam that separates
+  the wedges, and the action cells gain the reclaimed room.
+- Radial wedge labels size to an explicit per-side-count budget (not a max
+  over shrink-to-fit), so the label box can never be squeezed by
+  absolute-positioning width rules; the ellipsis fires only when the text
+  truly exceeds the wedge's room.
+- The radial side count is normalized at runtime (`4 | 6 | 8`; anything else
+  resolves to the nearest supported polygon, non-finite input to the
+  octagon default), so an out-of-range value from an untyped surface can
+  never render NaN geometry; the Storybook `sides` control is now an
+  inline-radio over exactly the supported counts.
 
 ### Removed
 
