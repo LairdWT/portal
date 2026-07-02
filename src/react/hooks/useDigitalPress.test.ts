@@ -25,6 +25,8 @@ function PressButton({ options }: PressButtonProps): ReactElement {
         type: 'button',
         'data-testid': SURFACE_TEST_ID,
         onPointerDown: binding.onPointerDown,
+        onPointerUp: binding.onPointerUp,
+        onPointerCancel: binding.onPointerCancel,
     });
 }
 
@@ -98,5 +100,84 @@ describe('useDigitalPress', (): void => {
         fireEvent.pointerDown(element, { pointerId: 1, button: 2 });
 
         expect(onPress).toHaveBeenCalledTimes(1);
+    });
+
+    // A press is owned by the pointer that started it: a second finger on the
+    // same control must neither double-start the press nor end the first
+    // finger's hold when it lifts.
+    describe('single active pointer', (): void => {
+        it('ignores a second pointerdown while a press is held', (): void => {
+            const onPress: Mock<() => void> = vi.fn<() => void>();
+            const { element }: { element: HTMLElement } = mount({
+                enabled: EEnabledState.Enabled,
+                onPress,
+            });
+
+            fireEvent.pointerDown(element, { pointerId: 1, button: 0 });
+            fireEvent.pointerDown(element, { pointerId: 2, button: 0 });
+
+            expect(onPress).toHaveBeenCalledTimes(1);
+        });
+
+        it('releases only for the owning pointer', (): void => {
+            const onPress: Mock<() => void> = vi.fn<() => void>();
+            const onRelease: Mock<() => void> = vi.fn<() => void>();
+            const { element }: { element: HTMLElement } = mount({
+                enabled: EEnabledState.Enabled,
+                onPress,
+                onRelease,
+            });
+
+            fireEvent.pointerDown(element, { pointerId: 1, button: 0 });
+            fireEvent.pointerDown(element, { pointerId: 2, button: 0 });
+
+            // The non-owning finger lifting must not end the held press.
+            fireEvent.pointerUp(element, { pointerId: 2 });
+            expect(onRelease).not.toHaveBeenCalled();
+
+            fireEvent.pointerUp(element, { pointerId: 1 });
+            expect(onRelease).toHaveBeenCalledTimes(1);
+        });
+
+        it('scopes pointercancel to the owning pointer', (): void => {
+            const onRelease: Mock<() => void> = vi.fn<() => void>();
+            const { element }: { element: HTMLElement } = mount({
+                enabled: EEnabledState.Enabled,
+                onRelease,
+            });
+
+            fireEvent.pointerDown(element, { pointerId: 1, button: 0 });
+            fireEvent.pointerCancel(element, { pointerId: 2 });
+            expect(onRelease).not.toHaveBeenCalled();
+
+            fireEvent.pointerCancel(element, { pointerId: 1 });
+            expect(onRelease).toHaveBeenCalledTimes(1);
+        });
+
+        it('allows a fresh press after the owning pointer releases', (): void => {
+            const onPress: Mock<() => void> = vi.fn<() => void>();
+            const { element }: { element: HTMLElement } = mount({
+                enabled: EEnabledState.Enabled,
+                onPress,
+            });
+
+            fireEvent.pointerDown(element, { pointerId: 1, button: 0 });
+            fireEvent.pointerUp(element, { pointerId: 1 });
+            fireEvent.pointerDown(element, { pointerId: 2, button: 0 });
+
+            expect(onPress).toHaveBeenCalledTimes(2);
+        });
+
+        it('emits no phantom release without a held press', (): void => {
+            const onRelease: Mock<() => void> = vi.fn<() => void>();
+            const { element }: { element: HTMLElement } = mount({
+                enabled: EEnabledState.Enabled,
+                onRelease,
+            });
+
+            fireEvent.pointerUp(element, { pointerId: 1 });
+
+            expect(onRelease).not.toHaveBeenCalled();
+        });
     });
 });
