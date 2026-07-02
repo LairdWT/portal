@@ -282,6 +282,11 @@ export const MultiWindow: Story = {
     render: (): ReactElement => <MultiWindowDemo />,
 };
 
+// Excluded from the autodocs page: the demo flips document.documentElement to
+// rtl for its lifetime, and the docs page mounts every story of this file at
+// once, so co-mounting would mirror all the sibling previews. The story stays
+// in the sidebar and in the browser (axe) test project, where it mounts alone.
 export const RTL: Story = {
     render: (): ReactElement => <RtlDemo />,
+    parameters: { docs: { disable: true } },
 };
