@@ -168,3 +168,45 @@ export const IconSections: Story = {
         centerActions: [ERadialAction.Confirm, ERadialAction.Cancel],
     },
 };
+
+// More items than sides: the center previous/next actions page through them
+// (wrapping), with the wedge entrance replaying per page.
+export const Paged: Story = {
+    args: {
+        sides: 4,
+        itemCount: 8,
+        centerActions: [ERadialAction.Previous, ERadialAction.Next],
+    },
+};
+
+// The collapsible inline form: the hub persists as the open/close toggle
+// (wearing the shared toggle chip) and the wedges fan out around it in place.
+function CollapsibleRadialDemo(): ReactElement {
+    const [open, setOpen]: [boolean, Dispatch<SetStateAction<boolean>>] =
+        useState<boolean>(false);
+    return (
+        <div style={{ padding: 'var(--portal-space-6, 2rem)' }}>
+            <RadialMenu
+                collapsible
+                open={open}
+                onOpen={(): void => {
+                    setOpen(true);
+                }}
+                onClose={(): void => {
+                    setOpen(false);
+                }}
+                label="Quick actions"
+                items={ACTION_ITEMS}
+                sides={8}
+                centerActions={[ERadialAction.Confirm, ERadialAction.Cancel]}
+                onSelect={(id: string): void => {
+                    console.log('select', id);
+                }}
+            />
+        </div>
+    );
+}
+
+export const Collapsible: Story = {
+    render: (): ReactElement => <CollapsibleRadialDemo />,
+};

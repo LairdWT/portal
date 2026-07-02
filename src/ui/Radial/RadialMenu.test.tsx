@@ -277,6 +277,111 @@ describe('RadialMenu', (): void => {
         expect(screen.getAllByRole('button', { name: 'Cancel' })).toHaveLength(1);
     });
 
+    it('pages items with the center next/previous actions, wrapping', async (): Promise<void> => {
+        const user: UserEvent = userEvent.setup();
+        render(
+            <RadialMenu
+                open
+                onClose={noop}
+                label="Actions"
+                items={ITEMS}
+                onSelect={noop}
+                sides={4}
+                centerActions={[ERadialAction.Previous, ERadialAction.Next]}
+            />,
+        );
+        // Page one: the first four items.
+        expect(screen.getByRole('button', { name: 'Alpha' })).toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: 'Echo' })).toBeNull();
+
+        await user.click(screen.getByRole('button', { name: 'Next' }));
+        expect(screen.getByRole('button', { name: 'Echo' })).toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: 'Alpha' })).toBeNull();
+
+        // Next from the last page wraps to page one.
+        await user.click(screen.getByRole('button', { name: 'Next' }));
+        expect(screen.getByRole('button', { name: 'Alpha' })).toBeInTheDocument();
+
+        // Previous wraps backwards to the last page.
+        await user.click(screen.getByRole('button', { name: 'Previous' }));
+        expect(screen.getByRole('button', { name: 'Echo' })).toBeInTheDocument();
+    });
+
+    it('renders the collapsed collapsible form as a persistent hub toggle', async (): Promise<void> => {
+        const user: UserEvent = userEvent.setup();
+        const onOpen: Mock = vi.fn();
+        render(
+            <RadialMenu
+                collapsible
+                open={false}
+                onOpen={onOpen}
+                onClose={noop}
+                label="Quick actions"
+                items={ITEMS}
+                onSelect={noop}
+                sides={4}
+                centerActions={[ERadialAction.Confirm]}
+            />,
+        );
+        // Collapsed: no modal dialog and no wedges - just the named toggle.
+        expect(screen.queryByRole('dialog')).toBeNull();
+        expect(screen.queryByRole('button', { name: 'Alpha' })).toBeNull();
+        const toggle: HTMLElement = screen.getByRole('button', {
+            name: 'Quick actions',
+        });
+        expect(toggle.getAttribute('aria-expanded')).toBe('false');
+        await user.click(toggle);
+        expect(onOpen).toHaveBeenCalledTimes(1);
+    });
+
+    it('expands the collapsible form into wedges around the action cells', (): void => {
+        render(
+            <RadialMenu
+                collapsible
+                open
+                onOpen={noop}
+                onClose={noop}
+                label="Quick actions"
+                items={ITEMS}
+                onSelect={noop}
+                sides={4}
+                centerActions={[ERadialAction.Confirm]}
+            />,
+        );
+        // Open with actions: wedges and cells, no toggle, and the surface is
+        // a non-modal group (never a dialog).
+        expect(screen.getByRole('button', { name: 'Alpha' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Confirm' })).toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: 'Quick actions' })).toBeNull();
+        expect(
+            screen.getByRole('group', { name: 'Quick actions' }),
+        ).toBeInTheDocument();
+        expect(screen.queryByRole('dialog')).toBeNull();
+    });
+
+    it('keeps the expanded toggle when no center actions are configured', async (): Promise<void> => {
+        const user: UserEvent = userEvent.setup();
+        const onClose: Mock = vi.fn();
+        render(
+            <RadialMenu
+                collapsible
+                open
+                onOpen={noop}
+                onClose={onClose}
+                label="Quick actions"
+                items={ITEMS}
+                onSelect={noop}
+                sides={4}
+            />,
+        );
+        const toggle: HTMLElement = screen.getByRole('button', {
+            name: 'Quick actions',
+        });
+        expect(toggle.getAttribute('aria-expanded')).toBe('true');
+        await user.click(toggle);
+        expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
     it('dismisses on the Escape key', async (): Promise<void> => {
         const user: UserEvent = userEvent.setup();
         const onClose: Mock = vi.fn();

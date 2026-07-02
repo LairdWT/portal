@@ -51,28 +51,45 @@ export type ERadialVariant = (typeof ERadialVariant)[keyof typeof ERadialVariant
 // Internal props for the shared RadialCore. NOT part of the public barrel: the
 // core is behavior-agnostic (it renders the overlay, geometry, hub, and
 // animation and reports raw activations) and each public wrapper maps its own
-// props onto this shape and supplies the activation behavior.
+// props onto this shape and supplies the activation behavior. `collapsible`
+// switches the core from a portaled modal overlay to an INLINE disclosure: the
+// hub stays mounted as the collapsed state (a toggle button wearing the shared
+// toggle chip) and only the wedges fan out/collapse; `onOpen` is the toggle's
+// expand request.
 export type RadialCoreProps = Readonly<{
     open: boolean;
     onClose: () => void;
+    onOpen?: (() => void) | undefined;
     label: string;
     sides: RadialSides;
     items: readonly RadialItem[];
     centerActions: readonly ERadialAction[];
     variant: ERadialVariant;
+    collapsible: boolean;
     onActivateSection: (item: RadialItem, index: number) => void;
     onActivateAction: (action: ERadialAction) => void;
     disabled: boolean;
     tone?: string | undefined;
 }>;
 
-// Props for the generic-UI RadialMenu. An open/close modal radial menu portaled
-// onto the shared overlay layer: `items` fan out from each edge, a click selects
-// one (and closes it unless closeOnSelect is false); the optional center hub
-// carries confirm/cancel/next/previous as drawn symbols. Cancel always closes.
+// Props for the generic-UI RadialMenu. An open/close radial menu: `items` fan
+// out from each edge, a click selects one (and closes it unless closeOnSelect
+// is false); the optional center hub carries confirm/cancel/next/previous as
+// drawn symbols. Cancel always closes.
+//
+// Paging: when more items than sides are supplied, the Next / Previous center
+// actions page through them (wrapping) with the wedge entrance replaying per
+// page; onCenterAction still fires for every action press.
+//
+// Collapsible: by default the menu is a portaled MODAL overlay. Set
+// `collapsible` for the inline disclosure form - the center hub stays mounted
+// as the collapsed state (a toggle button named by `label`, wearing the shared
+// toggle chip) and the wedges animate out around it on open and collapse back
+// into it on close; `onOpen` receives the toggle's expand request.
 export type RadialMenuProps = Readonly<{
     open: boolean;
     onClose: () => void;
+    onOpen?: () => void;
     label: string;
     items: readonly RadialItem[];
     onSelect: (id: string) => void;
@@ -82,5 +99,6 @@ export type RadialMenuProps = Readonly<{
     // Close the menu after a section is selected (default true). Set false to
     // keep it open, e.g. while paging through pages with the center next/previous.
     closeOnSelect?: boolean;
+    collapsible?: boolean;
     tone?: string | undefined;
 }>;

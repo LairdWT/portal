@@ -109,6 +109,14 @@
     outline: none;
 }
 
+/* The collapsible (inline disclosure) form: the panel sits in normal flow
+ * instead of the portaled overlay positioner. Its hub persists as the
+ * collapsed state, so the box keeps its full size and only the wedges come
+ * and go inside it. */
+.panel[data-overlay='false'] {
+    display: inline-block;
+}
+
 /* Shared face layers, defined per variant so the state rules can restack
  * them without re-authoring. The menu face is a center-dark radial wash
  * whose outer edge picks up the tone (rim light), textured by the shared
@@ -489,6 +497,19 @@
     pointer-events: none;
 }
 
+/* The collapsible toggle's mark: the shared universal toggle chip (the
+ * TreeView twisty, promoted), scaled up to carry the hub face alone. Points
+ * right while collapsed, rotates down when expanded. */
+.hubToggleGlyph {
+    composes: toggleChip from '../../theme/surfaces.module.css';
+
+    --portal-toggle-chip-size: var(--portal-space-6);
+}
+
+.hubToggleGlyph[data-expanded='true'] {
+    --portal-toggle-chip-rotate: 45deg;
+}
+
 /* The symbol answers the pointer: it swells on hover and dips on press. */
 .panel .hubButton:hover:not(:disabled) .hubGlyphAnchor {
     transform: translate(-50%, -50%) scale(1.15);
@@ -575,12 +596,14 @@
             var(--portal-easing-standard) forwards;
     }
 
-    .panel[data-motion='full'][data-state='open'] .hub {
+    /* The hub only fades with the OVERLAY form; the collapsible hub is the
+     * persistent collapsed state and must never blink out. */
+    .panel[data-motion='full'][data-state='open'][data-hub='overlay'] .hub {
         animation: portal-radial-fade var(--portal-duration-ui-base)
             var(--portal-easing-standard) backwards;
     }
 
-    .panel[data-motion='full'][data-state='closing'] .hub {
+    .panel[data-motion='full'][data-state='closing'][data-hub='overlay'] .hub {
         animation: portal-radial-fade-out var(--portal-duration-ui-base)
             var(--portal-easing-standard) forwards;
     }

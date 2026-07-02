@@ -158,6 +158,7 @@ export function RadialPad({
             items={sections}
             centerActions={centerActions}
             variant={ERadialVariant.Controller}
+            collapsible={false}
             onActivateSection={handleActivateSection}
             onActivateAction={handleActivateAction}
             disabled={isDisabled}

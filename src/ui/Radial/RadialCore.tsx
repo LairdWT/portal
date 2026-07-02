@@ -74,6 +74,20 @@ const ERadialPhase: {
 };
 type ERadialPhase = (typeof ERadialPhase)[keyof typeof ERadialPhase];
 
+// The presented open/close state for a given render: the prop wins (so the
+// frame on which `open` flips already presents correctly), the lifecycle
+// phase distinguishes an animating close from the settled rest state (which
+// only the collapsible form ever renders - the overlay form unmounts).
+function presentedState(open: boolean, phase: ERadialPhase): ERadialPhase {
+    if (open) {
+        return ERadialPhase.Open;
+    }
+    if (phase === ERadialPhase.Closing) {
+        return ERadialPhase.Closing;
+    }
+    return ERadialPhase.Closed;
+}
+
 // The exit keyframe name (CSS modules scope it with a suffix, so the
 // animationend handler matches by inclusion). Ending this animation - or the
 // fallback timer, whichever comes first - unmounts the surface.
@@ -104,11 +118,13 @@ const CELL_CLIP_PROPERTY: string = '--radial-cell-clip';
 export function RadialCore({
     open,
     onClose,
+    onOpen,
     label,
     sides,
     items,
     centerActions,
     variant,
+    collapsible,
     onActivateSection,
     onActivateAction,
     disabled,
@@ -194,11 +210,17 @@ export function RadialCore({
         Dispatch<SetStateAction<HTMLElement | null>>,
     ] = useState<HTMLElement | null>((): HTMLElement | null => ensureOverlayRoot());
 
-    // Modal radial: trap focus inside the ring while open and restore it on
-    // close; dismiss on Escape or an outside pointerdown (the dimmed backdrop).
-    // Both hooks are no-ops while closed (gated on `open`), so focus is
-    // restored the moment closing starts, not when the collapse finishes.
-    useFocusTrap({ active: open, containerRef: panelRef, restoreFocus: true });
+    // Overlay radial: trap focus inside the ring while open and restore it on
+    // close (the collapsible form is a non-modal inline disclosure, so it
+    // never traps); either form dismisses on Escape or an outside
+    // pointerdown. Both hooks are no-ops while closed (gated on `open`), so
+    // focus is restored the moment closing starts, not when the collapse
+    // finishes.
+    useFocusTrap({
+        active: open && !collapsible,
+        containerRef: panelRef,
+        restoreFocus: true,
+    });
     useDismiss({ enabled: open, onDismiss: onClose, refs: [panelRef] });
 
     const handleSectionClick: (item: RadialItem, index: number) => void =
@@ -224,35 +246,52 @@ export function RadialCore({
         [disabled, onActivateAction],
     );
 
-    if (!open && phase === ERadialPhase.Closed) {
-        return null;
-    }
-    if (overlayRoot === null) {
+    // The collapsible hub toggle: expand when collapsed, collapse when open.
+    const handleToggleClick: () => void = useCallback((): void => {
+        if (disabled) {
+            return;
+        }
+        if (open) {
+            onClose();
+            return;
+        }
+        onOpen?.();
+    }, [disabled, open, onClose, onOpen]);
+
+    // The overlay form unmounts entirely once closed; the collapsible form
+    // always renders (its persistent hub IS the collapsed state).
+    if (!collapsible && !open && phase === ERadialPhase.Closed) {
         return null;
     }
 
     const motion: EOverlayMotion = prefersReducedMotion
         ? EOverlayMotion.Reduced
         : EOverlayMotion.Full;
-    // Presented state derives from the prop (not the phase) so the frame on
-    // which `open` flips true - before the phase effect runs - already
-    // renders as open.
-    const state: ERadialPhase = open ? ERadialPhase.Open : ERadialPhase.Closing;
+    const state: ERadialPhase = presentedState(open, phase);
     // Normalize once at the render choke point: every consumer below (wedge
     // geometry, item cap, hub geometry, the data-sides CSS hook) sees only a
     // supported side count, so an out-of-range runtime value can never
     // produce NaN clip polygons or an unmatched label-budget rule.
     const resolvedSides: RadialSides = resolveRadialSides(sides);
     const wedges: readonly RadialWedge[] = radialWedges(resolvedSides);
-    const visibleItems: readonly RadialItem[] = items.slice(0, resolvedSides);
+    // Wedges exist while open or animating closed; the collapsible rest state
+    // renders none.
+    const showWedges: boolean = open || phase === ERadialPhase.Closing;
+    const visibleItems: readonly RadialItem[] = showWedges
+        ? items.slice(0, resolvedSides)
+        : [];
     // Dedupe (a repeated action would collide on key and read twice) before
     // capping to the 2x2 grid.
     const hubActions: readonly ERadialAction[] = Array.from(
         new Set(centerActions),
     ).slice(0, MAX_CENTER_ACTIONS);
+    // The collapsible hub presents the full-face toggle whenever it is not
+    // showing action cells: always while collapsed, and while open with no
+    // actions configured (so the fan can still be closed in place).
+    const hubToggle: boolean = collapsible && (!open || hubActions.length === 0);
     const hub: RadialHubGeometry = radialHubGeometry(
         resolvedSides,
-        hubActions.length,
+        hubToggle ? 0 : hubActions.length,
     );
     const hubStyle: CSSProperties = {
         [HUB_CLIP_PROPERTY]: hub.clipPath,
@@ -260,6 +299,189 @@ export function RadialCore({
     };
     const panelStyle: CSSProperties = toneProperties(tone);
 
+    // The panel itself is shared by both forms: the overlay wraps it in the
+    // backdrop + positioner and portals it; the collapsible form renders it
+    // inline as a non-modal disclosure group.
+    const panel: ReactElement = (
+        <div
+            ref={panelRef}
+            role={collapsible ? 'group' : 'dialog'}
+            aria-modal={collapsible ? undefined : true}
+            aria-label={label}
+            tabIndex={collapsible ? undefined : -1}
+            className={styles.panel}
+            style={panelStyle}
+            data-variant={variant}
+            data-sides={resolvedSides}
+            data-motion={motion}
+            data-state={state}
+            data-overlay={collapsible ? 'false' : 'true'}
+            data-hub={collapsible ? 'persistent' : 'overlay'}
+        >
+            {visibleItems.map(
+                (item: RadialItem, index: number): ReactElement | null => {
+                    const wedge: RadialWedge | undefined = wedges[index];
+                    if (wedge === undefined) {
+                        // Unreachable: visibleItems is capped to
+                        // `sides` and radialWedges returns one wedge
+                        // per side. Guarded so a geometry regression
+                        // can never render an unclipped panel-sized
+                        // button.
+                        return null;
+                    }
+                    const wedgeStyle: CSSProperties = {
+                        [CLIP_PROPERTY]: wedge.clipPath,
+                        [FACE_CLIP_PROPERTY]: wedge.faceClipPath,
+                        [ANCHOR_X_PROPERTY]: wedge.anchorX,
+                        [ANCHOR_Y_PROPERTY]: wedge.anchorY,
+                        [ENTER_X_PROPERTY]: wedge.enterX,
+                        [ENTER_Y_PROPERTY]: wedge.enterY,
+                        [INDEX_PROPERTY]: index,
+                    };
+                    // Icon-only sections carry their name through
+                    // aria-label alone; the label span is omitted so
+                    // the wedge reads as a pure glyph key. Falls back
+                    // to the text label when no icon is supplied.
+                    const iconOnly: boolean =
+                        item.iconOnly === true && item.icon !== undefined;
+                    const iconNode: ReactNode =
+                        item.icon !== undefined ? (
+                            <span className={styles.sectionIcon} aria-hidden="true">
+                                {item.icon}
+                            </span>
+                        ) : null;
+                    return (
+                        <button
+                            key={item.id}
+                            type="button"
+                            className={styles.section}
+                            style={wedgeStyle}
+                            aria-label={item.label}
+                            disabled={disabled || item.disabled === true}
+                            data-segment={item.id}
+                            data-activated={
+                                activated === `section:${item.id}`
+                                    ? 'true'
+                                    : undefined
+                            }
+                            onClick={(): void => {
+                                handleSectionClick(item, index);
+                            }}
+                        >
+                            <span
+                                className={styles.sectionBody}
+                                data-display={iconOnly ? 'icon' : 'label'}
+                            >
+                                {iconNode}
+                                {iconOnly ? null : (
+                                    <span className={styles.sectionLabel}>
+                                        {item.label}
+                                    </span>
+                                )}
+                            </span>
+                        </button>
+                    );
+                },
+            )}
+            <div
+                className={styles.hub}
+                style={hubStyle}
+                data-count={hubToggle ? 0 : hubActions.length}
+            >
+                {hubToggle ? (
+                    // The collapsible open/close toggle: the whole hub face
+                    // is the button, wearing the shared toggle chip.
+                    <button
+                        type="button"
+                        className={styles.hubButton}
+                        style={{
+                            [CELL_CLIP_PROPERTY]: hub.cells[0]?.clipPath ?? 'none',
+                            [ANCHOR_X_PROPERTY]: hub.cells[0]?.anchorX ?? '50%',
+                            [ANCHOR_Y_PROPERTY]: hub.cells[0]?.anchorY ?? '50%',
+                        }}
+                        aria-expanded={open}
+                        aria-label={label}
+                        disabled={disabled}
+                        onClick={handleToggleClick}
+                    >
+                        <span className={styles.hubGlyphAnchor} aria-hidden="true">
+                            <span
+                                className={styles.hubToggleGlyph}
+                                data-expanded={open ? 'true' : 'false'}
+                            />
+                        </span>
+                    </button>
+                ) : null}
+                {!hubToggle && hubActions.length === 0 ? (
+                    // The 0-action hub is a non-interactive center panel: the
+                    // themed face with no button semantics.
+                    <div
+                        className={styles.hubPanel}
+                        style={{
+                            [CELL_CLIP_PROPERTY]: hub.cells[0]?.clipPath ?? 'none',
+                        }}
+                        aria-hidden="true"
+                    />
+                ) : null}
+                {!hubToggle && hubActions.length > 0
+                    ? hubActions.map(
+                          (
+                              action: ERadialAction,
+                              index: number,
+                          ): ReactElement | null => {
+                              const cell: RadialHubCell | undefined =
+                                  hub.cells[index];
+                              if (cell === undefined) {
+                                  // Unreachable: the hub geometry returns
+                                  // one cell per requested action.
+                                  return null;
+                              }
+                              const cellStyle: CSSProperties = {
+                                  [CELL_CLIP_PROPERTY]: cell.clipPath,
+                                  [ANCHOR_X_PROPERTY]: cell.anchorX,
+                                  [ANCHOR_Y_PROPERTY]: cell.anchorY,
+                              };
+                              return (
+                                  <button
+                                      key={action}
+                                      type="button"
+                                      className={styles.hubButton}
+                                      style={cellStyle}
+                                      aria-label={ACTION_LABELS[action]}
+                                      data-action={action}
+                                      data-activated={
+                                          activated === `action:${action}`
+                                              ? 'true'
+                                              : undefined
+                                      }
+                                      disabled={disabled}
+                                      onClick={(): void => {
+                                          handleActionClick(action);
+                                      }}
+                                  >
+                                      <span
+                                          className={styles.hubGlyphAnchor}
+                                          aria-hidden="true"
+                                      >
+                                          <span
+                                              className={ACTION_GLYPH_CLASS[action]}
+                                          />
+                                      </span>
+                                  </button>
+                              );
+                          },
+                      )
+                    : null}
+            </div>
+        </div>
+    );
+
+    if (collapsible) {
+        return panel;
+    }
+    if (overlayRoot === null) {
+        return null;
+    }
     return createPortal(
         <>
             <div
@@ -268,158 +490,7 @@ export function RadialCore({
                 data-state={state}
                 aria-hidden="true"
             />
-            <div className={styles.positioner}>
-                <div
-                    ref={panelRef}
-                    role="dialog"
-                    aria-modal={true}
-                    aria-label={label}
-                    tabIndex={-1}
-                    className={styles.panel}
-                    style={panelStyle}
-                    data-variant={variant}
-                    data-sides={resolvedSides}
-                    data-motion={motion}
-                    data-state={state}
-                >
-                    {visibleItems.map(
-                        (item: RadialItem, index: number): ReactElement | null => {
-                            const wedge: RadialWedge | undefined = wedges[index];
-                            if (wedge === undefined) {
-                                // Unreachable: visibleItems is capped to
-                                // `sides` and radialWedges returns one wedge
-                                // per side. Guarded so a geometry regression
-                                // can never render an unclipped panel-sized
-                                // button.
-                                return null;
-                            }
-                            const wedgeStyle: CSSProperties = {
-                                [CLIP_PROPERTY]: wedge.clipPath,
-                                [FACE_CLIP_PROPERTY]: wedge.faceClipPath,
-                                [ANCHOR_X_PROPERTY]: wedge.anchorX,
-                                [ANCHOR_Y_PROPERTY]: wedge.anchorY,
-                                [ENTER_X_PROPERTY]: wedge.enterX,
-                                [ENTER_Y_PROPERTY]: wedge.enterY,
-                                [INDEX_PROPERTY]: index,
-                            };
-                            // Icon-only sections carry their name through
-                            // aria-label alone; the label span is omitted so
-                            // the wedge reads as a pure glyph key. Falls back
-                            // to the text label when no icon is supplied.
-                            const iconOnly: boolean =
-                                item.iconOnly === true && item.icon !== undefined;
-                            const iconNode: ReactNode =
-                                item.icon !== undefined ? (
-                                    <span
-                                        className={styles.sectionIcon}
-                                        aria-hidden="true"
-                                    >
-                                        {item.icon}
-                                    </span>
-                                ) : null;
-                            return (
-                                <button
-                                    key={item.id}
-                                    type="button"
-                                    className={styles.section}
-                                    style={wedgeStyle}
-                                    aria-label={item.label}
-                                    disabled={disabled || item.disabled === true}
-                                    data-segment={item.id}
-                                    data-activated={
-                                        activated === `section:${item.id}`
-                                            ? 'true'
-                                            : undefined
-                                    }
-                                    onClick={(): void => {
-                                        handleSectionClick(item, index);
-                                    }}
-                                >
-                                    <span
-                                        className={styles.sectionBody}
-                                        data-display={iconOnly ? 'icon' : 'label'}
-                                    >
-                                        {iconNode}
-                                        {iconOnly ? null : (
-                                            <span className={styles.sectionLabel}>
-                                                {item.label}
-                                            </span>
-                                        )}
-                                    </span>
-                                </button>
-                            );
-                        },
-                    )}
-                    <div
-                        className={styles.hub}
-                        style={hubStyle}
-                        data-count={hubActions.length}
-                    >
-                        {hubActions.length === 0 ? (
-                            // The 0-action hub is a non-interactive center
-                            // panel: the themed face with no button semantics.
-                            <div
-                                className={styles.hubPanel}
-                                style={{
-                                    [CELL_CLIP_PROPERTY]:
-                                        hub.cells[0]?.clipPath ?? 'none',
-                                }}
-                                aria-hidden="true"
-                            />
-                        ) : (
-                            hubActions.map(
-                                (
-                                    action: ERadialAction,
-                                    index: number,
-                                ): ReactElement | null => {
-                                    const cell: RadialHubCell | undefined =
-                                        hub.cells[index];
-                                    if (cell === undefined) {
-                                        // Unreachable: the hub geometry returns
-                                        // one cell per requested action.
-                                        return null;
-                                    }
-                                    const cellStyle: CSSProperties = {
-                                        [CELL_CLIP_PROPERTY]: cell.clipPath,
-                                        [ANCHOR_X_PROPERTY]: cell.anchorX,
-                                        [ANCHOR_Y_PROPERTY]: cell.anchorY,
-                                    };
-                                    return (
-                                        <button
-                                            key={action}
-                                            type="button"
-                                            className={styles.hubButton}
-                                            style={cellStyle}
-                                            aria-label={ACTION_LABELS[action]}
-                                            data-action={action}
-                                            data-activated={
-                                                activated === `action:${action}`
-                                                    ? 'true'
-                                                    : undefined
-                                            }
-                                            disabled={disabled}
-                                            onClick={(): void => {
-                                                handleActionClick(action);
-                                            }}
-                                        >
-                                            <span
-                                                className={styles.hubGlyphAnchor}
-                                                aria-hidden="true"
-                                            >
-                                                <span
-                                                    className={
-                                                        ACTION_GLYPH_CLASS[action]
-                                                    }
-                                                />
-                                            </span>
-                                        </button>
-                                    );
-                                },
-                            )
-                        )}
-                    </div>
-                </div>
-            </div>
+            <div className={styles.positioner}>{panel}</div>
         </>,
         overlayRoot,
     );

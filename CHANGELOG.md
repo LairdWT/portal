@@ -4,6 +4,52 @@ All notable changes to this project are documented in this file. The format is
 based on Keep a Changelog, and the project follows Semantic Versioning with the
 0.x caveat that, before 1.0, a minor version may carry a breaking change.
 
+## [Unreleased]
+
+### Added
+
+- `RadialMenu` pages its sections: when more items than sides are supplied,
+  the center Next / Previous actions page through them (wrapping), the wedge
+  entrance replays per page, and the page resets to one on every open.
+  `onCenterAction` still fires for every press. New `Paged` story.
+- `RadialMenu.collapsible` (with the new optional `onOpen`): the inline
+  disclosure form of the radial. The center hub persists as the collapsed
+  state - a toggle button named by `label`, wearing the shared toggle chip -
+  and the wedges fan out around it in place on open and collapse back into
+  it on close (Escape / outside press collapse it; non-modal, so no backdrop
+  and no focus trap). New `Collapsible` story.
+- `ENumberStepperFinish` (additive barrel export): NumberStepper's step keys
+  now default to the quiet themed HUD finish; `finish` = Metal opts back
+  into the brushed-metal BevelButton key face that was the previous default.
+- `surfaces.module.css` gains `.toggleChip`: the TreeView twisty promoted to
+  a shared universal disclosure chip (size and rotate knobs). TreeView
+  composes it, and the collapsible radial hub adopts it as its toggle mark.
+
+### Changed
+
+- DPad rebuilt as a machined plus-shaped cross on the radial's geometry
+  foundation (shared `ui/polygonMath` primitives): four chamfered cardinal
+  arms around a passive beveled center cap, with tucked-in corner keys for
+  EightWay - themed rim, brushed vignetted faces, engraved triangles, tone
+  glow and recess on the held direction, clipped-shape focus. The FOUR-BUTTON
+  CROSS is now the default `mode` (was EightWay); pointer/keyboard behavior
+  and the signal streams are unchanged.
+- Toast dismissal is animated: a dismissed card stays mounted through a
+  reduced-motion-gated exit (fade + settle) and is removed on the exit
+  animation's end (timer backstop); reduced motion removes immediately.
+- Toggle's thumb wears the ActionButton tab face (the radial indent ramp;
+  recessed when off, lit when on) instead of the brushed-metal ramp, scoped
+  strictly to the knob box so the gradient can never bleed into the track.
+- Marquee's play/pause control is the shared compactControl icon toggle
+  (drawn glyph only, name on aria-label) instead of the wide worded metal
+  key beside the strip.
+
+### Fixed
+
+- Window: the body pane now clamps to the frame when the window is resized
+  narrower than its content (grid min-inline-size floor), instead of
+  overflowing wider than the title bar.
+
 ## [1.5.0] - 2026-07-02
 
 All public-API changes are additive-optional; the freeze holds.
