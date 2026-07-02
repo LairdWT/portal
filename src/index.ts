@@ -238,6 +238,11 @@ export {
     type ColorPickerProps,
     EColorMode,
 } from './ui/ColorPicker/ColorPicker.types';
+export { Combobox } from './ui/Combobox/Combobox';
+export {
+    type ComboboxOption,
+    type ComboboxProps,
+} from './ui/Combobox/Combobox.types';
 export { CommandPalette } from './ui/CommandPalette/CommandPalette';
 export {
     type Command,
@@ -477,6 +482,8 @@ export {
 } from './ui/StepTrack/StepTrack.types';
 export { Tabs } from './ui/Tabs/Tabs';
 export { ETabState, type TabItem, type TabsProps } from './ui/Tabs/Tabs.types';
+export { TagInput } from './ui/TagInput/TagInput';
+export { type TagInputProps } from './ui/TagInput/TagInput.types';
 export { Text } from './ui/Text/Text';
 export {
     ETextRole,

@@ -1,0 +1,156 @@
+/*
+ * TagInput. Multi-value token entry: committed tags render as removable Chips
+ * inside a beveled field shell that behaves like one text control (a press on
+ * its empty area focuses the bare inline input; the shell shows the focus
+ * ring via :focus-within). Suggestions open in the shared Popover listbox
+ * with the same fuzzy-highlight treatment as the Combobox. Every value
+ * resolves from a --portal-* / --portal-tone-* token; logical properties
+ * throughout; motion reduced-gated.
+ */
+
+.root {
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-1);
+    font-family: var(--portal-font-sans);
+}
+
+/* Invalid: force the tone seed to danger for the whole scope, matching
+ * TextField's convention. */
+.root[data-invalid='true'] {
+    --portal-tone: var(--portal-color-danger);
+}
+
+.label {
+    font-size: var(--portal-size-text-sm);
+    letter-spacing: var(--portal-letter-spacing-wide);
+    line-height: var(--portal-line-height-tight);
+    color: var(--portal-color-text-1);
+}
+
+/* The field shell: a TextField-style bordered surface that wraps chips and
+ * the inline input. */
+.shell {
+    composes: beveled from '../../theme/surfaces.module.css';
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--portal-space-2);
+    box-sizing: border-box;
+    min-block-size: var(--portal-touch-target-min);
+    padding-inline: var(--portal-space-2);
+    padding-block: var(--portal-space-1);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-bevel-2);
+    background-color: var(--portal-color-surface-0);
+    cursor: text;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .shell {
+        transition:
+            border-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ui-fast) var(--portal-easing-standard);
+    }
+}
+
+.shell:focus-within {
+    border-color: var(--portal-tone-accent);
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow-strong);
+}
+
+.root[data-invalid='true'] .shell {
+    border-color: var(--portal-tone-accent);
+}
+
+.root[data-enabled='disabled'] .shell {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* The bare draft input: the shell owns the border and ring. */
+.input {
+    flex: 1 1 auto;
+    min-inline-size: calc(var(--portal-touch-target-min) * 2);
+    min-block-size: calc(
+        var(--portal-touch-target-min) - var(--portal-space-2) * 2
+    );
+    padding: 0;
+    border: 0;
+    outline: none;
+    background: transparent;
+    color: var(--portal-color-text-0);
+    font-family: inherit;
+    font-size: var(--portal-size-text-md);
+    line-height: var(--portal-line-height-normal);
+}
+
+.input::placeholder {
+    color: var(--portal-color-text-1);
+}
+
+.input:disabled {
+    cursor: not-allowed;
+}
+
+/* High-contrast foreground for the message; the danger signal is carried by
+ * aria-invalid and the toned shell, never by message color alone. */
+.error {
+    font-size: var(--portal-size-text-sm);
+    line-height: var(--portal-line-height-tight);
+    color: var(--portal-color-text-0);
+}
+
+/* The suggestion listbox inside the Popover panel (which owns the frame). */
+.listbox {
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-1);
+    max-block-size: calc(var(--portal-touch-target-min) * 6);
+    overflow: auto;
+}
+
+.option {
+    composes: beveled from '../../theme/surfaces.module.css';
+    display: flex;
+    align-items: center;
+    min-block-size: var(--portal-touch-target-min);
+    padding-block: var(--portal-space-2);
+    padding-inline: var(--portal-space-3);
+    border-radius: var(--portal-bevel-1);
+    color: var(--portal-color-text-0);
+    font-size: var(--portal-size-text-md);
+    line-height: var(--portal-line-height-normal);
+    cursor: pointer;
+    user-select: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .option {
+        transition:
+            background-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard),
+            transform var(--portal-duration-ui-fast) var(--portal-easing-standard);
+    }
+}
+
+.option[data-active='true'] {
+    background-color: var(--portal-tone-fill);
+}
+
+.option:hover {
+    background-color: var(--portal-tone-fill);
+    transform: translateX(calc(var(--portal-space-1) / 2));
+}
+
+/* translateX is physical, so the hover nudge flips under right-to-left. */
+.option:hover:dir(rtl) {
+    transform: translateX(calc(-1 * var(--portal-space-1) / 2));
+}
+
+/* Matched characters: emphasized on the AA-safe accent highlight. */
+.hit {
+    color: var(--portal-color-accent-highlight);
+    font-weight: var(--portal-weight-label-strong);
+}
