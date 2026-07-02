@@ -113,7 +113,11 @@ function collapseToCardinal(
             }
             return axisY <= 0 ? EDpadDirection.Up : EDpadDirection.Down;
         }
-        default:
+        case EDpadDirection.Up:
+        case EDpadDirection.Down:
+        case EDpadDirection.Left:
+        case EDpadDirection.Right:
+        case EDpadDirection.None:
             return direction;
     }
 }

@@ -196,16 +196,16 @@
     color: var(--portal-color-text-1);
 }
 
-.actionPrimary:hover {
+.actionPrimary:hover:not(:disabled) {
     box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow-strong);
 }
 
-.actionSecondary:hover {
+.actionSecondary:hover:not(:disabled) {
     border-color: var(--portal-tone-border);
     color: var(--portal-color-text-0);
 }
 
-.actionPrimary:active,
-.actionSecondary:active {
+.actionPrimary:active:not(:disabled),
+.actionSecondary:active:not(:disabled) {
     transform: scale(var(--portal-press-scale));
 }

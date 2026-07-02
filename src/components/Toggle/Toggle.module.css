@@ -10,6 +10,19 @@
 
     --toggle-track-inline-size: calc(var(--portal-touch-target-min) * 1.5);
     --toggle-knob-inset: var(--portal-space-1);
+    --toggle-knob-size: calc(
+        var(--portal-touch-target-min) - var(--toggle-knob-inset) * 2 -
+            var(--portal-border-thickness-thin) * 2
+    );
+
+    /* The checked slide distance: the track's padding box minus the knob and
+     * its inset on both ends. Expressed as a token so the transform (a
+     * compositor-cheap property, unlike the inset it replaces) and its RTL
+     * mirror share one value. */
+    --toggle-knob-travel: calc(
+        var(--toggle-track-inline-size) - var(--portal-hud-edge-width) * 2 -
+            var(--toggle-knob-size) - var(--toggle-knob-inset) * 2
+    );
 
     display: inline-flex;
     align-items: center;
@@ -70,10 +83,7 @@
     position: absolute;
     inset-block-start: 50%;
     inset-inline-start: var(--toggle-knob-inset);
-    inline-size: calc(
-        var(--portal-touch-target-min) - var(--toggle-knob-inset) * 2 -
-            var(--portal-border-thickness-thin) * 2
-    );
+    inline-size: var(--toggle-knob-size);
     aspect-ratio: 1;
     border-radius: var(--portal-bevel-1);
 
@@ -83,22 +93,25 @@
      * regression). Off reads as the recessed face; on swaps to the lit face
      * below. */
     background: var(--portal-gradient-button-face-pressed);
-    transform: translateY(-50%);
+    transform: translate(0, -50%);
 }
 
 @media (prefers-reduced-motion: no-preference) {
     .knob {
-        transition: inset-inline-start var(--portal-duration-ui-base)
+        transition: transform var(--portal-duration-ui-base)
             var(--portal-easing-emphasized);
     }
 }
 
 .toggle[data-checked='checked'] .knob {
-    inset-inline-start: calc(
-        var(--toggle-track-inline-size) - 55% - var(--toggle-knob-inset) -
-            var(--portal-border-thickness-thin)
-    );
     background: var(--portal-gradient-button-face);
+    transform: translate(var(--toggle-knob-travel), -50%);
+}
+
+/* translate() is physical while the rest of the layout is logical, so the
+ * checked travel flips sign under a right-to-left direction. */
+.toggle[data-checked='checked'] .knob:dir(rtl) {
+    transform: translate(calc(-1 * var(--toggle-knob-travel)), -50%);
 }
 
 .label {

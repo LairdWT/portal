@@ -42,12 +42,22 @@
 
     display: block;
     block-size: 100%;
-    inline-size: clamp(0%, var(--portal-bar-fill), 100%);
+    inline-size: 100%;
+
+    /* The bar stays full-width and slides left by the unfilled remainder; the
+     * overflow-hidden track crops it. Value changes then animate transform (a
+     * compositor-cheap property) instead of relaying out inline-size. The
+     * translation is physical, so it flips under RTL below. */
     border-radius: var(--portal-bevel-1);
     corner-shape: var(--portal-corner-shape);
     background-color: var(--portal-color-accent-highlight);
-    transition: inline-size var(--portal-duration-frame-base)
+    transform: translateX(calc(clamp(0%, var(--portal-bar-fill), 100%) - 100%));
+    transition: transform var(--portal-duration-frame-base)
         var(--portal-easing-standard);
+}
+
+.fill:dir(rtl) {
+    transform: translateX(calc(100% - clamp(0%, var(--portal-bar-fill), 100%)));
 }
 
 .value {
