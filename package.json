@@ -61,6 +61,8 @@
         "e2e": "playwright test",
         "e2e:behavior": "playwright test --project=behavior",
         "smoke:pack": "node scripts/packaging-smoke.mjs",
+        "probe:hud": "node scripts/probes/hud-showcase.mjs",
+        "probe:rtl": "node scripts/probes/rtl-sweep.mjs",
         "example:typecheck": "pnpm -C example exec tsc --noEmit",
         "storybook": "storybook dev -p 6006",
         "build-storybook": "storybook build",

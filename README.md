@@ -282,6 +282,9 @@ rather than per control.
   build.
 - `pnpm storybook` starts Storybook for component review.
 - `pnpm build` produces the library bundle in `dist`.
+- `pnpm probe:hud` and `pnpm probe:rtl` drive the built Storybook in
+  headless Chromium (the visual-verification probes; run
+  `pnpm build-storybook` first - see `scripts/probes/README.md`).
 
 ## Example app
 

@@ -1,0 +1,99 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Guides/Input and Binding" />
+
+# Input and Binding
+
+Portal's input core is decoupled from React and from any game. A control
+describes itself with an `InputDescriptor` (an opaque id, a value kind, and a
+label) and emits an `InputSignal` carrying the value, the interaction, and a
+timestamp. Nothing in the core knows what "fire" means - mapping inputs to
+actions is data, not code.
+
+## Descriptors and signals
+
+Every signal-emitting control takes an optional `descriptor` plus `onSignal`
+pair; both must be present for a signal to emit. Controls share the emit
+hooks, so the wiring is uniform whichever control carries it:
+
+- `useDigitalPress` and `useEmitBinding` for button-like inputs
+  (`ActionButton`, `BevelButton`, `Hotbar` keys, `VirtualKeyboard` keys).
+- `useAxis2DControl` for absolute (joystick) and relative (thumbpad) pads.
+- `useScalarControl` for sliders and the rotary `Dial`.
+
+```tsx
+import { EInputValueType, Hotbar } from '@laird-wt/portal';
+
+<Hotbar
+    label="Abilities"
+    slots={[
+        {
+            id: 'blink',
+            label: 'Blink',
+            keybind: '1',
+            descriptor: {
+                id: 'ability.blink',
+                valueType: EInputValueType.Digital,
+                label: 'Blink',
+            },
+        },
+    ]}
+    onSignal={(signal) => transport.publish(signal)}
+/>;
+```
+
+## Deterministic time
+
+Timestamps come from an injectable `TimeProvider` (default
+`performance.now`). Override it through `TimeProviderContext` to make
+emission deterministic in tests or to align the clock with a host engine:
+
+```tsx
+import { TimeProviderContext } from '@laird-wt/portal';
+
+<TimeProviderContext.Provider value={() => engineClock.nowMs()}>
+    <Controller />
+</TimeProviderContext.Provider>;
+```
+
+## The binding registry
+
+Inputs map to actions through a data-driven, immutable registry. Each
+mutator returns a NEW registry, and a binding can be scoped to a named
+context (a profile such as `menu` or `gameplay`) with a global fallback:
+
+```ts
+import { createRegistry } from '@laird-wt/portal';
+
+const registry = createRegistry([
+    { inputId: 'fire', actionId: 'weapon.primary' },
+    { inputId: 'fire', actionId: 'ui.confirm', context: 'menu' },
+]);
+
+registry.resolve('fire').actionId; // 'weapon.primary'
+registry.resolve('fire', 'menu').actionId; // 'ui.confirm'
+const rebound = registry.rebind('fire', 'weapon.special');
+```
+
+`detectConflicts` and `serializeBindings` round out the profile tooling:
+conflict detection before committing a rebind screen, serialization for
+saving the player's profile.
+
+## The wire boundary
+
+At an engine boundary (Unity, or any host over a socket), `toWireInput`
+narrows a signal to a serializable `FInputWirePayload` - the descriptor
+collapsed to its id, plus the interaction, value, and timestamp - and THROWS
+if a value does not match the descriptor's declared kind, so a malformed
+signal never crosses the wire silently.
+
+The [Unity Binding story](?path=/story/patterns-unity-binding--default)
+wires a binding profile, a custom `TimeProvider`, and the wire codec
+together end to end.
+
+## Where to go next
+
+- [Building a HUD](?path=/docs/guides-building-a-hud--docs): composing the
+  game-HUD components over this input layer.
+- The `Controls/*` sidebar section for each signal-emitting control's
+  auto-generated prop table.

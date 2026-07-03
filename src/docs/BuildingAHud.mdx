@@ -1,0 +1,79 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Guides/Building a HUD" />
+
+# Building a HUD
+
+Portal's game-HUD set is a kit of controlled components: every piece draws
+state the consumer owns, so a HUD is one state tree plus wiring. The
+[Game HUD showcase](?path=/story/patterns-game-hud--showcase) is the living
+recipe - everything below links to how it wires the pieces.
+
+## The instruments
+
+- `Gauge` draws a value over a 270-degree arc with status bands; give it the
+  reactor output and a danger band at the redline.
+- `Dial` is the rotary INPUT twin: `value`/`onChange` like a slider, a
+  relative twist (grabbing never jumps the value), optional detents. Point
+  its `onChange` at the state the `Gauge` reads and the two become one
+  instrument.
+- `Minimap` projects world-space markers (`+x` east, `+y` north) around a
+  `center` and `range`; `headingUp` rotates the map, `sweep` adds the radar
+  wedge. `Compass` shows the same heading as a strip; both are
+  chirality-fixed instruments.
+- `Odometer` rolls score/ammo digits; `Reticle` and `FloatingText` are the
+  decorative aim and combat-text layers.
+
+## The action loop
+
+The showcase's whole gameplay loop is one handler:
+
+```tsx
+function handleActivate(id: string): void {
+    setActiveId(id); // Hotbar active slot
+    setCast({ abilityId: id, cast: nextCast }); // arms the Cooldown (keyed!)
+    setScore((prev) => prev + 25); // rolls the Odometer
+    setHits((prev) => [...prev, { id: hitId, text: '+25' }]); // FloatingText
+    appendLog(`${label} engaged.`); // LogConsole entry
+}
+```
+
+Two contracts matter here:
+
+- `Cooldown` is controlled by `(durationMs, remainingMs)` sampled at render
+  and carries the countdown itself. Re-casting the same ability must REMOUNT
+  it - key the element by a cast counter.
+- `FloatingText` reports `onExpire(id)` exactly once per event; prune the
+  event from your list there or it stays mounted.
+
+## Logs, cargo, and narrative
+
+- `LogConsole` virtualizes thousands of entries and follows the tail while
+  pinned; `wrap` opts long lines into measured multi-line rows.
+- `InventoryGrid` owns the slot keyboard (grab / arrows / drop / Escape) and
+  pointer drag; you own the array - apply moves with the exported
+  `moveSlot(slots, from, to)`.
+- `ObjectiveTracker` lists quest states; `DialogueBox` types out narrative
+  lines (interval-driven text, instant under reduced motion) and its
+  continue key completes-then-advances.
+
+## Rules the kit already follows
+
+Compose freely - these properties hold for every piece above:
+
+- Reduced motion is honored twice (CSS media gate + the `useReducedMotion`
+  hook), so sweeps, typewriters, and flashes all degrade to static or timed
+  equivalents.
+- Meaning never rides color or decoration alone: severity uses edge bars,
+  map markers use shapes, objective states use glyphs plus spoken suffixes,
+  and the decorative layers (`Reticle`, `FloatingText`) are aria-hidden with
+  opt-in announcers.
+- Everything is JSON-safe controlled state (`DockLayout`'s layout tree
+  included), so persisting a HUD arrangement is `JSON.stringify`.
+
+## Where to go next
+
+- [Input and Binding](?path=/docs/guides-input-and-binding--docs): the
+  descriptor/signal layer under the input-emitting pieces.
+- [Theming](?path=/docs/guides-theming--docs): retheme the whole HUD with
+  `--portal-*` tokens and per-component `tone`.
