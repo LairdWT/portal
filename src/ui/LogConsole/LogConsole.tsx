@@ -1,6 +1,8 @@
 import {
     type CSSProperties,
     type Dispatch,
+    type KeyboardEvent as ReactKeyboardEvent,
+    type PointerEvent as ReactPointerEvent,
     type ReactElement,
     type RefObject,
     type SetStateAction,
@@ -14,6 +16,11 @@ import {
     type MeasuredWindowState,
     useMeasuredWindow,
 } from '../../react/hooks/useMeasuredWindow';
+import {
+    type PointerDragBinding,
+    type PointerDragState,
+    usePointerDrag,
+} from '../../react/hooks/usePointerDrag';
 import {
     useVirtualWindow,
     type VirtualWindowState,
@@ -43,6 +50,21 @@ const PIN_THRESHOLD_PX: number = ROW_HEIGHT_PX / 2;
 // keyboard scroll without an eslint-disable.
 const SCROLL_FOCUS_BINDING: { readonly tabIndex: number } = { tabIndex: 0 };
 
+// Time-column resize bounds (the DataTable clamp pattern) and the custom
+// property the row grid template reads.
+const TIME_WIDTH_PROPERTY: string = '--portal-logconsole-time-width';
+const TIME_WIDTH_DEFAULT_PX: number = 96;
+const TIME_WIDTH_MIN_PX: number = 48;
+const TIME_WIDTH_MAX_PX: number = 320;
+const TIME_RESIZE_STEP_PX: number = 8;
+
+function clampTimeWidth(width: number): number {
+    if (!Number.isFinite(width)) {
+        return TIME_WIDTH_DEFAULT_PX;
+    }
+    return Math.min(TIME_WIDTH_MAX_PX, Math.max(TIME_WIDTH_MIN_PX, width));
+}
+
 // The LogConsole: a virtualized mono scrollback. useVirtualWindow (uniform
 // single-line rows, the default) or useMeasuredWindow (the wrap opt-in, rows
 // measured per entry) renders only the visible slice over a full-height
@@ -58,12 +80,104 @@ export function LogConsole({
     followLabel,
     scanlines = true,
     wrap = false,
+    resizableTime = false,
+    timeColumnWidth,
+    onTimeColumnWidthChange,
+    fill = false,
     tone,
 }: LogConsoleProps): ReactElement {
     const scrollRef: RefObject<HTMLDivElement | null> =
         useRef<HTMLDivElement | null>(null);
     const [pinned, setPinned]: [boolean, Dispatch<SetStateAction<boolean>>] =
         useState<boolean>(true);
+
+    // The time-column width: controlled when the consumer passes it,
+    // component-owned otherwise (the DataTable controlled-width pattern).
+    const [internalTimeWidth, setInternalTimeWidth]: [
+        number,
+        Dispatch<SetStateAction<number>>,
+    ] = useState<number>(TIME_WIDTH_DEFAULT_PX);
+    const resolvedTimeWidth: number = clampTimeWidth(
+        timeColumnWidth ?? internalTimeWidth,
+    );
+    const [resizing, setResizing]: [boolean, Dispatch<SetStateAction<boolean>>] =
+        useState<boolean>(false);
+    const resizeBaseRef: RefObject<number> = useRef<number>(0);
+    const resizeDirectionRef: RefObject<number> = useRef<number>(1);
+
+    function commitTimeWidth(next: number): void {
+        const clamped: number = clampTimeWidth(next);
+        if (clamped === resolvedTimeWidth) {
+            return;
+        }
+        if (timeColumnWidth === undefined) {
+            setInternalTimeWidth(clamped);
+        }
+        onTimeColumnWidthChange?.(clamped);
+    }
+
+    const resizeDrag: PointerDragBinding<HTMLDivElement> =
+        usePointerDrag<HTMLDivElement>({
+            disabled: !resizableTime,
+            axisLock: 'x',
+            onDrag: (state: PointerDragState): void => {
+                commitTimeWidth(
+                    resizeBaseRef.current + state.dx * resizeDirectionRef.current,
+                );
+            },
+            onDragEnd: (): void => {
+                setResizing(false);
+            },
+        });
+
+    // Keyboard resize on the focused separator: logical arrows (Right/Up
+    // widen, Left/Down narrow), Home/End jump to the clamps.
+    function handleTimeGripKeyDown(
+        event: ReactKeyboardEvent<HTMLDivElement>,
+    ): void {
+        let next: number;
+        switch (event.key) {
+            case 'ArrowRight':
+            case 'ArrowUp':
+                next = resolvedTimeWidth + TIME_RESIZE_STEP_PX;
+                break;
+            case 'ArrowLeft':
+            case 'ArrowDown':
+                next = resolvedTimeWidth - TIME_RESIZE_STEP_PX;
+                break;
+            case 'Home':
+                next = TIME_WIDTH_MIN_PX;
+                break;
+            case 'End':
+                next = TIME_WIDTH_MAX_PX;
+                break;
+            default:
+                return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        commitTimeWidth(next);
+    }
+
+    // The separator's operable handlers ride a spreadable binding (the
+    // SplitPane/DataTable precedent): aria-query models separator as
+    // structure-only, so literal handlers would trip jsx-a11y even though
+    // the APG sanctions the focusable widget.
+    const timeGripHandlers: Readonly<{
+        onPointerDown: (event: ReactPointerEvent<HTMLDivElement>) => void;
+        onKeyDown: (event: ReactKeyboardEvent<HTMLDivElement>) => void;
+        tabIndex: number;
+    }> = {
+        onPointerDown: (event: ReactPointerEvent<HTMLDivElement>): void => {
+            resizeBaseRef.current = resolvedTimeWidth;
+            resizeDirectionRef.current =
+                getComputedStyle(event.currentTarget).direction === 'rtl' ? -1 : 1;
+            setResizing(true);
+            resizeDrag.onPointerDown(event);
+        },
+        onKeyDown: handleTimeGripKeyDown,
+        tabIndex: 0,
+    };
 
     // Both windowing hooks run unconditionally (rules of hooks); the
     // inactive one gets zero rows and returns its degenerate empty window.
@@ -137,18 +251,31 @@ export function LogConsole({
         virtualWindow.endIndex,
     );
 
-    const viewportStyle: CSSProperties = {
-        blockSize: blockSize ?? DEFAULT_BLOCK_SIZE,
-    };
+    // Fill mode sets NO inline height: the flexed shell owns the viewport
+    // size (an inline 100% would re-enter the flex-basis resolution and
+    // collapse the viewport).
+    const viewportStyle: CSSProperties | undefined = fill
+        ? undefined
+        : { blockSize: blockSize ?? DEFAULT_BLOCK_SIZE };
     const rowClassName: string = [styles.row, wrap ? styles.rowWrap : undefined]
         .filter((name: string | undefined): name is string => name !== undefined)
         .join(' ');
     const className: string = [toneStyles.toneScope, styles.root]
         .filter((entry: string | undefined): entry is string => entry !== undefined)
         .join(' ');
+    const rootStyle: CSSProperties = {
+        ...toneProperties(tone),
+        ...(resizableTime
+            ? { [TIME_WIDTH_PROPERTY]: `${String(resolvedTimeWidth)}px` }
+            : {}),
+    };
 
     return (
-        <section className={className} style={toneProperties(tone)}>
+        <section
+            className={className}
+            style={rootStyle}
+            data-fill={fill ? 'true' : undefined}
+        >
             <header className={styles.bar}>
                 <span className={styles.title}>{label}</span>
                 <button
@@ -206,11 +333,12 @@ export function LogConsole({
                                               }
                                             : {})}
                                     >
-                                        {entry.timeLabel !== undefined ? (
-                                            <span className={styles.time}>
-                                                {entry.timeLabel}
-                                            </span>
-                                        ) : null}
+                                        {/* Always mounted so the two-column
+                                            grid keeps the message column
+                                            aligned on label-less entries. */}
+                                        <span className={styles.time}>
+                                            {entry.timeLabel}
+                                        </span>
                                         <span className={styles.message}>
                                             {entry.message}
                                         </span>
@@ -221,6 +349,19 @@ export function LogConsole({
                     </div>
                 </div>
                 {scanlines ? <Scanlines /> : null}
+                {resizableTime ? (
+                    <div
+                        role="separator"
+                        aria-orientation="vertical"
+                        aria-label="Resize time column"
+                        aria-valuemin={TIME_WIDTH_MIN_PX}
+                        aria-valuemax={TIME_WIDTH_MAX_PX}
+                        aria-valuenow={resolvedTimeWidth}
+                        className={styles.timeGrip}
+                        data-active={resizing ? 'true' : undefined}
+                        {...timeGripHandlers}
+                    />
+                ) : null}
             </div>
             <span className={styles.srOnly} aria-live="polite">
                 {announcement}

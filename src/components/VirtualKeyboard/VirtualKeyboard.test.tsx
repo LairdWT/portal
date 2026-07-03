@@ -93,3 +93,67 @@ describe('VirtualKeyboard', (): void => {
         expect(handleKey).not.toHaveBeenCalled();
     });
 });
+
+describe('VirtualKeyboard control row and symbols', (): void => {
+    function noopKey(): void {
+        // The onKey sink for action-only tests.
+    }
+
+    it('reports Escape, Tab, and the arrows through onAction', (): void => {
+        const handleAction: Mock<ActionCallback> = vi.fn<ActionCallback>();
+        render(
+            <VirtualKeyboard
+                label="Keys"
+                onKey={noopKey}
+                onAction={handleAction}
+            />,
+        );
+        fireEvent.click(screen.getByRole('button', { name: 'ESC' }));
+        expect(handleAction).toHaveBeenLastCalledWith(EKeyAction.Escape);
+        fireEvent.click(screen.getByRole('button', { name: 'TAB' }));
+        expect(handleAction).toHaveBeenLastCalledWith(EKeyAction.Tab);
+        fireEvent.click(screen.getByRole('button', { name: 'Arrow left' }));
+        expect(handleAction).toHaveBeenLastCalledWith(EKeyAction.ArrowLeft);
+        fireEvent.click(screen.getByRole('button', { name: 'Arrow up' }));
+        expect(handleAction).toHaveBeenLastCalledWith(EKeyAction.ArrowUp);
+    });
+
+    it('latches Control and Alt visually while reporting each press', (): void => {
+        const handleAction: Mock<ActionCallback> = vi.fn<ActionCallback>();
+        render(
+            <VirtualKeyboard
+                label="Keys"
+                onKey={noopKey}
+                onAction={handleAction}
+            />,
+        );
+        const control: HTMLElement = screen.getByRole('button', { name: 'CTRL' });
+        expect(control).toHaveAttribute('aria-pressed', 'false');
+        fireEvent.click(control);
+        expect(control).toHaveAttribute('aria-pressed', 'true');
+        expect(handleAction).toHaveBeenLastCalledWith(EKeyAction.Control);
+        fireEvent.click(control);
+        expect(control).toHaveAttribute('aria-pressed', 'false');
+        const alt: HTMLElement = screen.getByRole('button', { name: 'ALT' });
+        fireEvent.click(alt);
+        expect(alt).toHaveAttribute('aria-pressed', 'true');
+        expect(handleAction).toHaveBeenLastCalledWith(EKeyAction.Alt);
+    });
+
+    it('emits the fuller punctuation set across the layers', (): void => {
+        const handleKey: Mock<KeyCallback> = vi.fn<KeyCallback>();
+        render(<VirtualKeyboard label="Keys" onKey={handleKey} />);
+        fireEvent.click(screen.getByRole('button', { name: '[' }));
+        expect(handleKey).toHaveBeenLastCalledWith('[');
+        // SHIFT lifts the punctuation row onto its shifted caps.
+        fireEvent.click(screen.getByRole('button', { name: 'SHIFT' }));
+        fireEvent.click(screen.getByRole('button', { name: '{' }));
+        expect(handleKey).toHaveBeenLastCalledWith('{');
+        // SYM surfaces the same shifted set (pipe, tilde, braces...).
+        fireEvent.click(screen.getByRole('button', { name: 'SYM' }));
+        fireEvent.click(screen.getByRole('button', { name: '|' }));
+        expect(handleKey).toHaveBeenLastCalledWith('|');
+        fireEvent.click(screen.getByRole('button', { name: '~' }));
+        expect(handleKey).toHaveBeenLastCalledWith('~');
+    });
+});

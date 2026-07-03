@@ -29,10 +29,20 @@ function capLabel(key: VirtualKeyDef, layer: EKeyboardLayer): string {
     return key.labels[layer] ?? key.labels[EKeyboardLayer.Base] ?? '';
 }
 
+// The actions that latch (aria-pressed toggles): the layer toggles plus the
+// host-owned Ctrl/Alt modifiers.
+const TOGGLE_ACTIONS: readonly EKeyAction[] = [
+    EKeyAction.Shift,
+    EKeyAction.Symbol,
+    EKeyAction.Control,
+    EKeyAction.Alt,
+];
+
 type VirtualKeyProps = Readonly<{
     keyDef: VirtualKeyDef;
     layer: EKeyboardLayer;
     enabled: EEnabledState;
+    latched: boolean;
     onCommit: (key: VirtualKeyDef) => void;
 }>;
 
@@ -45,14 +55,11 @@ function VirtualKey({
     keyDef,
     layer,
     enabled,
+    latched,
     onCommit,
 }: VirtualKeyProps): ReactElement {
     const action: EKeyAction = keyDef.action ?? EKeyAction.Input;
-    const isToggle: boolean =
-        action === EKeyAction.Shift || action === EKeyAction.Symbol;
-    const toggled: boolean =
-        (action === EKeyAction.Shift && layer === EKeyboardLayer.Shift) ||
-        (action === EKeyAction.Symbol && layer === EKeyboardLayer.Symbol);
+    const isToggle: boolean = TOGGLE_ACTIONS.includes(action);
     const {
         pressState,
         onPointerDown,
@@ -75,7 +82,10 @@ function VirtualKey({
             className={styles.key}
             style={keyStyle}
             disabled={enabled === EEnabledState.Disabled}
-            aria-pressed={isToggle ? toggled : undefined}
+            aria-pressed={isToggle ? latched : undefined}
+            {...(keyDef.srLabel !== undefined
+                ? { 'aria-label': keyDef.srLabel }
+                : {})}
             data-pressed={pressState}
             data-action={action}
             onPointerDown={onPointerDown}
@@ -88,15 +98,24 @@ function VirtualKey({
                 onCommit(keyDef);
             }}
         >
-            <span className={styles.cap}>{capLabel(keyDef, layer)}</span>
+            {keyDef.glyph !== undefined ? (
+                <span
+                    className={styles.arrowGlyph}
+                    data-direction={keyDef.glyph}
+                    aria-hidden="true"
+                />
+            ) : (
+                <span className={styles.cap}>{capLabel(keyDef, layer)}</span>
+            )}
         </button>
     );
 }
 
-// The VirtualKeyboard: a data-driven on-screen key matrix of machined key
-// faces (the BevelButton metal recipe) with base/shift/symbol layers. Shift
-// is one-shot (drops back to Base after the next emitted character); Symbol
-// latches until toggled back.
+// The VirtualKeyboard: a data-driven on-screen key matrix of dark domed key
+// faces (the Joystick-top actual-button recipe) with base/shift/symbol
+// layers. Shift is one-shot (drops back to Base after the next emitted
+// character); Symbol latches until toggled back; Control and Alt latch
+// visually and report through onAction - the host owns their semantics.
 export function VirtualKeyboard({
     label,
     rows,
@@ -109,7 +128,30 @@ export function VirtualKeyboard({
         EKeyboardLayer,
         Dispatch<SetStateAction<EKeyboardLayer>>,
     ] = useState<EKeyboardLayer>(EKeyboardLayer.Base);
+    const [controlLatched, setControlLatched]: [
+        boolean,
+        Dispatch<SetStateAction<boolean>>,
+    ] = useState<boolean>(false);
+    const [altLatched, setAltLatched]: [
+        boolean,
+        Dispatch<SetStateAction<boolean>>,
+    ] = useState<boolean>(false);
     const resolvedRows: readonly VirtualKeyboardRow[] = rows ?? QWERTY_ROWS;
+
+    function latchedFor(key: VirtualKeyDef): boolean {
+        switch (key.action) {
+            case EKeyAction.Shift:
+                return layer === EKeyboardLayer.Shift;
+            case EKeyAction.Symbol:
+                return layer === EKeyboardLayer.Symbol;
+            case EKeyAction.Control:
+                return controlLatched;
+            case EKeyAction.Alt:
+                return altLatched;
+            default:
+                return false;
+        }
+    }
 
     function commit(key: VirtualKeyDef): void {
         const action: EKeyAction = key.action ?? EKeyAction.Input;
@@ -146,8 +188,24 @@ export function VirtualKeyboard({
                 );
                 return;
             }
+            case EKeyAction.Control: {
+                setControlLatched((prev: boolean): boolean => !prev);
+                onAction?.(action);
+                return;
+            }
+            case EKeyAction.Alt: {
+                setAltLatched((prev: boolean): boolean => !prev);
+                onAction?.(action);
+                return;
+            }
             case EKeyAction.Backspace:
-            case EKeyAction.Enter: {
+            case EKeyAction.Enter:
+            case EKeyAction.Escape:
+            case EKeyAction.Tab:
+            case EKeyAction.ArrowLeft:
+            case EKeyAction.ArrowRight:
+            case EKeyAction.ArrowUp:
+            case EKeyAction.ArrowDown: {
                 onAction?.(action);
                 return;
             }
@@ -175,6 +233,7 @@ export function VirtualKeyboard({
                                     keyDef={key}
                                     layer={layer}
                                     enabled={resolvedEnabled}
+                                    latched={latchedFor(key)}
                                     onCommit={commit}
                                 />
                             ),

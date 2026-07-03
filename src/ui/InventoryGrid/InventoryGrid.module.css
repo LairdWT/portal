@@ -1,35 +1,64 @@
 /*
- * InventoryGrid. A machined slot surface: square beveled cells on the dark
- * face, the SelectableTile state language for the move flow (selected =
- * grabbed, targetable = valid destination, data-drop = the hovered target),
- * and a transform-only drag ghost driven by the --inventory-drag-* custom
- * properties. Tokens only; tone drives borders and glow, never cell content
- * text. The ghost transform is deliberately untransitioned (it follows the
- * pointer directly); border/glow feedback transitions are motion-gated.
+ * InventoryGrid. A machined slot surface inside a beveled Tier-2 container
+ * frame with a tracked heading (the Gauge/Chart panel recipe). The semantic
+ * layer is ONE aligned CSS grid of square beveled 1x1 cell buttons (the APG
+ * rows are display:contents so columns and rows align globally); a decorative
+ * aria-hidden item layer overlays the same template and draws each item once
+ * at its true span. The SelectableTile state language drives the move flow
+ * (selected = grabbed, targetable = valid destination, data-drop = the
+ * hovered target). Tokens only; tone drives borders and glow, never cell
+ * content text.
+ *
+ * Motion: the drag ghost (the item tile) is transform-only and deliberately
+ * untransitioned - it follows the pointer directly; border/glow feedback
+ * transitions, the targetable pulse (an opacity-only pseudo-element), and the
+ * drop settle (a transform/opacity keyframe on the remounted tile) are all
+ * gated behind prefers-reduced-motion.
  */
 
 .root {
+    composes: beveled from '../../theme/surfaces.module.css';
     display: flex;
     flex-direction: column;
     gap: var(--portal-space-2);
+    padding-block: var(--portal-space-3);
+    padding-inline: var(--portal-space-4);
+    border: var(--portal-border-thickness-thin) solid var(--portal-tone-border);
+    border-radius: var(--portal-bevel-3);
+    background-color: var(--portal-color-surface-0);
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow);
     color: var(--portal-color-text-0);
     font-family: var(--portal-font-sans);
 }
 
-.grid {
-    display: flex;
-    flex-direction: column;
-    gap: var(--portal-space-2);
+/* The tracked container heading (the ObjectiveTracker heading recipe). */
+.heading {
+    color: var(--portal-color-text-1);
+    font-size: var(--portal-size-text-sm);
+    font-weight: var(--portal-weight-label-bold);
+    line-height: var(--portal-line-height-tight);
+    letter-spacing: var(--portal-letter-spacing-wide);
+    text-transform: uppercase;
 }
 
-/* One APG row: an equal-track grid, so columns align across rows. */
-.gridRow {
+/* Anchors the decorative item layer over the semantic grid. */
+.surface {
+    position: relative;
+}
+
+/* ONE aligned grid: the APG row wrappers are display:contents, so every cell
+ * sits on this shared template and rows/columns line up globally. */
+.grid {
     display: grid;
     grid-template-columns: repeat(
         var(--inventory-columns, 4),
         minmax(var(--portal-touch-target-min), 1fr)
     );
     gap: var(--portal-space-2);
+}
+
+.gridRow {
+    display: contents;
 }
 
 .cell {
@@ -43,7 +72,7 @@
     padding: var(--portal-space-1);
     border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
     border-radius: var(--portal-bevel-2);
-    background-color: var(--portal-color-surface-0);
+    background-color: var(--portal-color-surface-1);
     color: inherit;
     font: inherit;
     appearance: none;
@@ -64,30 +93,93 @@
 .cell:focus-visible {
     outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
     outline-offset: var(--portal-space-1);
+    z-index: 1;
 }
 
-/* The grabbed (or pointer-dragged) slot. */
+/* Hover juice on an occupied cell: the machined edge lights toward the tone
+ * before a grab. */
+.cell[data-occupied='true']:hover:not(:disabled) {
+    border-color: var(--portal-tone-border);
+    box-shadow: 0 0 var(--portal-space-2) var(--portal-tone-glow);
+}
+
+/* The grabbed (or pointer-dragged) footprint. */
 .cell[data-state='selected'] {
     border-color: var(--portal-tone-accent);
     box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow-strong);
 }
 
-/* Valid destinations while a move is live: a dashed machined seam. */
+/* Valid destinations while a move is live: a dashed machined seam plus a
+ * soft opacity pulse on a pseudo-element (opacity-only, motion-gated). */
 .cell[data-state='targetable'] {
+    position: relative;
     border-style: dashed;
     border-color: var(--portal-tone-border);
 }
 
-/* The hovered drop target under a pointer drag. */
+.cell[data-state='targetable']::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    box-shadow: inset 0 0 var(--portal-space-2) var(--portal-tone-glow);
+    opacity: 0;
+}
+
+/* The hovered valid drop target under a pointer drag. */
 .cell[data-drop='true'] {
     border-style: solid;
     border-color: var(--portal-tone-accent);
     box-shadow: 0 0 var(--portal-space-2) var(--portal-tone-glow);
 }
 
+/* The decorative item layer: the same template with explicit equal rows so
+ * tiles land exactly over their cells (the cells' 1:1 aspect keeps the
+ * underlying rows equal). Pointer events pass through to the cells. */
+.itemLayer {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(
+        var(--inventory-columns, 4),
+        minmax(var(--portal-touch-target-min), 1fr)
+    );
+    grid-template-rows: repeat(var(--inventory-rows, 1), 1fr);
+    gap: var(--portal-space-2);
+    pointer-events: none;
+}
+
+/* One item plate, drawn once at its true span: a raised machined face over
+ * the slot cells. The base is OPAQUE with the surface-1 wash layered on top
+ * (surface-1 alone is translucent and the covered cell outlines bled
+ * through - the DataTable frozen-rail lesson). */
+.tile {
+    composes: beveled from '../../theme/surfaces.module.css';
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--portal-space-1);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-bevel-2);
+    background-color: var(--portal-color-surface-0);
+    background-image: linear-gradient(
+        var(--portal-color-surface-1),
+        var(--portal-color-surface-1)
+    );
+    color: var(--portal-color-text-0);
+    font: inherit;
+}
+
+.tile[data-state='selected'] {
+    border-color: var(--portal-tone-accent);
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow-strong);
+    transform: scale(1.02);
+}
+
 /* The pointer ghost: transform-only, above its siblings while airborne
- * (local stacking only - never the overlay layer). */
-.cell[data-dragging='true'] {
+ * (local stacking only - never the overlay layer). The translate replaces
+ * the selected scale so the plate tracks the pointer 1:1. */
+.tile[data-dragging='true'] {
     z-index: 1;
     transform: translate(var(--inventory-drag-x, 0), var(--inventory-drag-y, 0));
 }
@@ -98,6 +190,51 @@
             border-color var(--portal-duration-ui-base)
                 var(--portal-easing-standard),
             box-shadow var(--portal-duration-ui-base) var(--portal-easing-standard);
+    }
+
+    .cell[data-state='targetable']::after {
+        animation: portal-inventory-pulse var(--portal-duration-ui-slow)
+            var(--portal-easing-standard) infinite alternate;
+    }
+
+    .tile {
+        transition:
+            border-color var(--portal-duration-ui-base)
+                var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ui-base) var(--portal-easing-standard),
+            transform var(--portal-duration-ui-fast) var(--portal-easing-standard);
+        animation: portal-inventory-settle var(--portal-duration-ui-fast)
+            var(--portal-easing-emphasized);
+    }
+
+    /* The ghost must track the pointer 1:1 - a transform transition would
+     * rubber-band it behind the gesture. */
+    .tile[data-dragging='true'] {
+        transition: none;
+        animation: none;
+    }
+}
+
+@keyframes portal-inventory-pulse {
+    from {
+        opacity: 0.15;
+    }
+
+    to {
+        opacity: 0.6;
+    }
+}
+
+/* The drop settle: the remounted tile scales in at its new anchor. */
+@keyframes portal-inventory-settle {
+    from {
+        opacity: 0.6;
+        transform: scale(0.94);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
     }
 }
 

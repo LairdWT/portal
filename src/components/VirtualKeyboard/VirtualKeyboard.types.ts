@@ -15,8 +15,10 @@ export type EKeyboardLayer = (typeof EKeyboardLayer)[keyof typeof EKeyboardLayer
 
 // What a key does. Input keys emit their active-layer label through onKey;
 // Space emits a literal space; Shift/Symbol toggle layers (Shift is one-shot:
-// it drops back to Base after the next emitted character); Backspace and
-// Enter report through onAction.
+// it drops back to Base after the next emitted character); everything else
+// reports through onAction. Control and Alt LATCH visually (aria-pressed
+// toggles on each press) but the keyboard owns no chord semantics - the HOST
+// decides what a latched modifier means and when to consume it.
 export const EKeyAction: {
     readonly Input: 'input';
     readonly Shift: 'shift';
@@ -24,6 +26,14 @@ export const EKeyAction: {
     readonly Backspace: 'backspace';
     readonly Enter: 'enter';
     readonly Space: 'space';
+    readonly Escape: 'escape';
+    readonly Tab: 'tab';
+    readonly Control: 'control';
+    readonly Alt: 'alt';
+    readonly ArrowLeft: 'arrow-left';
+    readonly ArrowRight: 'arrow-right';
+    readonly ArrowUp: 'arrow-up';
+    readonly ArrowDown: 'arrow-down';
 } = {
     Input: 'input',
     Shift: 'shift',
@@ -31,17 +41,45 @@ export const EKeyAction: {
     Backspace: 'backspace',
     Enter: 'enter',
     Space: 'space',
+    Escape: 'escape',
+    Tab: 'tab',
+    Control: 'control',
+    Alt: 'alt',
+    ArrowLeft: 'arrow-left',
+    ArrowRight: 'arrow-right',
+    ArrowUp: 'arrow-up',
+    ArrowDown: 'arrow-down',
 };
 export type EKeyAction = (typeof EKeyAction)[keyof typeof EKeyAction];
 
+// A token-drawn cap glyph (the no-typed-glyphs rule: directional marks are
+// drawn triangles, never ASCII arrows). A key with a glyph names itself for
+// assistive tech through srLabel.
+export const EKeyGlyph: {
+    readonly ArrowLeft: 'arrow-left';
+    readonly ArrowRight: 'arrow-right';
+    readonly ArrowUp: 'arrow-up';
+    readonly ArrowDown: 'arrow-down';
+} = {
+    ArrowLeft: 'arrow-left',
+    ArrowRight: 'arrow-right',
+    ArrowUp: 'arrow-up',
+    ArrowDown: 'arrow-down',
+};
+export type EKeyGlyph = (typeof EKeyGlyph)[keyof typeof EKeyGlyph];
+
 // One key cap. `labels` maps layers to cap text; a missing layer falls back
-// to the base label (v1 keeps letters visible on the symbol layer).
-// `widthUnits` is the key's flex share of its row (default 1).
+// to the base label (letters keep their base caps on the symbol layer).
+// `widthUnits` is the key's flex share of its row (default 1). A `glyph`
+// replaces the text cap with a token-drawn mark; `srLabel` then carries the
+// accessible name (required with a glyph, optional to override a text cap).
 export type VirtualKeyDef = Readonly<{
     id: string;
     action?: EKeyAction | undefined;
     labels: Readonly<Partial<Record<EKeyboardLayer, string>>>;
     widthUnits?: number | undefined;
+    glyph?: EKeyGlyph | undefined;
+    srLabel?: string | undefined;
 }>;
 
 export type VirtualKeyboardRow = readonly VirtualKeyDef[];

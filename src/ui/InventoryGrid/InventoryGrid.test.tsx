@@ -172,3 +172,163 @@ describe('InventoryGrid', (): void => {
         expect(handleMove).not.toHaveBeenCalled();
     });
 });
+
+// 3 columns x 3 rows with a 2x2 crate anchored at 0 (covers 0,1,3,4) and a
+// 1x1 kit at 2.
+const SPAN_SLOTS: readonly InventorySlot[] = [
+    {
+        id: 'crate',
+        label: 'Supply crate',
+        content: <span>CR</span>,
+        widthCells: 2,
+        heightCells: 2,
+    },
+    { id: 's1' },
+    { id: 'kit', label: 'Medkit', content: <span>MK</span> },
+    { id: 's3' },
+    { id: 's4' },
+    { id: 's5' },
+    { id: 's6' },
+    { id: 's7' },
+    { id: 's8' },
+];
+
+describe('InventoryGrid multi-cell spans', (): void => {
+    it('speaks covered cells as part of the item and keeps every cell a gridcell', (): void => {
+        render(<InventoryGrid label="Loadout" slots={SPAN_SLOTS} columns={3} />);
+        expect(screen.getAllByRole('gridcell')).toHaveLength(9);
+        expect(
+            screen.getByRole('gridcell', { name: 'Supply crate' }),
+        ).toBeInTheDocument();
+        expect(
+            screen.getAllByRole('gridcell', {
+                name: 'Supply crate, part of 2 x 2',
+            }),
+        ).toHaveLength(3);
+    });
+
+    it('grabs the anchor from a covered cell', (): void => {
+        const handleMove: Mock<MoveCallback> = vi.fn<MoveCallback>();
+        render(
+            <InventoryGrid
+                label="Loadout"
+                slots={SPAN_SLOTS}
+                columns={3}
+                onMove={handleMove}
+            />,
+        );
+        const covered: HTMLElement | undefined = screen.getAllByRole('gridcell', {
+            name: 'Supply crate, part of 2 x 2',
+        })[0];
+        if (covered === undefined) {
+            throw new Error('missing covered cell');
+        }
+        fireEvent.keyDown(covered, { key: ' ' });
+        // The anchor cell (not the covered one) reads grabbed.
+        expect(
+            screen.getByRole('gridcell', { name: 'Supply crate' }),
+        ).toHaveAttribute('aria-selected', 'true');
+    });
+
+    it('rejects a drop where the footprint cannot fit and announces it', (): void => {
+        const handleMove: Mock<MoveCallback> = vi.fn<MoveCallback>();
+        render(
+            <InventoryGrid
+                label="Loadout"
+                slots={SPAN_SLOTS}
+                columns={3}
+                onMove={handleMove}
+            />,
+        );
+        const anchor: HTMLElement = screen.getByRole('gridcell', {
+            name: 'Supply crate',
+        });
+        fireEvent.keyDown(anchor, { key: ' ' });
+        // Cell 5 is the last column: a 2-wide crate overflows the edge.
+        const edge: HTMLElement = screen.getByRole('gridcell', {
+            name: 'Empty slot 6',
+        });
+        fireEvent.keyDown(edge, { key: ' ' });
+        expect(handleMove).not.toHaveBeenCalled();
+        expect(
+            screen.getByText('Cannot place Supply crate here.'),
+        ).toBeInTheDocument();
+        // The grab survives a rejected drop. Shifting the crate onto cell 3
+        // (inside its own footprint - covered cells are ignorable for the
+        // moving item) is a valid one-cell move.
+        const valid: HTMLElement | undefined = screen.getAllByRole('gridcell', {
+            name: 'Supply crate, part of 2 x 2',
+        })[1];
+        if (valid === undefined) {
+            throw new Error('missing footprint cell');
+        }
+        fireEvent.keyDown(valid, { key: ' ' });
+        expect(handleMove).toHaveBeenCalledWith(0, 3);
+    });
+
+    it('keeps the classic 1x1-onto-occupied reorder contract', (): void => {
+        const handleMove: Mock<MoveCallback> = vi.fn<MoveCallback>();
+        render(
+            <InventoryGrid
+                label="Cargo"
+                slots={SLOTS}
+                columns={3}
+                onMove={handleMove}
+            />,
+        );
+        // Plain 1x1 items: dropping on an occupied 1x1 slot is a reorder
+        // (the pre-span contract the HUD showcase pins).
+        fireEvent.keyDown(screen.getByRole('gridcell', { name: 'Plasma cell' }), {
+            key: ' ',
+        });
+        fireEvent.keyDown(screen.getByRole('gridcell', { name: 'Medkit' }), {
+            key: ' ',
+        });
+        expect(handleMove).toHaveBeenCalledWith(0, 1);
+    });
+
+    it('rejects a drop onto another item', (): void => {
+        const handleMove: Mock<MoveCallback> = vi.fn<MoveCallback>();
+        render(
+            <InventoryGrid
+                label="Loadout"
+                slots={SPAN_SLOTS}
+                columns={3}
+                onMove={handleMove}
+            />,
+        );
+        // Grab the 1x1 kit and try to drop it on a crate-covered cell.
+        const kit: HTMLElement = screen.getByRole('gridcell', {
+            name: 'Medkit',
+        });
+        fireEvent.keyDown(kit, { key: ' ' });
+        const covered: HTMLElement | undefined = screen.getAllByRole('gridcell', {
+            name: 'Supply crate, part of 2 x 2',
+        })[0];
+        if (covered === undefined) {
+            throw new Error('missing covered cell');
+        }
+        fireEvent.keyDown(covered, { key: ' ' });
+        expect(handleMove).not.toHaveBeenCalled();
+    });
+
+    it('draws each item once on the decorative layer at its true span', (): void => {
+        const view: { container: HTMLElement } = render(
+            <InventoryGrid label="Loadout" slots={SPAN_SLOTS} columns={3} />,
+        );
+        const layer: Element | null = view.container.querySelector(
+            '[aria-hidden="true"][class*="itemLayer"]',
+        );
+        expect(layer).not.toBeNull();
+        const tiles: readonly Element[] = Array.from(layer?.children ?? []);
+        expect(tiles).toHaveLength(2);
+        const crateTile: Element | undefined = tiles.find(
+            (tile: Element): boolean => tile.textContent === 'CR',
+        );
+        if (!(crateTile instanceof HTMLElement)) {
+            throw new Error('missing crate tile');
+        }
+        expect(crateTile.style.gridRow).toBe('1 / span 2');
+        expect(crateTile.style.gridColumn).toBe('1 / span 2');
+    });
+});

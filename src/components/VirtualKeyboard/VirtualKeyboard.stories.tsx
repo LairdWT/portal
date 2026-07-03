@@ -7,24 +7,21 @@ import {
     useState,
 } from 'react';
 
+import demoStyles from '../../examples/storySupport.module.css';
 import { EEnabledState } from '../../state/state';
 import { VirtualKeyboard } from './VirtualKeyboard';
 import { EKeyAction } from './VirtualKeyboard.types';
 
 const READOUT_STYLE: CSSProperties = {
-    minBlockSize: 'var(--portal-touch-target-min)',
     display: 'flex',
     alignItems: 'center',
-    paddingInline: 'var(--portal-space-3)',
-    border: 'var(--portal-border-thickness-thin) solid var(--portal-color-border)',
-    background: 'var(--portal-color-bg-0)',
-    color: 'var(--portal-color-text-0)',
     fontFamily: 'var(--portal-font-mono)',
     whiteSpace: 'pre-wrap',
 };
 
 // Typing harness: the board writes into a visible buffer, Backspace deletes,
-// Enter clears.
+// Enter clears; the modifier/navigation actions are host-owned, so the demo
+// leaves the buffer alone for them.
 function TypingHarness(props: Readonly<{ enabled?: EEnabledState }>): ReactElement {
     const [buffer, setBuffer]: [string, Dispatch<SetStateAction<string>>] =
         useState<string>('');
@@ -34,10 +31,14 @@ function TypingHarness(props: Readonly<{ enabled?: EEnabledState }>): ReactEleme
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 'var(--portal-space-3)',
-                maxInlineSize: '40rem',
+                maxInlineSize: '44rem',
             }}
         >
-            <output style={READOUT_STYLE} aria-label="Typed text">
+            <output
+                className={demoStyles.demoInput}
+                style={READOUT_STYLE}
+                aria-label="Typed text"
+            >
                 {buffer}
             </output>
             <VirtualKeyboard
@@ -50,7 +51,9 @@ function TypingHarness(props: Readonly<{ enabled?: EEnabledState }>): ReactEleme
                         setBuffer((prev: string): string => prev.slice(0, -1));
                         return;
                     }
-                    setBuffer('');
+                    if (action === EKeyAction.Enter) {
+                        setBuffer('');
+                    }
                 }}
                 {...(props.enabled !== undefined ? { enabled: props.enabled } : {})}
             />

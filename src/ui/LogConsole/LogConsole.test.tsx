@@ -151,3 +151,94 @@ describe('LogConsole', (): void => {
         expect(screen.getByText('reactor breach detected')).toBeInTheDocument();
     });
 });
+
+describe('LogConsole resizable time column', (): void => {
+    it('renders the boundary separator with the clamped width value', (): void => {
+        render(
+            <LogConsole
+                label="Mission log"
+                entries={buildEntries(10)}
+                resizableTime
+            />,
+        );
+        const grip: HTMLElement = screen.getByRole('separator', {
+            name: 'Resize time column',
+        });
+        expect(grip).toHaveAttribute('aria-valuemin', '48');
+        expect(grip).toHaveAttribute('aria-valuemax', '320');
+        expect(grip).toHaveAttribute('aria-valuenow', '96');
+        expect(grip).toHaveAttribute('aria-orientation', 'vertical');
+    });
+
+    it('steps and clamps the width from the keyboard', (): void => {
+        render(
+            <LogConsole
+                label="Mission log"
+                entries={buildEntries(10)}
+                resizableTime
+            />,
+        );
+        const grip: HTMLElement = screen.getByRole('separator');
+        fireEvent.keyDown(grip, { key: 'ArrowRight' });
+        expect(grip).toHaveAttribute('aria-valuenow', '104');
+        fireEvent.keyDown(grip, { key: 'ArrowLeft' });
+        expect(grip).toHaveAttribute('aria-valuenow', '96');
+        fireEvent.keyDown(grip, { key: 'Home' });
+        expect(grip).toHaveAttribute('aria-valuenow', '48');
+        fireEvent.keyDown(grip, { key: 'ArrowLeft' });
+        expect(grip).toHaveAttribute('aria-valuenow', '48');
+        fireEvent.keyDown(grip, { key: 'End' });
+        expect(grip).toHaveAttribute('aria-valuenow', '320');
+    });
+
+    it('reports a controlled width through the change callback', (): void => {
+        const widths: number[] = [];
+        render(
+            <LogConsole
+                label="Mission log"
+                entries={buildEntries(10)}
+                resizableTime
+                timeColumnWidth={120}
+                onTimeColumnWidthChange={(width: number): void => {
+                    widths.push(width);
+                }}
+            />,
+        );
+        const grip: HTMLElement = screen.getByRole('separator');
+        expect(grip).toHaveAttribute('aria-valuenow', '120');
+        fireEvent.keyDown(grip, { key: 'ArrowRight' });
+        expect(widths).toEqual([128]);
+        // Controlled: the value follows the prop, not internal state.
+        expect(grip).toHaveAttribute('aria-valuenow', '120');
+    });
+
+    it('drives the shared row template through the custom property', (): void => {
+        const view: { container: HTMLElement } = render(
+            <LogConsole
+                label="Mission log"
+                entries={buildEntries(5)}
+                resizableTime
+            />,
+        );
+        const root: Element | null = view.container.querySelector('section');
+        if (!(root instanceof HTMLElement)) {
+            throw new Error('missing console root');
+        }
+        expect(root.style.getPropertyValue('--portal-logconsole-time-width')).toBe(
+            '96px',
+        );
+    });
+});
+
+describe('LogConsole fill mode', (): void => {
+    it('marks the root so a definite-height parent can be filled', (): void => {
+        const view: { container: HTMLElement } = render(
+            <LogConsole label="Mission log" entries={buildEntries(5)} fill />,
+        );
+        const root: Element | null = view.container.querySelector('section');
+        expect(root).toHaveAttribute('data-fill', 'true');
+        // No inline height: the flexed shell owns the viewport size.
+        const viewport: HTMLElement = screen.getByRole('log');
+        expect(viewport.style.blockSize).toBe('');
+    });
+});

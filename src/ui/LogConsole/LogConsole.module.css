@@ -21,6 +21,8 @@
     font-family: var(--portal-font-mono);
 }
 
+/* The bar's underline is the unified faint hairline (the SplitPane divider
+ * standard), not the bright metal-2 rail. */
 .bar {
     display: flex;
     align-items: center;
@@ -29,7 +31,7 @@
     padding-block: var(--portal-space-2);
     padding-inline: var(--portal-space-4);
     border-block-end: var(--portal-border-thickness-thin) solid
-        var(--portal-color-metal-2);
+        var(--portal-color-border);
 }
 
 .title {
@@ -92,10 +94,15 @@
 }
 
 /* One single-line entry: the 1.5rem block-size IS the virtualization
- * constant (ROW_HEIGHT_PX = 24). */
+ * constant (ROW_HEIGHT_PX = 24). Rows share ONE two-column time|message
+ * template: the width custom property (set while resizableTime is on) pins
+ * every row to the same boundary; without it the time column hugs content. */
 .row {
-    display: flex;
-    gap: var(--portal-space-3);
+    display: grid;
+    grid-template-columns:
+        var(--portal-logconsole-time-width, max-content)
+        minmax(0, 1fr);
+    column-gap: var(--portal-space-3);
     align-items: center;
     block-size: var(--portal-space-5);
     padding-inline: var(--portal-space-4);
@@ -104,13 +111,13 @@
 }
 
 .time {
-    flex: 0 0 auto;
+    overflow: hidden;
     color: var(--portal-color-text-1);
     font-variant-numeric: tabular-nums;
+    text-overflow: ellipsis;
 }
 
 .message {
-    flex: 1 1 auto;
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -119,10 +126,81 @@
  * releases to content (useMeasuredWindow reads it back per row) and the min
  * keeps short lines on the uniform 1.5rem rhythm. */
 .rowWrap {
-    align-items: flex-start;
+    align-items: start;
     block-size: auto;
     min-block-size: var(--portal-space-5);
     white-space: normal;
+}
+
+/* The time-column resize grip: the unified divider standard (SplitPane) -
+ * a faint hairline in a transparent hit rail over the shell, positioned on
+ * the time|message boundary (row padding + width + half the column gap),
+ * lighting with the tone on hover/focus and solidifying on drag. */
+.timeGrip {
+    position: absolute;
+    z-index: 1;
+    inset-block: 0;
+    inset-inline-start: calc(
+        var(--portal-space-4) + var(--portal-logconsole-time-width, 6rem) +
+            (var(--portal-space-3) / 2) - (var(--portal-space-2) / 2)
+    );
+    inline-size: var(--portal-space-2);
+    cursor: col-resize;
+    touch-action: none;
+    user-select: none;
+}
+
+.timeGrip::before {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: calc(50% - (var(--portal-border-thickness-thin) / 2));
+    inline-size: var(--portal-border-thickness-thin);
+    background-color: var(--portal-color-border);
+    pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .timeGrip::before {
+        transition:
+            background-color var(--portal-duration-ui-fast)
+                var(--portal-easing-standard),
+            box-shadow var(--portal-duration-ui-fast) var(--portal-easing-standard);
+    }
+}
+
+.timeGrip:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: calc(-1 * var(--portal-border-thickness-normal));
+}
+
+.timeGrip:hover::before,
+.timeGrip:focus-visible::before {
+    background-color: var(--portal-tone-accent);
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow);
+}
+
+.timeGrip[data-active='true']::before {
+    background-color: var(--portal-tone-accent);
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow-strong);
+}
+
+/* Fill mode: the console stretches to a definite-height parent (a docked
+ * panel) - the shell flexes and the viewport takes the shell's height. */
+.root[data-fill='true'] {
+    block-size: 100%;
+}
+
+.root[data-fill='true'] .shell {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-block-size: 0;
+}
+
+.root[data-fill='true'] .viewport {
+    flex: 1 1 auto;
+    min-block-size: 0;
 }
 
 .rowWrap .message {

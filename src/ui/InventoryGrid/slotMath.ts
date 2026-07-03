@@ -123,6 +123,36 @@ export function slotIndexFromKey(
     }
 }
 
+// Relocation: SWAP the entries at `from` and `to` (the array the consumer
+// writes back through onMove for grids with multi-cell items - splice
+// semantics shift every later cell and would tear span anchors off their
+// footprints). Out-of-range input or a no-op move returns the input array
+// unchanged.
+export function relocateSlot<ItemType>(
+    items: readonly ItemType[],
+    from: number,
+    to: number,
+): readonly ItemType[] {
+    if (from === to) {
+        return items;
+    }
+    if (from < 0 || from >= items.length) {
+        return items;
+    }
+    if (to < 0 || to >= items.length) {
+        return items;
+    }
+    const fromItem: ItemType | undefined = items[from];
+    const toItem: ItemType | undefined = items[to];
+    if (fromItem === undefined || toItem === undefined) {
+        return items;
+    }
+    const next: ItemType[] = [...items];
+    next[from] = toItem;
+    next[to] = fromItem;
+    return next;
+}
+
 // Reorder: remove the item at `from` and reinsert it at `to` (splice
 // semantics, the array the consumer writes back through onMove). Out-of-range
 // input or a no-op move returns the input array unchanged.

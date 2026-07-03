@@ -49,6 +49,7 @@ export { VirtualKeyboard } from './components/VirtualKeyboard/VirtualKeyboard';
 export {
     EKeyAction,
     EKeyboardLayer,
+    EKeyGlyph,
     type VirtualKeyboardProps,
     type VirtualKeyboardRow,
     type VirtualKeyDef,
@@ -397,7 +398,7 @@ export {
     type InventoryGridProps,
     type InventorySlot,
 } from './ui/InventoryGrid/InventoryGrid.types';
-export { moveSlot } from './ui/InventoryGrid/slotMath';
+export { moveSlot, relocateSlot } from './ui/InventoryGrid/slotMath';
 export { KeyValue } from './ui/KeyValue/KeyValue';
 export {
     EKeyValueOverflow,

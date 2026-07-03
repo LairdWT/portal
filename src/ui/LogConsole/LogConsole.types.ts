@@ -61,5 +61,22 @@ export type LogConsoleProps = Readonly<{
      * the uniform fixed-height fast path with single-line ellipsized rows.
      */
     wrap?: boolean | undefined;
+    /**
+     * Renders a draggable/keyboard-operable separator on the time|message
+     * boundary (the DataTable resize recipe, styled on the unified divider
+     * standard) and lays every row on ONE shared two-column grid so the
+     * columns align. The width is component-owned by default; pass
+     * timeColumnWidth (px, clamped 48..320) with onTimeColumnWidthChange to
+     * own it.
+     */
+    resizableTime?: boolean | undefined;
+    timeColumnWidth?: number | undefined;
+    onTimeColumnWidthChange?: ((width: number) => void) | undefined;
+    /**
+     * Sizes the console to FILL a definite-height parent (a DockLayout
+     * panel or any docked host): the root stretches to 100% block-size and
+     * the viewport flexes instead of taking the fixed blockSize.
+     */
+    fill?: boolean | undefined;
 }> &
     Toned;

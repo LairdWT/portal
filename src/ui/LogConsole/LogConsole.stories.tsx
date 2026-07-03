@@ -7,6 +7,13 @@ import {
     useState,
 } from 'react';
 
+import { DockLayout } from '../DockLayout/DockLayout';
+import {
+    type DockLayoutState,
+    type DockPanelDef,
+    EDockNodeKind,
+} from '../DockLayout/DockLayout.types';
+import { ESplitOrientation } from '../SplitPane/SplitPane.types';
 import { LogConsole } from './LogConsole';
 import { ELogSeverity, type LogEntry } from './LogConsole.types';
 
@@ -129,4 +136,71 @@ export const Toned: Story = {
             scanlines={false}
         />
     ),
+};
+
+// Drag (or arrow-key) the boundary separator to resize the time column;
+// every row shares the one grid template.
+export const ResizableColumns: Story = {
+    render: (): ReactElement => (
+        <LogConsole label="Mission log" entries={buildEntries(200)} resizableTime />
+    ),
+};
+
+// The console as a DOCKED panel: fill mode stretches it to the panel's
+// definite height and the viewport flexes inside.
+function DockedConsoleHarness(): ReactElement {
+    const [layout, setLayout]: [
+        DockLayoutState,
+        Dispatch<SetStateAction<DockLayoutState>>,
+    ] = useState<DockLayoutState>({
+        root: {
+            kind: EDockNodeKind.Split,
+            orientation: ESplitOrientation.Vertical,
+            fraction: 0.35,
+            first: {
+                kind: EDockNodeKind.Tabs,
+                panelIds: ['editor'],
+                activeId: 'editor',
+            },
+            second: {
+                kind: EDockNodeKind.Tabs,
+                panelIds: ['log'],
+                activeId: 'log',
+            },
+        },
+        floating: [],
+    });
+    const panels: readonly DockPanelDef[] = [
+        {
+            id: 'editor',
+            title: 'Editor',
+            content: <p>Primary editing surface.</p>,
+        },
+        {
+            id: 'log',
+            title: 'Mission log',
+            content: (
+                <LogConsole
+                    label="Mission log"
+                    entries={buildEntries(200)}
+                    resizableTime
+                    fill
+                />
+            ),
+        },
+    ];
+    return (
+        <DockLayout
+            label="Console workspace"
+            panels={panels}
+            layout={layout}
+            onLayoutChange={setLayout}
+            blockSize="38rem"
+        />
+    );
+}
+
+export const DockedConsole: Story = {
+    parameters: { layout: 'padded' },
+    render: (): ReactElement => <DockedConsoleHarness />,
 };
