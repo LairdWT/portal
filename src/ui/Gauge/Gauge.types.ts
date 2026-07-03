@@ -1,3 +1,5 @@
+import { type ReactNode } from 'react';
+
 import { type EUiStatus, type Toned } from '../tone';
 
 // One highlighted span of the dial, drawn as a thin arc segment outside the
@@ -47,6 +49,21 @@ export type GaugeProps = Readonly<{
      * Default String(value).
      */
     formatValue?: ((value: number) => string) | undefined;
+    /**
+     * Decorative icon or text rendered in the dial hub above the value
+     * readout. The meter still speaks the numeric value; pass something
+     * self-explanatory visually (a glyph, a short tag).
+     */
+    centerContent?: ReactNode | undefined;
+    /**
+     * A units-independent amount line under the value (e.g. '620 / 1000'),
+     * also appended to the spoken aria-valuetext.
+     */
+    amountLabel?: string | undefined;
+    /**
+     * Renders the min/max bounds at the dial shoulders.
+     */
+    showBounds?: boolean | undefined;
     /**
      * Universal status routed through the tone scope (data-status).
      */

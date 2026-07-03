@@ -26,13 +26,16 @@
     font-family: var(--portal-font-sans);
 }
 
-/* The tracked caption above the dial (the Chart family's inline wide-label
- * recipe; .wideLabel cannot be composed under the value-keyword-case rule). */
+/* The tracked caption above the dial (the ObjectiveTracker heading recipe:
+ * bold uppercase tracking - the owner's review asked for stronger label
+ * styling than the plain Chart caption). */
 .caption {
     color: var(--portal-color-text-1);
     font-size: var(--portal-size-text-sm);
+    font-weight: var(--portal-weight-label-bold);
     line-height: var(--portal-line-height-tight);
     letter-spacing: var(--portal-letter-spacing-wide);
+    text-transform: uppercase;
 }
 
 /* The dial square: the SVG keeps its intrinsic 1:1 viewBox ratio and the
@@ -117,4 +120,31 @@
     font-size: var(--portal-size-text-sm);
     font-weight: var(--portal-weight-label-strong);
     color: var(--portal-color-text-1);
+}
+
+/* The optional hub content above the value: a consumer icon or short tag,
+ * dimmed so the value stays the loudest line. */
+.centerContent {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--portal-color-text-1);
+    font-size: var(--portal-size-text-sm);
+    letter-spacing: var(--portal-letter-spacing-wide);
+}
+
+/* The optional amount line under the value (e.g. 620 / 1000). */
+.amount {
+    color: var(--portal-color-text-1);
+    font-family: var(--portal-font-mono);
+    font-size: var(--portal-size-text-sm);
+    font-variant-numeric: tabular-nums;
+}
+
+/* The min/max bounds at the dial shoulders; glyph size is set as an SVG
+ * attribute in viewBox user units, like the stroke widths. */
+.boundLabel {
+    fill: var(--portal-color-text-1);
+    font-family: var(--portal-font-mono);
+    font-variant-numeric: tabular-nums;
 }

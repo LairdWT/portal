@@ -106,3 +106,36 @@
             var(--portal-easing-standard);
     }
 }
+
+/* The live value readout under the knob (the Compass readout recipe):
+ * console mono, tabular digits. Decorative - the slider speaks the value. */
+.readout {
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-mono);
+    font-size: var(--portal-size-text-sm);
+    font-variant-numeric: tabular-nums;
+    line-height: var(--portal-line-height-tight);
+}
+
+/* The opt-in direct-entry field: a compact beveled console input. The 2rem
+ * height follows the compactControl exception (clears the WCAG 24px target
+ * floor) so the knob stays the primary control. */
+.entry {
+    composes: beveled from '../../theme/surfaces.module.css';
+    inline-size: var(--portal-dial-size);
+    min-block-size: var(--portal-space-6);
+    padding-inline: var(--portal-space-2);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-bevel-1);
+    background-color: var(--portal-color-bg-0);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-mono);
+    font-size: var(--portal-size-text-sm);
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+
+.entry:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: calc(-1 * var(--portal-border-thickness-thin));
+}

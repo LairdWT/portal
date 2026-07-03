@@ -1,9 +1,13 @@
 import {
+    type ChangeEvent,
     type CSSProperties,
+    type Dispatch,
     type KeyboardEvent,
     type ReactElement,
     type RefObject,
+    type SetStateAction,
     useRef,
+    useState,
 } from 'react';
 
 import {
@@ -58,6 +62,8 @@ export function Dial({
     onSignal,
     descriptor,
     formatValueText,
+    showValue,
+    editable,
 }: DialProps): ReactElement {
     const resolvedEnabled: EEnabledState = useResolvedEnabled(enabled);
     const isDisabled: boolean = resolvedEnabled === EEnabledState.Disabled;
@@ -203,6 +209,43 @@ export function Dial({
         }
     }
 
+    const displayValue: string = formatValueText?.(safeValue) ?? String(safeValue);
+
+    // The direct-entry draft: non-null only while the entry field owns an
+    // uncommitted edit, so an external value change never fights the typist.
+    const [draft, setDraft]: [
+        string | null,
+        Dispatch<SetStateAction<string | null>>,
+    ] = useState<string | null>(null);
+
+    // Commit the typed draft: a non-numeric entry reverts silently; a number
+    // routes through the same clamp + quantize commit as every other edit
+    // (detents are ignored - a typed value is deliberate).
+    function commitDraft(): void {
+        const text: string | null = draft;
+        setDraft(null);
+        if (text === null) {
+            return;
+        }
+        const parsed: number = Number(text.trim());
+        if (!Number.isFinite(parsed)) {
+            return;
+        }
+        commit(parsed);
+    }
+
+    function handleEntryKeyDown(event: KeyboardEvent<HTMLInputElement>): void {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            commitDraft();
+            return;
+        }
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            setDraft(null);
+        }
+    }
+
     const rootStyle: CSSProperties = {
         [FILL_PROPERTY]: String(fraction),
     };
@@ -233,6 +276,27 @@ export function Dial({
                     <span className={styles.mark} aria-hidden="true" />
                 </div>
             </div>
+            {editable === true && !isDisabled ? (
+                <input
+                    type="text"
+                    inputMode="decimal"
+                    className={styles.entry}
+                    aria-label={`${label} value`}
+                    value={draft ?? displayValue}
+                    onFocus={(): void => {
+                        setDraft(String(safeValue));
+                    }}
+                    onChange={(event: ChangeEvent<HTMLInputElement>): void => {
+                        setDraft(event.target.value);
+                    }}
+                    onBlur={commitDraft}
+                    onKeyDown={handleEntryKeyDown}
+                />
+            ) : showValue !== false ? (
+                <span className={styles.readout} aria-hidden="true">
+                    {displayValue}
+                </span>
+            ) : null}
         </div>
     );
 }

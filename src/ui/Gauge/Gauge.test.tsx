@@ -91,4 +91,61 @@ describe('Gauge', (): void => {
             view.container.querySelector('path[data-status="success"]'),
         ).not.toBeNull();
     });
+
+    it('renders decorative center content above the value readout', (): void => {
+        render(
+            <Gauge
+                label="Reactor output"
+                value={62}
+                centerContent={<span>PWR</span>}
+            />,
+        );
+        expect(screen.getByText('PWR')).toBeInTheDocument();
+        // Decorative: the meter still speaks the numeric value only.
+        expect(screen.getByRole('meter')).toHaveAttribute('aria-valuenow', '62');
+    });
+
+    it('renders the amount line and appends it to the spoken value', (): void => {
+        render(
+            <Gauge
+                label="Reactor output"
+                value={620}
+                max={1000}
+                units="MW"
+                amountLabel="620 / 1000"
+            />,
+        );
+        expect(screen.getByText('620 / 1000')).toBeInTheDocument();
+        expect(screen.getByRole('meter')).toHaveAttribute(
+            'aria-valuetext',
+            '620 MW, 620 / 1000',
+        );
+    });
+
+    it('speaks the amount even without units or a formatter', (): void => {
+        render(
+            <Gauge
+                label="Reactor output"
+                value={620}
+                max={1000}
+                amountLabel="620 of 1000"
+            />,
+        );
+        expect(screen.getByRole('meter')).toHaveAttribute(
+            'aria-valuetext',
+            '620, 620 of 1000',
+        );
+    });
+
+    it('renders the min and max at the dial shoulders when showBounds is set', (): void => {
+        const view: { container: HTMLElement } = render(
+            <Gauge label="Reactor output" value={620} max={1000} showBounds />,
+        );
+        const bounds: readonly Element[] = Array.from(
+            view.container.querySelectorAll('text'),
+        );
+        expect(
+            bounds.map((node: Element): string | null => node.textContent),
+        ).toEqual(['0', '1000']);
+    });
 });

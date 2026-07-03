@@ -6,6 +6,7 @@ import {
     useState,
 } from 'react';
 
+import demoStyles from '../../examples/storySupport.module.css';
 import {
     EInputValueType,
     type InputDescriptor,
@@ -50,40 +51,61 @@ function logSignal(signal: InputSignal): void {
 type DemoProps = Readonly<{
     sides: RadialSides;
     enabled: EEnabledState;
+    collapsible?: boolean;
+    initialOpen?: boolean;
 }>;
 
-function RadialPadDemo({ sides, enabled }: DemoProps): ReactElement {
+// Collapsible (the default): the pad's own hub is the open/close toggle, so
+// the demo just wires open state through onOpen/onClose. The modal form
+// (collapsible=false) needs an external opener.
+function RadialPadDemo({
+    sides,
+    enabled,
+    collapsible,
+    initialOpen,
+}: DemoProps): ReactElement {
     const [open, setOpen]: [boolean, Dispatch<SetStateAction<boolean>>] =
-        useState<boolean>(true);
+        useState<boolean>(initialOpen ?? true);
     const sections: readonly RadialItem[] = WEAPON_SECTIONS.slice(0, sides);
-    return (
-        <>
-            <button
-                type="button"
-                onClick={(): void => {
-                    setOpen(true);
-                }}
-            >
-                Open weapon wheel
-            </button>
-            <RadialPad
-                open={open}
-                onClose={(): void => {
-                    setOpen(false);
-                }}
-                label="Weapon wheel"
-                sections={sections}
-                sides={sides}
-                enabled={enabled}
-                centerActions={CENTER_ACTIONS}
-                descriptor={radialDescriptor}
-                onSignal={logSignal}
-                onSelect={(id: string, index: number): void => {
-                    console.log('select', id, index);
-                }}
-            />
-        </>
+    const pad: ReactElement | null = (
+        <RadialPad
+            open={open}
+            onClose={(): void => {
+                setOpen(false);
+            }}
+            onOpen={(): void => {
+                setOpen(true);
+            }}
+            label="Weapon wheel"
+            sections={sections}
+            sides={sides}
+            enabled={enabled}
+            centerActions={CENTER_ACTIONS}
+            descriptor={radialDescriptor}
+            onSignal={logSignal}
+            onSelect={(id: string, index: number): void => {
+                console.log('select', id, index);
+            }}
+            {...(collapsible !== undefined ? { collapsible } : {})}
+        />
     );
+    if (collapsible === false) {
+        return (
+            <>
+                <button
+                    type="button"
+                    className={demoStyles.trigger}
+                    onClick={(): void => {
+                        setOpen(true);
+                    }}
+                >
+                    Open weapon wheel
+                </button>
+                {pad}
+            </>
+        );
+    }
+    return pad;
 }
 
 const meta: Meta<typeof RadialPadDemo> = {
@@ -115,4 +137,14 @@ export const Square: Story = {
 
 export const Disabled: Story = {
     args: { enabled: EEnabledState.Disabled },
+};
+
+// The pre-1.12 portaled modal overlay form, opened from an external trigger.
+export const ModalOverlay: Story = {
+    args: { collapsible: false, initialOpen: false },
+};
+
+// The collapsed resting state: the hub toggle waits for a press.
+export const Collapsed: Story = {
+    args: { initialOpen: false },
 };

@@ -31,4 +31,16 @@ export type DialProps = Readonly<{
     onSignal?: ((signal: InputSignal) => void) | undefined;
     descriptor?: InputDescriptor | undefined;
     formatValueText?: ((value: number) => string) | undefined;
+    /**
+     * Renders the live mono readout under the knob. Default true; pass
+     * false for a bare knob.
+     */
+    showValue?: boolean | undefined;
+    /**
+     * Upgrades the readout to a direct-entry field: type a number and
+     * commit on Enter or blur (clamped to the bounds and quantized to the
+     * step lattice; detents are ignored - a typed value is deliberate).
+     * Escape reverts. A disabled dial falls back to the plain readout.
+     */
+    editable?: boolean | undefined;
 }>;

@@ -1,8 +1,11 @@
 /*
- * Hotbar. A single-row action bar of machined square keys: dark beveled
- * faces, a keybind chip pinned to the top-start corner, tone-accent edge +
- * glow on the active slot, and the shared recessed press scale (transform
- * only). Tokens only; tone never carries AA-critical text.
+ * Hotbar. A single-row action bar of machined keys: dark beveled faces, a
+ * keybind chip pinned to the top-start corner, tone-accent edge + glow on
+ * the active slot, and the shared recessed press scale (transform only).
+ * Keys are WIDER than tall (4rem x 3rem; the owner's review) so ability
+ * mnemonics read comfortably - override per consumer through
+ * --portal-hotbar-key-inline, never below the 3rem touch floor. Tokens
+ * only; tone never carries AA-critical text.
  */
 
 .bar {
@@ -17,7 +20,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    inline-size: var(--portal-touch-target-min);
+    inline-size: var(--portal-hotbar-key-inline, var(--portal-space-8));
+    min-inline-size: var(--portal-touch-target-min);
     block-size: var(--portal-touch-target-min);
     padding: var(--portal-space-1);
     border: var(--portal-border-thickness-thin) solid var(--portal-color-border);

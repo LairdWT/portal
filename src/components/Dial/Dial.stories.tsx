@@ -21,6 +21,8 @@ type HarnessProps = Readonly<{
     detents?: readonly number[];
     enabled?: EEnabledState;
     formatValueText?: ((value: number) => string) | undefined;
+    showValue?: boolean;
+    editable?: boolean;
 }>;
 
 function ControlledDial(props: HarnessProps): ReactElement {
@@ -37,6 +39,10 @@ function ControlledDial(props: HarnessProps): ReactElement {
             {...(props.formatValueText !== undefined
                 ? { formatValueText: props.formatValueText }
                 : {})}
+            {...(props.showValue !== undefined
+                ? { showValue: props.showValue }
+                : {})}
+            {...(props.editable !== undefined ? { editable: props.editable } : {})}
         />
     );
 }
@@ -69,6 +75,20 @@ export const FineStep: Story = {
             step={0.5}
             formatValueText={(value: number): string => `${String(value)} dB`}
         />
+    ),
+};
+
+// Type a number into the entry under the knob and commit with Enter or blur;
+// the value clamps to the bounds and quantizes to the step lattice.
+export const Editable: Story = {
+    render: (): ReactElement => (
+        <ControlledDial label="Throttle" initial={62} editable />
+    ),
+};
+
+export const BareKnob: Story = {
+    render: (): ReactElement => (
+        <ControlledDial label="Mix" initial={20} showValue={false} />
     ),
 };
 

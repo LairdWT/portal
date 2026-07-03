@@ -1,4 +1,9 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import {
+    fireEvent,
+    render,
+    type RenderResult,
+    screen,
+} from '@testing-library/react';
 import { describe, expect, it, type Mock, vi } from 'vitest';
 
 import { EEnabledState } from '../../state/state';
@@ -137,5 +142,80 @@ describe('Dial', (): void => {
         fireEvent.pointerUp(knob, { pointerId: 1, clientX: 90, clientY: 50 });
         // The live twist reached 33.33; the release settles to the 50 detent.
         expect(handleChange).toHaveBeenLastCalledWith(50);
+    });
+});
+
+describe('Dial value readout and direct entry', (): void => {
+    it('renders the formatted readout by default and hides it on showValue false', (): void => {
+        const { rerender }: RenderResult = render(
+            <Dial
+                label="Gain"
+                value={35}
+                formatValueText={(value: number): string => `${String(value)} dB`}
+            />,
+        );
+        expect(screen.getByText('35 dB')).toBeInTheDocument();
+        rerender(<Dial label="Gain" value={35} showValue={false} />);
+        expect(screen.queryByText('35')).not.toBeInTheDocument();
+    });
+
+    it('commits a typed value on Enter, clamped and quantized', (): void => {
+        const handleChange: Mock<ChangeCallback> = vi.fn<ChangeCallback>();
+        render(
+            <Dial
+                label="Gain"
+                value={50}
+                step={5}
+                editable
+                onChange={handleChange}
+            />,
+        );
+        const entry: HTMLElement = screen.getByRole('textbox', {
+            name: 'Gain value',
+        });
+        fireEvent.focus(entry);
+        fireEvent.change(entry, { target: { value: '63' } });
+        fireEvent.keyDown(entry, { key: 'Enter' });
+        expect(handleChange).toHaveBeenLastCalledWith(65);
+        handleChange.mockClear();
+        fireEvent.focus(entry);
+        fireEvent.change(entry, { target: { value: '900' } });
+        fireEvent.keyDown(entry, { key: 'Enter' });
+        expect(handleChange).toHaveBeenLastCalledWith(100);
+    });
+
+    it('commits on blur, reverts on Escape, and ignores a non-numeric draft', (): void => {
+        const handleChange: Mock<ChangeCallback> = vi.fn<ChangeCallback>();
+        render(<Dial label="Gain" value={50} editable onChange={handleChange} />);
+        const entry: HTMLElement = screen.getByRole('textbox', {
+            name: 'Gain value',
+        });
+        fireEvent.focus(entry);
+        fireEvent.change(entry, { target: { value: '72' } });
+        fireEvent.blur(entry);
+        expect(handleChange).toHaveBeenLastCalledWith(72);
+        handleChange.mockClear();
+        fireEvent.focus(entry);
+        fireEvent.change(entry, { target: { value: '81' } });
+        fireEvent.keyDown(entry, { key: 'Escape' });
+        expect(handleChange).not.toHaveBeenCalled();
+        expect(entry).toHaveValue('50');
+        fireEvent.focus(entry);
+        fireEvent.change(entry, { target: { value: 'full power' } });
+        fireEvent.blur(entry);
+        expect(handleChange).not.toHaveBeenCalled();
+    });
+
+    it('falls back to the plain readout while disabled even when editable', (): void => {
+        render(
+            <Dial
+                label="Gain"
+                value={35}
+                editable
+                enabled={EEnabledState.Disabled}
+            />,
+        );
+        expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+        expect(screen.getByText('35')).toBeInTheDocument();
     });
 });

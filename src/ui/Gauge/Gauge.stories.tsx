@@ -73,3 +73,19 @@ export const Empty: Story = {
         value: 0,
     },
 };
+
+// The instrument-panel form: a hub tag above the value, a units-independent
+// amount line under it, and the min/max bounds at the dial shoulders.
+export const Instrumented: Story = {
+    args: {
+        label: 'Reactor output',
+        value: 620,
+        min: 0,
+        max: 1000,
+        units: 'MW',
+        centerContent: <span>PWR</span>,
+        amountLabel: '620 / 1000',
+        showBounds: true,
+        bands: [{ from: 850, to: 1000, status: EUiStatus.Danger }],
+    },
+};

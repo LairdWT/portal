@@ -44,6 +44,7 @@ function sectionKey(index: number): string {
 export function RadialPad({
     open,
     onClose,
+    onOpen,
     label,
     sections,
     sides = 8,
@@ -53,6 +54,9 @@ export function RadialPad({
     onSignal,
     descriptor,
     enabled,
+    collapsible = true,
+    toggleIcon,
+    toggleText,
     tone,
 }: RadialPadProps): ReactElement | null {
     const resolvedEnabled: EEnabledState = useResolvedEnabled(enabled);
@@ -153,12 +157,15 @@ export function RadialPad({
         <RadialCore
             open={open}
             onClose={onClose}
+            onOpen={onOpen}
             label={label}
             sides={resolvedSides}
             items={sections}
             centerActions={centerActions}
             variant={ERadialVariant.Controller}
-            collapsible={false}
+            collapsible={collapsible}
+            toggleIcon={toggleIcon}
+            toggleText={toggleText}
             onActivateSection={handleActivateSection}
             onActivateAction={handleActivateAction}
             disabled={isDisabled}

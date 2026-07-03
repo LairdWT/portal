@@ -1,5 +1,6 @@
 import { type CSSProperties, type ReactElement } from 'react';
 
+import { type Point } from '../polygonMath';
 import { toneProperties } from '../tone';
 import toneStyles from '../tone.module.css';
 import styles from './Gauge.module.css';
@@ -10,15 +11,20 @@ import {
     GAUGE_START_DEGREES,
     gaugeAngle,
     gaugeFraction,
+    gaugePoint,
 } from './gaugeMath';
 
 const DEFAULT_MIN: number = 0;
 const DEFAULT_MAX: number = 100;
 
 // Dial geometry in viewBox units: the main track/fill arc and the thinner
-// band ring drawn just outside it.
+// band ring drawn just outside it. The bounds labels hang below the arc
+// shoulders; their drop and glyph size are viewBox user units like the
+// stroke widths.
 const ARC_RADIUS: number = 40;
 const BAND_RADIUS: number = 46.5;
+const BOUND_DROP_UNITS: number = 11;
+const BOUND_FONT_UNITS: number = 7;
 
 // The fill fraction custom property the CSS dash math reads (the
 // --portal-slider-fill pattern), and the normalized path length that makes
@@ -40,6 +46,9 @@ export function Gauge({
     bands,
     units,
     formatValue,
+    centerContent,
+    amountLabel,
+    showBounds,
     status,
     tone,
 }: GaugeProps): ReactElement {
@@ -58,13 +67,20 @@ export function Gauge({
     );
     const displayValue: string = formatValue?.(safeValue) ?? String(safeValue);
     // Spoken value: the unit suffix always speaks; a bare formatted value
-    // speaks only when it differs from the numeric aria-valuenow.
-    const spokenValue: string | undefined =
+    // speaks only when it differs from the numeric aria-valuenow; the amount
+    // line, when present, speaks after the value.
+    const spokenBase: string | undefined =
         units !== undefined
             ? `${displayValue} ${units}`
             : formatValue !== undefined
               ? displayValue
               : undefined;
+    const spokenValue: string | undefined =
+        amountLabel !== undefined
+            ? `${spokenBase ?? displayValue}, ${amountLabel}`
+            : spokenBase;
+    const boundStart: Point = gaugePoint(ARC_RADIUS, GAUGE_START_DEGREES);
+    const boundEnd: Point = gaugePoint(ARC_RADIUS, GAUGE_END_DEGREES);
 
     const rootStyle: CSSProperties = {
         ...toneProperties(tone),
@@ -119,6 +135,28 @@ export function Gauge({
                         d={trackPath}
                         pathLength={NORMALIZED_PATH_LENGTH}
                     />
+                    {showBounds === true ? (
+                        <>
+                            <text
+                                className={styles.boundLabel}
+                                x={boundStart.x}
+                                y={boundStart.y + BOUND_DROP_UNITS}
+                                textAnchor="middle"
+                                fontSize={BOUND_FONT_UNITS}
+                            >
+                                {String(resolvedMin)}
+                            </text>
+                            <text
+                                className={styles.boundLabel}
+                                x={boundEnd.x}
+                                y={boundEnd.y + BOUND_DROP_UNITS}
+                                textAnchor="middle"
+                                fontSize={BOUND_FONT_UNITS}
+                            >
+                                {String(resolvedMax)}
+                            </text>
+                        </>
+                    ) : null}
                 </svg>
                 <span
                     className={styles.readout}
@@ -129,12 +167,22 @@ export function Gauge({
                     aria-valuenow={safeValue}
                     aria-valuetext={spokenValue}
                 >
+                    {centerContent !== undefined ? (
+                        <span className={styles.centerContent} aria-hidden="true">
+                            {centerContent}
+                        </span>
+                    ) : null}
                     <span className={styles.value} aria-hidden="true">
                         {displayValue}
                         {units !== undefined ? (
                             <span className={styles.unit}> {units}</span>
                         ) : null}
                     </span>
+                    {amountLabel !== undefined ? (
+                        <span className={styles.amount} aria-hidden="true">
+                            {amountLabel}
+                        </span>
+                    ) : null}
                 </span>
             </div>
         </figure>

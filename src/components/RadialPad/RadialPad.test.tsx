@@ -33,7 +33,7 @@ afterEach((): void => {
 });
 
 describe('RadialPad', (): void => {
-    it('renders a labelled modal controller with one section per side', (): void => {
+    it('renders the collapsible inline controller by default with one section per side', (): void => {
         render(
             <RadialPad
                 open
@@ -44,10 +44,71 @@ describe('RadialPad', (): void => {
             />,
         );
         expect(
-            screen.getByRole('dialog', { name: 'Weapon wheel' }),
+            screen.getByRole('group', { name: 'Weapon wheel' }),
         ).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Pistol' })).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Grenade' })).toBeInTheDocument();
+    });
+
+    it('keeps the hub mounted as the toggle while collapsed and requests expansion through onOpen', async (): Promise<void> => {
+        const user: UserEvent = userEvent.setup();
+        const onOpen: Mock = vi.fn();
+        render(
+            <RadialPad
+                open={false}
+                onClose={noop}
+                onOpen={onOpen}
+                label="Weapon wheel"
+                sections={SECTIONS}
+                sides={4}
+            />,
+        );
+        const toggle: HTMLElement = screen.getByRole('button', {
+            name: 'Weapon wheel',
+        });
+        expect(toggle).toHaveAttribute('aria-expanded', 'false');
+        expect(
+            screen.queryByRole('button', { name: 'Pistol' }),
+        ).not.toBeInTheDocument();
+        await user.click(toggle);
+        expect(onOpen).toHaveBeenCalledTimes(1);
+    });
+
+    it('never emits an InputSignal from the collapsed hub toggle', async (): Promise<void> => {
+        const user: UserEvent = userEvent.setup();
+        const signals: InputSignal[] = [];
+        render(
+            <RadialPad
+                open={false}
+                onClose={noop}
+                onOpen={noop}
+                label="Weapon wheel"
+                sections={SECTIONS}
+                sides={4}
+                descriptor={PAD_DESCRIPTOR}
+                onSignal={(signal: InputSignal): void => {
+                    signals.push(signal);
+                }}
+            />,
+        );
+        await user.click(screen.getByRole('button', { name: 'Weapon wheel' }));
+        expect(signals).toHaveLength(0);
+    });
+
+    it('renders the portaled modal overlay form when collapsible is false', (): void => {
+        render(
+            <RadialPad
+                open
+                onClose={noop}
+                label="Weapon wheel"
+                sections={SECTIONS}
+                sides={4}
+                collapsible={false}
+            />,
+        );
+        expect(
+            screen.getByRole('dialog', { name: 'Weapon wheel' }),
+        ).toBeInTheDocument();
     });
 
     it('reports the selected section id and index through onSelect', async (): Promise<void> => {
