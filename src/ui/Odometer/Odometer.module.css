@@ -1,0 +1,69 @@
+/*
+ * Odometer. A machined rolling counter: a recessed mono window of digit
+ * reels, each translated to its current face through ONE custom property so
+ * a value change rolls the column as a transform transition (instant under
+ * reduced motion - the media gate simply omits the transition). Face height
+ * derives from the tight line-height token, so the 10-face reel translates
+ * in exact 10% steps. Tone drives the edge and glow, never the digits
+ * (text stays text-0, AA on the dark window). Tokens only.
+ */
+
+.root {
+    display: inline-block;
+}
+
+/* The recessed readout window clipping the reels. */
+.window {
+    display: inline-flex;
+    gap: var(--portal-space-1);
+    padding-block: var(--portal-space-1);
+    padding-inline: var(--portal-space-2);
+    border: var(--portal-border-thickness-thin) solid var(--portal-tone-border);
+    border-radius: var(--portal-bevel-1);
+    background-color: var(--portal-color-bg-0);
+    box-shadow: inset 0 0 var(--portal-space-2) var(--portal-tone-glow);
+}
+
+/* One digit column: exactly one face tall, clipping its reel. */
+.column {
+    display: block;
+    overflow: hidden;
+    block-size: calc(1em * var(--portal-line-height-tight));
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-mono);
+    font-size: var(--portal-size-text-lg);
+    font-variant-numeric: tabular-nums;
+}
+
+/* The 10-face reel: translated to the current face in 10% steps. */
+.reel {
+    display: block;
+    transform: translateY(calc(var(--portal-odometer-digit, 0) * -10%));
+}
+
+.face {
+    display: block;
+    block-size: calc(1em * var(--portal-line-height-tight));
+    line-height: var(--portal-line-height-tight);
+    text-align: center;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .reel {
+        transition: transform var(--portal-duration-ui-base)
+            var(--portal-easing-standard);
+    }
+}
+
+/* The repo's per-component sr-only idiom for the opt-in announcer. */
+.srOnly {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}

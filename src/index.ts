@@ -380,6 +380,11 @@ export {
     EFileRejection,
     type FileUploadProps,
 } from './ui/FileUpload/FileUpload.types';
+export { FloatingText } from './ui/FloatingText/FloatingText';
+export {
+    type FloatingTextEvent,
+    type FloatingTextProps,
+} from './ui/FloatingText/FloatingText.types';
 export { Gauge } from './ui/Gauge/Gauge';
 export { type GaugeBand, type GaugeProps } from './ui/Gauge/Gauge.types';
 export { InventoryGrid } from './ui/InventoryGrid/InventoryGrid';
@@ -467,6 +472,8 @@ export {
     ENumberStepperFinish,
     type NumberStepperProps,
 } from './ui/NumberStepper/NumberStepper.types';
+export { Odometer } from './ui/Odometer/Odometer';
+export { type OdometerProps } from './ui/Odometer/Odometer.types';
 export { OtpField } from './ui/OtpField/OtpField';
 export { EOtpFieldMode, type OtpFieldProps } from './ui/OtpField/OtpField.types';
 export { Pagination } from './ui/Pagination/Pagination';

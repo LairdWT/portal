@@ -1,0 +1,93 @@
+/*
+ * FloatingText. The decorative combat-text layer: bold mono callouts that
+ * rise from the lower third of the layer and fade (transform/opacity only,
+ * animation-fill forwards so an unpruned event never flashes back). Status
+ * tints MIX toward text-0 so the fill stays AA on the dark HUD (the raw
+ * danger token sits below the 4.5:1 text floor - the LogConsole lesson);
+ * emphasis is the crit treatment. Under reduced motion no animation runs -
+ * events display statically and the component's backstop timer retires
+ * them on the same expiry path. Tokens only.
+ */
+
+.root {
+    position: relative;
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    pointer-events: none;
+}
+
+.plane {
+    position: absolute;
+    inset: 0;
+    display: block;
+    overflow: hidden;
+}
+
+/* One event: centered on its drift lane in the lower third. The drift is a
+ * chained translateX so no calc addition is needed on the percentage. */
+.event {
+    position: absolute;
+    inset-block-end: 25%;
+    inset-inline-start: 50%;
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-mono);
+    font-size: var(--portal-size-text-md);
+    font-weight: var(--portal-weight-label-bold);
+    letter-spacing: var(--portal-letter-spacing-wide);
+    text-shadow: 0 0 var(--portal-space-2) var(--portal-tone-glow);
+    white-space: nowrap;
+    transform: translate(-50%, 0) translateX(var(--portal-floating-drift, 0));
+}
+
+.event[data-status='danger'] {
+    color: color-mix(
+        in oklab,
+        var(--portal-color-danger) 50%,
+        var(--portal-color-text-0)
+    );
+}
+
+.event[data-status='success'] {
+    color: color-mix(
+        in oklab,
+        var(--portal-color-success) 60%,
+        var(--portal-color-text-0)
+    );
+}
+
+.event[data-emphasis='true'] {
+    font-size: var(--portal-size-text-lg);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .event {
+        animation: portal-floating-rise 900ms var(--portal-easing-standard) forwards;
+    }
+}
+
+@keyframes portal-floating-rise {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, 0) translateX(var(--portal-floating-drift, 0));
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(-50%, calc(-1 * var(--portal-space-8)))
+            translateX(var(--portal-floating-drift, 0));
+    }
+}
+
+/* The repo's per-component sr-only idiom for the opt-in announcer. */
+.srOnly {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
