@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { ComponentType, ReactElement } from 'react';
 
 import { LineChart } from './LineChart';
 
@@ -9,6 +10,16 @@ const SAMPLES: readonly number[] = [
 const meta: Meta<typeof LineChart> = {
     title: 'UI/LineChart',
     component: LineChart,
+    // The centered story canvas shrink-wraps; an explicit inline size keeps
+    // the demo at a readable trend width (the component itself also floors
+    // its own min width, so it can never collapse to a sliver again).
+    decorators: [
+        (Story: ComponentType): ReactElement => (
+            <div style={{ inlineSize: 'min(36rem, 90vw)' }}>
+                <Story />
+            </div>
+        ),
+    ],
     args: {
         label: 'Reactor output (MW)',
         values: SAMPLES,

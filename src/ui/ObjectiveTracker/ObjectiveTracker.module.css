@@ -42,12 +42,23 @@
     list-style: none;
 }
 
+/* A faint hairline under each entry (half-strength border color) subtly
+ * differentiates the rows - the owner's review asked for row clarification
+ * beyond the bare gap. The last row stays bare. */
 .item {
     display: flex;
     gap: var(--portal-space-2);
     align-items: baseline;
+    padding-block-end: var(--portal-space-2);
+    border-block-end: var(--portal-border-thickness-thin) solid
+        color-mix(in oklab, var(--portal-color-border) 50%, transparent);
     font-size: var(--portal-size-text-md);
     line-height: var(--portal-line-height-normal);
+}
+
+.item:last-child {
+    padding-block-end: 0;
+    border-block-end: 0;
 }
 
 .item[data-optional='true'] {

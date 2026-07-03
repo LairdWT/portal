@@ -28,6 +28,12 @@
     box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow);
     color: var(--portal-color-text-0);
     font-family: var(--portal-font-sans);
+
+    /* Shrink-wrap floor: a chart svg has no intrinsic width, so inside a
+     * content-sized container the frame used to collapse to its caption (the
+     * LineChart-as-a-sliver review finding). Every framed chart keeps at
+     * least a readable trend width. */
+    min-inline-size: calc(var(--portal-touch-target-min) * 6);
 }
 
 /* The tracked caption above a chart. Mirrors the shared wide-label pattern
@@ -243,6 +249,14 @@
     display: flex;
     flex-direction: column;
     gap: var(--portal-space-2);
+}
+
+/* The trend body keeps a readable 2/1 aspect instead of the shared fixed
+ * 4rem strip: the stretched viewBox follows the box, and the aspect scales
+ * the reading area with the available width. */
+.lineChart .chart {
+    block-size: auto;
+    aspect-ratio: 2 / 1;
 }
 
 .gridline {

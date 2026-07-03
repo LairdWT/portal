@@ -180,11 +180,13 @@
 }
 
 /* A child group: an indent step plus a thin angular tone-border guide rail, so
- * the hierarchy reads as nested console rails. */
+ * the hierarchy reads as nested console rails. The step is deliberately tight
+ * (the owner's review: the old 2rem-per-level indent made deep trees hard to
+ * read) - the 3rem marker column already separates the levels visually. */
 .group {
-    margin-inline-start: var(--portal-space-5);
-    padding-inline-start: var(--portal-space-2);
-    border-inline-start: var(--portal-hud-edge-width) solid
+    margin-inline-start: var(--portal-space-3);
+    padding-inline-start: var(--portal-space-1);
+    border-inline-start: var(--portal-border-thickness-thin) solid
         var(--portal-tone-border);
 }
 

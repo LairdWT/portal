@@ -60,16 +60,25 @@
     display: none;
 }
 
+/* A faint hairline under each entry body (half-strength border color) gives
+ * the rows subtle separation - the owner's review - while the marker rail
+ * stays the primary line. The last row stays bare. */
 .body {
     display: flex;
+    flex: 1 1 auto;
     flex-direction: column;
     gap: var(--portal-space-1);
-    padding-block-end: var(--portal-space-4);
+    margin-block-end: var(--portal-space-2);
+    padding-block-end: var(--portal-space-2);
+    border-block-end: var(--portal-border-thickness-thin) solid
+        color-mix(in oklab, var(--portal-color-border) 50%, transparent);
     min-inline-size: 0;
 }
 
 .item:last-child .body {
+    margin-block-end: 0;
     padding-block-end: 0;
+    border-block-end: 0;
 }
 
 .head {
