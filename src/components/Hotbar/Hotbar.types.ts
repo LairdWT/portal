@@ -27,5 +27,14 @@ export type HotbarProps = Readonly<{
     activeId?: string | undefined;
     onActivate?: ((id: string) => void) | undefined;
     onSignal?: ((signal: InputSignal) => void) | undefined;
+    /**
+     * Slot reorder callback. When present, a press that travels past the
+     * drag threshold becomes a pointer drag-reorder instead of an activation
+     * (a clean click still activates), and Ctrl+ArrowLeft / Ctrl+ArrowRight
+     * move the focused slot (advertised via aria-keyshortcuts, moves
+     * announced politely). Absent, the bar is layout-only: slot order is the
+     * consumer's.
+     */
+    onMove?: ((fromIndex: number, toIndex: number) => void) | undefined;
     enabled?: EEnabledState | undefined;
 }>;

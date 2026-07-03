@@ -7,6 +7,7 @@ import {
 } from 'react';
 
 import { EEnabledState } from '../../state/state';
+import { moveSlot } from '../../ui/InventoryGrid/slotMath';
 import { Hotbar } from './Hotbar';
 import { type HotbarSlot } from './Hotbar.types';
 
@@ -56,4 +57,32 @@ export const Disabled: Story = {
     render: (): ReactElement => (
         <ControlledHotbar enabled={EEnabledState.Disabled} />
     ),
+};
+
+// Reorderable harness: the story owns the slot order; drag a key (or
+// Ctrl+ArrowLeft/Right on a focused key) to rearrange the bar.
+function ReorderableHotbar(): ReactElement {
+    const [slots, setSlots]: [
+        readonly HotbarSlot[],
+        Dispatch<SetStateAction<readonly HotbarSlot[]>>,
+    ] = useState<readonly HotbarSlot[]>(SLOTS);
+    const [activeId, setActiveId]: [string, Dispatch<SetStateAction<string>>] =
+        useState<string>('blink');
+    return (
+        <Hotbar
+            label="Ability bar"
+            slots={slots}
+            activeId={activeId}
+            onActivate={setActiveId}
+            onMove={(fromIndex: number, toIndex: number): void => {
+                setSlots((prev: readonly HotbarSlot[]): readonly HotbarSlot[] =>
+                    moveSlot(prev, fromIndex, toIndex),
+                );
+            }}
+        />
+    );
+}
+
+export const Reorderable: Story = {
+    render: (): ReactElement => <ReorderableHotbar />,
 };

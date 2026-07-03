@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import {
     type Dispatch,
@@ -562,5 +562,147 @@ describe('DataTable', (): void => {
         } finally {
             restore();
         }
+    });
+});
+
+describe('DataTable column resize and frozen first column', (): void => {
+    type WidthsCallback = (next: Readonly<Record<string, number>>) => void;
+    type CaptureCallback = (pointerId: number) => void;
+
+    const RESIZABLE: readonly TableColumn[] = [
+        { key: 'name', header: 'Name', resizable: true },
+        { key: 'role', header: 'Role', resizable: true },
+        { key: 'status', header: 'Status' },
+    ];
+
+    it('renders resize separators only in fixed-column mode', (): void => {
+        const view: { unmount: () => void } = render(
+            <DataTable
+                label="Crew"
+                columns={RESIZABLE}
+                rowCount={3}
+                renderCell={renderCell}
+            />,
+        );
+        expect(screen.queryAllByRole('separator')).toHaveLength(0);
+        expect(screen.getByRole('grid')).not.toHaveAttribute('data-fixed-columns');
+        view.unmount();
+
+        render(
+            <DataTable
+                label="Crew"
+                columns={RESIZABLE}
+                rowCount={3}
+                renderCell={renderCell}
+                columnWidths={{ name: 200 }}
+                onColumnWidthsChange={vi.fn<WidthsCallback>()}
+            />,
+        );
+        const separators: readonly HTMLElement[] = screen.getAllByRole('separator');
+        // Only the two resizable columns grow a handle.
+        expect(separators).toHaveLength(2);
+        expect(separators[0]).toHaveAttribute('aria-valuenow', '200');
+        // An unspecified column resolves to the 160px default.
+        expect(separators[1]).toHaveAttribute('aria-valuenow', '160');
+        expect(screen.getByRole('grid')).toHaveAttribute(
+            'data-fixed-columns',
+            'true',
+        );
+    });
+
+    it('resizes from the keyboard with clamped commits', (): void => {
+        const onWidths: Mock<WidthsCallback> = vi.fn<WidthsCallback>();
+        render(
+            <DataTable
+                label="Crew"
+                columns={RESIZABLE}
+                rowCount={3}
+                renderCell={renderCell}
+                columnWidths={{ name: 200 }}
+                onColumnWidthsChange={onWidths}
+            />,
+        );
+        const separator: HTMLElement = screen.getByRole('separator', {
+            name: 'Resize Name column',
+        });
+        fireEvent.keyDown(separator, { key: 'ArrowRight' });
+        expect(onWidths).toHaveBeenLastCalledWith({ name: 208 });
+        fireEvent.keyDown(separator, { key: 'ArrowLeft' });
+        expect(onWidths).toHaveBeenLastCalledWith({ name: 192 });
+        fireEvent.keyDown(separator, { key: 'Home' });
+        expect(onWidths).toHaveBeenLastCalledWith({ name: 48 });
+        fireEvent.keyDown(separator, { key: 'End' });
+        expect(onWidths).toHaveBeenLastCalledWith({ name: 640 });
+    });
+
+    it('resizes with a pointer drag', (): void => {
+        const onWidths: Mock<WidthsCallback> = vi.fn<WidthsCallback>();
+        render(
+            <DataTable
+                label="Crew"
+                columns={RESIZABLE}
+                rowCount={3}
+                renderCell={renderCell}
+                columnWidths={{ name: 200 }}
+                onColumnWidthsChange={onWidths}
+            />,
+        );
+        const separator: HTMLElement = screen.getByRole('separator', {
+            name: 'Resize Name column',
+        });
+        separator.setPointerCapture = vi.fn<CaptureCallback>();
+        separator.releasePointerCapture = vi.fn<CaptureCallback>();
+        separator.hasPointerCapture = vi.fn<(pointerId: number) => boolean>(
+            (): boolean => true,
+        );
+        fireEvent.pointerDown(separator, {
+            button: 0,
+            pointerId: 1,
+            clientX: 100,
+            clientY: 10,
+        });
+        fireEvent.pointerMove(separator, {
+            pointerId: 1,
+            clientX: 140,
+            clientY: 10,
+        });
+        expect(onWidths).toHaveBeenLastCalledWith({ name: 240 });
+        fireEvent.pointerUp(separator, {
+            pointerId: 1,
+            clientX: 140,
+            clientY: 10,
+        });
+    });
+
+    it('marks the frozen first column only in fixed-column mode', (): void => {
+        const view: { unmount: () => void } = render(
+            <DataTable
+                label="Crew"
+                columns={RESIZABLE}
+                rowCount={3}
+                renderCell={renderCell}
+                columnWidths={{}}
+                onColumnWidthsChange={vi.fn<WidthsCallback>()}
+                frozenFirstColumn={true}
+            />,
+        );
+        expect(screen.getByRole('grid')).toHaveAttribute(
+            'data-frozen-first',
+            'true',
+        );
+        view.unmount();
+
+        // Without columnWidths the tracks are fr and never overflow, so the
+        // frozen flag is inert and stays off the DOM.
+        render(
+            <DataTable
+                label="Crew"
+                columns={RESIZABLE}
+                rowCount={3}
+                renderCell={renderCell}
+                frozenFirstColumn={true}
+            />,
+        );
+        expect(screen.getByRole('grid')).not.toHaveAttribute('data-frozen-first');
     });
 });

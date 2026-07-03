@@ -248,3 +248,41 @@ export const Disabled: Story = {
         />
     ),
 };
+
+// Fixed-column mode with a frozen first column: wide px tracks force
+// horizontal scroll in the narrow shell, the Name rowheader stays pinned to
+// the inline-start edge, and every column's header edge carries a resize
+// separator (drag it, or focus it and use Arrow/Home/End).
+const RESIZABLE_COLUMNS: readonly TableColumn[] = [
+    { key: 'name', header: 'Name', sortable: true, resizable: true },
+    { key: 'role', header: 'Role', resizable: true },
+    { key: 'status', header: 'Status', resizable: true },
+];
+
+function ResizableFrozenTable(): ReactElement {
+    const [widths, setWidths]: [
+        Readonly<Record<string, number>>,
+        Dispatch<SetStateAction<Readonly<Record<string, number>>>>,
+    ] = useState<Readonly<Record<string, number>>>({
+        name: 200,
+        role: 240,
+        status: 240,
+    });
+    return (
+        <div style={{ maxInlineSize: '28rem' }}>
+            <DataTable
+                label="Crew"
+                columns={RESIZABLE_COLUMNS}
+                rowCount={PEOPLE.length}
+                renderCell={staticPeopleCell}
+                columnWidths={widths}
+                onColumnWidthsChange={setWidths}
+                frozenFirstColumn={true}
+            />
+        </div>
+    );
+}
+
+export const ResizableFrozenColumns: Story = {
+    render: (): ReactElement => <ResizableFrozenTable />,
+};

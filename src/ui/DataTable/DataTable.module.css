@@ -59,6 +59,9 @@
  * mono accent header. data-align drives the justification. */
 .columnheader {
     composes: beveled from '../../theme/surfaces.module.css';
+
+    /* The positioned host for the absolute resize separator. */
+    position: relative;
     display: flex;
     align-items: center;
     min-inline-size: 0;
@@ -308,4 +311,122 @@
 .root[data-enabled='disabled'] .sortButton,
 .root[data-enabled='disabled'] .row {
     pointer-events: none;
+}
+
+/* ==== Fixed-column mode (a columnWidths prop present) ==== */
+
+/* The tracks are absolute px, so the grid plane may outgrow the viewport:
+ * the header strip and every row size to their tracks (max-content) while
+ * never shrinking under the viewport; .root's existing overflow:auto
+ * supplies the horizontal scrollbar. */
+.root[data-fixed-columns='true'] .headerGroup {
+    min-inline-size: max-content;
+}
+
+.root[data-fixed-columns='true'] .headerRow {
+    inline-size: max-content;
+    min-inline-size: 100%;
+}
+
+.root[data-fixed-columns='true'] .row {
+    inline-size: max-content;
+    min-inline-size: 100%;
+}
+
+/* The column-resize separator: a focusable APG splitter widget straddling
+ * the resizable header's inline-end edge, drawn as a milled seam that lights
+ * with tone under the pointer or focus. */
+.resizeHandle {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: calc(-1 * var(--portal-space-1));
+    inline-size: var(--portal-space-2);
+    cursor: col-resize;
+    touch-action: none;
+}
+
+.resizeHandle::after {
+    content: '';
+    position: absolute;
+    inset-block: var(--portal-space-1);
+    inset-inline-start: calc(50% - var(--portal-border-thickness-thin) / 2);
+    inline-size: var(--portal-border-thickness-thin);
+    background-color: var(--portal-color-metal-2);
+}
+
+.resizeHandle:hover::after {
+    background-color: var(--portal-tone-accent);
+}
+
+.resizeHandle:focus-visible {
+    outline: var(--portal-border-thickness-thin) solid var(--portal-color-focus);
+    outline-offset: 0;
+}
+
+.resizeHandle:focus-visible::after {
+    background-color: var(--portal-tone-accent);
+}
+
+/* ==== Frozen first column (fixed-column mode only) ==== */
+
+/* The first header cell and each row's first cell (the rowheader) stick to
+ * the inline-start edge under horizontal scroll. Opaque backgrounds mask the
+ * columns sliding beneath; zebra and selection re-key their washes onto the
+ * frozen cell because the row-level translucent washes cannot mask moving
+ * content. The row's inline-start padding moves INSIDE the frozen cell (and
+ * its pill radius flattens into a flush rail) so scrolled columns can never
+ * peek through the padding band beside it. */
+.root[data-frozen-first='true'] .headerRow {
+    padding-inline-start: 0;
+}
+
+.root[data-frozen-first='true'] .row {
+    padding-inline-start: 0;
+}
+
+.root[data-frozen-first='true'] .headerRow > .columnheader:first-child {
+    position: sticky;
+    inset-inline-start: 0;
+    z-index: 1;
+    padding-inline-start: var(--portal-space-2);
+    border-inline-end: var(--portal-border-thickness-thin) solid
+        var(--portal-color-metal-2);
+    border-radius: 0;
+
+    /* surface-1 is a translucent wash; layer it over the opaque surface so
+     * header cells sliding beneath can never ghost through. */
+    background-color: var(--portal-color-surface-0);
+    background-image: linear-gradient(
+        var(--portal-color-surface-1),
+        var(--portal-color-surface-1)
+    );
+}
+
+.root[data-frozen-first='true'] .row > .cell:first-child {
+    position: sticky;
+    inset-inline-start: 0;
+    z-index: 1;
+    padding-inline-start: calc(var(--portal-space-2) + var(--portal-space-3));
+    border-inline-end: var(--portal-border-thickness-thin) solid
+        var(--portal-color-metal-2);
+    border-radius: 0;
+    background-color: var(--portal-color-surface-0);
+}
+
+.root[data-frozen-first='true'] .row[data-parity='1'] > .cell:first-child {
+    /* The zebra wash is translucent; keep the opaque base beneath it. */
+    background-color: var(--portal-color-surface-0);
+    background-image: linear-gradient(
+        var(--portal-color-surface-1),
+        var(--portal-color-surface-1)
+    );
+}
+
+.root[data-frozen-first='true'] .row[data-selected='true'] > .cell:first-child {
+    background-color: var(--portal-color-surface-0);
+    background-image: linear-gradient(
+        160deg,
+        var(--portal-tone-fill) 0%,
+        transparent 100%
+    );
 }

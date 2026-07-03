@@ -45,8 +45,22 @@
     box-shadow: 0 0 var(--portal-space-2) var(--portal-tone-glow);
 }
 
+/* The hovered destination while a reorder drag is live. */
+.key[data-drop='true'] {
+    border-style: dashed;
+    border-color: var(--portal-tone-accent);
+    box-shadow: 0 0 var(--portal-space-2) var(--portal-tone-glow);
+}
+
 .key[data-pressed='pressed']:not(:disabled) {
     transform: scale(var(--portal-press-scale));
+}
+
+/* The reorder ghost: transform-only, above its siblings while airborne
+ * (local stacking only - never the overlay layer). */
+.key[data-dragging='true']:not(:disabled) {
+    z-index: 1;
+    transform: translate(var(--hotbar-drag-x, 0), var(--hotbar-drag-y, 0));
 }
 
 .face {
@@ -83,4 +97,23 @@
             box-shadow var(--portal-duration-frame-base)
                 var(--portal-easing-standard);
     }
+
+    /* The ghost must track the pointer 1:1 - a transform transition would
+     * make it rubber-band behind the gesture. */
+    .key[data-dragging='true'] {
+        transition: none;
+    }
+}
+
+/* The repo's per-component sr-only idiom for the reorder announcer. */
+.srOnly {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
 }

@@ -12,6 +12,11 @@ import {
     useState,
 } from 'react';
 
+import {
+    type PointerDragBinding,
+    type PointerDragState,
+    usePointerDrag,
+} from '../../react/hooks/usePointerDrag';
 import { useReducedMotion } from '../../react/hooks/useReducedMotion';
 import { useResolvedEnabled } from '../../react/hooks/useResolvedEnabled';
 import {
@@ -52,6 +57,24 @@ const BODY_MAX_PROPERTY: string = '--portal-datatable-body-max';
 // Shared empty selection so the absent-selection path does not allocate a Set per
 // render or per activation.
 const EMPTY_SELECTION: ReadonlySet<string> = new Set<string>();
+
+// Fixed-column mode bounds. The default is a comfortable data column; the
+// clamps keep a resize from crushing a column under the touch floor or
+// runaway-growing the scroll plane.
+const COLUMN_WIDTH_DEFAULT_PX: number = 160;
+const COLUMN_WIDTH_MIN_PX: number = 48;
+const COLUMN_WIDTH_MAX_PX: number = 640;
+const COLUMN_RESIZE_STEP_PX: number = 8;
+
+function clampColumnWidth(width: number): number {
+    if (!Number.isFinite(width)) {
+        return COLUMN_WIDTH_DEFAULT_PX;
+    }
+    return Math.min(
+        COLUMN_WIDTH_MAX_PX,
+        Math.max(COLUMN_WIDTH_MIN_PX, Math.round(width)),
+    );
+}
 
 // The pointer / keyboard modifier snapshot a selection activation reads.
 type SelectionModifiers = Readonly<{
@@ -150,6 +173,9 @@ export function DataTable(props: DataTableProps): ReactElement {
         rowHeight = ROW_HEIGHT_DEFAULT,
         overscan,
         maxBodyBlockSize,
+        columnWidths,
+        onColumnWidthsChange,
+        frozenFirstColumn = false,
         emptyContent,
         enabled,
         status = EUiStatus.None,
@@ -168,6 +194,50 @@ export function DataTable(props: DataTableProps): ReactElement {
     const scrollRef: RefObject<HTMLDivElement | null> =
         useRef<HTMLDivElement | null>(null);
     const rangeAnchorRef: RefObject<number | null> = useRef<number | null>(null);
+    // The live column resize: which column, its width at gesture start, and
+    // the drag direction factor (+1 LTR, -1 RTL - measured once at start).
+    const resizeKeyRef: RefObject<string | null> = useRef<string | null>(null);
+    const resizeBaseRef: RefObject<number> = useRef<number>(0);
+    const resizeDirectionRef: RefObject<number> = useRef<number>(1);
+
+    // Presence of columnWidths (even empty) selects fixed-column mode.
+    const fixedColumns: boolean = columnWidths !== undefined;
+
+    function resolveColumnWidth(column: TableColumn): number {
+        return clampColumnWidth(
+            columnWidths?.[column.key] ?? COLUMN_WIDTH_DEFAULT_PX,
+        );
+    }
+
+    function commitColumnWidth(columnKey: string, width: number): void {
+        if (columnWidths === undefined) {
+            return;
+        }
+        const clamped: number = clampColumnWidth(width);
+        if (columnWidths[columnKey] === clamped) {
+            return;
+        }
+        onColumnWidthsChange?.({ ...columnWidths, [columnKey]: clamped });
+    }
+
+    const resizeDrag: PointerDragBinding<HTMLDivElement> =
+        usePointerDrag<HTMLDivElement>({
+            disabled: isDisabled || !fixedColumns,
+            axisLock: 'x',
+            onDrag: (state: PointerDragState): void => {
+                const key: string | null = resizeKeyRef.current;
+                if (key === null) {
+                    return;
+                }
+                commitColumnWidth(
+                    key,
+                    resizeBaseRef.current + state.dx * resizeDirectionRef.current,
+                );
+            },
+            onDragEnd: (): void => {
+                resizeKeyRef.current = null;
+            },
+        });
 
     const virtualWindow: VirtualWindowState = useVirtualWindow({
         rowCount,
@@ -231,12 +301,19 @@ export function DataTable(props: DataTableProps): ReactElement {
         .filter((entry: string | undefined): entry is string => entry !== undefined)
         .join(' ');
 
-    const columnsTemplate: string = columns
-        .map(
-            (column: TableColumn): string =>
-                `minmax(0, ${String(column.weight ?? 1)}fr)`,
-        )
-        .join(' ');
+    const columnsTemplate: string = fixedColumns
+        ? columns
+              .map(
+                  (column: TableColumn): string =>
+                      `${String(resolveColumnWidth(column))}px`,
+              )
+              .join(' ')
+        : columns
+              .map(
+                  (column: TableColumn): string =>
+                      `minmax(0, ${String(column.weight ?? 1)}fr)`,
+              )
+              .join(' ');
 
     const rootStyle: CSSProperties = {
         ...toneProperties(tone),
@@ -266,6 +343,45 @@ export function DataTable(props: DataTableProps): ReactElement {
             return;
         }
         onSortChange?.(nextSort(sort, columnKey));
+    }
+
+    // Keyboard resize on the focused separator. Arrow semantics are LOGICAL
+    // (Right/Up widen, Left/Down narrow, Home/End jump to the clamps);
+    // handled keys stop propagating so the grid cursor does not also move.
+    function handleResizeKeyDown(
+        column: TableColumn,
+        event: ReactKeyboardEvent<HTMLDivElement>,
+    ): void {
+        if (isDisabled) {
+            return;
+        }
+        const width: number = resolveColumnWidth(column);
+        let next: number;
+        switch (event.key) {
+            case 'ArrowRight':
+            case 'ArrowUp': {
+                next = width + COLUMN_RESIZE_STEP_PX;
+                break;
+            }
+            case 'ArrowLeft':
+            case 'ArrowDown': {
+                next = width - COLUMN_RESIZE_STEP_PX;
+                break;
+            }
+            case 'Home': {
+                next = COLUMN_WIDTH_MIN_PX;
+                break;
+            }
+            case 'End': {
+                next = COLUMN_WIDTH_MAX_PX;
+                break;
+            }
+            default:
+                return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        commitColumnWidth(column.key, next);
     }
 
     function handleRowActivate(
@@ -533,6 +649,10 @@ export function DataTable(props: DataTableProps): ReactElement {
             data-status={status}
             data-enabled={resolvedEnabled}
             data-motion={motion}
+            data-fixed-columns={fixedColumns ? 'true' : undefined}
+            data-frozen-first={
+                frozenFirstColumn && fixedColumns ? 'true' : undefined
+            }
             onKeyDown={handleGridKeyDown}
         >
             <div role="rowgroup" className={styles.headerGroup}>
@@ -550,6 +670,42 @@ export function DataTable(props: DataTableProps): ReactElement {
                                 activeColumn === columnIndex;
                             const ariaSort: ESortDirection | 'none' =
                                 resolveAriaSort(column, sort);
+                            const resizable: boolean =
+                                fixedColumns && column.resizable === true;
+                            // The separator's operable handlers ride a
+                            // spreadable binding (the SplitPane precedent):
+                            // aria-query models separator as structure-only,
+                            // so literal handlers would trip jsx-a11y even
+                            // though the APG sanctions the focusable widget.
+                            const resizeHandlers: Readonly<{
+                                onPointerDown: (
+                                    event: ReactPointerEvent<HTMLDivElement>,
+                                ) => void;
+                                onKeyDown: (
+                                    event: ReactKeyboardEvent<HTMLDivElement>,
+                                ) => void;
+                                tabIndex: number;
+                            }> = {
+                                onPointerDown: (
+                                    event: ReactPointerEvent<HTMLDivElement>,
+                                ): void => {
+                                    resizeKeyRef.current = column.key;
+                                    resizeBaseRef.current =
+                                        resolveColumnWidth(column);
+                                    resizeDirectionRef.current =
+                                        getComputedStyle(event.currentTarget)
+                                            .direction === 'rtl'
+                                            ? -1
+                                            : 1;
+                                    resizeDrag.onPointerDown(event);
+                                },
+                                onKeyDown: (
+                                    event: ReactKeyboardEvent<HTMLDivElement>,
+                                ): void => {
+                                    handleResizeKeyDown(column, event);
+                                },
+                                tabIndex: isDisabled ? -1 : 0,
+                            };
                             return (
                                 <div
                                     key={column.key}
@@ -588,6 +744,27 @@ export function DataTable(props: DataTableProps): ReactElement {
                                             {column.header}
                                         </span>
                                     )}
+                                    {resizable ? (
+                                        <div
+                                            role="separator"
+                                            aria-orientation="vertical"
+                                            aria-label={`Resize ${
+                                                typeof column.header === 'string'
+                                                    ? column.header
+                                                    : column.key
+                                            } column`}
+                                            aria-valuemin={COLUMN_WIDTH_MIN_PX}
+                                            aria-valuemax={COLUMN_WIDTH_MAX_PX}
+                                            aria-valuenow={resolveColumnWidth(
+                                                column,
+                                            )}
+                                            {...(isDisabled
+                                                ? { 'aria-disabled': true }
+                                                : {})}
+                                            className={styles.resizeHandle}
+                                            {...resizeHandlers}
+                                        />
+                                    ) : null}
                                 </div>
                             );
                         },

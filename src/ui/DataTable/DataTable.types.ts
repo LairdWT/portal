@@ -32,10 +32,11 @@ import { type EUiStatus, type Toned } from '../tone';
  * behavior difference.
  *
  * Documented v1 deferrals (each present in Helicon's TableInteractionState, none
- * required by the parity ledger; recorded here, not silently dropped): frozen
- * columns / sticky first column; column reorder, resize, and hide; horizontal
- * (column) virtualization; multi-column sort; inline cell editing; and row
- * grouping / tree rows (TreeView's concern).
+ * required by the parity ledger; recorded here, not silently dropped): column
+ * reorder and hide; horizontal (column) virtualization; multi-column sort;
+ * inline cell editing; and row grouping / tree rows (TreeView's concern).
+ * Paid down since: sticky first column (`frozenFirstColumn`) and column
+ * resize (`columnWidths` / `onColumnWidthsChange` + per-column `resizable`).
  */
 
 // Cell text alignment within a column. Values feed the data-align attribute and
@@ -71,12 +72,15 @@ export type ESortDirection = (typeof ESortDirection)[keyof typeof ESortDirection
 // cell-context column key, and the React key. `header` is arbitrary renderable
 // content. `weight` is the relative grid track size (default 1; a weight-2 column
 // is twice a weight-1 column), mapped to minmax(0, weight fr). `sortable` makes
-// the header a sort button. `align` sets cell justification.
+// the header a sort button. `align` sets cell justification. `resizable` grows
+// a drag/keyboard resize separator on the header's inline-end edge - it only
+// operates in fixed-column mode (a `columnWidths` prop present on the table).
 export type TableColumn = Readonly<{
     key: string;
     header: ReactNode;
     weight?: number;
     sortable?: boolean;
+    resizable?: boolean;
     align?: EColumnAlign;
 }>;
 
@@ -137,6 +141,25 @@ export type DataTableProps = Readonly<{
      * clamp expression; a token default applies when omitted.
      */
     maxBodyBlockSize?: string;
+    /**
+     * Controlled per-column pixel widths keyed by column key. When PRESENT
+     * (even empty) the table enters fixed-column mode: every column resolves
+     * to columnWidths[key] or a 160px default, the grid scrolls horizontally
+     * once the tracks outgrow the viewport, and `resizable` columns grow a
+     * resize separator (pointer drag or Arrow/Home/End keys) that commits
+     * clamped 48..640px widths through onColumnWidthsChange. Absent, columns
+     * stay weighted fr tracks exactly as before.
+     */
+    columnWidths?: Readonly<Record<string, number>> | undefined;
+    onColumnWidthsChange?:
+        | ((next: Readonly<Record<string, number>>) => void)
+        | undefined;
+    /**
+     * Pin the first column to the inline-start edge under horizontal scroll
+     * (the fixed-column mode's frozen rowheader). No effect while the tracks
+     * fit the viewport.
+     */
+    frozenFirstColumn?: boolean | undefined;
     /**
      * Empty-state content shown when rowCount === 0.
      */

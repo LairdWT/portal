@@ -1,12 +1,16 @@
 /*
  * Lightbox. The media-viewer frame inside the Dialog: slides center their
  * content and cap media to the dynamic viewport so tall images never push
- * the dialog chrome off screen. Tokens only.
+ * the dialog chrome off screen. The zoom layer scales the canvas about its
+ * center (transform only) behind a grab overlay that owns the pan while
+ * zoomed; the toolbar buttons carry the keyboard zoom path. Tokens only.
  */
 
 .frame {
+    position: relative;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 /* Cap any replaced media a consumer drops into a slide. */
@@ -14,4 +18,60 @@
     max-inline-size: 100%;
     max-block-size: min(70dvh, 40rem);
     object-fit: contain;
+}
+
+/* The zoomed plane: pan + scale ride two custom properties (transform only,
+ * no transition - magnification must track the wheel and the drag 1:1). */
+.canvas {
+    transform: translate(var(--lightbox-pan-x, 0), var(--lightbox-pan-y, 0))
+        scale(var(--lightbox-scale, 1));
+    transform-origin: center;
+}
+
+/* The pan surface while zoomed: captures the drag so the carousel beneath
+ * never scroll-fights the pan; reset the zoom to reach the slide controls. */
+.panLayer {
+    position: absolute;
+    inset: 0;
+    cursor: grab;
+    touch-action: none;
+}
+
+/* The zoom toolbar: out / readout / in / reset, all clearing the touch floor. */
+.toolbar {
+    display: flex;
+    gap: var(--portal-space-2);
+    align-items: center;
+    justify-content: flex-end;
+    padding-block-start: var(--portal-space-3);
+}
+
+.zoomKey {
+    min-inline-size: var(--portal-touch-target-min);
+    min-block-size: var(--portal-touch-target-min);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-bevel-1);
+    background-color: var(--portal-color-surface-0);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-mono);
+    font-size: var(--portal-size-text-sm);
+    appearance: none;
+    cursor: pointer;
+}
+
+.zoomKey:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.zoomKey:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: var(--portal-space-1);
+}
+
+.zoomReadout {
+    color: var(--portal-color-text-1);
+    font-family: var(--portal-font-mono);
+    font-size: var(--portal-size-text-sm);
+    font-variant-numeric: tabular-nums;
 }
