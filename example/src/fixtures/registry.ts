@@ -1,6 +1,8 @@
 import { type ReactElement } from 'react';
 
 import { Collections } from './Collections';
+import { DockWorkspace } from './DockWorkspace';
+import { HudInstruments } from './HudInstruments';
 import { Overlays } from './Overlays';
 import { SingleSelect } from './SingleSelect';
 import { TabsApg } from './TabsApg';
@@ -16,4 +18,6 @@ export const FIXTURES: Readonly<Record<string, () => ReactElement>> = {
     overlays: Overlays,
     collections: Collections,
     tooltip: TooltipHover,
+    hud: HudInstruments,
+    dock: DockWorkspace,
 };

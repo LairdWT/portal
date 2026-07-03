@@ -18,6 +18,13 @@ geometry and emits per-section input signals.
 
 ![Portal mobile controller: a beveled HUD readout band over a deep shader backdrop, and a metal-trimmed deck holding Start and Select keys, an analog stick, and an A/B/X/Y action grid. The live Storybook adds an animated distort orb over an interactive rippleGrid shader.](https://raw.githubusercontent.com/LairdWT/portal/main/docs/portal-controller.png)
 
+![Portal game HUD: two octagonal arc gauges (hull integrity, and reactor output carrying a red redline band), a machined rotary throttle dial, a hotbar of keybound ability keys beside a radial cooldown chip mid-sweep, and a scanlined mono mission-log console, all on dark HUD glass.](https://raw.githubusercontent.com/LairdWT/portal/main/docs/portal-hud.png)
+
+The `Patterns/Game HUD` story wires the HUD set together through real state:
+hotbar presses arm the cooldown chip and append mission-log entries, the
+rotary dial drives the reactor gauge into its redline, and the cargo key
+opens an inventory-grid dialog whose moves are logged too.
+
 Live, interactive Storybook (every control, the controller showcase with the
 R3F orb backdrop, and the Unity-binding example):
 https://lairdwt.github.io/portal/
