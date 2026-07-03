@@ -245,9 +245,11 @@ so it suits any React UI, not only game input. It spans, among others:
   `Progress`, `Spinner`, `Banner`, `Avatar`, `Skeleton`, `EmptyState`,
   `Marquee`, `Scanlines`, `StepTrack`, `Timeline`, `TitleBar`,
   `StatusFooter`, `SelectableTile`.
-- Game HUD: `Gauge` (radial arc meter), `Cooldown` (unwinding ability
-  scrim), `LogConsole` (virtualized scrollback, with an opt-in wrap mode),
-  `InventoryGrid` (slot grid with keyboard grab/move and drag-reorder),
+- Game HUD: `Gauge` (radial arc meter with hub content, amount labelling,
+  and shoulder bounds), `Cooldown` (unwinding ability scrim), `LogConsole`
+  (virtualized scrollback with opt-in wrap, resizable time column, and a
+  dockable fill mode), `InventoryGrid` (slot grid with keyboard grab/move,
+  drag-reorder, and rectangular multi-cell item spans),
   `Minimap` (radar/map instrument with an optional sweep), `Compass`
   (heading strip), `Reticle` (decorative aiming glyph), `FloatingText`
   (combat-text layer), `Odometer` (rolling digit counter), `DialogueBox`

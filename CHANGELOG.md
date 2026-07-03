@@ -4,6 +4,89 @@ All notable changes to this project are documented in this file. The format is
 based on Keep a Changelog, and the project follows Semantic Versioning with the
 0.x caveat that, before 1.0, a minor version may carry a breaking change.
 
+## [1.12.0] - 2026-07-03
+
+The visual-compliance release: every concern from the owner's dev-build
+review, remediated in five batches with probe-reviewed evidence. Three
+DEFAULT-BEHAVIOR changes are called out below.
+
+### Changed (defaults - read these)
+
+- `RadialPad` now defaults to the COLLAPSIBLE inline disclosure, matching
+  RadialMenu: the center hub stays mounted as the open/close toggle and the
+  new `onOpen` / `toggleIcon` / `toggleText` props ride the same contract.
+  Pass `collapsible={false}` for the previous portaled modal overlay. The
+  toggle itself never emits an InputSignal.
+- `Dial` now renders a live mono value readout under the knob BY DEFAULT;
+  pass `showValue={false}` for the previous bare knob.
+- `Hotbar` keys widen from the 3rem square to a 4rem x 3rem rectangle;
+  retune through the new `--portal-hotbar-key-inline` custom property
+  (floored at the 3rem touch target).
+- `VirtualKeyboard` key faces move from brushed metal to the Joystick-top
+  dark domed button treatment, and the default `QWERTY_ROWS` layout grows a
+  control row (ESC, TAB, latching CTRL/ALT, token-drawn arrow keys) and a
+  full punctuation row.
+
+### Added
+
+- Bevel-compliance guard (`tokens.bevel.test.ts`): every
+  `--portal-bevel-N` border-radius must pair with a corner-shape source,
+  and stories may not draw inline `borderRadius` chrome - the machined
+  corner can no longer silently regress to round. The sweep it drove fixed
+  22 rule blocks across 14 modules and 8 story files (Cooldown scrim,
+  Lightbox zoom keys, Hotbar keybind chips, Odometer window, DockLayout
+  chrome, Tooltip/Field demo triggers, and more).
+- `Gauge`: `centerContent` (a decorative icon or tag in the dial hub),
+  `amountLabel` (a units-independent amount line, also spoken), and
+  `showBounds` (min/max at the dial shoulders); the caption adopts the
+  bold uppercase tracked heading.
+- `Dial`: `editable` upgrades the readout to a direct-entry field - type a
+  number, commit on Enter or blur (clamped and quantized; detents are
+  ignored for typed values), Escape reverts.
+- `InventoryGrid` v2: items may span RECTANGLES of cells
+  (`widthCells`/`heightCells`, additive, default 1x1) - the semantic layer
+  stays an APG grid of 1x1 cells (covered cells speak the item and its
+  footprint and grab the anchor) while a decorative layer draws each item
+  once at its true size; placement validates through the new pure
+  `inventoryPlacement` math; a beveled container frame with a tracked
+  heading, hover/grab/targetable/drop-settle juice (reduced-motion gated),
+  and the new `relocateSlot` (swap) helper for span grids. Plain 1x1
+  reordering keeps its classic contract.
+- `LogConsole`: `resizableTime` adds a drag/keyboard `role=separator` on
+  the time|message boundary (rows share one two-column grid; width clamped
+  48..320 px, controllable via `timeColumnWidth` /
+  `onTimeColumnWidthChange`), and `fill` sizes the console to a
+  definite-height parent for docked use.
+- `EKeyGlyph` and per-key `glyph`/`srLabel` on `VirtualKeyDef` for
+  token-drawn key caps.
+
+### Changed
+
+- The unified divider standard: every pane/panel divider is a faint
+  hairline in a transparent touch-sized rail that lights with the tone on
+  hover/focus and solidifies on drag. SplitPane hosts the recipe (its
+  metal seam, grab nub, and local sheen are REMOVED); DockLayout inherits
+  it and dims its bright group-bar rails; StatPill's internal separator
+  and LogConsole's header underline follow.
+- De-metalization: metal trim is reserved for Tier-1 game controllers.
+  Breadcrumb's current crumb moves to the Menu-family flat treatment
+  (dark tone fill, thin toned border, bold label) and every crumb border
+  thins.
+- CTA outlines follow the Accordion thin dual lining (a thin toned border
+  hugged by a thin neutral ring) instead of the thick band; Toolbar
+  entries inherit it.
+- LineChart keeps a readable 2/1 aspect with a shrink-wrap width floor on
+  the whole framed chart family (the collapsed-sliver fix); Odometer slims
+  to a thin machined window with md digits; ObjectiveTracker and Timeline
+  rows separate with faint hairlines; TreeView halves its per-level indent.
+
+### Fixed
+
+- The Cooldown scrim and ready flash now follow the wrapped control's
+  beveled silhouette (tunable via `--portal-cooldown-radius`).
+- The Minimap circle stays perfectly round while its square variant takes
+  the machined corner.
+
 ## [1.11.0] - 2026-07-03
 
 The Tier-4 "field kit" release: seven new game-HUD components - the spatial
