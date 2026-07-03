@@ -328,6 +328,11 @@ export {
     type SecretPromptOptions,
 } from './ui/Dialog/Dialog.types';
 export { PromptDialog } from './ui/Dialog/PromptDialog';
+export { DialogueBox } from './ui/DialogueBox/DialogueBox';
+export {
+    type DialogueBoxProps,
+    EDialogueVariant,
+} from './ui/DialogueBox/DialogueBox.types';
 export { DockLayout } from './ui/DockLayout/DockLayout';
 export {
     type DockFloatingPanel,
@@ -472,6 +477,12 @@ export {
     ENumberStepperFinish,
     type NumberStepperProps,
 } from './ui/NumberStepper/NumberStepper.types';
+export { ObjectiveTracker } from './ui/ObjectiveTracker/ObjectiveTracker';
+export {
+    EObjectiveState,
+    type Objective,
+    type ObjectiveTrackerProps,
+} from './ui/ObjectiveTracker/ObjectiveTracker.types';
 export { Odometer } from './ui/Odometer/Odometer';
 export { type OdometerProps } from './ui/Odometer/Odometer.types';
 export { OtpField } from './ui/OtpField/OtpField';

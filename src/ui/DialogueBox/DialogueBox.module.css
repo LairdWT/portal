@@ -1,0 +1,139 @@
+/*
+ * DialogueBox. The narrative line surface. Dialogue variant: a beveled HUD
+ * panel with a toned speaker plate, the serifless line, and the continue
+ * key (whose chevron nudges under full motion once the line completes).
+ * Subtitle variant: the minimal centered band with a scrim for legibility
+ * over gameplay. The unrevealed remainder is TRANSPARENT text - identical
+ * metrics, zero reflow - and the whole visible line is decorative (the
+ * announcer speaks the complete line). Tokens only; tone drives the plate
+ * and edge, never the AA-critical line text.
+ */
+
+.root {
+    composes: beveled from '../../theme/surfaces.module.css';
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-2);
+    inline-size: 100%;
+    padding-block: var(--portal-space-3);
+    padding-inline: var(--portal-space-4);
+    border: var(--portal-hud-edge-width) solid var(--portal-tone-border);
+    border-radius: var(--portal-bevel-3);
+    background-color: var(--portal-color-surface-0);
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+}
+
+/* The speaker plate: a small toned tab above the line. */
+.speaker {
+    align-self: flex-start;
+    padding-block: var(--portal-space-1);
+    padding-inline: var(--portal-space-2);
+    border: var(--portal-border-thickness-thin) solid var(--portal-tone-border);
+    border-radius: var(--portal-bevel-1);
+    background-color: var(--portal-color-bg-1);
+    color: var(--portal-color-accent-highlight);
+    font-size: var(--portal-size-text-sm);
+    font-weight: var(--portal-weight-label-bold);
+    letter-spacing: var(--portal-letter-spacing-wide);
+    text-transform: uppercase;
+}
+
+.line {
+    margin: 0;
+    font-size: var(--portal-size-text-md);
+    line-height: var(--portal-line-height-normal);
+}
+
+/* The unrevealed remainder: identical metrics, invisible ink. */
+.unrevealed {
+    color: transparent;
+}
+
+/* The continue key, bottom-end aligned. */
+.advance {
+    display: inline-flex;
+    gap: var(--portal-space-2);
+    align-items: center;
+    align-self: flex-end;
+    min-block-size: var(--portal-touch-target-min);
+    padding-inline: var(--portal-space-3);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-bevel-1);
+    background-color: var(--portal-color-surface-0);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+    font-size: var(--portal-size-text-sm);
+    appearance: none;
+    cursor: pointer;
+}
+
+.advance:focus-visible {
+    outline: var(--portal-border-thickness-normal) solid var(--portal-color-focus);
+    outline-offset: var(--portal-space-1);
+}
+
+/* A drawn advance chevron (a rotated square half). */
+.chevron {
+    inline-size: var(--portal-space-2);
+    block-size: var(--portal-space-2);
+    border-block-end: var(--portal-border-thickness-normal) solid
+        var(--portal-tone-accent);
+    border-inline-end: var(--portal-border-thickness-normal) solid
+        var(--portal-tone-accent);
+    transform: rotate(45deg);
+}
+
+/* Subtitle variant: strip the frame down to a centered scrim band. */
+.root[data-variant='subtitle'] {
+    padding-block: var(--portal-space-2);
+    border: 0;
+    border-radius: var(--portal-bevel-1);
+    background-color: color-mix(
+        in oklab,
+        var(--portal-color-bg-0) 82%,
+        transparent
+    );
+    box-shadow: none;
+}
+
+.root[data-variant='subtitle'] .line {
+    text-align: center;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    /* The completed line nudges the chevron (transform only). */
+    .root[data-state='complete'] .chevron {
+        animation: portal-dialogue-nudge 1.2s var(--portal-easing-standard) infinite;
+    }
+}
+
+@keyframes portal-dialogue-nudge {
+    0% {
+        transform: rotate(45deg) translate(0, 0);
+    }
+
+    50% {
+        transform: rotate(45deg)
+            translate(var(--portal-space-1), var(--portal-space-1));
+    }
+
+    100% {
+        transform: rotate(45deg) translate(0, 0);
+    }
+}
+
+/* The repo's per-component sr-only idiom for the line announcer. */
+.srOnly {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}

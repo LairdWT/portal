@@ -1,0 +1,151 @@
+/*
+ * ObjectiveTracker. The quest-list HUD panel: a beveled frame, the tracked
+ * heading, and one row per objective - a drawn state glyph (hollow diamond
+ * active, checked square complete, crossed square failed: SHAPE carries the
+ * state, status color only echoes it), the label (struck through once
+ * complete), and the mono progress chip. Optional objectives dim. Tokens
+ * only; the label text stays text-0/text-1 (AA) in every state.
+ */
+
+.root {
+    composes: beveled from '../../theme/surfaces.module.css';
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-2);
+    padding-block: var(--portal-space-3);
+    padding-inline: var(--portal-space-4);
+    border: var(--portal-hud-edge-width) solid var(--portal-tone-border);
+    border-radius: var(--portal-bevel-3);
+    background-color: var(--portal-color-surface-0);
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+}
+
+/* The tracked caption (the Chart family's wide-label recipe). */
+.heading {
+    margin: 0;
+    color: var(--portal-color-text-1);
+    font-size: var(--portal-size-text-sm);
+    font-weight: var(--portal-weight-label-bold);
+    line-height: var(--portal-line-height-tight);
+    letter-spacing: var(--portal-letter-spacing-wide);
+    text-transform: uppercase;
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.item {
+    display: flex;
+    gap: var(--portal-space-2);
+    align-items: baseline;
+    font-size: var(--portal-size-text-md);
+    line-height: var(--portal-line-height-normal);
+}
+
+.item[data-optional='true'] {
+    color: var(--portal-color-text-1);
+}
+
+.item[data-state='failed'] {
+    color: var(--portal-color-text-1);
+}
+
+/* The state glyph box: shape-first state. */
+.glyph {
+    position: relative;
+    flex: 0 0 auto;
+    inline-size: var(--portal-space-3);
+    block-size: var(--portal-space-3);
+    align-self: center;
+}
+
+/* Active: a hollow toned diamond. */
+.glyph[data-state='active'] {
+    border: var(--portal-border-thickness-normal) solid var(--portal-tone-accent);
+    transform: rotate(45deg) scale(0.72);
+}
+
+/* Complete: a success-edged square carrying a drawn check. */
+.glyph[data-state='complete'] {
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-success);
+    border-radius: var(--portal-bevel-1);
+}
+
+.glyph[data-state='complete']::after {
+    content: '';
+    position: absolute;
+    inset-block-start: 15%;
+    inset-inline-start: 30%;
+    inline-size: 35%;
+    block-size: 60%;
+    border-block-end: var(--portal-border-thickness-normal) solid
+        var(--portal-color-success);
+    border-inline-end: var(--portal-border-thickness-normal) solid
+        var(--portal-color-success);
+    transform: rotate(45deg);
+}
+
+/* Failed: a danger-edged square carrying a drawn cross. */
+.glyph[data-state='failed'] {
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-danger);
+    border-radius: var(--portal-bevel-1);
+}
+
+.glyph[data-state='failed']::before,
+.glyph[data-state='failed']::after {
+    content: '';
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 15%;
+    inline-size: 70%;
+    block-size: var(--portal-border-thickness-normal);
+    background-color: var(--portal-color-danger);
+}
+
+.glyph[data-state='failed']::before {
+    transform: rotate(45deg);
+}
+
+.glyph[data-state='failed']::after {
+    transform: rotate(-45deg);
+}
+
+.text {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+}
+
+.item[data-state='complete'] .text {
+    color: var(--portal-color-text-1);
+    text-decoration: line-through;
+}
+
+/* The mono progress chip ("3 / 5"). */
+.count {
+    flex: 0 0 auto;
+    color: var(--portal-color-text-1);
+    font-family: var(--portal-font-mono);
+    font-size: var(--portal-size-text-sm);
+    font-variant-numeric: tabular-nums;
+}
+
+/* The repo's per-component sr-only idiom for the spoken state suffix. */
+.srOnly {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
