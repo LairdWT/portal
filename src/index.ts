@@ -290,6 +290,14 @@ export {
     ECommandRowKind,
 } from './ui/CommandPalette/CommandPalette.types';
 export { type FuzzyMatch, fuzzyMatch } from './ui/CommandPalette/fuzzyMatch';
+export { Compass } from './ui/Compass/Compass';
+export { type CompassProps } from './ui/Compass/Compass.types';
+export {
+    COMPASS_CARDINALS,
+    headingDelta,
+    nearestCardinal,
+    normalizeHeading,
+} from './ui/Compass/compassMath';
 export { Cooldown } from './ui/Cooldown/Cooldown';
 export { type CooldownProps } from './ui/Cooldown/Cooldown.types';
 export { CTA } from './ui/CTA/CTA';
@@ -440,6 +448,14 @@ export {
     type MenuSubmenuNode,
 } from './ui/Menu/Menu.types';
 export { MenuBar } from './ui/Menu/MenuBar';
+export { type MapPoint } from './ui/Minimap/mapMath';
+export { Minimap } from './ui/Minimap/Minimap';
+export {
+    EMapMarkerKind,
+    EMinimapShape,
+    type MapMarker,
+    type MinimapProps,
+} from './ui/Minimap/Minimap.types';
 export { NavRail } from './ui/NavRail/NavRail';
 export {
     ENavItemState,
@@ -509,6 +525,8 @@ export {
     type Readout,
     type ReadoutPanelProps,
 } from './ui/ReadoutPanel/ReadoutPanel.types';
+export { Reticle } from './ui/Reticle/Reticle';
+export { EReticleVariant, type ReticleProps } from './ui/Reticle/Reticle.types';
 export { Scanlines } from './ui/Scanlines/Scanlines';
 export {
     EScanlineExtent,

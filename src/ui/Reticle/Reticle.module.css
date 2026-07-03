@@ -1,0 +1,165 @@
+/*
+ * Reticle. A decorative machined aiming glyph: toned hairline arms around a
+ * center gap (cross), a plain dot, a ring, or four corner brackets. The
+ * spread (weapon bloom) pushes arms and brackets outward through ONE custom
+ * property consumed inside transform translates, so live spread changes are
+ * transform-only. The hit flash is a bounded one-shot transform/opacity
+ * animation on a keyed remount, gated to full motion (it is decoration -
+ * meaning never rides it). Tokens only; tone drives the glyph color.
+ */
+
+.root {
+    position: relative;
+    display: inline-block;
+    inline-size: var(--portal-space-7);
+    block-size: var(--portal-space-7);
+    pointer-events: none;
+}
+
+/* One cross arm: a toned hairline pushed off center by the gap + spread. */
+.arm {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    inline-size: var(--portal-space-3);
+    block-size: var(--portal-border-thickness-normal);
+    background-color: var(--portal-tone-accent);
+    box-shadow: 0 0 var(--portal-space-1) var(--portal-tone-glow);
+}
+
+.arm[data-position='up'] {
+    transform: translate(-50%, -50%) rotate(90deg)
+        translateX(
+            calc(-1 * (var(--portal-space-3) + var(--portal-reticle-spread, 0px)))
+        );
+}
+
+.arm[data-position='down'] {
+    transform: translate(-50%, -50%) rotate(90deg)
+        translateX(calc(var(--portal-space-3) + var(--portal-reticle-spread, 0px)));
+}
+
+.arm[data-position='start'] {
+    transform: translate(-50%, -50%)
+        translateX(
+            calc(-1 * (var(--portal-space-3) + var(--portal-reticle-spread, 0px)))
+        );
+}
+
+.arm[data-position='end'] {
+    transform: translate(-50%, -50%)
+        translateX(calc(var(--portal-space-3) + var(--portal-reticle-spread, 0px)));
+}
+
+/* One corner bracket: two toned edges meeting in an L, pushed diagonally
+ * outward by the spread. */
+.bracket {
+    position: absolute;
+    inline-size: var(--portal-space-3);
+    block-size: var(--portal-space-3);
+    border-color: var(--portal-tone-accent);
+    border-style: solid;
+    border-width: 0;
+}
+
+.bracket[data-corner='top-start'] {
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    border-block-start-width: var(--portal-border-thickness-normal);
+    border-inline-start-width: var(--portal-border-thickness-normal);
+    transform: translate(
+        calc(-1 * var(--portal-reticle-spread, 0px)),
+        calc(-1 * var(--portal-reticle-spread, 0px))
+    );
+}
+
+.bracket[data-corner='top-end'] {
+    inset-block-start: 0;
+    inset-inline-end: 0;
+    border-block-start-width: var(--portal-border-thickness-normal);
+    border-inline-end-width: var(--portal-border-thickness-normal);
+    transform: translate(
+        var(--portal-reticle-spread, 0),
+        calc(-1 * var(--portal-reticle-spread, 0px))
+    );
+}
+
+.bracket[data-corner='bottom-start'] {
+    inset-block-end: 0;
+    inset-inline-start: 0;
+    border-block-end-width: var(--portal-border-thickness-normal);
+    border-inline-start-width: var(--portal-border-thickness-normal);
+    transform: translate(
+        calc(-1 * var(--portal-reticle-spread, 0px)),
+        var(--portal-reticle-spread, 0)
+    );
+}
+
+.bracket[data-corner='bottom-end'] {
+    inset-block-end: 0;
+    inset-inline-end: 0;
+    border-block-end-width: var(--portal-border-thickness-normal);
+    border-inline-end-width: var(--portal-border-thickness-normal);
+    transform: translate(
+        var(--portal-reticle-spread, 0),
+        var(--portal-reticle-spread, 0)
+    );
+}
+
+/* The ring variant: a toned circle inset from the box edge. */
+.ring {
+    position: absolute;
+    inset: var(--portal-space-1);
+    border: var(--portal-border-thickness-normal) solid var(--portal-tone-accent);
+    border-radius: var(--portal-radius-pill);
+    box-shadow: 0 0 var(--portal-space-1) var(--portal-tone-glow);
+}
+
+/* The center dot (cross, dot, and circle variants). */
+.dot {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    inline-size: var(--portal-space-1);
+    block-size: var(--portal-space-1);
+    border-radius: var(--portal-radius-pill);
+    background-color: var(--portal-tone-accent);
+    transform: translate(-50%, -50%);
+}
+
+/* The hit-marker flash: an expanding fading diamond, one-shot per keyed
+ * remount. Hidden at rest and entirely suppressed under reduced motion. */
+.hit {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    inline-size: var(--portal-space-4);
+    block-size: var(--portal-space-4);
+    border: var(--portal-border-thickness-normal) solid var(--portal-tone-accent);
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(45deg) scale(0.4);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .arm,
+    .bracket {
+        transition: transform var(--portal-duration-ui-fast)
+            var(--portal-easing-standard);
+    }
+
+    .hit {
+        animation: portal-reticle-hit 360ms var(--portal-easing-standard);
+    }
+}
+
+@keyframes portal-reticle-hit {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) rotate(45deg) scale(0.4);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) rotate(45deg) scale(1.6);
+    }
+}

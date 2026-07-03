@@ -1,0 +1,110 @@
+/*
+ * Compass. A machined-HUD heading strip in the Chart-family chrome: the
+ * beveled angular frame, the tracked caption, a dark tape windowing the
+ * rose ticks (majors carry their cardinal), a fixed toned center index, and
+ * a mono readout. The instrument is chirality-fixed (bearings increase to
+ * the visual right in every writing direction - the Dial convention), so
+ * tick positions use physical `left` deliberately. Tick slides are CSS
+ * transitions on that offset, reduced-motion gated. Tokens only.
+ */
+
+.root {
+    composes: beveled from '../../theme/surfaces.module.css';
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-2);
+
+    /* The tape has no intrinsic width, so the strip instrument fills its
+     * container instead of collapsing to the readout. */
+    inline-size: 100%;
+    margin: 0;
+    padding-block: var(--portal-space-3);
+    padding-inline: var(--portal-space-4);
+    border: var(--portal-hud-edge-width) solid var(--portal-tone-border);
+    border-radius: var(--portal-bevel-3);
+    background-color: var(--portal-color-surface-0);
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+}
+
+/* The tracked caption above the tape (the Chart family's inline wide-label
+ * recipe; .wideLabel cannot be composed under the value-keyword-case rule). */
+.caption {
+    color: var(--portal-color-text-1);
+    font-size: var(--portal-size-text-sm);
+    line-height: var(--portal-line-height-tight);
+    letter-spacing: var(--portal-letter-spacing-wide);
+}
+
+.body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-2);
+    align-items: center;
+}
+
+/* The rose tape: a dark recessed band clipping the sliding ticks. */
+.strip {
+    position: relative;
+    overflow: hidden;
+    inline-size: 100%;
+    block-size: var(--portal-space-7);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-bevel-1);
+    background-color: var(--portal-color-bg-0);
+}
+
+/* One rose tick: a bottom-anchored hairline; majors run taller and carry
+ * their cardinal above. */
+.tick {
+    position: absolute;
+    inset-block-end: 0;
+    inline-size: var(--portal-border-thickness-thin);
+    block-size: var(--portal-space-2);
+    background-color: var(--portal-color-metal-2);
+    transform: translateX(-50%);
+}
+
+.tick[data-major='true'] {
+    block-size: var(--portal-space-3);
+    background-color: var(--portal-color-text-1);
+}
+
+.cardinal {
+    position: absolute;
+    inset-block-end: calc(100% + var(--portal-space-1));
+    inset-inline-start: 50%;
+    color: var(--portal-color-text-1);
+    font-family: var(--portal-font-mono);
+    font-size: var(--portal-size-text-sm);
+    line-height: var(--portal-line-height-tight);
+    letter-spacing: var(--portal-letter-spacing-wide);
+    transform: translateX(-50%);
+}
+
+/* The fixed center index: a toned lubber line over the tape. */
+.index {
+    position: absolute;
+    inset-block: 0;
+    left: 50%;
+    inline-size: var(--portal-border-thickness-normal);
+    background-color: var(--portal-tone-accent);
+    box-shadow: 0 0 var(--portal-space-2) var(--portal-tone-glow);
+    transform: translateX(-50%);
+}
+
+/* The mono heading readout under the tape. */
+.readout {
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-mono);
+    font-size: var(--portal-size-text-md);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: var(--portal-letter-spacing-wide);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .tick {
+        transition: left var(--portal-duration-ui-fast) linear;
+    }
+}

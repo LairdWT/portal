@@ -1,0 +1,136 @@
+/*
+ * Minimap. A machined-HUD radar instrument in the Chart-family chrome: the
+ * beveled angular frame, the tracked caption, and a dark scope carrying the
+ * graticule, the projected markers, and the player chevron. Marker meaning
+ * rides SHAPE first (dot / ring / triangle / diamond) with the universal
+ * status colors as the echo; clamped (out-of-range) markers dim against the
+ * frame edge. The optional sweep is an infinite TRANSFORM rotation (the
+ * Spinner rule - never a paint-property animation) and is removed entirely
+ * under reduced motion. Stroke widths inside the SVG are viewBox user units;
+ * the chrome uses tokens only.
+ */
+
+.root {
+    composes: beveled from '../../theme/surfaces.module.css';
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-space-2);
+    margin: 0;
+    padding-block: var(--portal-space-3);
+    padding-inline: var(--portal-space-4);
+    border: var(--portal-hud-edge-width) solid var(--portal-tone-border);
+    border-radius: var(--portal-bevel-3);
+    background-color: var(--portal-color-surface-0);
+    box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+}
+
+/* The tracked caption above the scope (the Chart family's inline wide-label
+ * recipe; .wideLabel cannot be composed under the value-keyword-case rule). */
+.caption {
+    color: var(--portal-color-text-1);
+    font-size: var(--portal-size-text-sm);
+    line-height: var(--portal-line-height-tight);
+    letter-spacing: var(--portal-letter-spacing-wide);
+}
+
+/* The scope: a positioned square so the sweep overlay can pin over the SVG.
+ * The circle shape rounds the frame into the radar ring. */
+.frame {
+    position: relative;
+    overflow: hidden;
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    background-color: var(--portal-color-bg-0);
+}
+
+.frame[data-shape='circle'] {
+    border-radius: var(--portal-radius-pill);
+}
+
+.frame[data-shape='square'] {
+    border-radius: var(--portal-bevel-2);
+}
+
+.map {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+    aspect-ratio: 1;
+}
+
+/* The range rings / boxes and the crosshair. */
+.graticule {
+    fill: none;
+    stroke: var(--portal-color-metal-2);
+    stroke-width: 0.5;
+}
+
+.marker {
+    fill: var(--portal-color-text-1);
+    stroke: var(--portal-color-text-1);
+    stroke-width: 1;
+}
+
+.marker[data-kind='ally'] {
+    fill: var(--portal-color-success);
+    stroke: var(--portal-color-success);
+}
+
+.marker[data-kind='hostile'] {
+    fill: var(--portal-color-danger);
+    stroke: var(--portal-color-danger);
+}
+
+.marker[data-kind='objective'] {
+    fill: var(--portal-tone-accent);
+    stroke: var(--portal-tone-accent);
+}
+
+/* Edge-pinned (out of range): present but dimmed against the rim. */
+.marker[data-clamped='true'] {
+    opacity: 0.45;
+}
+
+.glyph {
+    stroke-width: inherit;
+}
+
+/* The player chevron: always the tone accent, always at center. */
+.chevron {
+    fill: var(--portal-tone-accent);
+    stroke: none;
+}
+
+/* The radar sweep: a toned conic wedge spun by TRANSFORM (the Spinner
+ * annulus recipe). Hidden by default; only full-motion contexts show and
+ * spin it - it is pure decoration. */
+.sweep {
+    position: absolute;
+    inset: 0;
+    display: none;
+    border-radius: inherit;
+    background: conic-gradient(
+        from 0deg,
+        var(--portal-tone-glow-strong) 0deg,
+        transparent 70deg
+    );
+    pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .sweep {
+        display: block;
+        animation: portal-minimap-sweep 4s linear infinite;
+    }
+}
+
+@keyframes portal-minimap-sweep {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
