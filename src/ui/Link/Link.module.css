@@ -5,6 +5,7 @@
  */
 
 .link {
+    composes: beveled from '../../theme/surfaces.module.css';
     display: inline-flex;
     align-items: baseline;
     gap: var(--portal-space-1);

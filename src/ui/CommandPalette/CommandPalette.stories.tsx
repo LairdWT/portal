@@ -1,12 +1,12 @@
 import { type Meta, type StoryObj } from '@storybook/react-vite';
 import {
-    type CSSProperties,
     type Dispatch,
     type ReactElement,
     type SetStateAction,
     useState,
 } from 'react';
 
+import demoStyles from '../../examples/storySupport.module.css';
 import { EEnabledState } from '../../state/state';
 import { EUiStatus } from '../tone';
 import { CommandPalette } from './CommandPalette';
@@ -27,16 +27,6 @@ type CommandPaletteStoryArgs = Readonly<{
     status?: EUiStatus;
     tone?: string;
 }>;
-
-const OPENER_STYLE: CSSProperties = {
-    minBlockSize: 'var(--portal-touch-target-min)',
-    paddingInline: 'var(--portal-space-4)',
-    borderRadius: 'var(--portal-radius-md)',
-    border: 'var(--portal-border-thickness-thin) solid var(--portal-color-border)',
-    background: 'var(--portal-color-surface-0)',
-    color: 'var(--portal-color-text-0)',
-    cursor: 'pointer',
-};
 
 const COMMANDS: readonly Command[] = [
     { id: 'file.new', label: 'New File', shortcut: 'Ctrl N', group: 'File' },
@@ -114,7 +104,7 @@ function ControlledPalette(args: CommandPaletteStoryArgs): ReactElement {
         <div style={{ minBlockSize: '24rem' }}>
             <button
                 type="button"
-                style={OPENER_STYLE}
+                className={demoStyles.trigger}
                 onClick={(): void => {
                     setOpen(true);
                 }}

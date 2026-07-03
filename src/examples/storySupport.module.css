@@ -1,0 +1,90 @@
+/*
+ * Story-support chrome. Storybook demos need trigger buttons, arenas, and
+ * layout swatches that are NOT the component under test; inline styles cannot
+ * compose the shared corner-shape, so ad-hoc story boxes rendered ROUND (the
+ * owner's dev-build review). These classes give demo chrome the machined
+ * treatment from the theme utilities. Stories-only: the library build never
+ * imports this file, and the bevel guard test bans inline borderRadius in
+ * stories so new demos reach for these instead.
+ */
+
+/* A generic demo trigger/opener button (Tooltip, Popover, Dialog, Toast,
+ * CommandPalette anchors). */
+.trigger {
+    composes: beveled from '../theme/surfaces.module.css';
+    min-block-size: var(--portal-touch-target-min);
+    padding-inline: var(--portal-space-4);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-bevel-2);
+    background-color: var(--portal-color-surface-0);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+    cursor: pointer;
+}
+
+/* A dashed capture region (the ContextMenu right-click demo). */
+.contextZone {
+    composes: beveled from '../theme/surfaces.module.css';
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: var(--portal-border-thickness-thin) dashed var(--portal-color-border);
+    border-radius: var(--portal-bevel-2);
+    color: var(--portal-color-text-1);
+    font-family: var(--portal-font-sans);
+}
+
+/* A positioned stage for overlay/effect components (FloatingText). The story
+ * keeps its dimensions inline; the chrome lives here. */
+.arena {
+    composes: beveled from '../theme/surfaces.module.css';
+    position: relative;
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-bevel-2);
+    background-color: var(--portal-color-bg-0);
+}
+
+/* A labelled layout cell (the Layout demos). */
+.swatch {
+    composes: beveled from '../theme/surfaces.module.css';
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: var(--portal-space-8);
+    min-block-size: calc(var(--portal-space-6) + var(--portal-space-2));
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-bevel-1);
+    background-color: var(--portal-color-surface-1);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-sans);
+}
+
+/* A machined key-sized face (the HUD showcase's Cooldown-wrapped chips). */
+.chipFace {
+    composes: beveled from '../theme/surfaces.module.css';
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: var(--portal-touch-target-min);
+    block-size: var(--portal-touch-target-min);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-bevel-2);
+    background-color: var(--portal-color-surface-0);
+    color: var(--portal-color-text-0);
+    font-family: var(--portal-font-mono);
+    font-size: var(--portal-size-text-sm);
+}
+
+/* An unowned demo input for Field: Field is scaffolding for ANY control, so
+ * the demo wires a plain native input, but its chrome still speaks the
+ * design language. */
+.demoInput {
+    composes: beveled from '../theme/surfaces.module.css';
+    min-block-size: var(--portal-touch-target-min);
+    padding-inline: var(--portal-space-3);
+    border: var(--portal-border-thickness-thin) solid var(--portal-color-border);
+    border-radius: var(--portal-bevel-2);
+    background-color: var(--portal-color-surface-0);
+    color: var(--portal-color-text-0);
+    font: inherit;
+}

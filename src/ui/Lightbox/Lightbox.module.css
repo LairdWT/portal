@@ -47,6 +47,7 @@
 }
 
 .zoomKey {
+    composes: beveled from '../../theme/surfaces.module.css';
     min-inline-size: var(--portal-touch-target-min);
     min-block-size: var(--portal-touch-target-min);
     border: var(--portal-border-thickness-thin) solid var(--portal-color-border);

@@ -73,10 +73,12 @@
     transform: rotate(45deg) scale(0.72);
 }
 
-/* Complete: a success-edged square carrying a drawn check. */
+/* Complete: a success-edged square carrying a drawn check. corner-shape is
+ * declared literally: composes is illegal in an attribute-variant rule. */
 .glyph[data-state='complete'] {
     border: var(--portal-border-thickness-thin) solid var(--portal-color-success);
     border-radius: var(--portal-bevel-1);
+    corner-shape: var(--portal-corner-shape);
 }
 
 .glyph[data-state='complete']::after {
@@ -97,6 +99,7 @@
 .glyph[data-state='failed'] {
     border: var(--portal-border-thickness-thin) solid var(--portal-color-danger);
     border-radius: var(--portal-bevel-1);
+    corner-shape: var(--portal-corner-shape);
 }
 
 .glyph[data-state='failed']::before,

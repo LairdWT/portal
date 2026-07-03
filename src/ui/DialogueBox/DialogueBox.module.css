@@ -28,6 +28,7 @@
 
 /* The speaker plate: a small toned tab above the line. */
 .speaker {
+    composes: beveled from '../../theme/surfaces.module.css';
     align-self: flex-start;
     padding-block: var(--portal-space-1);
     padding-inline: var(--portal-space-2);
@@ -54,6 +55,7 @@
 
 /* The continue key, bottom-end aligned. */
 .advance {
+    composes: beveled from '../../theme/surfaces.module.css';
     display: inline-flex;
     gap: var(--portal-space-2);
     align-items: center;

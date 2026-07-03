@@ -48,8 +48,11 @@
     border-radius: var(--portal-radius-pill);
 }
 
+/* corner-shape is declared literally: composes is illegal in an
+ * attribute-variant rule, and the circle shape must stay perfectly round. */
 .frame[data-shape='square'] {
     border-radius: var(--portal-bevel-2);
+    corner-shape: var(--portal-corner-shape);
 }
 
 .map {

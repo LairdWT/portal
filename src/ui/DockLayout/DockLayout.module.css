@@ -8,6 +8,7 @@
  */
 
 .root {
+    composes: beveled from '../../theme/surfaces.module.css';
     position: relative;
     display: flex;
     flex-direction: column;
@@ -70,7 +71,8 @@
 }
 
 /* The shared compact chassis for the grip and menu keys - never shrinks,
- * never clips. */
+ * never clips. corner-shape is declared literally: composes is illegal in a
+ * multi-selector rule. */
 .grip,
 .menuKey {
     flex: 0 0 auto;
@@ -81,6 +83,7 @@
     min-block-size: var(--portal-touch-target-min);
     border: 0;
     border-radius: var(--portal-bevel-1);
+    corner-shape: var(--portal-corner-shape);
     background-color: transparent;
     color: var(--portal-color-text-1);
     appearance: none;
@@ -146,6 +149,7 @@
 }
 
 .zone {
+    composes: beveled from '../../theme/surfaces.module.css';
     position: absolute;
     border: var(--portal-border-thickness-thin) dashed var(--portal-tone-border);
     border-radius: var(--portal-bevel-2);
@@ -196,6 +200,7 @@
 /* The dock-back affordance in a floating Window's title bar: a small framed
  * square reading as "return to the dock". */
 .dockBackKey {
+    composes: beveled from '../../theme/surfaces.module.css';
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -219,6 +224,7 @@
 }
 
 .dockBackGlyph {
+    composes: beveled from '../../theme/surfaces.module.css';
     inline-size: var(--portal-space-3);
     block-size: var(--portal-space-3);
     border: var(--portal-border-thickness-normal) solid var(--portal-color-text-1);

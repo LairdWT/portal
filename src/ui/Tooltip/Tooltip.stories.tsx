@@ -1,25 +1,10 @@
 import { type Meta, type StoryObj } from '@storybook/react-vite';
-import {
-    type CSSProperties,
-    type ReactElement,
-    type RefObject,
-    useEffect,
-    useRef,
-} from 'react';
+import { type ReactElement, type RefObject, useEffect, useRef } from 'react';
 
+import demoStyles from '../../examples/storySupport.module.css';
 import { EPopoverPlacement } from '../Popover/Popover.types';
 import { Tooltip } from './Tooltip';
 import { type TooltipProps } from './Tooltip.types';
-
-const TRIGGER_STYLE: CSSProperties = {
-    minBlockSize: 'var(--portal-touch-target-min)',
-    paddingInline: 'var(--portal-space-4)',
-    borderRadius: 'var(--portal-radius-md)',
-    border: 'var(--portal-border-thickness-thin) solid var(--portal-color-border)',
-    background: 'var(--portal-color-surface-0)',
-    color: 'var(--portal-color-text-0)',
-    cursor: 'pointer',
-};
 
 // Focuses its trigger on mount so the bubble is shown without a pointer, letting
 // axe evaluate the rendered tooltip panel in the storybook browser project.
@@ -31,7 +16,7 @@ function ForcedOpenTooltip(args: TooltipProps): ReactElement {
     }, []);
     return (
         <Tooltip {...args}>
-            <button ref={triggerRef} type="button" style={TRIGGER_STYLE}>
+            <button ref={triggerRef} type="button" className={demoStyles.trigger}>
                 Focused trigger
             </button>
         </Tooltip>
@@ -47,7 +32,7 @@ const meta: Meta<typeof Tooltip> = {
     },
     render: (args: TooltipProps): ReactElement => (
         <Tooltip {...args}>
-            <button type="button" style={TRIGGER_STYLE}>
+            <button type="button" className={demoStyles.trigger}>
                 Hover or focus me
             </button>
         </Tooltip>
@@ -90,7 +75,7 @@ export const Placements: Story = {
                 content="Opens above"
                 placement={EPopoverPlacement.Top}
             >
-                <button type="button" style={TRIGGER_STYLE}>
+                <button type="button" className={demoStyles.trigger}>
                     Top
                 </button>
             </Tooltip>
@@ -99,7 +84,7 @@ export const Placements: Story = {
                 content="Opens below"
                 placement={EPopoverPlacement.Bottom}
             >
-                <button type="button" style={TRIGGER_STYLE}>
+                <button type="button" className={demoStyles.trigger}>
                     Bottom
                 </button>
             </Tooltip>
@@ -108,7 +93,7 @@ export const Placements: Story = {
                 content="Opens left"
                 placement={EPopoverPlacement.Left}
             >
-                <button type="button" style={TRIGGER_STYLE}>
+                <button type="button" className={demoStyles.trigger}>
                     Left
                 </button>
             </Tooltip>
@@ -117,7 +102,7 @@ export const Placements: Story = {
                 content="Opens right"
                 placement={EPopoverPlacement.Right}
             >
-                <button type="button" style={TRIGGER_STYLE}>
+                <button type="button" className={demoStyles.trigger}>
                     Right
                 </button>
             </Tooltip>
@@ -129,17 +114,17 @@ export const Composition: Story = {
     render: (args: TooltipProps): ReactElement => (
         <div style={{ display: 'flex', gap: 'var(--portal-space-4)' }}>
             <Tooltip {...args} content="First action">
-                <button type="button" style={TRIGGER_STYLE}>
+                <button type="button" className={demoStyles.trigger}>
                     One
                 </button>
             </Tooltip>
             <Tooltip {...args} content="Second action">
-                <button type="button" style={TRIGGER_STYLE}>
+                <button type="button" className={demoStyles.trigger}>
                     Two
                 </button>
             </Tooltip>
             <Tooltip {...args} content="Third action">
-                <button type="button" style={TRIGGER_STYLE}>
+                <button type="button" className={demoStyles.trigger}>
                     Three
                 </button>
             </Tooltip>

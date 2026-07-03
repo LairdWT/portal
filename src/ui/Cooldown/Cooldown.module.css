@@ -26,14 +26,20 @@
 }
 
 /* The unwinding scrim (the Dialog backdrop mix). It never intercepts input:
- * disabling the wrapped control while cooling is the consumer's contract. */
+ * disabling the wrapped control while cooling is the consumer's contract.
+ * The scrim follows the wrapped control's machined silhouette: the beveled
+ * corner shape plus a radius that defaults to the house key radius
+ * (bevel-2) and can be matched to an odd-shaped child through
+ * --portal-cooldown-radius. */
 .scrim {
+    composes: beveled from '../../theme/surfaces.module.css';
     position: absolute;
     inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     pointer-events: none;
+    border-radius: var(--portal-cooldown-radius, var(--portal-bevel-2));
     background: conic-gradient(
         from 0deg,
         transparent 0deg var(--portal-cooldown-angle),
@@ -94,6 +100,8 @@
         position: absolute;
         inset: 0;
         pointer-events: none;
+        border-radius: var(--portal-cooldown-radius, var(--portal-bevel-2));
+        corner-shape: var(--portal-corner-shape);
         opacity: 0;
         animation: portal-cooldown-flash var(--portal-duration-ui-base)
             var(--portal-easing-standard);

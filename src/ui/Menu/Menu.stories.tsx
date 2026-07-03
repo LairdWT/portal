@@ -8,6 +8,7 @@ import {
     useState,
 } from 'react';
 
+import demoStyles from '../../examples/storySupport.module.css';
 import { ContextMenu } from './ContextMenu';
 import { Menu } from './Menu';
 import { EMenuNodeKind, type MenuBarMenu, type MenuNode } from './Menu.types';
@@ -232,15 +233,10 @@ function ControlledContextMenu(): ReactElement {
     return (
         <ContextMenu items={items} onSelect={onSelect} label="Region actions">
             <div
+                className={demoStyles.contextZone}
                 style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
                     minBlockSize: 'calc(var(--portal-touch-target-min) * 4)',
                     minInlineSize: 'calc(var(--portal-touch-target-min) * 8)',
-                    border: 'var(--portal-border-thickness-thin) dashed var(--portal-color-border)',
-                    borderRadius: 'var(--portal-bevel-2)',
-                    color: 'var(--portal-color-text-1)',
                 }}
             >
                 Right-click this region

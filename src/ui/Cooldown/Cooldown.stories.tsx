@@ -1,28 +1,14 @@
 import { type Meta, type StoryObj } from '@storybook/react-vite';
 import {
-    type CSSProperties,
     type Dispatch,
     type ReactElement,
     type SetStateAction,
     useState,
 } from 'react';
 
+import demoStyles from '../../examples/storySupport.module.css';
 import { Cooldown } from './Cooldown';
 import { type CooldownProps } from './Cooldown.types';
-
-// A plain ability-key tile for the wrapped-children slot.
-const TILE_STYLE: CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    inlineSize: 'var(--portal-space-8)',
-    blockSize: 'var(--portal-space-8)',
-    border: 'var(--portal-border-thickness-thin) solid var(--portal-color-border)',
-    background: 'var(--portal-color-surface-0)',
-    color: 'var(--portal-color-text-0)',
-    fontFamily: 'var(--portal-font-mono)',
-    fontSize: 'var(--portal-size-text-lg)',
-};
 
 // Interactive recast demo: casting disables the key and re-keys the Cooldown
 // (the documented re-trigger contract), and completion re-enables it.
@@ -43,7 +29,8 @@ function RecastHarness(): ReactElement {
         >
             <button
                 type="button"
-                style={{ ...TILE_STYLE, cursor: 'pointer' }}
+                className={demoStyles.chipFace}
+                style={{ cursor: 'pointer' }}
                 disabled={!ready}
                 onClick={(): void => {
                     setReady(false);
@@ -66,7 +53,7 @@ const meta: Meta<typeof Cooldown> = {
     },
     render: (args: CooldownProps): ReactElement => (
         <Cooldown {...args}>
-            <div style={TILE_STYLE}>Q</div>
+            <div className={demoStyles.chipFace}>Q</div>
         </Cooldown>
     ),
 };

@@ -8,6 +8,7 @@ import {
     useState,
 } from 'react';
 
+import demoStyles from '../../examples/storySupport.module.css';
 import { EEnabledState } from '../../state/state';
 import { EUiStatus } from '../tone';
 import { Drawer } from './Drawer';
@@ -34,15 +35,6 @@ const MAIN_STYLE: CSSProperties = {
     color: 'var(--portal-color-text-0)',
 };
 
-const OPENER_STYLE: CSSProperties = {
-    minBlockSize: 'var(--portal-touch-target-min)',
-    paddingInline: 'var(--portal-space-4)',
-    border: 'var(--portal-border-thickness-thin) solid var(--portal-color-border)',
-    background: 'var(--portal-color-surface-0)',
-    color: 'var(--portal-color-text-0)',
-    cursor: 'pointer',
-};
-
 const DEMO_BODY: ReactNode = (
     <div
         style={{
@@ -55,7 +47,7 @@ const DEMO_BODY: ReactNode = (
             The controller link is active and streaming telemetry. Adjust the
             filters below to scope the live feed.
         </p>
-        <button type="button" style={OPENER_STYLE}>
+        <button type="button" className={demoStyles.trigger}>
             Reset filters
         </button>
     </div>
@@ -79,7 +71,7 @@ function ControlledOverlayDrawer(props: OverlayDemoProps): ReactElement {
         <div style={MAIN_STYLE}>
             <button
                 type="button"
-                style={OPENER_STYLE}
+                className={demoStyles.trigger}
                 onClick={(): void => {
                     setOpen(true);
                 }}

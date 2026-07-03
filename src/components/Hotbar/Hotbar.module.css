@@ -74,6 +74,7 @@
 
 /* The keybind chip in the top-start corner. */
 .keybind {
+    composes: beveled from '../../theme/surfaces.module.css';
     position: absolute;
     inset-block-start: calc(-1 * var(--portal-space-1));
     inset-inline-start: calc(-1 * var(--portal-space-1));

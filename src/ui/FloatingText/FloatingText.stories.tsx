@@ -8,18 +8,17 @@ import {
     useState,
 } from 'react';
 
+import demoStyles from '../../examples/storySupport.module.css';
 import { CTA } from '../CTA/CTA';
 import { EUiStatus } from '../tone';
 import { FloatingText } from './FloatingText';
 import { type FloatingTextEvent } from './FloatingText.types';
 
+// Dimensions only: the arena chrome (bevel, border, fill) comes from the
+// story-support class so the corner shape composes correctly.
 const ARENA_STYLE: CSSProperties = {
-    position: 'relative',
     inlineSize: 'min(24rem, 90vw)',
     blockSize: '16rem',
-    border: 'var(--portal-border-thickness-thin) solid var(--portal-color-border)',
-    borderRadius: 'var(--portal-bevel-2)',
-    backgroundColor: 'var(--portal-color-bg-0)',
 };
 
 const STACK_STYLE: CSSProperties = {
@@ -74,7 +73,7 @@ function CombatArena(): ReactElement {
 
     return (
         <div style={STACK_STYLE}>
-            <div style={ARENA_STYLE}>
+            <div className={demoStyles.arena} style={ARENA_STYLE}>
                 <FloatingText
                     events={events}
                     onExpire={(id: string): void => {
@@ -112,7 +111,7 @@ export const CombatText: Story = {
 
 export const Static: Story = {
     render: (): ReactElement => (
-        <div style={ARENA_STYLE}>
+        <div className={demoStyles.arena} style={ARENA_STYLE}>
             <FloatingText
                 events={[
                     { id: 'a', text: '128' },

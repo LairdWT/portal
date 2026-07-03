@@ -135,6 +135,7 @@
 }
 
 .rankRow {
+    composes: beveled from '../../theme/surfaces.module.css';
     display: inline-flex;
     align-items: center;
     gap: var(--portal-space-3);
@@ -193,6 +194,7 @@
 }
 
 .legendItem {
+    composes: beveled from '../../theme/surfaces.module.css';
     display: inline-flex;
     align-items: center;
     gap: var(--portal-space-2);

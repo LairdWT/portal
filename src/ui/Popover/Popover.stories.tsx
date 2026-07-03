@@ -7,6 +7,7 @@ import {
     useState,
 } from 'react';
 
+import demoStyles from '../../examples/storySupport.module.css';
 import { Popover } from './Popover';
 import { EPopoverPlacement, EPopoverRole } from './Popover.types';
 
@@ -21,17 +22,6 @@ type PopoverStoryArgs = Readonly<{
     tone?: string;
     trapFocus?: boolean;
 }>;
-
-const TRIGGER_STYLE: CSSProperties = {
-    minBlockSize: 'var(--portal-touch-target-min)',
-    paddingInline: 'var(--portal-space-4)',
-    borderRadius: 'var(--portal-bevel-2)',
-    ...({ cornerShape: 'bevel' } as CSSProperties),
-    border: 'var(--portal-border-thickness-thin) solid var(--portal-color-border)',
-    background: 'var(--portal-color-surface-0)',
-    color: 'var(--portal-color-text-0)',
-    cursor: 'pointer',
-};
 
 const CONTENT_STYLE: CSSProperties = {
     display: 'flex',
@@ -66,7 +56,7 @@ function PopoverDemo(args: PopoverStoryArgs): ReactElement {
             trigger={
                 <button
                     type="button"
-                    style={TRIGGER_STYLE}
+                    className={demoStyles.trigger}
                     aria-haspopup="dialog"
                     aria-expanded={open}
                     onClick={(): void => {
@@ -85,7 +75,7 @@ function PopoverDemo(args: PopoverStoryArgs): ReactElement {
                 </span>
                 <button
                     type="button"
-                    style={TRIGGER_STYLE}
+                    className={demoStyles.trigger}
                     onClick={(): void => {
                         setOpen(false);
                     }}

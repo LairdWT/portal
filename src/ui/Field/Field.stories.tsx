@@ -1,23 +1,16 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import type { CSSProperties, ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
+import demoStyles from '../../examples/storySupport.module.css';
 import { Field } from './Field';
 import type { FieldControlProps } from './Field.types';
 
 // A plain native input for the demos: Field is scaffolding for ANY control,
-// so the story wires an unowned element (token-styled inline) rather than a
-// Portal input that already carries its own label.
-const DEMO_INPUT_STYLE: CSSProperties = {
-    minBlockSize: 'var(--portal-touch-target-min)',
-    paddingInline: 'var(--portal-space-3)',
-    border: 'var(--portal-border-thickness-thin) solid var(--portal-color-border)',
-    background: 'var(--portal-color-surface-0)',
-    color: 'var(--portal-color-text-0)',
-    font: 'inherit',
-};
-
+// so the story wires an unowned element rather than a Portal input that
+// already carries its own label - but its chrome still speaks the design
+// language (beveled, not square) via the story-support class.
 function demoControl(control: FieldControlProps): ReactElement {
-    return <input {...control} style={DEMO_INPUT_STYLE} />;
+    return <input {...control} className={demoStyles.demoInput} />;
 }
 
 const meta: Meta<typeof Field> = {

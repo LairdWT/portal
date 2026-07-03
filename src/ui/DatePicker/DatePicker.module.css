@@ -86,6 +86,7 @@
 /* The token-drawn month-grid mark: a bordered box whose header rule and day
  * dots are painted as layered gradients on currentColor-adjacent tokens. */
 .toggleGlyph {
+    composes: beveled from '../../theme/surfaces.module.css';
     box-sizing: border-box;
     inline-size: var(--portal-space-4);
     block-size: var(--portal-space-4);

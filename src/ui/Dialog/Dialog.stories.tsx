@@ -1,28 +1,18 @@
 import { type Meta, type StoryObj } from '@storybook/react-vite';
 import {
-    type CSSProperties,
     type Dispatch,
     type ReactElement,
     type SetStateAction,
     useState,
 } from 'react';
 
+import demoStyles from '../../examples/storySupport.module.css';
 import { ESecretAutocomplete } from '../SecretField/SecretField.types';
 import { EUiStatus } from '../tone';
 import { ConfirmDialog } from './ConfirmDialog';
 import { Dialog } from './Dialog';
 import { EDialogSize } from './Dialog.types';
 import { PromptDialog } from './PromptDialog';
-
-const OPENER_STYLE: CSSProperties = {
-    minBlockSize: 'var(--portal-touch-target-min)',
-    paddingInline: 'var(--portal-space-4)',
-    borderRadius: 'var(--portal-radius-md)',
-    border: 'var(--portal-border-thickness-thin) solid var(--portal-color-border)',
-    background: 'var(--portal-color-surface-0)',
-    color: 'var(--portal-color-text-0)',
-    cursor: 'pointer',
-};
 
 function BaseDialogDemo(
     props: Readonly<{ initialOpen?: boolean; size?: EDialogSize }>,
@@ -33,7 +23,7 @@ function BaseDialogDemo(
         <>
             <button
                 type="button"
-                style={OPENER_STYLE}
+                className={demoStyles.trigger}
                 onClick={(): void => {
                     setOpen(true);
                 }}
@@ -68,7 +58,7 @@ function ConfirmDemo(
         <>
             <button
                 type="button"
-                style={OPENER_STYLE}
+                className={demoStyles.trigger}
                 onClick={(): void => {
                     setOpen(true);
                 }}
@@ -107,7 +97,7 @@ function PromptDemo(props: Readonly<{ initialOpen?: boolean }>): ReactElement {
         <>
             <button
                 type="button"
-                style={OPENER_STYLE}
+                className={demoStyles.trigger}
                 onClick={(): void => {
                     setOpen(true);
                 }}
@@ -146,7 +136,7 @@ function SecretPromptDemo(
         <>
             <button
                 type="button"
-                style={OPENER_STYLE}
+                className={demoStyles.trigger}
                 onClick={(): void => {
                     setOpen(true);
                 }}

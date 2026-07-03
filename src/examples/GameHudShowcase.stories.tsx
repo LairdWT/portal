@@ -32,6 +32,7 @@ import { Odometer } from '../ui/Odometer/Odometer';
 import { StatusFooter } from '../ui/StatusFooter/StatusFooter';
 import { EFooterStatus } from '../ui/StatusFooter/StatusFooter.types';
 import { EUiStatus } from '../ui/tone';
+import demoStyles from './storySupport.module.css';
 
 // The integration showcase: the full HUD set wired through REAL state.
 // Hotbar presses arm the Cooldown chip, score the Odometer, spawn
@@ -148,20 +149,6 @@ const LOWER_ROW_STYLE: CSSProperties = {
     gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)',
     gap: 'var(--portal-space-4)',
     alignItems: 'start',
-};
-
-const CHIP_FACE_STYLE: CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    inlineSize: 'var(--portal-touch-target-min)',
-    blockSize: 'var(--portal-touch-target-min)',
-    border: 'var(--portal-border-thickness-thin) solid var(--portal-color-border)',
-    borderRadius: 'var(--portal-bevel-2)',
-    backgroundColor: 'var(--portal-color-surface-0)',
-    color: 'var(--portal-color-text-0)',
-    fontFamily: 'var(--portal-font-mono)',
-    fontSize: 'var(--portal-size-text-sm)',
 };
 
 // One armed ability cast. The cast counter keys the Cooldown so re-casting
@@ -303,12 +290,12 @@ function GameHud(): ReactElement {
                             setCast(null);
                         }}
                     >
-                        <span style={CHIP_FACE_STYLE}>
+                        <span className={demoStyles.chipFace}>
                             {ABILITY_FACES[cast.abilityId] ?? '----'}
                         </span>
                     </Cooldown>
                 ) : (
-                    <span style={CHIP_FACE_STYLE}>RDY</span>
+                    <span className={demoStyles.chipFace}>RDY</span>
                 )}
                 <Odometer label="Score" value={score} minDigits={4} />
                 <div style={HIT_ARENA_STYLE}>

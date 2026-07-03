@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import type { CSSProperties, ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
+import demoStyles from '../../examples/storySupport.module.css';
 import { Divider } from './Divider';
 import { Grid } from './Grid';
 import {
@@ -12,21 +13,10 @@ import {
 } from './Layout.types';
 import { Stack } from './Stack';
 
-// A visible block so the layout decisions read in the demos.
-const SWATCH_STYLE: CSSProperties = {
-    minInlineSize: '4rem',
-    minBlockSize: '2.5rem',
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    border: 'var(--portal-border-thickness-thin) solid var(--portal-color-border)',
-    background: 'var(--portal-color-surface-1)',
-    color: 'var(--portal-color-text-0)',
-    fontFamily: 'var(--portal-font-sans)',
-};
-
+// A visible block so the layout decisions read in the demos; the machined
+// story-support swatch keeps the demo chrome on the design language.
 function Swatch({ children }: Readonly<{ children: string }>): ReactElement {
-    return <div style={SWATCH_STYLE}>{children}</div>;
+    return <div className={demoStyles.swatch}>{children}</div>;
 }
 
 const meta: Meta<typeof Stack> = {

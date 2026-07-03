@@ -58,6 +58,7 @@
 /* The toned fill between the thumbs. Sized purely by the fraction custom
  * properties; no transition (direct manipulation must track the pointer). */
 .fill {
+    composes: beveled from '../../theme/surfaces.module.css';
     position: absolute;
     inset-block-start: 50%;
     inset-inline-start: calc(var(--range-lower) * 100%);

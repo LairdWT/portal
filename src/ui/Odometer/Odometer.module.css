@@ -12,8 +12,11 @@
     display: inline-block;
 }
 
-/* The recessed readout window clipping the reels. */
+/* The recessed readout window clipping the reels: a machined beveled slot
+ * with a thin edge and a faint recess glow (the heavier glow and lg digits
+ * read as over-thick chrome - the owner's review). */
 .window {
+    composes: beveled from '../../theme/surfaces.module.css';
     display: inline-flex;
     gap: var(--portal-space-1);
     padding-block: var(--portal-space-1);
@@ -21,7 +24,7 @@
     border: var(--portal-border-thickness-thin) solid var(--portal-tone-border);
     border-radius: var(--portal-bevel-1);
     background-color: var(--portal-color-bg-0);
-    box-shadow: inset 0 0 var(--portal-space-2) var(--portal-tone-glow);
+    box-shadow: inset 0 0 var(--portal-space-1) var(--portal-tone-glow);
 }
 
 /* One digit column: exactly one face tall, clipping its reel. */
@@ -31,7 +34,7 @@
     block-size: calc(1em * var(--portal-line-height-tight));
     color: var(--portal-color-text-0);
     font-family: var(--portal-font-mono);
-    font-size: var(--portal-size-text-lg);
+    font-size: var(--portal-size-text-md);
     font-variant-numeric: tabular-nums;
 }
 

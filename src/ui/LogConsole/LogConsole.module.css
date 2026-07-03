@@ -41,6 +41,7 @@
 }
 
 .followKey {
+    composes: beveled from '../../theme/surfaces.module.css';
     min-block-size: var(--portal-touch-target-min);
     padding-inline: var(--portal-space-3);
     border: var(--portal-border-thickness-thin) solid var(--portal-color-border);

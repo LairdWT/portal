@@ -46,6 +46,7 @@
 
 /* The rose tape: a dark recessed band clipping the sliding ticks. */
 .strip {
+    composes: beveled from '../../theme/surfaces.module.css';
     position: relative;
     overflow: hidden;
     inline-size: 100%;

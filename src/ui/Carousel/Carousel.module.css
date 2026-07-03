@@ -19,6 +19,7 @@
 }
 
 .track {
+    composes: beveled from '../../theme/surfaces.module.css';
     display: flex;
     overflow-x: auto;
     scroll-snap-type: x mandatory;

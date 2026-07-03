@@ -1,12 +1,7 @@
 import { type Meta, type StoryObj } from '@storybook/react-vite';
-import {
-    type CSSProperties,
-    type ReactElement,
-    type RefObject,
-    useEffect,
-    useRef,
-} from 'react';
+import { type ReactElement, type RefObject, useEffect, useRef } from 'react';
 
+import demoStyles from '../../examples/storySupport.module.css';
 import {
     EToastKind,
     EToastPlacement,
@@ -15,16 +10,6 @@ import {
 } from './Toast.types';
 import { ToastProvider } from './ToastProvider';
 import { useToast } from './useToast';
-
-const BUTTON_STYLE: CSSProperties = {
-    minBlockSize: 'var(--portal-touch-target-min)',
-    paddingInline: 'var(--portal-space-4)',
-    borderRadius: 'var(--portal-radius-md)',
-    border: 'var(--portal-border-thickness-thin) solid var(--portal-color-border)',
-    background: 'var(--portal-color-surface-0)',
-    color: 'var(--portal-color-text-0)',
-    cursor: 'pointer',
-};
 
 // A button wired to the toast sink: clicking it enqueues the supplied toast, the
 // imperative pattern a consumer uses from any handler inside the provider.
@@ -36,7 +21,7 @@ function NotifyButton({
     return (
         <button
             type="button"
-            style={BUTTON_STYLE}
+            className={demoStyles.trigger}
             onClick={(): void => {
                 notify(input);
             }}
