@@ -4,6 +4,53 @@ All notable changes to this project are documented in this file. The format is
 based on Keep a Changelog, and the project follows Semantic Versioning with the
 0.x caveat that, before 1.0, a minor version may carry a breaking change.
 
+## [1.10.0] - 2026-07-03
+
+The "depth and showcase" release: the documented v1 deferrals whose enabling
+tech landed in 1.9.0 are paid down, a flagship composed Game HUD story ships,
+and the interaction-heavy HUD surfaces gain real-browser behavior coverage.
+All public-API changes are additive; the freeze holds.
+
+### Added
+
+- `useMeasuredWindow`: the variable-height sibling of `useVirtualWindow`
+  (the hook's documented follow-up) - rows measured through cached callback
+  refs plus a shared ResizeObserver, coalesced rAF flushes into a pure
+  prefix-sum offset table (`measuredWindowMath`), and scroll anchoring so
+  rows re-measuring above the viewport never visibly jump the content.
+  Estimate-driven fallback under zero measurements (jsdom, display:none).
+- `LogConsole` `wrap` prop: opt-in multi-line rows on the measured-height
+  virtualization path; the uniform single-line fast path stays the default
+  and unchanged.
+- `Hotbar` `onMove` prop: pointer drag-reorder past an 8px threshold (a
+  clean press still activates; the trailing click after a real drag is
+  swallowed exactly once) with a transform-only ghost over `slotMath` hit
+  testing, plus Ctrl+ArrowLeft/Right keyboard reorder with polite
+  announcements and advertised aria-keyshortcuts.
+- `DataTable` fixed-column mode: a `columnWidths` prop switches the tracks
+  to controlled pixel widths (160px default, clamped 48..640), the grid
+  scrolls horizontally past the viewport, per-column `resizable` grows an
+  APG separator (pointer drag or Arrow/Home/End keys) committing through
+  `onColumnWidthsChange`, and `frozenFirstColumn` pins an opaque rowheader
+  rail to the inline-start edge under horizontal scroll. Weighted fr
+  tracks stay byte-identical when `columnWidths` is absent.
+- `Lightbox` zoom: 1x..4x magnification by wheel, double-click toggle, or
+  the toolbar buttons (the keyboard path), with clamped grab-pan while
+  zoomed (`lightboxZoom` pure math); the pan overlay parks the carousel so
+  slides cannot change under a stale zoom, and zoom resets on close.
+- `Patterns/Game HUD` showcase story: Gauge, Dial, Hotbar, Cooldown,
+  LogConsole, InventoryGrid, and StatusFooter wired through real state as
+  an integration surface (hero image in the README).
+- Behavior e2e suite: dial-rotary, dock-dnd, inventory-reorder, and
+  log-follow-tail specs over two new example fixtures, proving the rotary
+  twist + detent settle, dock edge-drop + float/dock-back, keyboard and
+  pointer slot reorder, and follow-tail pinning against real layout.
+
+### Deferred
+
+- `Rating` interactive half-step stays deferred on its recorded YAGNI flag
+  (consumer-need driven; none has materialized).
+
 ## [1.9.0] - 2026-07-02
 
 The Tier-3 "HUD identity" phase of the coverage roadmap: the radial
