@@ -16,10 +16,11 @@ export const ELogSeverity: {
 };
 export type ELogSeverity = (typeof ELogSeverity)[keyof typeof ELogSeverity];
 
-// One log line. `message` renders on a SINGLE fixed-height row (the
-// virtualization precondition - long lines ellipsize, wrapping is a
-// deliberate non-goal in v1); `timeLabel` is a preformatted timestamp string
-// (the console never formats dates).
+// One log line. `message` renders on a single fixed-height row by default
+// (long lines ellipsize; the uniform-height virtualization precondition) -
+// the console-level `wrap` prop opts into measured multi-line rows.
+// `timeLabel` is a preformatted timestamp string (the console never formats
+// dates).
 export type LogEntry = Readonly<{
     id: string;
     message: string;
@@ -27,8 +28,10 @@ export type LogEntry = Readonly<{
     timeLabel?: string | undefined;
 }>;
 
-// Props for the LogConsole: a virtualized mono scrollback (useVirtualWindow,
-// so ten thousand entries mount a handful of rows) with a follow-tail toggle.
+// Props for the LogConsole: a virtualized mono scrollback (useVirtualWindow
+// on the uniform default path, useMeasuredWindow when `wrap` opts into
+// variable-height rows - either way ten thousand entries mount a handful of
+// rows) with a follow-tail toggle.
 // While following, new entries pin the view to the bottom; scrolling away
 // unpins, and scrolling back to the bottom (or the toggle) re-pins. A polite
 // live announcer speaks only the LATEST entry, never the scroll window (a
@@ -52,5 +55,11 @@ export type LogConsoleProps = Readonly<{
      * Render the CRT scanline overlay. Default true.
      */
     scanlines?: boolean | undefined;
+    /**
+     * Wrap long messages onto multiple lines. Opting in switches the
+     * virtualization to measured (variable) row heights; the default keeps
+     * the uniform fixed-height fast path with single-line ellipsized rows.
+     */
+    wrap?: boolean | undefined;
 }> &
     Toned;

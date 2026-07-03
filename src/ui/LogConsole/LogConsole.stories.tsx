@@ -89,6 +89,37 @@ export const LiveTail: Story = {
     render: (): ReactElement => <LiveTailHarness />,
 };
 
+// Long-form diagnostics for the wrap mode: multi-line rows on the
+// measured-height virtualization path.
+const LONG_MESSAGES: readonly string[] = [
+    'reactor stack trace: coolant loop 2 reported a pressure excursion past the amber band during spool-up; the governor clamped flow to 82 percent and scheduled a staged re-open across the next three duty cycles',
+    'nav fusion notice: star tracker 1 and the inertial platform disagreed by 0.4 arc-minutes after the correction burn, so the filter re-weighted toward the tracker until the gyro bias estimate settles',
+    'cargo bay audit complete',
+    'link budget report: the high-gain dish held 96 percent packet integrity through the occlusion window by stepping the symbol rate down twice and back up once the horizon cleared',
+];
+
+function buildWrappedEntries(count: number): readonly LogEntry[] {
+    return Array.from(
+        { length: count },
+        (_unused: unknown, index: number): LogEntry => ({
+            id: `wrapped-${String(index)}`,
+            message: `${LONG_MESSAGES[index % LONG_MESSAGES.length] ?? 'tick'} [${String(index)}]`,
+            timeLabel: `T+${String(index).padStart(4, '0')}`,
+            ...(index % 5 === 0 ? { severity: ELogSeverity.Warning } : {}),
+        }),
+    );
+}
+
+export const Wrapped: Story = {
+    render: (): ReactElement => (
+        <LogConsole
+            label="Incident detail"
+            entries={buildWrappedEntries(120)}
+            wrap={true}
+        />
+    ),
+};
+
 export const Toned: Story = {
     render: (): ReactElement => (
         <LogConsole

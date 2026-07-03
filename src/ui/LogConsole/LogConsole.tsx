@@ -11,6 +11,10 @@ import {
 } from 'react';
 
 import {
+    type MeasuredWindowState,
+    useMeasuredWindow,
+} from '../../react/hooks/useMeasuredWindow';
+import {
     useVirtualWindow,
     type VirtualWindowState,
 } from '../../react/hooks/useVirtualWindow';
@@ -39,19 +43,21 @@ const PIN_THRESHOLD_PX: number = ROW_HEIGHT_PX / 2;
 // keyboard scroll without an eslint-disable.
 const SCROLL_FOCUS_BINDING: { readonly tabIndex: number } = { tabIndex: 0 };
 
-// The LogConsole: a virtualized mono scrollback. useVirtualWindow renders
-// only the visible slice over a full-height spacer; follow-tail pins the
-// viewport to the bottom as entries arrive (scroll away to unpin, scroll
-// back or toggle to re-pin). The viewport carries role=log for the semantic
-// but with aria-live OFF: virtualization remounts rows on every scroll, and
-// a live window would narrate each remount. The polite sr-only announcer
-// speaks only the latest entry instead.
+// The LogConsole: a virtualized mono scrollback. useVirtualWindow (uniform
+// single-line rows, the default) or useMeasuredWindow (the wrap opt-in, rows
+// measured per entry) renders only the visible slice over a full-height
+// spacer; follow-tail pins the viewport to the bottom as entries arrive
+// (scroll away to unpin, scroll back or toggle to re-pin). The viewport
+// carries role=log for the semantic but with aria-live OFF: virtualization
+// remounts rows on every scroll, and a live window would narrate each
+// remount. The polite sr-only announcer speaks only the latest entry instead.
 export function LogConsole({
     label,
     entries,
     blockSize,
     followLabel,
     scanlines = true,
+    wrap = false,
     tone,
 }: LogConsoleProps): ReactElement {
     const scrollRef: RefObject<HTMLDivElement | null> =
@@ -59,11 +65,26 @@ export function LogConsole({
     const [pinned, setPinned]: [boolean, Dispatch<SetStateAction<boolean>>] =
         useState<boolean>(true);
 
-    const virtualWindow: VirtualWindowState = useVirtualWindow({
-        rowCount: entries.length,
+    // Both windowing hooks run unconditionally (rules of hooks); the
+    // inactive one gets zero rows and returns its degenerate empty window.
+    const uniformWindow: VirtualWindowState = useVirtualWindow({
+        rowCount: wrap ? 0 : entries.length,
         rowHeight: ROW_HEIGHT_PX,
         scrollRef,
     });
+    const measuredWindow: MeasuredWindowState = useMeasuredWindow({
+        rowCount: wrap ? entries.length : 0,
+        estimatedRowHeight: ROW_HEIGHT_PX,
+        scrollRef,
+    });
+    const virtualWindow: VirtualWindowState = wrap
+        ? {
+              startIndex: measuredWindow.startIndex,
+              endIndex: measuredWindow.endIndex,
+              offsetStart: measuredWindow.offsetStart,
+              totalSize: measuredWindow.totalSize,
+          }
+        : uniformWindow;
 
     // Latest-entry announcement, re-derived when the tail grows
     // (render-phase sync, the DatePicker pattern).
@@ -82,7 +103,10 @@ export function LogConsole({
     }
 
     // Follow-tail: while pinned, every entries change lands the viewport on
-    // the bottom edge.
+    // the bottom edge. The spacer size joins the deps because in wrap mode it
+    // also moves on measurement flushes (rows re-measuring taller shift the
+    // bottom), and the pin must re-land after each one.
+    const spacerSize: number = virtualWindow.totalSize;
     useEffect((): void => {
         if (!pinned) {
             return;
@@ -91,8 +115,8 @@ export function LogConsole({
         if (viewport === null) {
             return;
         }
-        viewport.scrollTop = viewport.scrollHeight;
-    }, [pinned, entries]);
+        viewport.scrollTop = Math.max(viewport.scrollHeight, spacerSize);
+    }, [pinned, entries, spacerSize]);
 
     // Manual scrolling drives the pin: away from the bottom unpins, landing
     // back on the bottom re-pins (the programmatic follow scroll lands at 0
@@ -116,6 +140,9 @@ export function LogConsole({
     const viewportStyle: CSSProperties = {
         blockSize: blockSize ?? DEFAULT_BLOCK_SIZE,
     };
+    const rowClassName: string = [styles.row, wrap ? styles.rowWrap : undefined]
+        .filter((name: string | undefined): name is string => name !== undefined)
+        .join(' ');
     const className: string = [toneStyles.toneScope, styles.root]
         .filter((entry: string | undefined): entry is string => entry !== undefined)
         .join(' ');
@@ -162,11 +189,22 @@ export function LogConsole({
                             }}
                         >
                             {windowed.map(
-                                (entry: LogEntry): ReactElement => (
+                                (
+                                    entry: LogEntry,
+                                    offsetIndex: number,
+                                ): ReactElement => (
                                     <div
                                         key={entry.id}
-                                        className={styles.row}
+                                        className={rowClassName}
                                         data-severity={entry.severity}
+                                        {...(wrap
+                                            ? {
+                                                  ref: measuredWindow.measureRow(
+                                                      virtualWindow.startIndex +
+                                                          offsetIndex,
+                                                  ),
+                                              }
+                                            : {})}
                                     >
                                         {entry.timeLabel !== undefined ? (
                                             <span className={styles.time}>

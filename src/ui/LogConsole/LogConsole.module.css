@@ -4,8 +4,9 @@
  * --portal-space-5 (1.5rem = the 24px JS virtualization constant) height,
  * severity keyed through the universal status tokens on the row accents, and
  * the contained Scanlines overlay pinned over the (non-scrolling) shell.
- * Long messages ellipsize - wrapping would break the uniform-row-height
- * virtualization precondition. Tokens only.
+ * Long messages ellipsize by default (the uniform-row-height virtualization
+ * precondition); the wrap prop swaps rows onto the measured-height path and
+ * the .rowWrap override below. Tokens only.
  */
 
 .root {
@@ -111,6 +112,23 @@
     flex: 1 1 auto;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+/* Wrapped (measured-height) rows - the wrap prop's opt-in mode. block-size
+ * releases to content (useMeasuredWindow reads it back per row) and the min
+ * keeps short lines on the uniform 1.5rem rhythm. */
+.rowWrap {
+    align-items: flex-start;
+    block-size: auto;
+    min-block-size: var(--portal-space-5);
+    white-space: normal;
+}
+
+.rowWrap .message {
+    overflow: visible;
+    overflow-wrap: anywhere;
+    text-overflow: clip;
+    white-space: normal;
 }
 
 /* Severity is carried by NON-TEXT cues only - the inset edge bar and a faint

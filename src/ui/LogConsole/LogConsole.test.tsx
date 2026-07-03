@@ -92,6 +92,50 @@ describe('LogConsole', (): void => {
         expect(follow).toHaveAttribute('aria-pressed', 'true');
     });
 
+    it('windows wrapped rows on the measured path', (): void => {
+        // jsdom reports zero row heights, which the measured hook ignores:
+        // the estimate drives the window, so wrap mode shows the same
+        // overscan band as the uniform path.
+        render(
+            <LogConsole
+                label="Mission log"
+                entries={buildEntries(30)}
+                wrap={true}
+            />,
+        );
+        expect(
+            screen.getByRole('log', { name: 'Mission log' }),
+        ).toBeInTheDocument();
+        expect(screen.getByText('line-0')).toBeInTheDocument();
+        expect(
+            screen.getByText(`line-${String(JSDOM_WINDOW_ROWS - 1)}`),
+        ).toBeInTheDocument();
+        expect(
+            screen.queryByText(`line-${String(JSDOM_WINDOW_ROWS)}`),
+        ).not.toBeInTheDocument();
+    });
+
+    it('keeps follow-tail and the announcer under wrap', (): void => {
+        const initial: readonly LogEntry[] = buildEntries(30);
+        const view: {
+            rerender: (element: ReactElement) => void;
+        } = render(
+            <LogConsole label="Mission log" entries={initial} wrap={true} />,
+        );
+        const follow: HTMLElement = screen.getByRole('button', {
+            name: 'Follow tail',
+        });
+        expect(follow).toHaveAttribute('aria-pressed', 'true');
+        const grown: readonly LogEntry[] = [
+            ...initial,
+            { id: 'breach', message: 'reactor breach detected' },
+        ];
+        view.rerender(
+            <LogConsole label="Mission log" entries={grown} wrap={true} />,
+        );
+        expect(screen.getByText('reactor breach detected')).toBeInTheDocument();
+    });
+
     it('announces only the latest appended entry', (): void => {
         const initial: readonly LogEntry[] = buildEntries(30);
         const view: {

@@ -142,6 +142,11 @@ export {
 } from './react/hooks/useGesture.types';
 export { useInputBinding } from './react/hooks/useInputBinding';
 export { useInputSource } from './react/hooks/useInputSource';
+export {
+    type MeasuredWindowOptions,
+    type MeasuredWindowState,
+    useMeasuredWindow,
+} from './react/hooks/useMeasuredWindow';
 export { usePointerControl } from './react/hooks/usePointerControl';
 export {
     type PointerDragAxis,
