@@ -53,13 +53,15 @@
     box-shadow: 0 0 var(--portal-space-3) var(--portal-tone-glow-strong);
 }
 
+/* The bar's underline is the unified faint hairline, not the bright metal-2
+ * rail the review flagged as obstructive. */
 .groupBar {
     display: flex;
     align-items: center;
     gap: var(--portal-space-1);
     padding-inline: var(--portal-space-2);
     border-block-end: var(--portal-border-thickness-thin) solid
-        var(--portal-color-metal-2);
+        var(--portal-color-border);
 }
 
 /* The tabs rail is the SHRINKING element: it scrolls inside itself so the

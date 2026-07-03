@@ -234,9 +234,7 @@ export function SplitPane({
                     : {})}
                 {...(isDisabled ? { 'aria-disabled': true } : {})}
                 {...separatorHandlers}
-            >
-                <span className={styles.handle} aria-hidden="true" />
-            </div>
+            />
             <div id={secondaryId} className={styles.pane}>
                 {secondary}
             </div>

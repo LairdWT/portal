@@ -5,16 +5,16 @@
  * dim monospace chevron separates crumbs and is decorative (aria-hidden), drawn
  * via CSS content so it is never selectable text or part of an accessible name.
  *
- * The machined-HUD identity is adopted BY REFERENCE: the interactive surfaces
- * compose the shared .beveled corner and the current node composes the static
- * .metalEdge trim plus the .wideLabel tracking from surfaces.module.css, so no
- * bevel or metal value is forked here. The animated metal sheen is reserved for
- * button-weight controllers - a breadcrumb is text-weight, so its metal trim is
- * static. The tone accent is carried by the lit HUD edge and glow (border/shadow,
- * not text); crumb text stays on the high-contrast neutral ramp so the trail
- * keeps its contrast over an arbitrary tone seed (CodingStandards/axe contrast
- * wins over a literal accent-on-dark fill). Every value resolves from a
- * --portal-* token or the derived --portal-tone-* ramp; no literal here.
+ * The machined-HUD identity is adopted BY REFERENCE: every crumb composes the
+ * shared .beveled corner with a THIN border (metal is reserved for Tier-1 game
+ * controllers - the owner's de-metalization review), and the current node
+ * takes the Menu family's flat treatment: the dark tone fill with a thin toned
+ * border and bold text. The tone accent is carried by the lit edge and glow
+ * (border/shadow, not text); crumb text stays on the high-contrast neutral
+ * ramp so the trail keeps its contrast over an arbitrary tone seed
+ * (CodingStandards/axe contrast wins over a literal accent-on-dark fill).
+ * Every value resolves from a --portal-* token or the derived --portal-tone-*
+ * ramp; no literal here.
  */
 
 .nav {
@@ -69,7 +69,7 @@
     justify-content: center;
     padding-block: var(--portal-space-2);
     padding-inline: var(--portal-space-3);
-    border: var(--portal-hud-edge-width) solid transparent;
+    border: var(--portal-border-thickness-thin) solid transparent;
     border-radius: var(--portal-bevel-2);
     background-color: transparent;
     color: var(--portal-color-text-1);
@@ -136,17 +136,14 @@ button.crumbLabel:active:not(:disabled) {
 
 /*
  * The inert current node, selected by data-state='current' (read here, redundant
- * with aria-current so "you are here" is never color-only): a bold HUD label on a
- * static machined-metal edge (the .metalEdge recipe inlined from the shared
- * tokens, since stylelint value-keyword-case rejects a camelCase name inside
- * composes) with the shared wide-label tracking trim. It is never interactive.
+ * with aria-current so "you are here" is never color-only): a bold HUD label on
+ * the Menu family's flat treatment - the dark tone fill behind a thin toned
+ * border - with the shared wide-label tracking trim. It is never interactive.
  */
 .crumbLabel[data-state='current'] {
     min-block-size: var(--portal-touch-target-min);
-    border: var(--portal-hud-edge-width) solid transparent;
-    background:
-        linear-gradient(var(--portal-hud-fill), var(--portal-hud-fill)) padding-box,
-        var(--portal-gradient-metal) border-box;
+    border-color: var(--portal-tone-border);
+    background-color: var(--portal-tone-fill);
     margin-inline-end: calc(-1 * var(--portal-letter-spacing-wide));
     color: var(--portal-color-text-0);
     font-weight: var(--portal-weight-label-bold);

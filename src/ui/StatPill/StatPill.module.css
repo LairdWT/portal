@@ -29,10 +29,12 @@
     background-color: var(--portal-tone-accent);
 }
 
+/* The internal label/value separator: the unified subtle hairline (the
+ * SplitPane divider standard), never a metal gradient. */
 .divider {
     align-self: stretch;
-    inline-size: var(--portal-hud-edge-width);
-    background: var(--portal-gradient-metal);
+    inline-size: var(--portal-border-thickness-thin);
+    background-color: var(--portal-color-border);
 }
 
 .label {

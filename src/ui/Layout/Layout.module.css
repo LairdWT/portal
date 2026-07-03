@@ -89,6 +89,7 @@
     gap: var(--portal-space-6);
 }
 
+/* The unified subtle hairline (the SplitPane divider standard). */
 .divider {
     background-color: var(--portal-color-border);
 }
