@@ -4,6 +4,53 @@ All notable changes to this project are documented in this file. The format is
 based on Keep a Changelog, and the project follows Semantic Versioning with the
 0.x caveat that, before 1.0, a minor version may carry a breaking change.
 
+## [1.11.0] - 2026-07-03
+
+The Tier-4 "field kit" release: seven new game-HUD components - the spatial
+instruments, the feedback pair, and the narrative pair - all folded into the
+Game HUD showcase. All public-API changes are additive; the freeze holds.
+
+### Added
+
+- `Minimap`: the non-interactive radar/map instrument in the Chart-family
+  chrome - pure `mapMath` projects world coordinates onto the viewBox with
+  heading-up rotation, pins out-of-range markers to the ring or square
+  frame, and marker meaning rides SHAPE first (contact dot, ally ring,
+  hostile triangle, objective diamond) with status colors as the echo. The
+  optional radar sweep is an infinite transform rotation (the Spinner
+  rule), removed under reduced motion; a role=img summary speaks the label
+  and marker count.
+- `Compass`: the heading-strip instrument - `compassMath` normalizes
+  headings and windows the rose ticks across the 0/360 seam, majors carry
+  their cardinals, a toned lubber line fixes the center, and the mono
+  readout doubles as the accessible name. Chirality-fixed (no RTL mirror,
+  the Dial convention); `normalizeHeading` / `headingDelta` /
+  `nearestCardinal` exported.
+- `Reticle`: the purely decorative aiming glyph (cross / dot / circle /
+  brackets) - spread rides one custom property inside transform translates,
+  and the hit flash is a one-shot keyed remount suppressed under reduced
+  motion.
+- `FloatingText`: the decorative combat-text layer - keyed events rise and
+  fade once (transform/opacity) and report `onExpire` exactly once via
+  animationend plus a backstop timer; deterministic drift lanes fan
+  overlapping events; status tints mix toward text-0 to hold the 4.5:1
+  floor; aria-hidden with an opt-in polite announcer.
+- `Odometer`: the rolling digit counter - place-keyed 0-9 reels translated
+  through one custom property (instant under reduced motion; reels keep DOM
+  identity across the 99 -> 100 carry), with a role=img label speaking the
+  true unpadded value and opt-in announcements.
+- `DialogueBox`: the narrative line surface - an interval-driven typewriter
+  (text, never an animation; instant under reduced motion), a transparent
+  unrevealed remainder so the box never reflows, a polite announcer that
+  speaks the complete line immediately, a continue key that completes then
+  advances, and a subtitle variant.
+- `ObjectiveTracker`: the quest-list HUD panel - shape-first state glyphs
+  (diamond / check / cross) with spoken state and optional suffixes,
+  strike-through completion, and mono progress chips.
+- The `Patterns/Game HUD` showcase now folds in the field kit: the minimap
+  and compass join the instrument row, ability casts score the odometer
+  and spawn floating hit text, and the objective list frames the log.
+
 ## [1.10.0] - 2026-07-03
 
 The "depth and showcase" release: the documented v1 deferrals whose enabling

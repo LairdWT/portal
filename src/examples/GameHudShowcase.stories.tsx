@@ -10,24 +10,37 @@ import {
 import { Dial } from '../components/Dial/Dial';
 import { Hotbar } from '../components/Hotbar/Hotbar';
 import { type HotbarSlot } from '../components/Hotbar/Hotbar.types';
+import { Compass } from '../ui/Compass/Compass';
 import { Cooldown } from '../ui/Cooldown/Cooldown';
 import { Dialog } from '../ui/Dialog/Dialog';
+import { FloatingText } from '../ui/FloatingText/FloatingText';
+import { type FloatingTextEvent } from '../ui/FloatingText/FloatingText.types';
 import { Gauge } from '../ui/Gauge/Gauge';
 import { InventoryGrid } from '../ui/InventoryGrid/InventoryGrid';
 import { type InventorySlot } from '../ui/InventoryGrid/InventoryGrid.types';
 import { moveSlot } from '../ui/InventoryGrid/slotMath';
 import { LogConsole } from '../ui/LogConsole/LogConsole';
 import { ELogSeverity, type LogEntry } from '../ui/LogConsole/LogConsole.types';
+import { Minimap } from '../ui/Minimap/Minimap';
+import { EMapMarkerKind, type MapMarker } from '../ui/Minimap/Minimap.types';
+import { ObjectiveTracker } from '../ui/ObjectiveTracker/ObjectiveTracker';
+import {
+    EObjectiveState,
+    type Objective,
+} from '../ui/ObjectiveTracker/ObjectiveTracker.types';
+import { Odometer } from '../ui/Odometer/Odometer';
 import { StatusFooter } from '../ui/StatusFooter/StatusFooter';
 import { EFooterStatus } from '../ui/StatusFooter/StatusFooter.types';
 import { EUiStatus } from '../ui/tone';
 
-// The integration showcase: every 1.9.0 HUD piece wired through REAL state.
-// Hotbar presses arm the Cooldown chip and append LogConsole entries, the
-// Dial drives the reactor Gauge (danger band + status past the redline), the
-// cargo key opens an InventoryGrid dialog whose moves also log, and the
-// StatusFooter mirrors the latest event. Nothing here is mocked - the story
-// doubles as an integration test under the story/axe gate.
+// The integration showcase: the full HUD set wired through REAL state.
+// Hotbar presses arm the Cooldown chip, score the Odometer, spawn
+// FloatingText hits, and append LogConsole entries; the Dial drives the
+// reactor Gauge (danger band + status past the redline); the cargo key
+// opens an InventoryGrid dialog whose moves also log; the Minimap, Compass,
+// and ObjectiveTracker frame the scene; and the StatusFooter mirrors the
+// latest event. Nothing here is mocked - the story doubles as an
+// integration test under the story/axe gate.
 
 const COOLDOWN_MS: number = 5000;
 const POWER_REDLINE: number = 85;
@@ -70,6 +83,38 @@ const INITIAL_LOG: readonly LogEntry[] = [
     },
 ];
 
+const HEADING_DEGREES: number = 30;
+
+const MAP_MARKERS: readonly MapMarker[] = [
+    { id: 'wing', x: -30, y: 45, label: 'Wingman', kind: EMapMarkerKind.Ally },
+    {
+        id: 'raider',
+        x: 40,
+        y: -60,
+        label: 'Raider',
+        kind: EMapMarkerKind.Hostile,
+    },
+    {
+        id: 'relay',
+        x: 220,
+        y: 160,
+        label: 'Relay (out of range)',
+        kind: EMapMarkerKind.Objective,
+    },
+];
+
+const OBJECTIVES: readonly Objective[] = [
+    { id: 'hold', label: 'Hold the eastern pass' },
+    { id: 'cells', label: 'Recover power cells', count: 3, total: 5 },
+    {
+        id: 'silence',
+        label: 'Silence the battery',
+        state: EObjectiveState.Complete,
+    },
+];
+
+const SCORE_PER_CAST: number = 25;
+
 const ROOT_STYLE: CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
@@ -89,6 +134,20 @@ const ACTION_ROW_STYLE: CSSProperties = {
     flexWrap: 'wrap',
     gap: 'var(--portal-space-5)',
     alignItems: 'center',
+};
+
+// The FloatingText arena beside the score: hits rise out of this box.
+const HIT_ARENA_STYLE: CSSProperties = {
+    position: 'relative',
+    inlineSize: '8rem',
+    blockSize: 'var(--portal-touch-target-min)',
+};
+
+const LOWER_ROW_STYLE: CSSProperties = {
+    display: 'grid',
+    gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)',
+    gap: 'var(--portal-space-4)',
+    alignItems: 'start',
 };
 
 const CHIP_FACE_STYLE: CSSProperties = {
@@ -134,6 +193,12 @@ function GameHud(): ReactElement {
         readonly InventorySlot[],
         Dispatch<SetStateAction<readonly InventorySlot[]>>,
     ] = useState<readonly InventorySlot[]>(INITIAL_CARGO);
+    const [score, setScore]: [number, Dispatch<SetStateAction<number>>] =
+        useState<number>(1250);
+    const [hits, setHits]: [
+        readonly FloatingTextEvent[],
+        Dispatch<SetStateAction<readonly FloatingTextEvent[]>>,
+    ] = useState<readonly FloatingTextEvent[]>([]);
 
     function appendLog(message: string, severity?: ELogSeverity): void {
         setEntries((prev: readonly LogEntry[]): readonly LogEntry[] => [
@@ -163,6 +228,17 @@ function GameHud(): ReactElement {
         const nextCast: number = castCount + 1;
         setCastCount(nextCast);
         setCast({ abilityId: id, label: ability.label, cast: nextCast });
+        setScore((prev: number): number => prev + SCORE_PER_CAST);
+        setHits(
+            (prev: readonly FloatingTextEvent[]): readonly FloatingTextEvent[] => [
+                ...prev,
+                {
+                    id: `hit-${String(nextCast)}`,
+                    text: `+${String(SCORE_PER_CAST)}`,
+                    status: EUiStatus.Success,
+                },
+            ],
+        );
         appendLog(`${ability.label} engaged.`);
     }
 
@@ -200,7 +276,15 @@ function GameHud(): ReactElement {
                     detents={[0, 25, 50, 75, 100]}
                     onChange={setPower}
                 />
+                <Minimap
+                    label="Tactical"
+                    markers={MAP_MARKERS}
+                    center={{ x: 0, y: 0 }}
+                    range={100}
+                    heading={HEADING_DEGREES}
+                />
             </div>
+            <Compass label="Bearing" heading={HEADING_DEGREES} />
             <div style={ACTION_ROW_STYLE}>
                 <Hotbar
                     label="Ability bar"
@@ -226,8 +310,28 @@ function GameHud(): ReactElement {
                 ) : (
                     <span style={CHIP_FACE_STYLE}>RDY</span>
                 )}
+                <Odometer label="Score" value={score} minDigits={4} />
+                <div style={HIT_ARENA_STYLE}>
+                    <FloatingText
+                        events={hits}
+                        onExpire={(id: string): void => {
+                            setHits(
+                                (
+                                    prev: readonly FloatingTextEvent[],
+                                ): readonly FloatingTextEvent[] =>
+                                    prev.filter(
+                                        (event: FloatingTextEvent): boolean =>
+                                            event.id !== id,
+                                    ),
+                            );
+                        }}
+                    />
+                </div>
             </div>
-            <LogConsole label="Mission log" entries={entries} />
+            <div style={LOWER_ROW_STYLE}>
+                <LogConsole label="Mission log" entries={entries} />
+                <ObjectiveTracker label="Objectives" objectives={OBJECTIVES} />
+            </div>
             <StatusFooter
                 label="HUD status"
                 status={overRedline ? EFooterStatus.Warning : EFooterStatus.Ok}

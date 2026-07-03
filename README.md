@@ -246,9 +246,14 @@ so it suits any React UI, not only game input. It spans, among others:
   `Marquee`, `Scanlines`, `StepTrack`, `Timeline`, `TitleBar`,
   `StatusFooter`, `SelectableTile`.
 - Game HUD: `Gauge` (radial arc meter), `Cooldown` (unwinding ability
-  scrim), `LogConsole` (virtualized scrollback), `InventoryGrid` (slot grid
-  with keyboard grab/move and drag-reorder), plus the signal-emitting
-  `Dial`, `Hotbar`, and `VirtualKeyboard` on the game-input side.
+  scrim), `LogConsole` (virtualized scrollback, with an opt-in wrap mode),
+  `InventoryGrid` (slot grid with keyboard grab/move and drag-reorder),
+  `Minimap` (radar/map instrument with an optional sweep), `Compass`
+  (heading strip), `Reticle` (decorative aiming glyph), `FloatingText`
+  (combat-text layer), `Odometer` (rolling digit counter), `DialogueBox`
+  (typewriter narrative line), `ObjectiveTracker` (quest list), plus the
+  signal-emitting `Dial`, `Hotbar`, and `VirtualKeyboard` on the
+  game-input side.
 - Layout: `Stack`, `Grid`, `Divider`.
 
 See the live Storybook (linked above) for the full, current catalogue with
