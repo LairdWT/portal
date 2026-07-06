@@ -1,0 +1,16 @@
+name: adr-gate
+on:
+    push:
+        branches: [main]
+    pull_request:
+jobs:
+    adr:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            # Stdlib-only portable checker vendored from the
+            # agent-enhanced-project adr-authoring assets; validates
+            # frontmatter, INDEX coverage and sections, supersede symmetry,
+            # and that every adr:<slug> reference resolves.
+            - name: check ADR log
+              run: python3 docs/adr/check-adrs.py --adr-dir docs/adr --repo-root .
