@@ -130,8 +130,30 @@ export function parseIsoDate(text: string): CalendarDate | null {
 
 // The locale's first day of the week as 0 (Sunday) .. 6 (Saturday), read
 // from Intl.Locale week info. Falls back to Monday - the ISO 8601
-// convention - when the tag does not parse.
+// convention - when the tag does not parse or the runtime carries no week
+// info at all.
 const FALLBACK_FIRST_DAY: number = 1;
+
+// The one field of Intl's Locale Info week data the grid needs. `firstDay`
+// counts 1 (Monday) .. 7 (Sunday).
+type LocaleWeekInfo = Readonly<{ firstDay: number }>;
+
+// The same week data ships under two engine shapes: the standardized
+// `getWeekInfo()` method (V8 >= 13: Node 23+, Chromium 130+) and the earlier
+// non-standard `weekInfo` accessor still carried by older engines (Node 22,
+// Chromium < 130). TypeScript's lib declares only the method, so the accessor
+// is reached through a widened structural view. A runtime exposing neither
+// yields undefined, and the caller falls back to the ISO Monday.
+function readLocaleWeekInfo(locale: Intl.Locale): LocaleWeekInfo | undefined {
+    const carrier: Readonly<{
+        getWeekInfo?: () => LocaleWeekInfo;
+        weekInfo?: LocaleWeekInfo;
+    }> = locale;
+    if (typeof carrier.getWeekInfo !== 'function') {
+        return carrier.weekInfo;
+    }
+    return carrier.getWeekInfo();
+}
 
 export function localeFirstDayOfWeek(locale: string): number {
     let resolved: Intl.Locale;
@@ -143,8 +165,12 @@ export function localeFirstDayOfWeek(locale: string): number {
         }
         return FALLBACK_FIRST_DAY;
     }
+    const info: LocaleWeekInfo | undefined = readLocaleWeekInfo(resolved);
+    if (info === undefined) {
+        return FALLBACK_FIRST_DAY;
+    }
     // Week info counts 1 (Monday) .. 7 (Sunday); the grid counts from Sunday.
-    return resolved.getWeekInfo().firstDay % DAYS_PER_WEEK;
+    return info.firstDay % DAYS_PER_WEEK;
 }
 
 // The seven weekday names starting from `firstDay`, in narrow and long forms
