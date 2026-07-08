@@ -16,8 +16,6 @@ center previous/next actions, and an inline collapsible form whose hub
 persists as the toggle. Its Tier-1 sibling `RadialPad` shares the same
 geometry and emits per-section input signals.
 
-![Portal mobile controller: a beveled HUD readout band over a deep shader backdrop, and a metal-trimmed deck holding Start and Select keys, an analog stick, and an A/B/X/Y action grid. The live Storybook adds an animated distort orb over an interactive rippleGrid shader.](https://raw.githubusercontent.com/LairdWT/portal/main/docs/portal-controller.png)
-
 ![Portal game HUD: two octagonal arc gauges (hull integrity, and reactor output carrying a red redline band), a machined rotary throttle dial, a hotbar of keybound ability keys beside a radial cooldown chip mid-sweep, and a scanlined mono mission-log console, all on dark HUD glass.](https://raw.githubusercontent.com/LairdWT/portal/main/docs/portal-hud.png)
 
 The `Patterns/Game HUD` story wires the HUD set together through real state:
